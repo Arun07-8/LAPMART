@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <link rel="stylesheet" href="css/register.css" type="text/css">
+ <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+
+</head>
+<body>
+    <div class="container">
+        <div class="form-box">
+            <div class="form-section">
+                <h2>Get Started Now, Created your Account,</h2>
+
+                <form action="/signup" method="post">
+                    <div class="input-group">
+                        <input type="text" placeholder="Name" name="name" id="name">
+                        <div class="error1 error-message"></div>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="email" placeholder="Email" name="email" id="email">
+                        <div class="error2 error-message"></div>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" placeholder="Phone Number" id="phoneNumber" name="phoneNumber">
+                        <div class="error3 error-message"></div>
+                    </div>
+
+                    <div class="input-group password-group">
+                        <input type="password" placeholder="Password" id="password" name="password">
+                        <div class="error4 error-message"></div>
+                        <button type="button" class="toggle-password" onclick="togglePassword('password')"><img src="img/register/Vector.png" alt=""></button>
+                    </div>
+                    
+                    <div class="input-group password-group">
+                        <input type="password" placeholder="Confirm password" id="confirm-password" name="confirmpassword">
+                        <div class="error5 error-message"></div>
+                        <button type="button" class="toggle-password" onclick="togglePassword('confirm-password')"><img src="img/register/Vector.png" alt=""></button>
+                    </div>
+                    
+                    <%if(locals.message && message.length>0){%>
+                        <div class="alert alert-danger text-center "><%=message%></div>
+                     <%}%>
+                    <button type="submit" class="submit-btn"> Agree and Register</button>
+
+                    <div class="divider">
+                        <span>Or Login with </span>
+                    </div>
+
+                    <button type="button" class="google-btn">
+                        <a href="/auth/google/" style="text-decoration: none;">
+                            <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png" alt="Google"> 
+                        </a>
+                    </button>
+
+                    <p class="signin-link">
+                        Have an account? <a href="/login">Sign In</a>
+                    </p>
+                </form>
+            </div>
+            <div class="image-section">
+                <img src="img/register/Property 1=Default.png" alt="Gaming Laptop" class="main-image">
+                <!-- <img src="img/register/skinova text 2.png" alt="Overlay Image" class="logo"> -->
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(id) {
+            var input = document.getElementById(id);
+            if (input.type === "password") {
+                input.type = "text";
+            } else {
+                input.type = "password";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const name = document.getElementById("name");
+            const email = document.getElementById("email");
+            const phoneNumber = document.getElementById("phoneNumber");
+            const password = document.getElementById("password");
+            const confirmPassword = document.getElementById('confirm-password');
+            const error1 = document.querySelector(".error1");
+            const error2 = document.querySelector(".error2");
+            const error3 = document.querySelector(".error3");
+            const error4 = document.querySelector(".error4");
+            const error5 = document.querySelector(".error5");
+            const signupForm = document.querySelector("form");
+
+            function showError(errorElement, message) {
+                errorElement.style.display = "block";
+                errorElement.innerHTML = message;
+                
+           
+            }
+
+            function hideError(errorElement) {
+                errorElement.style.display = "none";
+                errorElement.innerHTML = "";
+            }
+
+            function nameValidateChecking() {
+                const nameVal = name.value.trim();
+                const namepattern = /^[A-Za-z ]{2,}$/;
+                const inputGroup = name.parentElement;
+                if (!nameVal) {
+                    showError(error1, "Please enter a valid name");
+                    return false;
+                } else if (!namepattern.test(nameVal)) {
+                    showError(error1, "Name can only contain alphabets and spaces");
+                    return false;
+                } else {
+                    hideError(error1); // Hide error when valid
+                    return true;
+                }
+            }
+
+            function emailValidateChecking() {
+                const emailVal = email.value.trim();
+                const emailpattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                const inputGroup = email.parentElement;
+                if (!emailVal) {
+                    showError(error2, "Email cannot be empty");
+                    return false;
+                } else if (!emailpattern.test(emailVal)) {
+                    showError(error2, "Invalid email format");
+                    return false;
+                } else {
+                    hideError(error2); // Hide error when valid
+                    return true;
+                }
+            }
+
+            function phoneValidateChecking() {
+                const phoneVal = phoneNumber.value.trim();
+                const inputGroup = phoneNumber.parentElement;
+                if (!phoneVal) {
+                    showError(error3, "Enter a valid phone number");
+                    return false;
+                } else if (phoneVal.length !== 10 || isNaN(phoneVal)) {
+                    showError(error3, "Enter a 10-digit number");
+                    return false;
+                } else {
+                    hideError(error3); // Hide error when valid
+                    return true;
+                }
+            }
+
+            function passwordValidateChecking() {
+                const passwordVal = password.value.trim();
+                const cpasswordVal = confirmPassword.value.trim();
+                const strongpass = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+                const passwordGroup = password.parentElement;
+                const confirmPasswordGroup = confirmPassword.parentElement;
+                let isValid = true;
+
+                if (!passwordVal) {
+                    showError(error4, "Password cannot be empty");
+                    isValid = false;
+                } else if (passwordVal.length < 8) {
+                    showError(error4, "Should contain at least 8 characters");
+                    isValid = false;
+                } else if (!strongpass.test(passwordVal)) {
+                    showError(error4, "Password must include at least one number and one special character (@$!%*?&).");
+                    isValid = false;
+                } else {
+                    hideError(error4); // Hide error when valid
+                }
+
+                if (!cpasswordVal) {
+                    showError(error5, "Confirm Password cannot be empty");
+                    isValid = false;
+                } else if (passwordVal !== cpasswordVal) {
+                    showError(error5, "Passwords do not match");
+                    isValid = false;
+                } else {
+                    hideError(error5); // Hide error when valid
+                }
+
+                return isValid;
+            }
+
+            name.addEventListener("input", nameValidateChecking);
+            email.addEventListener("input", emailValidateChecking);
+            phoneNumber.addEventListener("input", phoneValidateChecking);
+            password.addEventListener("input", passwordValidateChecking);
+            confirmPassword.addEventListener("input", passwordValidateChecking);
+
+            signupForm.addEventListener("submit", function (e) {
+                const isNameValid = nameValidateChecking();
+                const isEmailValid = emailValidateChecking();
+                const isPhoneValid = phoneValidateChecking();
+                const isPasswordValid = passwordValidateChecking();
+
+                if (!isNameValid || !isEmailValid || !isPhoneValid || !isPasswordValid) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+</body>
+</html>

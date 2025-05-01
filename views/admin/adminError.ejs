@@ -1,0 +1,40 @@
+<%-include("../../views/partials/admin/header")%>
+     <section>
+        <div class="main-content" id="main-content">
+            <nav class="navbar navbar-expand-lg mb-4">
+                <div class="container-fluid">
+                    <div class="d-flex align-items-center">
+                        <span class="toggle-sidebar me-3" id="toggle-sidebar">
+                            <i class="fas fa-bars"></i>
+                        </span>
+                        <h4 class="mb-0">Dashboard</h4>
+                    </div>
+                    <!-- Admin Profile with Fixed Icon -->
+                    <div class="admin-profile ms-auto">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32&q=80" 
+                             alt="Admin Avatar">
+                        <span>Admin</span>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    
+            <!-- 404 Error Section -->
+            <div class="error-container" id="error-container">
+                <div class="error-content">
+                    <h1 class="error-code">404</h1>
+                    <h2 class="error-title">Page Not Found</h2>
+                    <p class="error-message">Oops! It seems like the page you're looking for doesn't exist or has been moved.</p>
+                    <div class="error-actions">
+                        <a href="/admin/dashboard" class="btn btn-primary error-btn">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                        <a href="#" class="btn btn-outline-secondary error-btn">
+                            <i class="fas fa-redo me-2"></i>Try Again
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <%-include("../../views/partials/admin/footer")%>

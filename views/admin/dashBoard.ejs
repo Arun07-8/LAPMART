@@ -1,0 +1,261 @@
+<%- include("../../views/partials/admin/header") %>
+
+    <!-- Main Content -->
+    <div class="main-content" id="main-content">
+        <!-- Top Navbar -->
+        <div class="top-navbar">
+            <div class="d-flex align-items-center">
+                <button class="toggle-sidebar me-3" id="toggle-sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">Dashboard</h1>
+            </div>
+            <div class="d-flex align-items-center">
+                <button class="theme-toggle" id="theme-toggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="admin-profile">
+                    <img src="#" alt="Admin Avatar">
+                </div>
+            </div>
+        </div>
+        <!-- Dashboard Content -->
+        <div class="dashboard-stats">
+            <div class="stat-card revenue">
+                <div class="stat-card-header">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                </div>
+                <div class="stat-card-value">$24,580</div>
+                <div class="stat-card-title">Total Revenue</div>
+                <div class="stat-card-footer">
+                    <span class="stat-change-positive">
+                        <i class="fas fa-arrow-up"></i> 12%
+                    </span>
+                    <span>since last month</span>
+                </div>
+            </div>
+            <div class="stat-card orders">
+                <div class="stat-card-header">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                </div>
+                <div class="stat-card-value">1,352</div>
+                <div class="stat-card-title">Total Orders</div>
+                <div class="stat-card-footer">
+                    <span class="stat-change-positive">
+                        <i class="fas fa-arrow-up"></i> 8%
+                    </span>
+                    <span>since last month</span>
+                </div>
+            </div>
+            <div class="stat-card users">
+                <div class="stat-card-header">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <div class="stat-card-value">9,271</div>
+                <div class="stat-card-title">Total Users</div>
+                <div class="stat-card-footer">
+                    <span class="stat-change-positive">
+                        <i class="fas fa-arrow-up"></i> 5%
+                    </span>
+                    <span>since last month</span>
+                </div>
+            </div>
+            <div class="stat-card products">
+                <div class="stat-card-header">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                </div>
+                <div class="stat-card-value">485</div>
+                <div class="stat-card-title">Total Products</div>
+                <div class="stat-card-footer">
+                    <span class="stat-change-negative">
+                        <i class="fas fa-arrow-down"></i> 2%
+                    </span>
+                    <span>since last month</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-charts">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">Sales Overview</div>
+                    <div class="chart-action">View Details</div>
+                </div>
+                <div id="sales-chart" class="chart-placeholder">
+                    <p>Sales Chart Placeholder</p>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">Top Products</div>
+                    <div class="chart-action">View All</div>
+                </div>
+                <div id="products-chart" class="chart-placeholder">
+                    <p>Products Chart Placeholder</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="recent-activity">
+            <div class="activity-header">
+                <div class="activity-title">Recent Activity</div>
+                <div class="chart-action">View All</div>
+            </div>
+            <ul class="activity-list">
+                <li class="activity-item">
+                    <div class="activity-icon order">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-text">New order #1234 from John Doe</div>
+                        <div class="activity-time">2 hours ago</div>
+                    </div>
+                </li>
+                <li class="activity-item">
+                    <div class="activity-icon user">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-text">New user registered: Sarah Johnson</div>
+                        <div class="activity-time">5 hours ago</div>
+                    </div>
+                </li>
+                <li class="activity-item">
+                    <div class="activity-icon product">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-text">Product stock updated: Wireless Headphones</div>
+                        <div class="activity-time">8 hours ago</div>
+                    </div>
+                </li>
+                <li class="activity-item">
+                    <div class="activity-icon order">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-text">Order #1230 has been completed</div>
+                        <div class="activity-time">Yesterday</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Hidden message div for SweetAlert2 -->
+    <div id="msg" data-msg="<%=message%>" style="display: none;"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sidebar toggle functionality
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            const toggleSidebar = document.getElementById('toggle-sidebar');
+
+            toggleSidebar.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+            });
+
+            // Dark mode toggle functionality
+            const themeToggle = document.getElementById('theme-toggle');
+            const htmlTag = document.documentElement;
+            
+            // Check for saved theme preference or prefer-color-scheme
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                htmlTag.setAttribute('data-theme', savedTheme);
+                updateThemeIcon(savedTheme);
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                htmlTag.setAttribute('data-theme', 'dark');
+                updateThemeIcon('dark');
+            }
+
+            // Toggle theme when button is clicked
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = htmlTag.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                htmlTag.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+                
+                // Show theme change notification
+                Swal.fire({
+                    icon: 'success',
+                    title: newTheme === 'dark' ? 'Dark Mode Activated' : 'Light Mode Activated',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1500,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+            });
+
+            function updateThemeIcon(theme) {
+                const iconElement = themeToggle.querySelector('i');
+                if (theme === 'dark') {
+                    iconElement.classList.remove('fa-moon');
+                    iconElement.classList.add('fa-sun');
+                } else {
+                    iconElement.classList.remove('fa-sun');
+                    iconElement.classList.add('fa-moon');
+                }
+            }
+
+            // Check for smaller screens on load and resize
+            function checkScreenSize() {
+                if (window.innerWidth < 992) {
+                    sidebar.classList.add('collapsed');
+                    mainContent.classList.remove('expanded');
+                } else {
+                    sidebar.classList.remove('collapsed');
+                    mainContent.classList.remove('expanded');
+                }
+            }
+
+            // Check on page load
+            checkScreenSize();
+
+            // Check on window resize
+            window.addEventListener('resize', checkScreenSize);
+
+            // SweetAlert2 message handler
+            const msg = document.getElementById('msg').dataset.msg;
+            if (msg && msg !== "none" && msg !== "") {
+                Swal.fire({
+                    icon: "success",
+                    title: msg,
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }
+
+            // Add active class to current page in sidebar
+            const currentLocation = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentLocation) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+<%- include("../../views/partials/admin/footer") %>

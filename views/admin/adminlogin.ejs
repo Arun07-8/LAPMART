@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="/css/adminlogin.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        /* Classic design styles */
+        body {
+            background: #f8f9fa;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%233a7bd5' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        
+        .gradient-background {
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.98) 0%, rgba(240, 242, 245, 0.95) 100%);
+        }
+        
+        .rounded-4 {
+            border-radius: 10px !important;
+        }
+        
+        .shadow-lg {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 1px 8px rgba(0, 0, 0, 0.05) !important;
+        }
+        
+        /* Input fields styling with reduced spacing */
+        .input-group {
+            margin-bottom: 0.8rem;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .input-group .form-control, 
+        .input-group .input-group-text {
+            height: 60px;
+            padding: 0.75rem 1.25rem;
+            font-size: 1.05rem;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .input-group .input-group-text {
+            width: 55px;
+            display: flex;
+            justify-content: center;
+            background-color: #f8f9fa;
+        }
+        
+        .input-group .input-group-text i {
+            font-size: 1.2rem;
+            color: #6c757d;
+        }
+        
+        .form-control:focus {
+            box-shadow: none;
+            border-color: #3a7bd5;
+        }
+        
+        /* Button styling */
+        .btn-primary {
+            height: 60px;
+            font-size: 1.05rem;
+            background-color: #3a7bd5;
+            border-color: #3a7bd5;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2d6bc7;
+            border-color: #2d6bc7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Headers and text */
+        .display-6 {
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+        
+        .text-muted {
+            color: #6c757d !important;
+        }
+        
+        /* Container styling */
+        .bg-white {
+            position: relative;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        /* Accent line at the top */
+        .bg-white::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, #3a7bd5, #00d2ff);
+            z-index: 3;
+        }
+        
+        /* Image styling */
+        .img-fluid {
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.15);
+            transition: all 0.5s ease;
+        }
+        
+        .hover-scale:hover {
+            transform: scale(1.02);
+        }
+        
+        /* Layout adjustments */
+        .p-md-5 {
+            padding: 2rem !important;
+        }
+        
+        @media (min-width: 768px) {
+            .w-md-50 {
+                width: 55% !important;
+            }
+        }
+        
+        /* Logo overlay styling - Enhanced */
+        .logo-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.75);
+            padding: 25px 35px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            z-index: 10;
+        }
+        
+        .brand-icon {
+            background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .brand-icon i {
+            font-size: 35px;
+            color: white;
+        }
+        
+        .logo-overlay h3 {
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        
+        .logo-overlay p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            margin: 0;
+        }
+        
+        .features-carousel {
+            position: relative;
+        }
+        
+        /* Further reduce spacing in form */
+        .py-5 {
+            padding-top: 1.5rem !important;
+            padding-bottom: 1.5rem !important;
+        }
+        
+        .mb-4 {
+            margin-bottom: 1rem !important;
+        }
+        
+        .mb-2 {
+            margin-bottom: 0.4rem !important;
+        }
+        
+        /* Adjust text elements for tighter spacing */
+        h2.display-6 {
+            margin-bottom: 0.5rem !important;
+        }
+        
+        p.text-muted.mb-4 {
+            margin-bottom: 1.2rem !important;
+        }
+        
+        .p-4 {
+            padding: 1.25rem !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="session-data" data-message="<%= typeof message !== 'undefined' ? JSON.stringify(message) : 'null' %>"></div>
+    <!-- Top Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-transparent position-absolute w-100 top-0">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+                
+            </a>
+            
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="min-vh-100 gradient-background d-flex align-items-center justify-content-center p-4">
+        <div class="bg-white rounded-4 shadow-lg d-flex flex-column flex-md-row w-100" style="max-width: 1200px;">
+            <!-- Left Side - Login Form -->
+            <div class="w-100 w-md-50 p-4 p-md-5">
+                <div class="text-start fw-bold">
+                    <span class="text-primary d-flex align-items-center gap-2">
+                        <i class="bi bi-laptop fs-4"></i>
+                        <span class="fs-4">Admin Portal</span>
+                    </span>
+                </div>
+                
+                <div class="py-5">
+                    <h2 class="display-6 fw-bold text-dark mb-2">Welcome Back</h2>
+                    <p class="text-muted mb-4">Please sign in to your account</p>
+                    
+                    <form  class="needs-validation" action="login" method="post">
+                        <div class="mb-4 position-relative">
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0">
+                                    <i class="bi bi-envelope text-muted"></i>
+                                </span>
+                                <input
+                                    type="email"
+                                    class="form-control border-start-0 ps-0"
+                                    placeholder="Email Address"
+                                    name="email"
+                                    id="email"
+                                >
+                                <div class="invalid-feedback">
+                                    Please enter a valid email address.
+                                </div>
+                            </div>
+                            <div class="error1 error-message" style="color: red;"></div>
+                        </div>
+                        
+                        <div class="mb-4 position-relative">
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0">
+                                    <i class="bi bi-lock text-muted"></i>
+                                </span>
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    class="form-control border-start-0 border-end-0 ps-0"
+                                    placeholder="Password"
+                                >
+                                <button 
+                                class="input-group-text bg-transparent border-start-0"
+                                type="button"
+                                onclick="togglePassword()"
+                                >
+                                <i class="bi bi-eye text-muted" id="togglePassword"></i>
+                            </button>
+                            <div class="invalid-feedback">
+                                Please enter your password.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="error2 error-message" style="color: red;"></div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check">
+                                
+                            </div>
+                      
+                        </div>
+                        
+                        <button
+                            type="submit"
+                            class="btn btn-primary w-100 py-3 rounded-3 fw-semibold d-flex align-items-center justify-content-center gap-2"
+                        >
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            <span>Sign In</span>
+                        </button>
+
+                        
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Right Side - Image Section -->
+            <div class="w-100 w-md-50 bg-primary rounded-end-4 p-4 p-md-5 d-none d-md-block">
+                <div class="text-white text-center h-100 d-flex flex-column align-items-center justify-content-center">
+                    <div class="features-carousel mb-4 position-relative">
+                        <img
+                            src="https://images.unsplash.com/photo-1593642532744-d377ab507dc8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80"
+                            alt="Modern laptop setup"
+                            class="rounded-4 mb-4 shadow img-fluid hover-scale"
+                        >
+                        <div class="logo-overlay">
+                            <div class="brand-icon">
+                                <i class="bi bi-laptop"></i>
+                            </div>
+                            <h3>AURONIX</h3>
+                            <p>Premium Computing Solutions</p>
+                        </div>
+                    </div>
+                    <h2 class="display-6 fw-bold mb-3">Admin Dashboard</h2>
+                    <p class="fs-5 mb-4">Manage your business with our powerful admin tools</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+
+    const sessionData = document.getElementById('session-data');
+    console.log(sessionData);
+    
+        let sessionMessage = sessionData.dataset.message;
+        // Convert string to object if not null
+        if (sessionMessage !== 'null') {
+            try {
+                sessionMessage = JSON.parse(sessionMessage);
+            } catch (error) {
+                console.error("Failed to parse sessionMessage:", error);
+            }
+        } else {
+            sessionMessage = null;
+        }
+
+        // Display session message with SweetAlert2 on page load
+     
+                // Show session message or validation errors
+                document.addEventListener("DOMContentLoaded", function () {
+                    if (typeof Swal === 'undefined') {
+                        console.error("SweetAlert2 not loaded");
+                        return;
+                    }
+
+                    // Show server session message
+                    if (sessionMessage) {
+                        let text, icon, title;
+                        if (typeof sessionMessage === 'string') {
+                            text = sessionMessage;
+                            icon = 'error';
+                            title = 'Error';
+                        } else if (sessionMessage && sessionMessage.text) {
+                            text = sessionMessage.text;
+                            icon = sessionMessage.type === 'success' ? 'success' : 'error';
+                            title = sessionMessage.type === 'success' ? 'Success' : 'Error';
+                        }
+                        if (text) {
+                            Swal.fire({
+                                icon: icon,
+                                title: title,
+                                text: text,
+                                confirmButtonColor: '#3a7bd5'
+                            });
+                        }
+                    }
+                })
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('togglePassword');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+            }
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            const email = document.getElementById("email");
+            const password = document.getElementById("password");
+            const error1 = document.querySelector(".error1");
+            const error2 = document.querySelector(".error2");
+            const signupForm = document.querySelector("form");
+
+            function showError(errorElement, message) {
+                errorElement.style.display = "block";
+                errorElement.innerHTML = message;
+            }
+
+            function hideError(errorElement) {
+                errorElement.style.display = "none";
+                errorElement.innerHTML = "";
+            }
+
+            function emailValidateChecking() {
+                const emailVal = email.value.trim();
+                const emailpattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                if (!emailVal) {
+                    showError(error1, "Email cannot be empty");
+                    return false;
+                } else if (!emailpattern.test(emailVal)) {
+                    showError(error1, "Invalid email format");
+                    return false;
+                } else {
+                    hideError(error1);
+                    return true;
+                }
+            }
+
+            function passwordValidateChecking() {
+                const passwordVal = password.value.trim();
+                const strongpass = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+                let isValid = true;
+
+                if (!passwordVal) {
+                    showError(error2, "Password cannot be empty");
+                    isValid = false;
+                } else if (passwordVal.length < 8) {
+                    showError(error2, "Should contain at least 8 characters");
+                    isValid = false;
+                } else if (!strongpass.test(passwordVal)) {
+                    showError(error2, "Password must include at least one number and one special character (@$!%*?&).");
+                    isValid = false;
+                } else {
+                    hideError(error2);
+                }
+
+                return isValid;
+            }
+
+            email.addEventListener("input", emailValidateChecking);
+            password.addEventListener("input", passwordValidateChecking);
+
+            signupForm.addEventListener("submit", function (e) {
+                const isEmailValid = emailValidateChecking();
+                const isPasswordValid = passwordValidateChecking();
+
+                if (!isEmailValid || !isPasswordValid) {
+                    e.preventDefault();
+                    let errorMessage = "";
+                    if (!isEmailValid) {
+                        errorMessage += error1.innerHTML + "<br>";
+                    }
+                    if (!isPasswordValid) {
+                        errorMessage += error2.innerHTML;
+                    }
+                }
+            });
+        });
+    </script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+</body>
+</html>

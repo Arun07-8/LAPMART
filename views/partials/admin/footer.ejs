@@ -1,0 +1,41 @@
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+        const toggleSidebar = document.getElementById('toggle-sidebar');
+        const errorContainer = document.getElementById('error-container');
+
+        // Sidebar toggle functionality
+        toggleSidebar.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+        });
+
+        // Example: Show 404 error conditionally (for demo purposes)
+        // You can replace this logic with your actual condition
+        const show404 = true; // Set to true to display the 404 error
+        if (show404) {
+            errorContainer.classList.add('active');
+        }
+        // Highlight active menu item based on current URL
+const navLinks = document.querySelectorAll('.sidebar .nav-link');
+const currentPath = window.location.pathname;
+
+// First remove all active classes
+navLinks.forEach(link => {
+  link.classList.remove('active');
+});
+
+// Then add active class to the matching link
+navLinks.forEach(link => {
+  const href = link.getAttribute('href');
+  if (href === currentPath) {
+    link.classList.add('active');
+  }
+});
+    </script>
+</body>
+</html>

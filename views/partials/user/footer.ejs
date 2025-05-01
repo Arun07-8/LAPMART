@@ -1,0 +1,107 @@
+<footer>
+    <div class="footer-grid">
+        <div class="footer-col">
+            <h3>AURONIX LAPSTORE</h3>
+            <p>We have laptops and electronics that suit your style and which you're proud to own. From students to professionals.</p>
+            <div class="social-icons">
+                <a href="#" class="social-icon" aria-label="Facebook">f</a>
+                <a href="#" class="social-icon" aria-label="LinkedIn">in</a>
+                <a href="#" class="social-icon" aria-label="Instagram">ig</a>
+                <a href="#" class="social-icon" aria-label="Twitter">tw</a>
+            </div>
+        </div>
+        <div class="footer-col">
+            <h3>COMPANY</h3>
+            <ul>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Features</a></li>
+                <li><a href="#">Works</a></li>
+                <li><a href="#">Career</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h3>HELP</h3>
+            <ul>
+                <li><a href="#">Customer Support</a></li>
+                <li><a href="#">Delivery Details</a></li>
+                <li><a href="#">Terms & Conditions</a></li>
+                <li><a href="#">Privacy Policy</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h3>FAQ</h3>
+            <ul>
+                <li><a href="#">Account</a></li>
+                <li><a href="#">Manage Deliveries</a></li>
+                <li><a href="#">Orders</a></li>
+                <li><a href="#">Payments</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h3>RESOURCES</h3>
+            <ul>
+                <li><a href="#">Free eBooks</a></li>
+                <li><a href="#">Tech Tutorials</a></li>
+                <li><a href="#">How to - Blog</a></li>
+                <li><a href="#">Youtube Channel</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="payment-methods">
+        <div class="payment-icon">VISA</div>
+        <div class="payment-icon">MC</div>
+        <div class="payment-icon">PayPal</div>
+        <div class="payment-icon">Apple</div>
+        <div class="payment-icon">G Pay</div>
+    </div>
+    <div class="footer-bottom">
+        © 2019-2025 AURONIX LAPSTORE All Rights Reserved
+    </div>
+</footer>
+
+<script>
+    // Mobile menu toggle
+    document.querySelector('.menu-toggle').addEventListener('click', function () {
+        const navLinks = document.querySelector('.nav-links');
+        navLinks.classList.toggle('active');
+        this.setAttribute('aria-expanded', navLinks.classList.contains('active'));
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function (event) {
+        const isClickInsideMenu = document.querySelector('.menu-toggle').contains(event.target);
+        const isClickInsideNav = document.querySelector('.nav-links').contains(event.target);
+        const navLinks = document.querySelector('.nav-links');
+
+        if (!isClickInsideMenu && !isClickInsideNav && navLinks.classList.contains('active')) {
+            navLinks.classList.remove('active');
+            document.querySelector('.menu-toggle').setAttribute('aria-expanded', 'false');
+        }
+    });
+
+    // Close banner
+    document.querySelector('.top-banner .close-btn').addEventListener('click', function () {
+        document.querySelector('.top-banner').style.display = 'none';
+    });
+
+    // Testimonial slider controls
+    const testimonialGrid = document.querySelector('.testimonial-grid');
+    const nextBtn = document.querySelector('.testimonial-controls .control-btn:last-child');
+    const prevBtn = document.querySelector('.testimonial-controls .control-btn:first-child');
+
+    nextBtn.addEventListener('click', function () {
+        testimonialGrid.scrollBy({
+            left: 320,
+            behavior: 'smooth',
+        });
+    });
+
+    prevBtn.addEventListener('click', function () {
+        testimonialGrid.scrollBy({
+            left: -320,
+            behavior: 'smooth',
+        });
+    });
+</script>
+</body>
+</html>

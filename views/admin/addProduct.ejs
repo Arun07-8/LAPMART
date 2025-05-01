@@ -1,0 +1,808 @@
+<!-- External Libraries -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="/css/admin-css/addprod.css">
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
+<style>
+    .form-group .error-message {
+        color: #dc3545 !important;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-top: 0.25rem;
+        padding: 0.25rem 0;
+        display: none;
+        line-height: 1.2;
+    }
+
+    .form-group .error-message.active {
+        display: block !important;
+    }
+
+    .form-control.is-invalid,
+    .form-select.is-invalid,
+    .form-group input[type="file"].is-invalid {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+    }
+
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        background-image: none !important;
+        padding-right: 0.75rem !important;
+    }
+
+    .form-group .error-message[aria-live="polite"] {
+        display: none;
+    }
+
+    .form-group .error-message.active[aria-live="polite"] {
+        display: block !important;
+    }
+</style>
+
+<body>
+    <%- include("../../views/partials/admin/header") %>
+
+    <div class="main-content">
+        <div class="header">
+            <h1 class="text-white">Add Products</h1>
+            <div class="user-profile">
+                <img src="/api/placeholder/36/36" alt="User Profile">
+            </div>
+        </div>
+
+        <form action="/admin/addProducts" method="Post" enctype="multipart/form-data" id="addProductForm" onclick=" validateForm()">
+            <div class="container">
+                <!-- Left Form Section -->
+                <div class="form-section">
+                    <h3 class="text-white mb-4">Product Details</h3>
+                    <div class="form-group">
+                        <label for="productName" class="required">Product Name:</label>
+                        <input type="text" id="productName" name="productName" class="form-control" placeholder="Enter laptop model name" required>
+                        <div id="productName-error" class="error-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description" class="required">Product Description:</label>
+                        <textarea id="description" name="description" class="form-control" rows="4" placeholder="Enter product description" required></textarea>
+                        <div id="description-error" class="error-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="brand" class="required">Brand:</label>
+                        <select name="brand" class="form-control" id="brand" required>
+                            <option value="" disabled selected>Select Brand</option>
+                            <% for(let i=0; i < brand.length; i++) { %>
+                                <option value="<%= brand[i]._id %>">
+                                    <%= brand[i].name %>
+                                </option>
+                            <% } %>
+                        </select>
+                        <div id="brand-error" class="error-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category" class="required">Category:</label>
+                        <select name="category" class="form-control" id="category" required>
+                            <option value="" disabled selected>Select Category</option>
+                            <% for(let i=0; i < category.length; i++) { %>
+                                <option value="<%= category[i]._id %>">
+                                    <%= category[i].name %>
+                                </option>
+                            <% } %>
+                        </select>
+                        <div id="category-error" class="error-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regularPrice" class="required">Product Price:</label>
+                        <input type="number" id="regularPrice" name="regularPrice" class="form-control" placeholder="Enter product price" step="0.01" required>
+                        <div id="regularPrice-error" class="error-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="salePrice" class="required">Offer Price:</label>
+                        <input type="number" id="salePrice" name="salePrice" class="form-control" placeholder="Enter offer price" step="0.01" required>
+                        <div id="salePrice-error" class="error-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quantity" class="required">Stock Count:</label>
+                        <input type="number" id="quantity" name="quantity" class="form-control" placeholder="Enter total stock count" required>
+                        <div id="quantity-error" class="error-message"></div>
+                    </div>
+                </div>
+
+                <!-- Product Specifications Section -->
+                <div class="specifications-section">
+                    <div class="section-header">
+                        <h2 class="section-title text-white">
+                            <i class="bi bi-laptop"></i>
+                            Laptop Specifications
+                        </h2>
+                        <p class="section-subtitle text-white">Enter essential laptop specifications</p>
+                    </div>
+                    <div class="specs-container">
+                        <!-- Core Specifications -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label required text-white">Processor</label>
+                                <input type="text" class="form-control" id="processor" name="processor" placeholder="e.g., Intel Core i7-13700H, AMD Ryzen 9 7940HS" required>
+                                <div id="processor-error" class="error-message"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label required text-white">Graphics Card</label>
+                                <input type="text" class="form-control" id="graphicsCard" name="graphicsCard" placeholder="e.g., NVIDIA RTX 4060, AMD Radeon RX 7600M" required>
+                                <div id="graphicsCard-error" class="error-message"></div>
+                            </div>
+                        </div>
+                        <!-- Memory and Storage -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label required text-white">RAM</label>
+                                <input type="text" class="form-control" id="ram" name="ram" placeholder="e.g., 16GB DDR5-5200" required>
+                                <div id="ram-error" class="error-message"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label required text-white">Storage</label>
+                                <input type="text" class="form-control" id="Storage" name="Storage" placeholder="e.g., 1TB PCIe NVMe SSD" required>
+                                <div id="Storage-error" class="error-message"></div>
+                            </div>
+                        </div>
+                        <!-- Display -->
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label required text-white">Display</label>
+                                <input type="text" class="form-control" id="display" name="display" placeholder="e.g., 15.6 inch IPS (2560x1440) 165Hz" required>
+                                <div id="display-error" class="error-message"></div>
+                            </div>
+                        </div>
+                        <!-- Operating System -->
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label required text-white">Operating System</label>
+                                <input type="text" class="form-control" id="operatingSystem" name="operatingSystem" placeholder="e.g., Windows 11 Home, macOS Sequoia" required>
+                                <div id="operatingSystem-error" class="error-message"></div>
+                            </div>
+                        </div>
+                        <!-- Battery and Weight -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label required text-white">Battery</label>
+                                <input type="text" class="form-control" id="Battery" name="Battery" placeholder="e.g., 80Wh, Up to 10 hours" required>
+                                <div id="Battery-error" class="error-message"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label required text-white">Weight</label>
+                                <input type="text" class="form-control" id="Weight" name="Weight" placeholder="e.g., 1.8kg (4.0 lbs)" required>
+                                <div id="Weight-error" class="error-message"></div>
+                            </div>
+                        </div>
+                        <!-- Additional Features -->
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label text-white">Additional Features</label>
+                                <input type="text" class="form-control" id="additionalFeatures" name="additionalFeatures" placeholder="e.g., Backlit Keyboard, Fingerprint Reader, 1080p Webcam">
+                                <div id="additionalFeatures-error" class="error-message"></div>
+                            </div>
+                        </div>
+                        <!-- Warranty -->
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label required text-white">Warranty</label>
+                                <input type="text" class="form-control" id="Warranty" name="Warranty" placeholder="e.g., 2 Year Limited Warranty" required>
+                                <div id="Warranty-error" class="error-message"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Upload Section -->
+                <div class="image-upload-container">
+                    <h4 class="text-white">Product Images</h4>
+                    <% for (let i=1; i <=4; i++) { %>
+                        <div class="form-group image-item" id="imageContainer<%= i %>">
+                            <label for="image<%= i %>" class="text-white">Image <%= i %></label>
+                            <input type="file" name="image<%= i %>" id="image<%= i %>" class="form-control" accept="image/*" onchange="previewImage(event, `<%= i %>`)">
+                            <!-- Cropping Section -->
+                            <div class="cropper-container" id="cropperContainer<%= i %>" style="display: none;">
+                                <h5 class="text-white">Crop Image</h5>
+                                <div class="cropper-wrapper">
+                                    <img id="cropperImg<%= i %>" alt="Image to crop">
+                                </div>
+                                <!-- Aspect Ratio Selection -->
+                                <div class="aspect-ratio-controls">
+                                    <span class="text-white me-2">Aspect Ratio:</span>
+                                    <button type="button" class="aspect-ratio-btn active" data-index="<%= i %>" data-ratio="free" onclick="setAspectRatio(`<%= i %>`, 'free')">
+                                        Free
+                                    </button>
+                                    <button type="button" class="aspect-ratio-btn" data-index="<%= i %>" data-ratio="30/37" onclick="setAspectRatio(`<%= i %>`, 30/37)">
+                                        Fit image
+                                    </button>
+                                </div>
+                                <div class="cropper-controls">
+                                    <button type="button" class="btn btn-primary" onclick="cropImage(`<%= i %>`)">
+                                        <i class="fas fa-check"></i> Apply Crop
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="cancelCrop(`<%= i %>`)">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Result Preview -->
+                            <div class="crop-result-container" id="previewContainer<%= i %>" style="display: none;">
+                                <h5 class="text-white">Final Image</h5>
+                                <img id="preview<%= i %>" src="#" alt="Image preview" class="image-preview">
+                                <button type="button" class="btn btn-outline-light btn-sm mt-2" onclick="recropImage(`<%= i %>`)">
+                                    <i class="fas fa-crop-alt"></i> Re-crop Image
+                                </button>
+                            </div>
+                            <div id="image<%= i %>-error" class="error-message"></div>
+                        </div>
+                    <% } %>
+                </div>
+
+                <div class="button-container">
+                    <button type="submit" class="add-btn">Add Product</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+    <script>
+        let croppers = {};
+        let originalImages = {};
+        let croppedImages = [false, false, false, false]; // Track cropped images
+
+        // Basic input sanitization to prevent XSS
+        function sanitizeInput(input) {
+            const div = document.createElement('div');
+            div.textContent = input;
+            return div.innerHTML.replace(/[<>&"]/g, '');
+        }
+
+       // Enhanced form validation and submission handler
+document.addEventListener('DOMContentLoaded', function () {
+    // Form submission handler
+    document.getElementById('addProductForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
+        console.log('Form submitted');
+
+        if (validateForm()) {
+            console.log('Form validation passed');
+            const form = this;
+            const formData = new FormData(form);
+            
+            // Show loading indicator
+            Swal.fire({
+                title: 'Processing...',
+                text: 'Adding your product',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            try {
+                console.log('Sending fetch request to /admin/addProducts');
+                const response = await fetch('/admin/addProducts', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('Response status:', response.status);
+                
+                // Check if the response is JSON
+                const contentType = response.headers.get('content-type');
+                let result;
+                
+                if (contentType && contentType.includes('application/json')) {
+                    result = await response.json();
+                    console.log('Response JSON:', result);
+                } else {
+                    const text = await response.text();
+                    console.log('Response text:', text);
+                    result = { message: 'Operation completed', success: response.ok };
+                }
+                
+                if (response.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: result.message || 'Product added successfully!',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        console.log('Redirecting to products page');
+                        window.location.href = '/admin/products';
+                    });
+                } else {
+                    console.log('Request failed with status ' + response.status);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: result.error || 'Failed to add product.'
+                    });
+                }
+            } catch (error) {
+                console.error('Submission error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An unexpected error occurred. Please try again.'
+                });
+            }
+        } else {
+            console.log('Form validation failed');
+            const firstInvalid = document.querySelector('.is-invalid');
+            if (firstInvalid) {
+                console.log('Scrolling to first invalid field:', firstInvalid.id);
+                setTimeout(() => {
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                text: 'Please correct the errors in the form before submitting.'
+            });
+        }
+    });
+});
+        // Full form validation
+        function validateForm() {
+            clearErrorMessages();
+            let isValid = true;
+            let firstInvalidField = null;
+
+            console.log('Starting form validation');
+
+            const fields = [
+                {
+                    id: 'productName',
+                    validate: (value) => {
+                        value = sanitizeInput(value);
+                        if (!value) return 'Product name is required.';
+                        if (value.length < 3 || value.length > 100) return 'Product name must be 3-100 characters.';
+                        if (!/^[a-zA-Z][a-zA-Z0-9\s\-()+,.']{2,}$/.test(value)) return 'Product name must start with a letter and contain valid characters.';
+                        if (/^\d+\s*$/.test(value)) return 'Product name cannot be purely numeric.';
+                        if (/^(.)\1{2,}$/.test(value.replace(/\s/g, ''))) return 'Product name cannot consist of repetitive characters (e.g., aaa).';
+                        return '';
+                    }
+                },
+                {
+                    id: 'description',
+                    validate: (value) => {
+                        value = sanitizeInput(value);
+                        if (!value) return 'Description is required.';
+                        if (value.length < 10 || value.length > 500) return 'Description must be 10-500 characters.';
+                        if (!/^[a-zA-Z].*[a-zA-Z0-9\s\-.,;:'"!()]+$/.test(value)) return 'Description must start with a letter and contain valid characters.';
+                        return '';
+                    }
+                },
+                {
+                    id: 'brand',
+                    validate: (value) => !value ? 'Please select a brand.' : ''
+                },
+                {
+                    id: 'category',
+                    validate: (value) => !value ? 'Please select a category.' : ''
+                },
+                {
+                    id: 'regularPrice',
+                    validate: (value) => {
+                        const price = parseFloat(value);
+                        if (!value) return 'Regular price is required.';
+                        if (isNaN(price) || price < 100 || price > 100000) return 'Regular price must be between 100 and 100,000.';
+                        if (!/^\d+(\.\d{1,2})?$/.test(value)) return 'Regular price must have up to two decimal places.';
+                        return '';
+                    }
+                },
+                {
+                    id: 'salePrice',
+                    validate: (value) => {
+                        const price = parseFloat(value);
+                        if (!value) return 'Offer price is required.';
+                        if (isNaN(price) || price < 50 || price > 100000) return 'Offer price must be between 50 and 100,000.';
+                        if (!/^\d+(\.\d{1,2})?$/.test(value)) return 'Offer price must have up to two decimal places.';
+                        return '';
+                    }
+                },
+                {
+                    id: 'quantity',
+                    validate: (value) => {
+                        const qty = parseInt(value);
+                        if (value === '') return 'Stock count is required.';
+                        if (isNaN(qty) || qty < 0 || qty > 10000) return 'Stock count must be between 0 and 10,000.';
+                        return '';
+                    }
+                },
+                {
+                    id: 'processor',
+                    validate: (value) => {
+                        value = sanitizeInput(value);
+                        if (!value) return 'Processor is required.';
+                        if (value.length < 2 || value.length > 100) return 'Processor must be 2-100 characters.';
+                        if (!/^[a-zA-Z0-9\s\-.,/()]+$/.test(value)) return 'Processor must contain valid characters.';
+                        return '';
+                    }
+                },
+                {
+                    id: 'graphicsCard',
+                    validate: (value) => {
+                        value = sanitizeInput(value);
+                        if (!value) return 'Graphics card is required.';
+                        if (value.length < 2 || value.length > 100) return 'Graphics card must be 2-100 characters.';
+                        if (!/^[a-zA-Z0-9\s\-.,/()]+$/.test(value)) return 'Graphics card must contain valid characters.';
+                        return '';
+                    }
+                },
+                {
+                    id: 'ram',
+                    validate: (value) => {
+                        value = sanitizeInput(value);
+                        if (!value) return 'RAM is required.';
+                        if (value.length < 2 || value.length > 100) return 'RAM must be 2-100 characters.';
+                        if (!/^[a-zA-Z0-9\s\-.,/()]+$/.test(value)) return 'RAM must contain valid characters.';
+                        return '';
+                    }
+                },
+                {
+                    id: 'Storage',
+                    validate: (value) => {
+                        value = sanitizeInput(value);
+                        if (!value) return 'Storage is required.';
+                        if (value.length < 2 || value.length > 100) return 'Storage must be 2-100 characters.';
+                        if (!/^[a-zA-Z0-9\s\-.,/()]+$/.test(value)) return 'Storage must contain valid characters.';
+                        return '';
+                    }
+                },
+                {
+                    id: 'display',
+                    validate: (value) => {
+                        value = sanitizeInput(value);
+                        if (!value) return 'Display is required.';
+                        if (value.length < 2 || value.length > 100) return 'Display must be 2-100 characters.';
+                        if (!/^[a-zA-Z0-9\s\-.,/()]+$/.test(value)) return 'Display must contain valid characters.';
+                        return '';
+                    }
+                },
+                {
+                    id: 'operatingSystem',
+                    validate: (value) => {
+                        value = sanitizeInput(value);
+                        if (!value) return 'Operating system is required.';
+                        if (value.length < 2 || value.length > 100) return 'Operating system must be 2-100 characters.';
+                        if (!/^[a-zA-Z0-9\s\-.,/()]+$/.test(value)) return 'Operating system must contain valid characters.';
+                        return '';
+                    }
+                },
+                {
+                    id: 'Battery',
+                    validate: (value) => {
+                        value = sanitizeInput(value);
+                        if (!value) return 'Battery is required.';
+                        if (value.length < 2 || value.length > 100) return 'Battery must be 2-100 characters.';
+                        if (!/^[a-zA-Z0-9\s\-.,/()]+$/.test(value)) return 'Battery must contain valid characters.';
+                        return '';
+                    }
+                },
+                {
+                    id: 'Weight',
+                    validate: (value) => {
+                        value = sanitizeInput(value);
+                        if (!value) return 'Weight is required.';
+                        if (value.length < 2 || value.length > 100) return 'Weight must be 2-100 characters.';
+                        if (!/^[a-zA-Z0-9\s\-.,/()]+$/.test(value)) return 'Weight must contain valid characters.';
+                        return '';
+                    }
+                },
+                {
+                    id: 'Warranty',
+                    validate: (value) => {
+                        value = sanitizeInput(value);
+                        if (!value) return 'Warranty is required.';
+                        if (value.length < 2 || value.length > 100) return 'Warranty must be 2-100 characters.';
+                        if (!/^[a-zA-Z0-9\s\-.,/()]+$/.test(value)) return 'Warranty must contain valid characters.';
+                        return '';
+                    }
+                },
+                {
+                    id: 'additionalFeatures',
+                    validate: (value) => {
+                        value = sanitizeInput(value);
+                        if (value && (value.length > 200 || !/^[a-zA-Z0-9\s\-.,/()]*$/.test(value))) {
+                            return 'Additional features must be 0-200 characters and contain valid characters.';
+                        }
+                        return '';
+                    }
+                }
+            ];
+
+            // Validate all fields
+            fields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (!element) {
+                    console.error(`Field element not found for ID: ${field.id}`);
+                    isValid = false;
+                    return;
+                }
+                const value = element.value.trim();
+                const errorMessage = field.validate(value);
+                if (errorMessage) {
+                    console.log(`Validation error for ${field.id}: ${errorMessage}`);
+                    displayErrorMessage(field.id, errorMessage);
+                    element.classList.add('is-invalid');
+                    if (!firstInvalidField) firstInvalidField = element;
+                    isValid = false;
+                }
+            });
+
+            // Validate sale price <= regular price
+            const regularPrice = parseFloat(document.getElementById('regularPrice').value);
+            const salePrice = parseFloat(document.getElementById('salePrice').value);
+            if (!isNaN(regularPrice) && !isNaN(salePrice) && salePrice > regularPrice) {
+                console.log('Sale price validation error');
+                displayErrorMessage('salePrice', 'Offer price must be less than or equal to regular price.');
+                document.getElementById('salePrice').classList.add('is-invalid');
+                if (!firstInvalidField) firstInvalidField = document.getElementById('salePrice');
+                isValid = false;
+            }
+
+            // Validate images
+            let hasValidImage = false;
+            for (let i = 1; i <= 4; i++) {
+                const fileInput = document.getElementById(`image${i}`);
+                if (!fileInput) {
+                    console.error(`Image input not found for ID: image${i}`);
+                    isValid = false;
+                    continue;
+                }
+                const file = fileInput.files[0];
+                if (file) {
+                    if (!['image/jpeg', 'image/png'].includes(file.type)) {
+                        console.log(`Image ${i} validation error: Invalid type`);
+                        displayErrorMessage(`image${i}`, 'Only JPEG or PNG images are allowed.');
+                        fileInput.classList.add('is-invalid');
+                        if (!firstInvalidField) firstInvalidField = fileInput;
+                        isValid = false;
+                    } else if (file.size > 5 * 1024 * 1024) {
+                        console.log(`Image ${i} validation error: File too large`);
+                        displayErrorMessage(`image${i}`, 'Image size must be less than 5MB.');
+                        fileInput.classList.add('is-invalid');
+                        if (!firstInvalidField) firstInvalidField = fileInput;
+                        isValid = false;
+                    } else if (croppedImages[i - 1]) {
+                        hasValidImage = true;
+                    }
+                }
+            }
+            if (!hasValidImage) {
+                console.log('Image validation error: No cropped image');
+                for (let i = 1; i <= 4; i++) {
+                    const fileInput = document.getElementById(`image${i}`);
+                    if (!croppedImages[i - 1]) {
+                        displayErrorMessage(`image${i}`, 'Please upload and crop at least one image.');
+                        fileInput.classList.add('is-invalid');
+                        if (!firstInvalidField) firstInvalidField = fileInput;
+                    }
+                }
+                isValid = false;
+            }
+
+            console.log(`Validation complete, isValid: ${isValid}`);
+            return isValid;
+        }
+
+        // Display error message
+        function displayErrorMessage(id, message) {
+            const errorElement = document.getElementById(`${id}-error`);
+            if (errorElement) {
+                console.log(`Displaying error for ${id}: ${message}`);
+                errorElement.textContent = message;
+                errorElement.classList.add('active');
+                errorElement.style.display = 'block';
+            } else {
+                console.error(`Error element not found for ID: ${id}-error`);
+            }
+        }
+
+        // Clear error message for a single field
+        function clearErrorMessage(id) {
+            const errorElement = document.getElementById(`${id}-error`);
+            if (errorElement) {
+                errorElement.textContent = '';
+                errorElement.classList.remove('active');
+                errorElement.style.display = 'none';
+            }
+            const element = document.getElementById(id);
+            if (element) {
+                element.classList.remove('is-invalid');
+            }
+        }
+
+        // Clear all error messages
+        function clearErrorMessages() {
+            console.log('Clearing all error messages');
+            const errorElements = document.getElementsByClassName('error-message');
+            for (let element of errorElements) {
+                element.textContent = '';
+                element.classList.remove('active');
+                element.style.display = 'none';
+            }
+            const inputs = document.querySelectorAll('input, select, textarea');
+            for (let input of inputs) {
+                input.classList.remove('is-invalid');
+            }
+        }
+
+        // Image cropping functions
+        function previewImage(event, index) {
+            const input = event.target;
+            const previewContainer = document.getElementById(`previewContainer${index}`);
+            const cropperContainer = document.getElementById(`cropperContainer${index}`);
+            const cropperImg = document.getElementById(`cropperImg${index}`);
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                if (!['image/jpeg', 'image/png'].includes(file.type)) {
+                    displayErrorMessage(`image${index}`, 'Only JPEG or PNG images are allowed.');
+                    input.classList.add('is-invalid');
+                    return;
+                }
+                if (file.size > 5 * 1024 * 1024) {
+                    displayErrorMessage(`image${index}`, 'Image size must be less than 5MB.');
+                    input.classList.add('is-invalid');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    originalImages[index] = e.target.result;
+                    cropperImg.src = e.target.result;
+                    cropperContainer.style.display = 'block';
+                    previewContainer.style.display = 'none';
+
+                    if (croppers[index]) {
+                        croppers[index].destroy();
+                    }
+
+                    croppers[index] = new Cropper(cropperImg, {
+                        viewMode: 1,
+                        dragMode: 'crop',
+                        responsive: true,
+                        restore: false,
+                        center: true,
+                        highlight: true,
+                        background: true,
+                        autoCrop: true,
+                        autoCropArea: 0.8,
+                        movable: true,
+                        rotatable: false,
+                        scalable: true,
+                        zoomable: true,
+                        zoomOnTouch: true,
+                        zoomOnWheel: true,
+                        aspectRatio: NaN,
+                        crop: function (event) {}
+                    });
+
+                    setActiveAspectRatioButton(index, 'free');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function setAspectRatio(index, ratio) {
+            if (croppers[index]) {
+                if (ratio === 'free') {
+                    croppers[index].setAspectRatio(NaN);
+                } else {
+                    croppers[index].setAspectRatio(ratio);
+                }
+                setActiveAspectRatioButton(index, ratio);
+            }
+        }
+
+        function setActiveAspectRatioButton(index, ratio) {
+            const ratioButtons = document.querySelectorAll(`.aspect-ratio-btn[data-index="${index}"]`);
+            ratioButtons.forEach(button => button.classList.remove('active'));
+            const activeButton = document.querySelector(`.aspect-ratio-btn[data-index="${index}"][data-ratio="${ratio}"]`);
+            if (activeButton) activeButton.classList.add('active');
+        }
+
+        function recropImage(index) {
+            const previewContainer = document.getElementById(`previewContainer${index}`);
+            const cropperContainer = document.getElementById(`cropperContainer${index}`);
+            const cropperImg = document.getElementById(`cropperImg${index}`);
+
+            if (originalImages[index]) {
+                cropperImg.src = originalImages[index];
+                if (croppers[index]) croppers[index].destroy();
+                croppers[index] = new Cropper(cropperImg, {
+                    viewMode: 1,
+                    dragMode: 'crop',
+                    responsive: true,
+                    background: true,
+                    autoCropArea: 0.8,
+                    movable: true,
+                    rotatable: false,
+                    scalable: true,
+                    zoomable: true,
+                    guides: true,
+                    aspectRatio: NaN,
+                    ready: function () { this.cropper.crop(); }
+                });
+                setActiveAspectRatioButton(index, 'free');
+                cropperContainer.style.display = 'block';
+                previewContainer.style.display = 'none';
+            }
+        }
+
+        function cropImage(index) {
+            const cropper = croppers[index];
+            const preview = document.getElementById(`preview${index}`);
+            const cropperContainer = document.getElementById(`cropperContainer${index}`);
+            const previewContainer = document.getElementById(`previewContainer${index}`);
+
+            if (cropper) {
+                const cropData = cropper.getData();
+                if (cropData.width < 256 || cropData.height < 256) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Crop',
+                        text: 'Cropped image must be at least 256x256 pixels.'
+                    });
+                    return;
+                }
+                const croppedCanvas = cropper.getCroppedCanvas({
+                    minWidth: 256,
+                    minHeight: 256,
+                    maxWidth: 4096,
+                    maxHeight: 4096,
+                    fillColor: '#fff',
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high'
+                });
+                preview.src = croppedCanvas.toDataURL('image/jpeg', 0.9);
+                previewContainer.style.display = 'block';
+                croppedCanvas.toBlob((blob) => {
+                    const fileInput = document.getElementById(`image${index}`);
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(new File([blob], `cropped_image_${index}.jpg`, {
+                        type: 'image/jpeg',
+                        lastModified: Date.now()
+                    }));
+                    fileInput.files = dataTransfer.files;
+                    croppedImages[index - 1] = true;
+                    clearErrorMessage(`image${index}`);
+                }, 'image/jpeg', 0.9);
+                cropperContainer.style.display = 'none';
+            }
+        }
+
+        function cancelCrop(index) {
+            const cropperContainer = document.getElementById(`cropperContainer${index}`);
+            const previewContainer = document.getElementById(`previewContainer${index}`);
+            if (croppers[index]) {
+                croppers[index].destroy();
+                delete croppers[index];
+            }
+            cropperContainer.style.display = 'none';
+            previewContainer.style.display = 'none';
+            document.getElementById(`image${index}`).value = '';
+            croppedImages[index - 1] = false;
+        }
+    </script>
+</body>
+</html>

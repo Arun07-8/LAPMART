@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brand Management</title>
+    <%- include("../../views/partials/admin/header") %>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-color: #3056D3;
+            --secondary-color: #2748BE;
+            --success-color: #219653;
+            --danger-color: #D74742;
+            --warning-color: #F59E0B;
+            --info-color: #0EA5E9;
+            --light-color: #F8FAFC;
+            --dark-color: #1E293B;
+            --border-color: #E2E8F0;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --text-primary: #334155;
+            --text-secondary: #64748B;
+            --bg-light: #F1F5F9;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+            background-color: #F8FAFC;
+            color: var(--text-primary);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .main-content {
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        /* Top Admin Bar */
+        .top-admin-bar {
+            display: flex;
+            justify-content: flex-end;
+            padding: 16px 24px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .admin-profile img {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-color);
+        }
+
+        .admin-profile span {
+            font-weight: 600;
+            color: var(--dark-color);
+            font-size: 16px;
+        }
+
+        /* Navigation */
+        .navbar {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .toggle-sidebar {
+            cursor: pointer;
+            font-size: 1.3rem;
+            color: var(--dark-color);
+            margin-right: 20px;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            flex-grow: 1;
+            max-width: 500px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 16px 14px 44px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background-color: var(--bg-light);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(48, 86, 211, 0.15);
+            background-color: white;
+        }
+
+        .search-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-search, .btn-clear {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+            font-size: 16px;
+            color: white;
+        }
+
+        .btn-search {
+            background-color: var(--primary-color);
+            border: none;
+        }
+
+        .btn-search:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-clear {
+            background-color: #6B7280;
+            border: none;
+        }
+
+        .btn-clear:hover {
+            background-color: #4B5563;
+            transform: translateY(-2px);
+        }
+
+        .add-button {
+            background-color: var(--success-color);
+            border: none;
+            padding: 12px 22px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            font-size: 16px;
+            white-space: nowrap;
+            color: white;
+        }
+
+        .add-button:hover {
+            background-color: #16803F;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(33, 150, 83, 0.2);
+        }
+
+        /* Page Heading */
+        .page-heading {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding-left: 12px;
+        }
+
+        .page-heading i {
+            font-size: 2.2rem;
+            color: var(--primary-color);
+        }
+
+        .page-heading h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin: 0;
+        }
+
+        /* Table Container */
+        .brand-management-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            padding: 28px;
+            margin-bottom: 32px;
+            border: 1px solid var(--border-color);
+        }
+/* Table Styling */
+/* Table Styling */
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-header {
+    background-color: var(--bg-light);
+}
+
+.table th {
+    padding: 20px 18px; /* Increased padding for larger appearance */
+    font-weight: 700; /* Bolder font for headings */
+    color: var(--dark-color);
+    text-transform: uppercase;
+    font-size: 1.2rem; /* Increased font size */
+    letter-spacing: 0.8px; /* Slightly wider letter spacing */
+    border-bottom: 2px solid var(--border-color);
+    text-align: center;
+    vertical-align: middle;
+    line-height: 1.4;
+}
+
+.table td {
+    padding: 20px 18px; /* Increased padding */
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 1.15rem; /* Increased font size for cell content */
+    text-align: center;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table tr:hover {
+    background-color: rgba(48, 86, 211, 0.04);
+}
+
+/* Status Buttons */
+.btn-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px; /* Increased padding for larger buttons */
+    border-radius: 24px; /* Softer, more rounded corners */
+    font-size: 1rem; /* Increased font size */
+    font-weight: 600; /* Bolder text */
+    text-decoration: none;
+    transition: all 0.3s ease;
+    min-width: 120px; /* Wider buttons */
+    height: 40px; /* Taller buttons */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Subtle shadow for depth */
+    border: 1px solid transparent; /* Border for hover effect */
+}
+
+.btn-listed {
+    background: linear-gradient(135deg, #219653 0%, #2ecc71 100%); /* Gradient for classy look */
+    color: white;
+    border-color: #1b8045;
+}
+
+.btn-listed:hover {
+    background: linear-gradient(135deg, #1b8045 0%, #27ae60 100%);
+    transform: translateY(-2px); /* Slight lift on hover */
+    box-shadow: 0 6px 12px rgba(33, 150, 83, 0.3);
+}
+
+.btn-listed2 {
+    background: linear-gradient(135deg, #D74742 0%, #e74c3c 100%); /* Gradient for unlisted */
+    color: white;
+    border-color: #b93c38;
+}
+
+.btn-listed2:hover {
+    background: linear-gradient(135deg, #b93c38 0%, #c0392b 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(215, 71, 66, 0.3);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    min-height: 52px; /* Increased height to match larger content */
+    width: 100%;
+}
+
+.btn-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px; /* Increased size */
+    height: 48px;
+    border-radius: 10px; /* Slightly larger radius */
+    transition: all 0.3s;
+    font-size: 1.2rem; /* Larger icons */
+    border: none;
+    line-height: 1;
+}
+
+.btn-edit {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+.btn-edit:hover {
+    background-color: var(--warning-color);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+}
+
+.btn-delete {
+    background-color: rgba(215, 71, 66, 0.1);
+    color: var(--danger-color);
+    border: none;
+}
+
+.btn-delete:hover {
+    background-color: var(--danger-color);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(215, 71, 66, 0.2);
+}
+
+        /* Pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 32px;
+        }
+
+        .pagination {
+            display: flex;
+            padding-left: 0;
+            list-style: none;
+            border-radius: 0.25rem;
+            gap: 6px;
+        }
+
+        .page-item .page-link {
+            position: relative;
+            display: block;
+            padding: 12px 18px;
+            margin-left: -1px;
+            line-height: 1.25;
+            color: var(--primary-color);
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .page-item .page-link:hover {
+            z-index: 2;
+            color: var(--secondary-color);
+            text-decoration: none;
+            background-color: var(--bg-light);
+            border-color: var(--border-color);
+        }
+
+        .page-item.active .page-link {
+            z-index: 3;
+            color: #fff;
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .page-item.disabled .page-link {
+            color: var(--text-secondary);
+            pointer-events: none;
+            cursor: auto;
+            background-color: #fff;
+            border-color: var(--border-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .search-buttons {
+                display: none;
+            }
+
+            .page-heading h1 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .table th, .table td {
+                padding: 16px 12px;
+                font-size: 1rem; /* Slightly smaller for smaller screens */
+            }
+
+            .add-button {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .action-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .page-heading {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .main-content {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section>
+        <div class="main-content" id="main-content">
+            <!-- Admin profile at the top -->
+            <div class="top-admin-bar">
+                <div class="admin-profile">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32&q=80"
+                         alt="Admin Avatar">
+                    <span>Admin Profile</span>
+                </div>
+            </div>
+
+            <!-- Navbar with search and New Brand button -->
+            <nav class="navbar navbar-expand-lg">
+                <div class="container-fluid">
+                    <div class="d-flex align-items-center flex-grow-1">
+                        <span class="toggle-sidebar me-3" id="toggle-sidebar">
+                            <i class="fas fa-bars"></i>
+                        </span>
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="search-input" id="searchInput" placeholder="Search brands..." value="">
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="search-buttons">
+                            <button class="btn btn-search" onclick="triggerSearch()">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                            <button class="btn btn-clear" onclick="clearSearch()">
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                        </div>
+                        <button class="add-button" data-bs-toggle="modal" data-bs-target="#addBrandModal">
+                            <i class="bi bi-plus-circle"></i> New Brand
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Brand management content -->
+            <div class="brand-management-container">
+                <div class="page-heading">
+                    <i class="fas fa-list"></i>
+                    <h1>Brand Management</h1>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr class="table-header">
+                                    <th>BRAND NAME</th>
+                                    <th>BRAND DESCRIPTION</th>
+                                    <th>LAST UPDATED</th>
+                                    <th>STATUS</th>
+                                    <th>ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% brand.forEach((brand) => { %>
+                                    <tr>
+                                        <td><%= brand.name %></td>
+                                        <td><%= brand.description %></td>
+                                        <td>
+                                            <%
+                                                const createdDate = new Date(brand.createdAt);
+                                                const day = String(createdDate.getDate()).padStart(2, "0");
+                                                const month = String(createdDate.getMonth() + 1).padStart(2, "0");
+                                                const year = createdDate.getFullYear();
+                                            %>
+                                            <%= `${day}-${month}-${year}` %>
+                                        </td>
+                                        <td>
+                                            <% if (brand.isListed) { %>
+                                                <button class="btn-status btn-listed" onclick="handleUnlistBrand('<%= brand._id %>')" aria-label="Unlist brand">Listed</button>
+                                            <% } else { %>
+                                                <button class="btn-status btn-listed2" onclick="handleListBrand('<%= brand._id %>')" aria-label="List brand">Unlisted</button>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="btn-action btn-edit" data-bs-toggle="modal" data-bs-target="#editBrandModal" onclick="handleEditClick('<%= brand._id %>', '<%= brand.name %>', '<%= brand.description %>')">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button class="btn-action btn-delete" onclick="handleSoftDeleteClick('<%= brand._id %>')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination-container">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            <% if (currentPage > 1) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+                                        <span aria-hidden="true">«</span>
+                                    </a>
+                                </li>
+                            <% } %>
+
+                            <% for (let i = 1; i <= totalPages; i++) { %>
+                                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                    <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                                </li>
+                            <% } %>
+
+                            <% if (currentPage < totalPages) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                                        <span aria-hidden="true">»</span>
+                                    </a>
+                                </li>
+                            <% } %>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Add Brand Modal -->
+    <div class="modal fade" id="addBrandModal" tabindex="-1" aria-labelledby="addBrandModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addBrandModalLabel">
+                        <i class="fas fa-folder-plus"></i> Add New Brand
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form onsubmit="return handleFormSubmit(event)">
+                    <div class="modal-body">
+                        <div class="form-group mb-4">
+                            <label for="brandName" class="form-label">Brand Name</label>
+                            <input type="text" class="form-control classic-input" id="brandName" name="brandName" placeholder="Enter brand name">
+                            <span id="name-error" class="error-message" style="color: red; display: none; font-size: 0.9rem;"></span>
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="brandDescription" class="form-label">Brand Description</label>
+                            <textarea class="form-control classic-input" id="brandDescription" name="brandDescription" placeholder="Enter brand description" rows="5"></textarea>
+                            <span id="description-error" class="error-message" style="color: red; display: none; font-size: 0.9rem;"></span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light btn-classic-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-classic-primary">Add Brand</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Brand Modal -->
+    <div class="modal fade" id="editBrandModal" tabindex="-1" aria-labelledby="editBrandModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editBrandModalLabel">
+                        <i class="fas fa-edit"></i> Edit Brand
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editBrandForm" onsubmit="return handleEditFormSubmit(event)">
+                    <div class="modal-body">
+                        <input type="hidden" id="editBrandId" name="brandId">
+                        <div class="form-group mb-4">
+                            <label for="editBrandName" class="form-label">Brand Name</label>
+                            <input type="text" class="form-control classic-input" id="editBrandName" name="brandName" placeholder="Enter brand name">
+                            <span id="edit-name-error" class="error-message" style="color: red; display: none; font-size: 0.9rem;"></span>
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="editBrandDescription" class="form-label">Brand Description</label>
+                            <textarea class="form-control classic-input" id="editBrandDescription" name="brandDescription" placeholder="Enter brand description" rows="5"></textarea>
+                            <span id="edit-description-error" class="error-message" style="color: red; display: none; font-size: 0.9rem;"></span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light btn-classic-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-classic-primary">Update Brand</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function handleFormSubmit(event) {
+            event.preventDefault();
+
+            if (!validateForm()) {
+                return false;
+            }
+
+            const name = document.getElementById("brandName").value.trim();
+            const description = document.getElementById("brandDescription").value.trim();
+      
+      
+            fetch("/admin/addbrand", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, description })
+            })
+            .then(response => response.json().then(data => ({ ok: response.ok, status: response.status, data })))
+            .then(({ ok, status, data }) => {
+                if (!ok) {
+                    throw new Error(data.error || `Failed to add brand (Status: ${status})`);
+                }
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Brand Added',
+                    text: data.message || 'Brand added successfully!',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addBrandModal'));
+                    if (modal) modal.hide();
+                    location.reload();
+                });
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'An error occurred while adding the brand.'
+                });
+            });
+
+            return false;
+        }
+
+        function handleEditFormSubmit(event) {
+            event.preventDefault();
+
+            if (!validateEditForm()) {
+                return;
+            }
+
+            const brandId = document.getElementById('editBrandId').value;
+            const name = document.getElementById('editBrandName').value.trim();
+            const description = document.getElementById('editBrandDescription').value.trim();
+
+            fetch(`/admin/editBrand/${brandId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ brandName: name, description })
+            })
+            .then(response => response.json().then(data => ({ ok: response.ok, status: response.status, data })))
+            .then(({ ok, status, data }) => {
+                if (!ok) {
+                    throw new Error(data.error || `Failed to update brand (Status: ${status})`);
+                }
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Brand Updated',
+                    text: data.message || 'Brand updated successfully!',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editBrandModal'));
+                    if (modal) modal.hide();
+                    location.reload();
+                });
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'An error occurred while updating the brand.'
+                });
+            });
+        }
+        
+
+
+        
+
+        function validateForm() {
+            clearErrorMessages();
+            const name = document.getElementById("brandName").value.trim();
+            const description = document.getElementById("brandDescription").value.trim();
+            let isValid = true;
+
+            if (name === "") {
+                displayErrorMessage("name-error", "Please enter a brand name");
+                isValid = false;
+            } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+                displayErrorMessage("name-error", "Brand name should contain only alphabetic characters");
+                isValid = false;
+            }
+
+            if (description === "") {
+                displayErrorMessage("description-error", "Please enter a description");
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function validateEditForm() {
+            clearErrorMessages();
+            const name = document.getElementById('editBrandName').value.trim();
+            const description = document.getElementById('editBrandDescription').value.trim();
+            let isValid = true;
+
+            if (name === "") {
+                displayErrorMessage("edit-name-error", "Please enter a brand name");
+                isValid = false;
+            } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+                displayErrorMessage("edit-name-error", "Brand name should contain only alphabetic characters");
+                isValid = false;
+            }
+
+            if (description === "") {
+                displayErrorMessage("edit-description-error", "Please enter a description");
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function handleEditClick(brandId, brandName, brandDescription) {
+            document.getElementById('editBrandId').value = brandId;
+            document.getElementById('editBrandName').value = brandName;
+            document.getElementById('editBrandDescription').value = brandDescription;
+        }
+
+        async function handleSoftDeleteClick(brandId) {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: 'This will mark the brand as deleted. You can restore it later.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/admin/deleteBrand/${brandId}`,{
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Failed to soft delete brand');
+                    }
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Deleted',
+                        text: data.message || 'Brand has been soft deleted'
+                    }).then(() => {
+                        location.reload();  
+                    });
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops',
+                        text: error.message || 'An error occurred while deleting the brand'
+                    });
+                }
+            }
+        }
+
+        function displayErrorMessage(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            if (errorElement) {
+                errorElement.innerText = message;
+                errorElement.style.display = "block";
+            }
+        }
+
+        function clearErrorMessages() {
+            const errorElements = document.getElementsByClassName("error-message");
+            Array.from(errorElements).forEach(element => {
+                element.innerText = "";
+                element.style.display = "none";
+            });
+        }
+
+        function triggerSearch() {
+            const searchInput = document.getElementById('searchInput').value.trim();
+            const url = new URL(window.location.href);
+            url.searchParams.set('search', searchInput);
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
+        }
+
+        function clearSearch() {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('search');
+            url.searchParams.set('page', '1');
+            document.getElementById('searchInput').value = '';
+            window.location.href = url.toString();
+        }
+
+        document.getElementById('searchInput').addEventListener('input', function () {
+            clearTimeout(this.searchTimeout);
+            if (this.value.length >= 2) {
+                this.searchTimeout = setTimeout(() => {
+                    triggerSearch();
+                }, 500);
+            }
+        });
+
+        document.getElementById('searchInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                triggerSearch();
+            }
+        });
+
+
+        
+        async function handleListBrand(brandId) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'This will list the brand, making it visible.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, list it!',
+            cancelButtonText: 'Cancel'
+        });
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch(`/admin/listedBrand/${brandId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Failed to list brand');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Brand Listed',
+                    text: data.message || 'Brand has been listed successfully',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => location.reload());
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'An error occurred while listing the brand'
+                });
+            }
+        }
+    }
+
+    async function handleUnlistBrand(brandId) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'This will unlist the brand, making it hidden.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, unlist it!',
+            cancelButtonText: 'Cancel'
+        });
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch(`/admin/unlistedBrand/${brandId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Failed to unlist brand');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Brand Unlisted',
+                    text: data.message || 'Brand has been unlisted successfully',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => location.reload());
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'An error occurred while unlisting the brand'
+                });
+            }
+        }
+    }
+    </script>
+    <%- include("../../views/partials/admin/footer") %>
+</body>
+</html>

@@ -1,0 +1,529 @@
+<%- include("../../views/partials/admin/header") %>
+<section>
+    <div class="main-content" id="main-content">
+        <!-- Admin profile at the top -->
+        <div class="top-admin-bar">
+            <div class="admin-profile">
+                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32&q=80"
+                    alt="Admin Avatar">
+                <span>Admin Profile</span>
+            </div>
+        </div>
+
+        <!-- Navbar with search -->
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid">
+                <div class="d-flex align-items-center flex-grow-1">
+                    <span class="toggle-sidebar me-3" id="toggle-sidebar">
+                        <i class="fas fa-bars"></i>
+                    </span>
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" id="userSearchInput" placeholder="Search users...">
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="search-buttons">
+                        <button class="btn btn-primary btn-search" id="searchBtn">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button class="btn btn-secondary btn-clear" id="clearSearchBtn" style="display: none;">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Users Management Content -->
+        <div class="users-management-container">
+            <!-- Page Heading -->
+            <div class="page-heading">
+                <i class="fas fa-users"></i>
+                <h1>Users Management</h1>
+            </div>
+
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr class="table-header">
+                                <th>User ID</th>
+                                <th>User Image</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Phone Number</th>
+                                <th>Date of Creation</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% for(let i=0; i<data.length; i++) { %>
+                            <tr>
+                                <td><%= i + 1 %></td>
+                                <td>
+                                    <div class="user-image">
+                                        <img src="<%= data[i].image || 'https://via.placeholder.com/40' %>" alt="User" class="user-thumbnail">
+                                    </div>
+                                </td>
+                                <td><%= data[i].name %></td>
+                                <td><%= data[i].email %></td>
+                                <td><%= data[i].phoneNumber || 'N/A' %></td>
+                                <td>
+                                    <%
+                                        const createdDate = new Date(data[i].createdAt);
+                                        const day = String(createdDate.getDate()).padStart(2, "0");
+                                        const month = String(createdDate.getMonth() + 1).padStart(2, "0");
+                                        const year = createdDate.getFullYear();
+                                    %>
+                                    <%= `${day}-${month}-${year}` %>
+                                </td>
+                                <td>
+                                    <% if(data[i].isBlocked === false) { %>
+                                        <a href="blockUser?id=<%= data[i]._id %>" class="btn-status btn-listed2">BLOCK</a>
+                                    <% } else { %>
+                                        <a href="unblockUser?id=<%= data[i]._id %>" class="btn-status btn-listed">UNBLOCK</a>
+                                    <% } %>
+                                </td>
+                            </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-container">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <% if(currentPage > 1) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+                                    <span aria-hidden="true">«</span>
+                                </a>
+                            </li>
+                        <% } %>
+
+                        <% for(let i=1; i<=totalPages; i++) { %>
+                            <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+                                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                            </li>
+                        <% } %>
+
+                        <% if(currentPage < totalPages) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                                    <span aria-hidden="true">»</span>
+                                </a>
+                            </li>
+                        <% } %>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Custom CSS for Users Management -->
+<style>
+    :root {
+        --primary-color: #3056D3;
+        --secondary-color: #2748BE;
+        --success-color: #219653;
+        --danger-color: #D74742;
+        --warning-color: #F59E0B;
+        --info-color: #0EA5E9;
+        --light-color: #F8FAFC;
+        --dark-color: #1E293B;
+        --border-color: #E2E8F0;
+        --shadow-color: rgba(0, 0, 0, 0.08);
+        --text-primary: #334155;
+        --text-secondary: #64748B;
+        --bg-light: #F1F5F9;
+    }
+
+    body {
+        font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+        background-color: #F8FAFC;
+        color: var(--text-primary);
+        font-size: 16px;
+        line-height: 1.6;
+    }
+
+    .main-content {
+        padding: 24px;
+        transition: all 0.3s ease;
+    }
+
+    /* Top Admin Bar */
+    .top-admin-bar {
+        display: flex;
+        justify-content: flex-end;
+        padding: 16px 24px;
+        background-color: white;
+        border-radius: 12px;    
+        box-shadow: 0 4px 12px var(--shadow-color);
+        margin-bottom: 24px;
+        border: 1px solid var(--border-color);
+    }
+
+    .admin-profile {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .admin-profile img {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--primary-color);
+    }
+
+    .admin-profile span {
+        font-weight: 600;
+        color: var(--dark-color);
+        font-size: 16px;
+    }
+
+    /* Navigation */
+    .navbar {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px var(--shadow-color);
+        padding: 16px 24px;
+        margin-bottom: 24px;
+        border: 1px solid var(--border-color);
+    }
+
+    .toggle-sidebar {
+        cursor: pointer;
+        font-size: 1.3rem;
+        color: var(--dark-color);
+        margin-right: 20px;
+    }
+
+    .search-input-wrapper {
+        position: relative;
+        flex-grow: 1;
+        max-width: 500px;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: 16px;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 14px 16px 14px 44px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s;
+        background-color: var(--bg-light);
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(48, 86, 211, 0.15);
+        background-color: white;
+    }
+
+    .search-buttons {
+        display: flex;
+        gap: 12px;
+    }
+
+    .btn-search, .btn-clear {
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s;
+        font-size: 16px;
+    }
+
+    .btn-search {
+        background-color: var(--primary-color);
+        border: none;
+        color: white;
+    }
+
+    .btn-search:hover {
+        background-color: var(--secondary-color);
+        transform: translateY(-2px);
+    }
+
+    .btn-clear {
+        background-color: #6B7280;
+        border: none;
+        color: white;
+    }
+
+    .btn-clear:hover {
+        background-color: #4B5563;
+        transform: translateY(-2px);
+    }
+
+    /* Page Heading */
+    .page-heading {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 28px;
+        padding-left: 12px;
+    }
+
+    .page-heading i {
+        font-size: 2.2rem;
+        color: var(--primary-color);
+    }
+
+    .page-heading h1 {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin: 0;
+    }
+
+    /* Table Container */
+    .users-management-container {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px var(--shadow-color);
+        padding: 28px;
+        margin-bottom: 32px;
+        border: 1px solid var(--border-color);
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .table {
+        width: 100%; /* Decreased from 110% */
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table-header {
+        background-color: var(--bg-light);
+    }
+
+    .table th {
+        padding: 24px 20px; /* Increased padding */
+        font-weight: 600;
+        color: var(--dark-color);
+        text-transform: uppercase;
+        font-size: 1.1rem; /* Increased font size */
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .table td {
+        padding: 24px 20px; /* Increased padding */
+        vertical-align: middle;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 1.1rem; /* Increased font size */
+    }
+
+    .table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .table tr:hover {
+        background-color: rgba(48, 86, 211, 0.04);
+    }
+
+    /* User Image */
+    .user-image {
+        width: 100px; /* Increased from 80px */
+        height: 100px; /* Increased from 80px */
+        overflow: hidden;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+    }
+
+    .user-thumbnail {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Status Buttons */
+    .btn-status {
+        display: inline-block;
+        padding: 10px 20px; /* Increased padding */
+        border-radius: 20px;
+        font-size: 16px; /* Increased font size */
+        font-weight: 500;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s;
+    }
+
+    .btn-listed {
+        background-color: #219653;
+        color: white;
+    }
+
+    .btn-listed:hover {
+        background-color: #16803F;
+    }
+
+    .btn-listed2 {
+        background-color: #D74742;
+        color: white;
+    }
+
+    .btn-listed2:hover {
+        background-color: #C13934;
+    }
+
+    /* Pagination */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 32px;
+    }
+
+    .pagination {
+        display: flex;
+        padding-left: 0;
+        list-style: none;
+        border-radius: 0.25rem;
+        gap: 6px;
+    }
+
+    .page-item .page-link {
+        position: relative;
+        display: block;
+        padding: 12px 18px;
+        margin-left: -1px;
+        line-height: 1.25;
+        color: var(--primary-color);
+        background-color: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+
+    .page-item .page-link:hover {
+        z-index: 2;
+        color: var(--secondary-color);
+        text-decoration: none;
+        background-color: var(--bg-light);
+        border-color: var(--border-color);
+    }
+
+    .page-item.active .page-link {
+        z-index: 3;
+        color: #fff;
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .page-item.disabled .page-link {
+        color: var(--text-secondary);
+        pointer-events: none;
+        cursor: auto;
+        background-color: #fff;
+        border-color: var(--border-color);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .search-buttons {
+            display: none;
+        }
+        
+        .page-heading h1 {
+            font-size: 2rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .table th, .table td {
+            padding: 16px 12px;
+            font-size: 0.95rem;
+        }
+        
+        .user-image {
+            width: 70px;
+            height: 70px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .page-heading {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        
+        .main-content {
+            padding: 16px;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('userSearchInput');
+    const clearButton = document.getElementById('clearSearchBtn');
+    const searchButton = document.getElementById('searchBtn');
+    
+    // Function to check if search input has text and toggle clear button visibility
+    function toggleClearButton() {
+        if (searchInput.value.length > 0) {
+            clearButton.style.display = 'inline-block';
+        } else {
+            clearButton.style.display = 'none';
+        }
+    }
+    
+    // Listen for input changes to show/hide clear button
+    searchInput.addEventListener('input', toggleClearButton);
+    
+    // Clear the search input when clear button is clicked
+    clearButton.addEventListener('click', function() {
+        searchInput.value = '';
+        toggleClearButton();
+        searchInput.focus();
+        // Trigger a search reset
+        const url = new URL(window.location.href);
+        url.searchParams.delete('search');
+        url.searchParams.set('page', '1');
+        window.location.href = url.toString();
+    });
+    
+    // Trigger search on button click
+    searchButton.addEventListener('click', function() {
+        const searchInputValue = searchInput.value.trim();
+        const url = new URL(window.location.href);
+        url.searchParams.set('search', searchInputValue);
+        url.searchParams.set('page', '1');
+        window.location.href = url.toString();
+    });
+
+    // Handle Enter key for search
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            searchButton.click();
+        }
+    });
+    
+    // Initial check for clear button visibility
+    toggleClearButton();
+});
+</script>
+
+<%- include("../../views/partials/admin/footer") %>

@@ -1,0 +1,219 @@
+:root {
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 70px;
+    --primary-color: #2b1e66;
+    --secondary-color: #ffffff;
+    --hover-color: #e8e4ff;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+}
+
+/* Existing Sidebar and Main Content Styles (unchanged) */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: var(--sidebar-width);
+    background: var(--primary-color);
+    transition: all 0.3s ease;
+    box-shadow: 2px 0 15px rgba(0,0,0,0.1);
+    border-radius: 0 20px 20px 0;
+}
+
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed-width);
+    border-radius: 0;
+}
+
+.sidebar-logo {
+    padding: 25px 20px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-logo i {
+    color: white;
+    font-size: 28px;
+}
+
+.sidebar-logo-text {
+    color: white;
+    margin-left: 15px;
+    font-weight: 600;
+    font-size: 22px;
+    transition: all 0.3s ease;
+}
+
+.collapsed .sidebar-logo-text {
+    opacity: 0;
+    width: 0;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: rgba(255,255,255,0.9);
+    text-decoration: none;
+    margin: 5px 10px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    transform: translateX(5px);
+}
+
+.nav-link i {
+    min-width: 30px;
+    font-size: 20px;
+}
+
+.nav-link-text {
+    margin-left: 15px;
+    transition: all 0.3s ease;
+}
+
+.collapsed .nav-link-text {
+    opacity: 0;
+    width: 0;
+}
+
+.main-content {
+    margin-left: var(--sidebar-width);
+    padding: 30px;
+    transition: all 0.3s ease;
+}
+
+.main-content.expanded {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+.navbar {
+    background: white;
+    border-radius: 15px;
+    padding: 15px 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.toggle-sidebar {
+    cursor: pointer;
+    font-size: 24px;
+    color: var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.toggle-sidebar:hover {
+    transform: rotate(90deg);
+}
+
+.admin-profile {
+    display: flex;
+    align-items: center;
+    color: white;
+    padding: 8px 15px;
+    background: var(--primary-color);
+    border-radius: 8px;
+}
+
+.admin-profile img {
+    width: 32px;
+    height: 32px;
+    margin-right: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--secondary-color);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    object-fit: cover;
+    transition: all 0.3s ease;
+}
+
+.admin-profile:hover img {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+/* 404 Error Styles */
+.error-container {
+    display: none; /* Hidden by default */
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 200px);
+    padding: 20px;
+}
+
+.error-container.active {
+    display: flex; /* Show when active */
+}
+
+.error-content {
+    text-align: center;
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 100%;
+}
+
+.error-code {
+    font-size: 6rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin: 0;
+    line-height: 1;
+}
+
+.error-title {
+    font-size: 2rem;
+    color: #333;
+    margin: 10px 0 20px;
+}
+
+.error-message {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.error-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.error-btn {
+    padding: 10px 25px;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary {
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    background: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: var(--sidebar-collapsed-width);
+        border-radius: 0;
+    }
+    
+    .main-content {
+        margin-left: var(--sidebar-collapsed-width);
+    }
+}

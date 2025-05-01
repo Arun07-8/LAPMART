@@ -1,0 +1,158 @@
+/* Custom styles */
+.gradient-background {
+    background: linear-gradient(135deg, #1a2a6c, #2a3a7c);
+}
+
+.w-md-50 {
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .w-md-50 {
+        width: 50% !important;
+    }
+}
+
+.hover-scale {
+    transition: transform 0.5s ease;
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+/* Custom form styles */
+.input-group-text {
+    border-radius: 0.75rem 0 0 0.75rem;
+    padding: 1.25rem 1.5rem;
+    font-size: 1.2rem;
+}
+
+.form-control {
+    border-radius: 0 0.75rem 0.75rem 0;
+    padding: 1.25rem 1.5rem;
+    font-size: 1.2rem;
+    height: auto;
+    min-height: 4rem;
+}
+
+.input-group {
+    margin-bottom: 1.75rem;
+}
+/* 
+.input-group .form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: none;
+} */
+
+/* .form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+} */
+
+/* Password toggle button styles */
+.input-group input[type="password"] {
+    border-radius: 0;
+}
+
+.input-group button.input-group-text {
+    border-radius: 0 0.75rem 0.75rem 0;
+    cursor: pointer;
+    padding: 0.75rem 1.5rem;
+    min-height: 4rem;
+}
+
+/* .input-group button.input-group-text:hover {
+    background-color: #f8f9fa;
+} */
+
+/* Button hover effect */
+.btn-primary {
+    transition: all 0.3s ease;
+    padding: 1.25rem;
+    font-size: 1.2rem;
+    min-height: 4rem;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+}
+
+/* Image container styles */
+.img-fluid {
+    max-height: 300px;
+    object-fit: cover;
+    width: 100%;
+}
+
+/* Feature carousel indicators */
+.feature-indicators {
+    margin-top: 1rem;
+}
+
+
+/* Feature icons */
+.feature-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+/* Modal customization */
+.modal-content {
+    border: none;
+}
+
+.modal-header {
+    padding: 1.5rem 1.5rem 0.5rem;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+/* Navbar customization */
+.navbar {
+    padding: 1rem 0;
+    z-index: 1000;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    transition: color 0.3s ease;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: white;
+}
+
+/* Social login buttons */
+.btn-outline-secondary {
+    border-color: #dee2e6;
+    color: #6c757d;
+    transition: all 0.3s ease;
+    padding: 1.25rem;
+    font-size: 1.2rem;
+    min-height: 4rem;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #6c757d;
+    transform: translateY(-1px);
+}
+.error-message {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    color: #dc2626;
+    font-size: 0.78rem;
+    display: none;
+}

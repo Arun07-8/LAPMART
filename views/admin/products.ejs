@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management</title>
+    <%- include("../../views/partials/admin/header") %>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/2.0.0/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/2.0.0/cropper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-color: #3056D3;
+            --secondary-color: #2748BE;
+            --success-color: #219653;
+            --danger-color: #D74742;
+            --warning-color: #F59E0B;
+            --info-color: #0EA5E9;
+            --light-color: #F8FAFC;
+            --dark-color: #1E293B;
+            --border-color: #E2E8F0;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --text-primary: #334155;
+            --text-secondary: #64748B;
+            --bg-light: #F1F5F9;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+            background-color: #F8FAFC;
+            color: var(--text-primary);
+            font-size: 16px; /* Increased base font size */
+            line-height: 1.6;
+        }
+
+        .main-content {
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        /* Top Admin Bar */
+        .top-admin-bar {
+            display: flex;
+            justify-content: flex-end;
+            padding: 16px 24px;
+            background-color: white;
+            border-radius: 12px;    
+            box-shadow: 0 4px 12px var(--shadow-color);
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .admin-profile img {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-color);
+        }
+
+        .admin-profile span {
+            font-weight: 600;
+            color: var(--dark-color);
+            font-size: 16px; /* Increased font size */
+        }
+
+        /* Navigation */
+        .navbar {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .toggle-sidebar {
+            cursor: pointer;
+            font-size: 1.3rem;
+            color: var(--dark-color);
+            margin-right: 20px;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            flex-grow: 1;
+            max-width: 500px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 16px 14px 44px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px; /* Increased font size */
+            transition: all 0.3s;
+            background-color: var(--bg-light);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(48, 86, 211, 0.15);
+            background-color: white;
+        }
+
+        .search-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-search, .btn-clear {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+            font-size: 16px; /* Increased font size */
+        }
+
+        .btn-search {
+            background-color: var(--primary-color);
+            border: none;
+        }
+
+        .btn-search:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-clear {
+            background-color: #6B7280;
+            border: none;
+        }
+
+        .btn-clear:hover {
+            background-color: #4B5563;
+            transform: translateY(-2px);
+        }
+
+        .add-button {
+            background-color: var(--success-color);
+            border: none;
+            padding: 12px 22px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            font-size: 16px; /* Increased font size */
+            white-space: nowrap;
+            color: white;
+        }
+
+        .add-button:hover {
+            background-color: #16803F;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(33, 150, 83, 0.2);
+        }
+
+        /* Page Heading */
+        .page-heading {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding-left: 12px;
+        }
+
+        .page-heading i {
+            font-size: 2.2rem;
+            color: var(--primary-color);
+        }
+
+        .page-heading h1 {
+            font-size: 2.5rem; /* Increased main heading size */
+            font-weight: 600;
+            color: var(--dark-color);
+            margin: 0;
+        }
+
+        /* Table Container */
+     /* Table Container */
+/* Table Container */
+.product-management-container {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    padding: 28px;
+    margin-bottom: 32px;
+    border: 1px solid var(--border-color);
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%; /* Fits within container */
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0 auto; /* Center the table */
+}
+
+.table-header {
+    background-color: var(--bg-light);
+}
+
+.table th {
+    padding: 22px 16px; /* Increased padding for comfort */
+    font-weight: 600;
+    color: var(--dark-color);
+    text-transform: uppercase;
+    font-size: 1.1rem; /* Slightly larger font size */
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color);
+    text-align: center; /* Center-align headings */
+    vertical-align: middle; /* Vertical centering */
+}
+
+.table td {
+    padding: 22px 16px; /* Increased padding for comfort */
+    vertical-align: middle; /* Vertical centering */
+    border-bottom: 1px solid var(--border-color);
+    font-size: 1.1rem; /* Slightly larger font size */
+    text-align: center; /* Center-align content */
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table tr:hover {
+    background-color: rgba(48, 86, 211, 0.04);
+}
+
+/* Product Image */
+.product-image {
+    width: 120px; /* Increased size for better visibility */
+    height: 120px;
+    overflow: hidden;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    margin: 0 auto; /* Center the image */
+}
+
+.product-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Product Name */
+.product-name {
+    font-weight: 600;
+    color: var(--dark-color);
+    font-size: 1.2rem; /* Increased font size */
+}
+
+/* Status Buttons */
+.btn-status {
+    display: inline-block;
+    padding: 12px 24px; /* Increased padding for larger buttons */
+    border-radius: 20px;
+    font-size: 15px; /* Slightly larger font */
+    font-weight: 500;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s;
+    min-width: 120px; /* Larger minimum width */
+}
+
+.btn-listed {
+    background-color: #219653;
+    color: white;
+}
+
+.btn-listed:hover {
+    background-color: #16803F;
+}
+
+.btn-listed2 {
+    background-color: #D74742;
+    color: white;
+}
+
+.btn-listed2:hover {
+    background-color: #C13934;
+}
+
+/* Action Buttons */
+.actions-cell {
+    text-align: center;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 24px; /* Increased gap for better spacing */
+}
+
+.edit-icon, .delete-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px; /* Increased size for better clickability */
+    height: 52px;
+    border-radius: 8px;
+    transition: all 0.3s;
+    font-size: 1.3rem; /* Larger icons */
+}
+
+.edit-icon {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+.edit-icon:hover {
+    background-color: var(--warning-color);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.delete-icon {
+    background-color: rgba(215, 71, 66, 0.1);
+    color: var(--danger-color);
+}
+
+.delete-icon:hover {
+    background-color: var(--danger-color);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(215, 71, 66, 0.2);
+}
+
+/* Pagination */
+.pagination-container {
+    display: flex;
+    justify-content: center; /* Ensure centering */
+    align-items: center; /* Vertical centering */
+    margin-top: 32px;
+    width: 100%; /* Full width for proper alignment */
+}
+
+.pagination {
+    display: flex;
+    justify-content: center; /* Center pagination items */
+    align-items: center;
+    padding-left: 0;
+    list-style: none;
+    border-radius: 0.25rem;
+    gap: 8px; /* Slightly increased gap */
+}
+
+.page-item .page-link {
+    position: relative;
+    display: block;
+    padding: 14px 20px; /* Increased padding for larger buttons */
+    margin-left: -1px;
+    line-height: 1.25;
+    color: var(--primary-color);
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    transition: all 0.2s;
+    font-weight: 500;
+    font-size: 1.1rem; /* Larger font size */
+    min-width: 48px; /* Ensure consistent button size */
+    text-align: center; /* Center text */
+}
+
+.page-item .page-link:hover {
+    z-index: 2;
+    color: var(--secondary-color);
+    text-decoration: none;
+    background-color: var(--bg-light);
+    border-color: var(--border-color);
+}
+
+.page-item.active .page-link {
+    z-index: 3;
+    color: #fff;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.page-item.disabled .page-link {
+    color: var(--text-secondary);
+    pointer-events: none;
+    cursor: auto;
+    background-color: #fff;
+    border-color: var(--border-color);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .table th, .table td {
+        padding: 18px 12px;
+        font-size: 1rem;
+    }
+
+    .product-image {
+        width: 100px;
+        height: 100px;
+    }
+
+    .btn-status {
+        padding: 10px 20px;
+        min-width: 100px;
+        font-size: 14px;
+    }
+
+    .page-item .page-link {
+        padding: 12px 18px;
+        font-size: 1rem;
+        min-width: 44px;
+    }
+}
+
+@media (max-width: 768px) {
+    .table th, .table td {
+        padding: 14px 10px;
+        font-size: 0.95rem;
+    }
+
+    .product-image {
+        width: 80px;
+        height: 80px;
+    }
+
+    .action-buttons {
+        gap: 16px;
+    }
+
+    .edit-icon, .delete-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 1.1rem;
+    }
+
+    .btn-status {
+        padding: 8px 16px;
+        min-width: 90px;
+        font-size: 13px;
+    }
+
+    .page-item .page-link {
+        padding: 10px 16px;
+        font-size: 0.95rem;
+        min-width: 40px;
+    }
+}
+
+@media (max-width: 576px) {
+    .table th, .table td {
+        padding: 12px 8px;
+        font-size: 0.9rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .product-image {
+        width: 60px;
+        height: 60px;
+    }
+
+    .btn-status {
+        padding: 6px 14px;
+        font-size: 12px;
+        min-width: 80px;
+    }
+
+    .page-item .page-link {
+        padding: 8px 14px;
+        font-size: 0.9rem;
+        min-width: 36px;
+    }
+}
+    </style>
+</head>
+<body>
+    <section>
+        <div class="main-content" id="main-content">
+            <!-- Admin profile at the top -->
+            <div class="top-admin-bar">
+                <div class="admin-profile">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32&q=80"
+                        alt="Admin Avatar">
+                    <span>Admin Profile</span> <!-- Updated to "Admin Profile" -->
+                </div>
+            </div>
+
+            <!-- Navbar with search -->
+            <nav class="navbar navbar-expand-lg">
+                <div class="container-fluid">
+                    <div class="d-flex align-items-center flex-grow-1">
+                        <span class="toggle-sidebar me-3" id="toggle-sidebar">
+                            <i class="fas fa-bars"></i>
+                        </span>
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="search-input" id="searchInput" placeholder="Search products..." value="">
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="search-buttons">
+                            <button class="btn btn-primary btn-search" onclick="triggerSearch()">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                            <button class="btn btn-secondary btn-clear" onclick="clearSearch()">
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                        </div>
+                        <button class="btn add-button" onclick="window.location.href='/admin/addProducts'">
+                            <i class="bi bi-plus-circle"></i> New Product
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Product management content -->
+            <div class="product-management-container">
+                <div class="page-heading">
+                    <i class="fas fa-box"></i>
+                    <h1>Product Management</h1>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr class="table-header">
+                                    <th>PRODUCT IMAGE</th>
+                                    <th>PRODUCT NAME</th>
+                                    <th>CATEGORY</th>
+                                    <th>BRAND</th>
+                                    <th>STOCK</th>
+                                    <th>AMOUNT</th>
+                                    <th>CURRENT STATUS</th> <!-- New column -->
+                                    <th>LIST STATUS</th> <!-- Renamed "STATUS" to "LIST STATUS" for clarity -->
+                                    <th>ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% for (let i = product.length - 1; i >= 0; i--) { %>
+                                    <tr>
+                                        <td>
+                                            <div class="product-image">
+                                                <% if (product[i].productImage && product[i].productImage.length > 0) { %>
+                                                    <img src="<%= product[i].productImage[0] %>" alt="Product Image" class="product-thumbnail">
+                                                <% } else { %>
+                                                    <img src="/images/no-image.png" alt="No Image" class="product-thumbnail">
+                                                <% } %>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="product-name">
+                                                <span><%= product[i].productName %></span>
+                                            </div>
+                                        </td>
+                                        <td><%= product[i]?.category?.name|| "N/A"%></td>
+                                        <td><%= product[i]?.brand?.name%></td>
+                                        <td><%= product[i]?.quantity %></td>
+                                        <td>₹<%= product[i]?.salePrice %></td>
+                                        <td><%= product[i]?.status %></td> <!-- Display Current Status -->
+                                        <td>
+                                            <% if (product[i].isListed) { %>
+                                                <a href="/admin/unListedProduct?id=<%= product[i]._id %>" class="btn-status btn-listed">Unlisted</a>
+                                            <% } else { %>
+                                                <a href="/admin/listedProduct?id=<%= product[i]._id %>" class="btn-status btn-listed2">Listed</a>
+                                            <% } %>
+                                        </td>
+                                        <td class="actions-cell">
+                                            <div class="action-buttons">
+                                                <a href="/admin/editProduct/<%= product[i]._id %>" class="edit-link" title="Edit" style="text-decoration: none;">
+                                                    <i class="bi bi-pencil edit-icon"></i>
+                                                </a>
+                                                <button onclick="handleSoftDeleteClick('<%= product[i]._id %>')" class="delete-btn">
+                                                    <i class="bi bi-trash delete-icon" title="Delete"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination-container">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            <% if (currentPage > 1) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+                                        <span aria-hidden="true">«</span>
+                                    </a>
+                                </li>
+                            <% } %>
+
+                            <% for (let i = 1; i <= totalPages; i++) { %>
+                                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                    <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                                </li>
+                            <% } %>
+
+                            <% if (currentPage < totalPages) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                                        <span aria-hidden="true">»</span>
+                                    </a>
+                                </li>
+                            <% } %>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </section>
+        
+    <script>
+        async function handleSoftDeleteClick(productId) {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: 'This will mark the product as deleted. You can restore it later.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#D74742',
+                cancelButtonColor: '#6B7280',
+                customClass: {
+                    confirmButton: 'btn btn-danger',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: true
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/admin/deleteProducts/${productId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Failed to soft delete product');
+                    }
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Deleted',
+                        text: data.message || 'Product has been soft deleted',
+                        confirmButtonColor: '#219653'
+                    }).then(() => {
+                        window.location.href = '/admin/products';
+                    });
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops',
+                        text: error.message || 'An error occurred while deleting the product',
+                        confirmButtonColor: '#D74742'
+                    });
+                }
+            }
+        }
+
+        function triggerSearch() {
+            const searchInput = document.getElementById('searchInput').value.trim();
+            const url = new URL(window.location.href);
+            url.searchParams.set('search', searchInput);
+            url.searchParams.set('page', '1'); // Reset to page 1
+            window.location.href = url.toString();
+        }
+
+        function clearSearch() {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('search');
+            url.searchParams.set('page', '1');
+            document.getElementById('searchInput').value = '';
+            window.location.href = url.toString();
+        }
+
+        // Real-time search after delay
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('input', function () {
+            clearTimeout(searchTimeout);
+            if (this.value.length >= 2) {
+                searchTimeout = setTimeout(() => {
+                    triggerSearch();
+                }, 500);
+            }
+        });
+
+        // Handle Enter key
+        document.getElementById('searchInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                triggerSearch();
+            }
+        });
+
+        // Highlight active sidebar item
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarItems = document.querySelectorAll('.sidebar-item');
+            sidebarItems.forEach(item => {
+                if (item.getAttribute('href') === '/admin/products') {
+                    item.classList.add('active');
+                }
+            });
+        });
+    </script>
+    <%- include("../../views/partials/admin/footer") %>
+</body>
+</html>
