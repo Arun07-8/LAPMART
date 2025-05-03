@@ -1,17 +1,12 @@
 const Brand = require("../../models/BrandSchema");
 
-
-
-
 const brandInfo=async (req,res) => {
     try{
 
         const  page=parseInt(req.query.page)||1;
-        const  limit=4;
+        const  limit=3;
         const  skip=(page-1)*limit;
-
- 
-        const branddata=await  Brand.find({isDeleted:true})
+        const branddata=await  Brand.find({isDeleted:false})
         .sort({createdAt:-1})
         .skip(skip)
         .limit(limit);
@@ -33,8 +28,7 @@ const brandInfo=async (req,res) => {
 const addbrand=async (req,res) => {
     try {
         const {name,description}=req.body;
-      
-        
+
         const existingBrand=await Brand.findOne({name,isDeleted:true});
         if(existingBrand){
             return res.status(400).json({error:"Brand already exists"})
@@ -67,7 +61,6 @@ const listedBrand=async (req,res) => {
     }
 }
 //  unlisted Brand
-
 const unlistedBrand=async (req,res) => {
     try{
         let id=req.params.id;
@@ -83,18 +76,10 @@ const unlistedBrand=async (req,res) => {
 //  edited  brand
 const editBrand=async (req,res) => {
     try{
-        let id=req.params.id;
-        const {brandname,description}=req.body;
-
-        const existingBrand=await  Brand.findOne({name:brandname,_id:{$ne:id}})
-        if(existingBrand){
-            return res.status(400).json({error:"Brand already exists.Please choose a different name"});
-        }
-        const  updatedBrand=await Brand.findByIdAndUpdate(
-            id,
-            {name:brandname,description},
-            {new:true}
-        );
+        const {id}=req.params
+        const {name,description}=req.body;
+        const updatedBrand = await Brand.findByIdAndUpdate(id,{name,description},{new:true})
+        console.log(updatedBrand);
         if(updatedBrand){
             return res.status(200).json({message:"Brand updated successfully",brand:updatedBrand})
         }else{
@@ -114,7 +99,7 @@ const softdeleteBrand=async (req,res) => {
         const id=req.params.id;   
         const delBrand=await Brand.findByIdAndUpdate( 
             id,
-            {isDeleted:false},
+            {isDeleted:true},
             {new:true}
         );
         

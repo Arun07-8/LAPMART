@@ -1,48 +1,54 @@
-<!-- External Libraries -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<link rel="stylesheet" href="/css/admin-css/addprod.css">
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Products</title>
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin-css/addprod.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
-<style>
-    .form-group .error-message {
-        color: #dc3545 !important;
-        font-size: 0.875rem;
-        font-weight: 500;
-        margin-top: 0.25rem;
-        padding: 0.25rem 0;
-        display: none;
-        line-height: 1.2;
-    }
+    <style>
+        .form-group .error-message {
+            color: #dc3545 !important;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-top: 0.25rem;
+            padding: 0.25rem 0;
+            display: none;
+            line-height: 1.2;
+        }
 
-    .form-group .error-message.active {
-        display: block !important;
-    }
+        .form-group .error-message.active {
+            display: block !important;
+        }
 
-    .form-control.is-invalid,
-    .form-select.is-invalid,
-    .form-group input[type="file"].is-invalid {
-        border-color: #dc3545 !important;
-        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
-    }
+        .form-control.is-invalid,
+        .form-select.is-invalid,
+        .form-group input[type="file"].is-invalid {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+        }
 
-    .form-control.is-invalid,
-    .form-select.is-invalid {
-        background-image: none !important;
-        padding-right: 0.75rem !important;
-    }
+        .form-control.is-invalid,
+        .form-select.is-invalid {
+            background-image: none !important;
+            padding-right: 0.75rem !important;
+        }
 
-    .form-group .error-message[aria-live="polite"] {
-        display: none;
-    }
+        .form-group .error-message[aria-live="polite"] {
+            display: none;
+        }
 
-    .form-group .error-message.active[aria-live="polite"] {
-        display: block !important;
-    }
-</style>
-
+        .form-group .error-message.active[aria-live="polite"] {
+            display: block !important;
+        }
+    </style>
+</head>
 <body>
     <%- include("../../views/partials/admin/header") %>
 
@@ -54,26 +60,26 @@
             </div>
         </div>
 
-        <form action="/admin/addProducts" method="Post" enctype="multipart/form-data" id="addProductForm" onclick=" validateForm()">
+        <form action="/admin/addProducts" method="Post" enctype="multipart/form-data" id="addProductForm">
             <div class="container">
                 <!-- Left Form Section -->
                 <div class="form-section">
                     <h3 class="text-white mb-4">Product Details</h3>
                     <div class="form-group">
                         <label for="productName" class="required">Product Name:</label>
-                        <input type="text" id="productName" name="productName" class="form-control" placeholder="Enter laptop model name" required>
+                        <input type="text" id="productName" name="productName" class="form-control" placeholder="Enter laptop model name">
                         <div id="productName-error" class="error-message"></div>
                     </div>
 
                     <div class="form-group">
                         <label for="description" class="required">Product Description:</label>
-                        <textarea id="description" name="description" class="form-control" rows="4" placeholder="Enter product description" required></textarea>
+                        <textarea id="description" name="description" class="form-control" rows="4" placeholder="Enter product description"></textarea>
                         <div id="description-error" class="error-message"></div>
                     </div>
 
                     <div class="form-group">
                         <label for="brand" class="required">Brand:</label>
-                        <select name="brand" class="form-control" id="brand" required>
+                        <select name="brand" class="form-control" id="brand">
                             <option value="" disabled selected>Select Brand</option>
                             <% for(let i=0; i < brand.length; i++) { %>
                                 <option value="<%= brand[i]._id %>">
@@ -86,7 +92,7 @@
 
                     <div class="form-group">
                         <label for="category" class="required">Category:</label>
-                        <select name="category" class="form-control" id="category" required>
+                        <select name="category" class="form-control" id="category">
                             <option value="" disabled selected>Select Category</option>
                             <% for(let i=0; i < category.length; i++) { %>
                                 <option value="<%= category[i]._id %>">
@@ -99,19 +105,19 @@
 
                     <div class="form-group">
                         <label for="regularPrice" class="required">Product Price:</label>
-                        <input type="number" id="regularPrice" name="regularPrice" class="form-control" placeholder="Enter product price" step="0.01" required>
+                        <input type="number" id="regularPrice" name="regularPrice" class="form-control" placeholder="Enter product price" step="0.01">
                         <div id="regularPrice-error" class="error-message"></div>
                     </div>
 
                     <div class="form-group">
                         <label for="salePrice" class="required">Offer Price:</label>
-                        <input type="number" id="salePrice" name="salePrice" class="form-control" placeholder="Enter offer price" step="0.01" required>
+                        <input type="number" id="salePrice" name="salePrice" class="form-control" placeholder="Enter offer price" step="0.01">
                         <div id="salePrice-error" class="error-message"></div>
                     </div>
 
                     <div class="form-group">
                         <label for="quantity" class="required">Stock Count:</label>
-                        <input type="number" id="quantity" name="quantity" class="form-control" placeholder="Enter total stock count" required>
+                        <input type="number" id="quantity" name="quantity" class="form-control" placeholder="Enter total stock count">
                         <div id="quantity-error" class="error-message"></div>
                     </div>
                 </div>
@@ -130,12 +136,12 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label required text-white">Processor</label>
-                                <input type="text" class="form-control" id="processor" name="processor" placeholder="e.g., Intel Core i7-13700H, AMD Ryzen 9 7940HS" required>
+                                <input type="text" class="form-control" id="processor" name="processor" placeholder="e.g., Intel Core i7-13700H, AMD Ryzen 9 7940HS">
                                 <div id="processor-error" class="error-message"></div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label required text-white">Graphics Card</label>
-                                <input type="text" class="form-control" id="graphicsCard" name="graphicsCard" placeholder="e.g., NVIDIA RTX 4060, AMD Radeon RX 7600M" required>
+                                <input type="text" class="form-control" id="graphicsCard" name="graphicsCard" placeholder="e.g., NVIDIA RTX 4060, AMD Radeon RX 7600M">
                                 <div id="graphicsCard-error" class="error-message"></div>
                             </div>
                         </div>
@@ -143,12 +149,12 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label required text-white">RAM</label>
-                                <input type="text" class="form-control" id="ram" name="ram" placeholder="e.g., 16GB DDR5-5200" required>
+                                <input type="text" class="form-control" id="ram" name="ram" placeholder="e.g., 16GB DDR5-5200">
                                 <div id="ram-error" class="error-message"></div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label required text-white">Storage</label>
-                                <input type="text" class="form-control" id="Storage" name="Storage" placeholder="e.g., 1TB PCIe NVMe SSD" required>
+                                <input type="text" class="form-control" id="Storage" name="Storage" placeholder="e.g., 1TB PCIe NVMe SSD">
                                 <div id="Storage-error" class="error-message"></div>
                             </div>
                         </div>
@@ -156,7 +162,7 @@
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label class="form-label required text-white">Display</label>
-                                <input type="text" class="form-control" id="display" name="display" placeholder="e.g., 15.6 inch IPS (2560x1440) 165Hz" required>
+                                <input type="text" class="form-control" id="display" name="display" placeholder="e.g., 15.6 inch IPS (2560x1440) 165Hz">
                                 <div id="display-error" class="error-message"></div>
                             </div>
                         </div>
@@ -164,7 +170,7 @@
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label class="form-label required text-white">Operating System</label>
-                                <input type="text" class="form-control" id="operatingSystem" name="operatingSystem" placeholder="e.g., Windows 11 Home, macOS Sequoia" required>
+                                <input type="text" class="form-control" id="operatingSystem" name="operatingSystem" placeholder="e.g., Windows 11 Home, macOS Sequoia">
                                 <div id="operatingSystem-error" class="error-message"></div>
                             </div>
                         </div>
@@ -172,12 +178,12 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label required text-white">Battery</label>
-                                <input type="text" class="form-control" id="Battery" name="Battery" placeholder="e.g., 80Wh, Up to 10 hours" required>
+                                <input type="text" class="form-control" id="Battery" name="Battery" placeholder="e.g., 80Wh, Up to 10 hours">
                                 <div id="Battery-error" class="error-message"></div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label required text-white">Weight</label>
-                                <input type="text" class="form-control" id="Weight" name="Weight" placeholder="e.g., 1.8kg (4.0 lbs)" required>
+                                <input type="text" class="form-control" id="Weight" name="Weight" placeholder="e.g., 1.8kg (4.0 lbs)">
                                 <div id="Weight-error" class="error-message"></div>
                             </div>
                         </div>
@@ -193,7 +199,7 @@
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label class="form-label required text-white">Warranty</label>
-                                <input type="text" class="form-control" id="Warranty" name="Warranty" placeholder="e.g., 2 Year Limited Warranty" required>
+                                <input type="text" class="form-control" id="Warranty" name="Warranty" placeholder="e.g., 2 Year Limited Warranty">
                                 <div id="Warranty-error" class="error-message"></div>
                             </div>
                         </div>
@@ -206,7 +212,7 @@
                     <% for (let i=1; i <=4; i++) { %>
                         <div class="form-group image-item" id="imageContainer<%= i %>">
                             <label for="image<%= i %>" class="text-white">Image <%= i %></label>
-                            <input type="file" name="image<%= i %>" id="image<%= i %>" class="form-control" accept="image/*" onchange="previewImage(event, `<%= i %>`)">
+                            <input type="file" name="image<%= i %>" id="image<%= i %>" class="form-control" accept="image/jpeg,image/png,image/webp" onchange="previewImage(event, `<%= i %>`)">
                             <!-- Cropping Section -->
                             <div class="cropper-container" id="cropperContainer<%= i %>" style="display: none;">
                                 <h5 class="text-white">Crop Image</h5>
@@ -262,110 +268,103 @@
     <script>
         let croppers = {};
         let originalImages = {};
-        let croppedImages = [false, false, false, false]; // Track cropped images
-
-        // Basic input sanitization to prevent XSS
+        let croppedImages = [false, false, false, false]; 
         function sanitizeInput(input) {
             const div = document.createElement('div');
             div.textContent = input;
             return div.innerHTML.replace(/[<>&"]/g, '');
         }
 
-       // Enhanced form validation and submission handler
-document.addEventListener('DOMContentLoaded', function () {
-    // Form submission handler
-    document.getElementById('addProductForm').addEventListener('submit', async function (event) {
-        event.preventDefault();
-        console.log('Form submitted');
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('addProductForm').addEventListener('submit', async function (event) {
+                event.preventDefault();
+                console.log('Form submitted');
 
-        if (validateForm()) {
-            console.log('Form validation passed');
-            const form = this;
-            const formData = new FormData(form);
-            
-            // Show loading indicator
-            Swal.fire({
-                title: 'Processing...',
-                text: 'Adding your product',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-            
-            try {
-                console.log('Sending fetch request to /admin/addProducts');
-                const response = await fetch('/admin/addProducts', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                console.log('Response status:', response.status);
-                
-                // Check if the response is JSON
-                const contentType = response.headers.get('content-type');
-                let result;
-                
-                if (contentType && contentType.includes('application/json')) {
-                    result = await response.json();
-                    console.log('Response JSON:', result);
-                } else {
-                    const text = await response.text();
-                    console.log('Response text:', text);
-                    result = { message: 'Operation completed', success: response.ok };
-                }
-                
-                if (response.ok) {
+                if (validateForm()) {
+                    console.log('Form validation passed');
+                    const form = this;
+                    const formData = new FormData(form);
+
+                 
                     Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: result.message || 'Product added successfully!',
-                        timer: 2000,
-                        showConfirmButton: false
-                    }).then(() => {
-                        console.log('Redirecting to products page');
-                        window.location.href = '/admin/products';
+                        title: 'Processing...',
+                        text: 'Adding your product',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
                     });
+
+                    try {
+                        console.log('Sending fetch request to /admin/addProducts');
+                        const response = await fetch('/admin/addProducts', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        console.log('Response status:', response.status);
+
+                        const contentType = response.headers.get('content-type');
+                        let result;
+
+                        if (contentType && contentType.includes('application/json')) {
+                            result = await response.json();
+                            console.log('Response JSON:', result);
+                        } else {
+                            const text = await response.text();
+                            console.log('Response text:', text);
+                            result = { message: 'Operation completed', success: response.ok };
+                        }
+
+                        if (response.ok) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: result.message || 'Product added successfully!',
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                console.log('Redirecting to products page');
+                                window.location.href = '/admin/products';
+                            });
+                        } else {
+                            console.log('Request failed with status ' + response.status);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: result.error || 'Failed to add product.'
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Submission error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An unexpected error occurred. Please try again.'
+                        });
+                    }
                 } else {
-                    console.log('Request failed with status ' + response.status);
+                    console.log('Form validation failed');
+                    const firstInvalid = document.querySelector('.is-invalid');
+                    if (firstInvalid) {
+                        console.log('Scrolling to first invalid field:', firstInvalid.id);
+                        setTimeout(() => {
+                            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 100);
+                    }
                     Swal.fire({
                         icon: 'error',
-                        title: 'Error',
-                        text: result.error || 'Failed to add product.'
+                        title: 'Validation Error',
+                        text: 'Please correct the errors in the form before submitting.'
                     });
                 }
-            } catch (error) {
-                console.error('Submission error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'An unexpected error occurred. Please try again.'
-                });
-            }
-        } else {
-            console.log('Form validation failed');
-            const firstInvalid = document.querySelector('.is-invalid');
-            if (firstInvalid) {
-                console.log('Scrolling to first invalid field:', firstInvalid.id);
-                setTimeout(() => {
-                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 100);
-            }
-            Swal.fire({
-                icon: 'error',
-                title: 'Validation Error',
-                text: 'Please correct the errors in the form before submitting.'
             });
-        }
-    });
-});
-        // Full form validation
+        });
+
         function validateForm() {
             clearErrorMessages();
             let isValid = true;
             let firstInvalidField = null;
-
-            console.log('Starting form validation');
 
             const fields = [
                 {
@@ -373,10 +372,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     validate: (value) => {
                         value = sanitizeInput(value);
                         if (!value) return 'Product name is required.';
-                        if (value.length < 3 || value.length > 100) return 'Product name must be 3-100 characters.';
-                        if (!/^[a-zA-Z][a-zA-Z0-9\s\-()+,.']{2,}$/.test(value)) return 'Product name must start with a letter and contain valid characters.';
-                        if (/^\d+\s*$/.test(value)) return 'Product name cannot be purely numeric.';
-                        if (/^(.)\1{2,}$/.test(value.replace(/\s/g, ''))) return 'Product name cannot consist of repetitive characters (e.g., aaa).';
+                        const wordCount = value.trim().split(/\s+/).length;
+                        if (wordCount < 3) return 'Product name must contain at least 3 words.';
                         return '';
                     }
                 },
@@ -385,8 +382,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     validate: (value) => {
                         value = sanitizeInput(value);
                         if (!value) return 'Description is required.';
-                        if (value.length < 10 || value.length > 500) return 'Description must be 10-500 characters.';
-                        if (!/^[a-zA-Z].*[a-zA-Z0-9\s\-.,;:'"!()]+$/.test(value)) return 'Description must start with a letter and contain valid characters.';
+                        const wordCount = value.trim().split(/\s+/).length;
+                        if (wordCount < 5) return 'Description must contain at least 5 words.';
                         return '';
                     }
                 },
@@ -401,29 +398,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 {
                     id: 'regularPrice',
                     validate: (value) => {
-                        const price = parseFloat(value);
                         if (!value) return 'Regular price is required.';
-                        if (isNaN(price) || price < 100 || price > 100000) return 'Regular price must be between 100 and 100,000.';
-                        if (!/^\d+(\.\d{1,2})?$/.test(value)) return 'Regular price must have up to two decimal places.';
+                        const price = parseFloat(value);
+                        if (isNaN(price) || price < 15000 || price > 150000) return 'Regular price must be between 15000 and 150,000.';
                         return '';
                     }
                 },
                 {
                     id: 'salePrice',
                     validate: (value) => {
-                        const price = parseFloat(value);
                         if (!value) return 'Offer price is required.';
-                        if (isNaN(price) || price < 50 || price > 100000) return 'Offer price must be between 50 and 100,000.';
-                        if (!/^\d+(\.\d{1,2})?$/.test(value)) return 'Offer price must have up to two decimal places.';
+                        const price = parseFloat(value);
+                        if (isNaN(price) || price < 15000 || price > 150000) return 'Offer price must be between 15000 and 150,000.';
                         return '';
                     }
                 },
                 {
                     id: 'quantity',
                     validate: (value) => {
+                        if (!value) return 'Stock count is required.';
                         const qty = parseInt(value);
-                        if (value === '') return 'Stock count is required.';
-                        if (isNaN(qty) || qty < 0 || qty > 10000) return 'Stock count must be between 0 and 10,000.';
+                        if (isNaN(qty) || qty < 0 || qty > 1000) return 'Stock count must be between 0 and 1,000.';
                         return '';
                     }
                 },
@@ -432,8 +427,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     validate: (value) => {
                         value = sanitizeInput(value);
                         if (!value) return 'Processor is required.';
-                        if (value.length < 2 || value.length > 100) return 'Processor must be 2-100 characters.';
-                        if (!/^[a-zA-Z0-9\s\-.,/()]+$/.test(value)) return 'Processor must contain valid characters.';
+                        const wordCount = value.trim().split(/\s+/).length;
+                        if (wordCount < 2) return 'Processor must contain at least 2 words.';
                         return '';
                     }
                 },
@@ -442,8 +437,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     validate: (value) => {
                         value = sanitizeInput(value);
                         if (!value) return 'Graphics card is required.';
-                        if (value.length < 2 || value.length > 100) return 'Graphics card must be 2-100 characters.';
-                        if (!/^[a-zA-Z0-9\s\-.,/()]+$/.test(value)) return 'Graphics card must contain valid characters.';
+                        const wordCount = value.trim().split(/\s+/).length;
+                        if (wordCount < 2) return 'Graphics card must contain at least 2 words.';
                         return '';
                     }
                 },
@@ -452,8 +447,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     validate: (value) => {
                         value = sanitizeInput(value);
                         if (!value) return 'RAM is required.';
-                        if (value.length < 2 || value.length > 100) return 'RAM must be 2-100 characters.';
-                        if (!/^[a-zA-Z0-9\s\-.,/()]+$/.test(value)) return 'RAM must contain valid characters.';
+                        const wordCount = value.trim().split(/\s+/).length;
+                        if (wordCount < 2) return 'RAM must contain at least 2 words.';
                         return '';
                     }
                 },
@@ -462,8 +457,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     validate: (value) => {
                         value = sanitizeInput(value);
                         if (!value) return 'Storage is required.';
-                        if (value.length < 2 || value.length > 100) return 'Storage must be 2-100 characters.';
-                        if (!/^[a-zA-Z0-9\s\-.,/()]+$/.test(value)) return 'Storage must contain valid characters.';
+                        const wordCount = value.trim().split(/\s+/).length;
+                        if (wordCount < 2) return 'Storage must contain at least 2 words.';
                         return '';
                     }
                 },
@@ -472,8 +467,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     validate: (value) => {
                         value = sanitizeInput(value);
                         if (!value) return 'Display is required.';
-                        if (value.length < 2 || value.length > 100) return 'Display must be 2-100 characters.';
-                        if (!/^[a-zA-Z0-9\s\-.,/()]+$/.test(value)) return 'Display must contain valid characters.';
+                        const wordCount = value.trim().split(/\s+/).length;
+                        if (wordCount < 2) return 'Display must contain at least 2 words.';
                         return '';
                     }
                 },
@@ -482,8 +477,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     validate: (value) => {
                         value = sanitizeInput(value);
                         if (!value) return 'Operating system is required.';
-                        if (value.length < 2 || value.length > 100) return 'Operating system must be 2-100 characters.';
-                        if (!/^[a-zA-Z0-9\s\-.,/()]+$/.test(value)) return 'Operating system must contain valid characters.';
+                        const wordCount = value.trim().split(/\s+/).length;
+                        if (wordCount < 2) return 'Operating system must contain at least 2 words.';
                         return '';
                     }
                 },
@@ -492,8 +487,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     validate: (value) => {
                         value = sanitizeInput(value);
                         if (!value) return 'Battery is required.';
-                        if (value.length < 2 || value.length > 100) return 'Battery must be 2-100 characters.';
-                        if (!/^[a-zA-Z0-9\s\-.,/()]+$/.test(value)) return 'Battery must contain valid characters.';
+                        const wordCount = value.trim().split(/\s+/).length;
+                        if (wordCount < 2) return 'Battery must contain at least 2 words.';
                         return '';
                     }
                 },
@@ -502,8 +497,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     validate: (value) => {
                         value = sanitizeInput(value);
                         if (!value) return 'Weight is required.';
-                        if (value.length < 2 || value.length > 100) return 'Weight must be 2-100 characters.';
-                        if (!/^[a-zA-Z0-9\s\-.,/()]+$/.test(value)) return 'Weight must contain valid characters.';
+                        const wordCount = value.trim().split(/\s+/).length;
+                        if (wordCount < 2) return 'Weight must contain at least 2 words.';
                         return '';
                     }
                 },
@@ -512,8 +507,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     validate: (value) => {
                         value = sanitizeInput(value);
                         if (!value) return 'Warranty is required.';
-                        if (value.length < 2 || value.length > 100) return 'Warranty must be 2-100 characters.';
-                        if (!/^[a-zA-Z0-9\s\-.,/()]+$/.test(value)) return 'Warranty must contain valid characters.';
+                        const wordCount = value.trim().split(/\s+/).length;
+                        if (wordCount < 2) return 'Warranty must contain at least 2 words.';
                         return '';
                     }
                 },
@@ -521,9 +516,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     id: 'additionalFeatures',
                     validate: (value) => {
                         value = sanitizeInput(value);
-                        if (value && (value.length > 200 || !/^[a-zA-Z0-9\s\-.,/()]*$/.test(value))) {
-                            return 'Additional features must be 0-200 characters and contain valid characters.';
-                        }
+                        if (value && value.trim().split(/\s+/).length < 2) return 'Additional features must contain at least 2 words.';
                         return '';
                     }
                 }
@@ -561,6 +554,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Validate images
             let hasValidImage = false;
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
             for (let i = 1; i <= 4; i++) {
                 const fileInput = document.getElementById(`image${i}`);
                 if (!fileInput) {
@@ -570,9 +564,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 const file = fileInput.files[0];
                 if (file) {
-                    if (!['image/jpeg', 'image/png'].includes(file.type)) {
+                    if (!allowedTypes.includes(file.type)) {
                         console.log(`Image ${i} validation error: Invalid type`);
-                        displayErrorMessage(`image${i}`, 'Only JPEG or PNG images are allowed.');
+                        displayErrorMessage(`image${i}`, 'Only JPEG, PNG, or WebP images are allowed.');
                         fileInput.classList.add('is-invalid');
                         if (!firstInvalidField) firstInvalidField = fileInput;
                         isValid = false;
@@ -591,7 +585,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log('Image validation error: No cropped image');
                 for (let i = 1; i <= 4; i++) {
                     const fileInput = document.getElementById(`image${i}`);
-                    if (!croppedImages[i - 1]) {
+                    if (!croppedImages[i - 1] && !fileInput.files[0]) {
                         displayErrorMessage(`image${i}`, 'Please upload and crop at least one image.');
                         fileInput.classList.add('is-invalid');
                         if (!firstInvalidField) firstInvalidField = fileInput;
@@ -653,16 +647,21 @@ document.addEventListener('DOMContentLoaded', function () {
             const cropperContainer = document.getElementById(`cropperContainer${index}`);
             const cropperImg = document.getElementById(`cropperImg${index}`);
 
+            clearErrorMessage(`image${index}`);
+
             if (input.files && input.files[0]) {
                 const file = input.files[0];
-                if (!['image/jpeg', 'image/png'].includes(file.type)) {
-                    displayErrorMessage(`image${index}`, 'Only JPEG or PNG images are allowed.');
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    displayErrorMessage(`image${index}`, 'Only JPEG, PNG, or WebP images are allowed.');
                     input.classList.add('is-invalid');
+                    input.value = ''; // Clear invalid file
                     return;
                 }
                 if (file.size > 5 * 1024 * 1024) {
                     displayErrorMessage(`image${index}`, 'Image size must be less than 5MB.');
                     input.classList.add('is-invalid');
+                    input.value = ''; // Clear invalid file
                     return;
                 }
 
@@ -765,6 +764,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
                     return;
                 }
+
                 const croppedCanvas = cropper.getCroppedCanvas({
                     minWidth: 256,
                     minHeight: 256,
@@ -774,19 +774,29 @@ document.addEventListener('DOMContentLoaded', function () {
                     imageSmoothingEnabled: true,
                     imageSmoothingQuality: 'high'
                 });
-                preview.src = croppedCanvas.toDataURL('image/jpeg', 0.9);
+
+                // Determine file type based on original image
+                const fileInput = document.getElementById(`image${index}`);
+                const file = fileInput.files[0];
+                const mimeType = file.type;
+                const extension = mimeType.split('/')[1];
+
+                // Set preview image
+                preview.src = croppedCanvas.toDataURL(mimeType);
                 previewContainer.style.display = 'block';
+
+                
                 croppedCanvas.toBlob((blob) => {
-                    const fileInput = document.getElementById(`image${index}`);
                     const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(new File([blob], `cropped_image_${index}.jpg`, {
-                        type: 'image/jpeg',
+                    dataTransfer.items.add(new File([blob], `cropped_image_${index}.${extension}`, {
+                        type: mimeType,
                         lastModified: Date.now()
                     }));
                     fileInput.files = dataTransfer.files;
                     croppedImages[index - 1] = true;
                     clearErrorMessage(`image${index}`);
-                }, 'image/jpeg', 0.9);
+                }, mimeType, 0.9);
+
                 cropperContainer.style.display = 'none';
             }
         }

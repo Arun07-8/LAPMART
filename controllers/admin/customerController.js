@@ -34,42 +34,36 @@ const customerInfo = async (req, res) => {
         });
     } catch (error) {
         console.error("Error in customerInfo:", error);
-        res.render("usersManagement", {
-            data: [],
-            currentPage: 1,
-            totalPages: 1,
-            search: "",
-            errorMsg: "Something went wrong!"
-        });
+        res.redirect("/admin/pageNotFounderror")
     }
 };
 
 
 //  blockuser
-const blockUser=async (req,res) => {
-    try{
-    
-        let  id=req.query.id;
-        await User.updateOne({_id:id},{$set:{isBlocked:true}});
-        res.redirect("/admin/users");
-
-    }catch(error){
-        res.redirect("/pageNotFounderror");
-
+const blockUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await User.updateOne({ _id: id }, { $set: { isBlocked: true } });
+        return res.status(200).json({ message: 'User blocked successfully' });
+    } catch (error) {
+        console.error('Error blocking user:', error);
+        return res.status(500).json({ error: 'An error occurred while blocking the user' });
     }
-}
-const unblockUser=async (req,res) => {
-    try{
+};
 
-        let  id=req.query.id;
-        await User.updateOne({_id:id},{$set:{isBlocked:false}})
-        res.redirect("users")
-
-    }catch(error){
-        res.redirect("/pageNotFounderror")
-
+const unblockUser = async (req, res) => {
+    try {
+        const { id } = req.params; 
+       
+        await User.updateOne({ _id: id }, { $set: { isBlocked: false } });
+        return res.status(200).json({ message: 'User unblocked successfully' });
+    } catch (error) {
+        console.error('Error unblocking user:', error);
+        return res.status(500).json({ error: 'An error occurred while unblocking the user' });
     }
-}
+};
+
+module.exports = { blockUser, unblockUser };
 
 module.exports={
     customerInfo,

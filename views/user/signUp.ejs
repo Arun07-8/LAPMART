@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration Form</title>
-    <link rel="stylesheet" href="css/register.css" type="text/css">
+    <link rel="stylesheet" href="/css/register.css" type="text/css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
 
 </head>
@@ -33,18 +34,20 @@
                     <div class="input-group password-group">
                         <input type="password" placeholder="Password" id="password" name="password">
                         <div class="error4 error-message"></div>
-                        <button type="button" class="toggle-password" onclick="togglePassword('password')"><img src="img/register/Vector.png" alt=""></button>
+                        <button type="button" class="toggle-password" onclick="togglePassword('password')"><img src="/img/register/Vector.png" alt=""></button>
                     </div>
                     
                     <div class="input-group password-group">
                         <input type="password" placeholder="Confirm password" id="confirm-password" name="confirmpassword">
                         <div class="error5 error-message"></div>
-                        <button type="button" class="toggle-password" onclick="togglePassword('confirm-password')"><img src="img/register/Vector.png" alt=""></button>
+                        <button type="button" class="toggle-password" onclick="togglePassword('confirm-password')"><img src="/img/register/Vector.png" alt=""></button>
                     </div>
                     
-                    <%if(locals.message && message.length>0){%>
-                        <div class="alert alert-danger text-center "><%=message%></div>
+                    <%if(message){%>
+                        <input type="hidden" id="msg" value="<%= message || '' %>">
                      <%}%>
+                        
+                   
                     <button type="submit" class="submit-btn"> Agree and Register</button>
 
                     <div class="divider">
@@ -63,14 +66,27 @@
                 </form>
             </div>
             <div class="image-section">
-                <img src="img/register/Property 1=Default.png" alt="Gaming Laptop" class="main-image">
+                <img src="/img/register/Property 1=Default.png" alt="Gaming Laptop" class="main-image">
                 <!-- <img src="img/register/skinova text 2.png" alt="Overlay Image" class="logo"> -->
             </div>
         </div>
         </div>
     </div>
-
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <script>
+
+
+    const msg = document.getElementById('msg').value;
+    if (msg && msg !== "none" && msg !== "") {
+        Swal.fire({
+            title: "error",
+            text: msg,
+            icon: 'warning',
+            showConfirmButton: false,
+            timer: 1500
+        });
+    }
+
         function togglePassword(id) {
             var input = document.getElementById(id);
             if (input.type === "password") {
@@ -107,10 +123,10 @@
 
             function nameValidateChecking() {
                 const nameVal = name.value.trim();
-                const namepattern = /^[A-Za-z ]{2,}$/;
+                const namepattern = /^[A-Za-z ]{3,}$/
                 const inputGroup = name.parentElement;
                 if (!nameVal) {
-                    showError(error1, "Please enter a valid name");
+                    showError(error1, "Please enter a valid name at least 3 lettrs ");
                     return false;
                 } else if (!namepattern.test(nameVal)) {
                     showError(error1, "Name can only contain alphabets and spaces");
@@ -138,19 +154,24 @@
             }
 
             function phoneValidateChecking() {
-                const phoneVal = phoneNumber.value.trim();
-                const inputGroup = phoneNumber.parentElement;
-                if (!phoneVal) {
-                    showError(error3, "Enter a valid phone number");
-                    return false;
-                } else if (phoneVal.length !== 10 || isNaN(phoneVal)) {
-                    showError(error3, "Enter a 10-digit number");
-                    return false;
-                } else {
-                    hideError(error3); // Hide error when valid
-                    return true;
-                }
-            }
+            const phoneVal = phoneNumber.value.trim();
+            const inputGroup = phoneNumber.parentElement;
+
+    if (!phoneVal) {
+        showError(error3, "Enter a valid phone number");
+        return false;
+    } else if (phoneVal.length !== 10 || isNaN(phoneVal)) {
+        showError(error3, "Enter a 10-digit number");
+        return false;
+    } else if (phoneVal[0] === '0') {
+        showError(error3, "Phone number cannot start with 0");
+        return false;
+    } else {
+        hideError(error3);
+        return true;
+    }
+}
+
 
             function passwordValidateChecking() {
                 const passwordVal = password.value.trim();
@@ -204,6 +225,7 @@
             });
         });
     </script>
+       
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
 </body>
 </html>

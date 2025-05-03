@@ -234,16 +234,16 @@
             // Check on window resize
             window.addEventListener('resize', checkScreenSize);
 
-            // SweetAlert2 message handler
-            const msg = document.getElementById('msg').dataset.msg;
-            if (msg && msg !== "none" && msg !== "") {
-                Swal.fire({
-                    icon: "success",
-                    title: msg,
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-            }
+                // SweetAlert2 message handler
+                const msg = document.getElementById('msg').dataset.msg;
+                if (msg && msg !== "none" && msg !== "") {
+                    Swal.fire({
+                        icon: "success",
+                        title: msg,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
 
             // Add active class to current page in sidebar
             const currentLocation = window.location.pathname;

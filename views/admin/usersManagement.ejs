@@ -1,4 +1,8 @@
 <%- include("../../views/partials/admin/header") %>
+<!-- Ensure SweetAlert2 and Font Awesome are included -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <section>
     <div class="main-content" id="main-content">
         <!-- Admin profile at the top -->
@@ -19,15 +23,16 @@
                     </span>
                     <div class="search-input-wrapper">
                         <i class="fas fa-search search-icon"></i>
-                        <input type="text" class="search-input" id="userSearchInput" placeholder="Search users...">
+                        <input type="text" class="search-input" id="userSearchInput" placeholder="Search by username or email..." value="<%= search || '' %>" aria-label="Search users">
+                        <i class="fas fa-spinner fa-spin search-loading-icon" id="searchLoadingIcon" style="display: none;"></i>
                     </div>
                 </div>
-                <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-3 search-buttons-wrapper">
                     <div class="search-buttons">
-                        <button class="btn btn-primary btn-search" id="searchBtn">
+                        <button class="btn btn-primary btn-search" id="searchBtn" aria-label="Search users">
                             <i class="fas fa-search"></i> Search
                         </button>
-                        <button class="btn btn-secondary btn-clear" id="clearSearchBtn" style="display: none;">
+                        <button class="btn btn-secondary btn-clear" id="clearSearchBtn" aria-label="Clear search">
                             <i class="fas fa-times"></i> Clear
                         </button>
                     </div>
@@ -63,7 +68,7 @@
                                 <td><%= i + 1 %></td>
                                 <td>
                                     <div class="user-image">
-                                        <img src="<%= data[i].image || 'https://via.placeholder.com/40' %>" alt="User" class="user-thumbnail">
+                                        <img src="<%= data[i].image || '/img/register/download.png' %>" alt="User" class="user-thumbnail">
                                     </div>
                                 </td>
                                 <td><%= data[i].name %></td>
@@ -79,10 +84,10 @@
                                     <%= `${day}-${month}-${year}` %>
                                 </td>
                                 <td>
-                                    <% if(data[i].isBlocked === false) { %>
-                                        <a href="blockUser?id=<%= data[i]._id %>" class="btn-status btn-listed2">BLOCK</a>
-                                    <% } else { %>
-                                        <a href="unblockUser?id=<%= data[i]._id %>" class="btn-status btn-listed">UNBLOCK</a>
+                                    <% if(data[i].isBlocked) { %>
+                                        <button class="btn-status btn-listed2" onclick="handleUnblockUserClick('<%= data[i]._id %>')" aria-label="Unblock user">BLOCK</button>
+                                        <% } else { %>
+                                        <button class="btn-status btn-listed"onclick="handleBlockUserClick('<%= data[i]._id %>')" aria-label="Block user">UNBLOCK</button>
                                     <% } %>
                                 </td>
                             </tr>
@@ -98,7 +103,7 @@
                     <ul class="pagination">
                         <% if(currentPage > 1) { %>
                             <li class="page-item">
-                                <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+                                <a class="page-link" href="?page=<%= currentPage - 1 %>&search=<%= encodeURIComponent(search || '') %>" aria-label="Previous">
                                     <span aria-hidden="true">«</span>
                                 </a>
                             </li>
@@ -106,13 +111,13 @@
 
                         <% for(let i=1; i<=totalPages; i++) { %>
                             <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
-                                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                                <a class="page-link" href="?page=<%= i %>&search=<%= encodeURIComponent(search || '') %>"><%= i %></a>
                             </li>
                         <% } %>
 
                         <% if(currentPage < totalPages) { %>
                             <li class="page-item">
-                                <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                                <a class="page-link" href="?page=<%= currentPage + 1 %>&search=<%= encodeURIComponent(search || '') %>" aria-label="Next">
                                     <span aria-hidden="true">»</span>
                                 </a>
                             </li>
@@ -208,6 +213,7 @@
         position: relative;
         flex-grow: 1;
         max-width: 500px;
+        margin-right: 16px;
     }
 
     .search-icon {
@@ -219,9 +225,18 @@
         font-size: 16px;
     }
 
+    .search-loading-icon {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--primary-color);
+        font-size: 16px;
+    }
+
     .search-input {
         width: 100%;
-        padding: 14px 16px 14px 44px;
+        padding: 14px 44px 14px 44px;
         border: 1px solid var(--border-color);
         border-radius: 8px;
         font-size: 16px;
@@ -236,17 +251,23 @@
         background-color: white;
     }
 
+    .search-buttons-wrapper {
+        flex-shrink: 0;
+    }
+
     .search-buttons {
         display: flex;
         gap: 12px;
+        align-items: center;
     }
 
     .btn-search, .btn-clear {
-        padding: 12px 20px;
+        padding: 10px 18px;
         border-radius: 8px;
         font-weight: 500;
         transition: all 0.3s;
         font-size: 16px;
+        white-space: nowrap;
     }
 
     .btn-search {
@@ -307,7 +328,7 @@
     }
 
     .table {
-        width: 100%; /* Decreased from 110% */
+        width: 100%;
         border-collapse: separate;
         border-spacing: 0;
     }
@@ -317,20 +338,20 @@
     }
 
     .table th {
-        padding: 24px 20px; /* Increased padding */
+        padding: 24px 20px;
         font-weight: 600;
         color: var(--dark-color);
         text-transform: uppercase;
-        font-size: 1.1rem; /* Increased font size */
+        font-size: 1.1rem;
         letter-spacing: 0.5px;
         border-bottom: 2px solid var(--border-color);
     }
 
     .table td {
-        padding: 24px 20px; /* Increased padding */
+        padding: 24px 20px;
         vertical-align: middle;
         border-bottom: 1px solid var(--border-color);
-        font-size: 1.1rem; /* Increased font size */
+        font-size: 1.1rem;
     }
 
     .table tr:last-child td {
@@ -343,8 +364,8 @@
 
     /* User Image */
     .user-image {
-        width: 100px; /* Increased from 80px */
-        height: 100px; /* Increased from 80px */
+        width: 100px;
+        height: 100px;
         overflow: hidden;
         border-radius: 10px;
         border: 1px solid var(--border-color);
@@ -359,9 +380,9 @@
     /* Status Buttons */
     .btn-status {
         display: inline-block;
-        padding: 10px 20px; /* Increased padding */
+        padding: 10px 20px;
         border-radius: 20px;
-        font-size: 16px; /* Increased font size */
+        font-size: 16px;
         font-weight: 500;
         text-decoration: none;
         text-align: center;
@@ -440,12 +461,24 @@
 
     /* Responsive Design */
     @media (max-width: 992px) {
-        .search-buttons {
-            display: none;
+        .container-fluid {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
         }
-        
-        .page-heading h1 {
-            font-size: 2rem;
+
+        .search-input-wrapper {
+            margin-right: 0;
+            max-width: 100%;
+        }
+
+        .search-buttons-wrapper {
+            justify-content: center;
+        }
+
+        .search-buttons {
+            justify-content: center;
+            flex-wrap: wrap;
         }
     }
 
@@ -459,6 +492,11 @@
             width: 70px;
             height: 70px;
         }
+
+        .btn-search, .btn-clear {
+            padding: 8px 14px;
+            font-size: 14px;
+        }
     }
 
     @media (max-width: 576px) {
@@ -471,6 +509,10 @@
         .main-content {
             padding: 16px;
         }
+
+        .navbar {
+            padding: 12px 16px;
+        }
     }
 </style>
 
@@ -479,51 +521,202 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('userSearchInput');
     const clearButton = document.getElementById('clearSearchBtn');
     const searchButton = document.getElementById('searchBtn');
-    
-    // Function to check if search input has text and toggle clear button visibility
+    const searchLoadingIcon = document.getElementById('searchLoadingIcon');
+
+    // Function to toggle clear button visibility
     function toggleClearButton() {
-        if (searchInput.value.length > 0) {
-            clearButton.style.display = 'inline-block';
-        } else {
-            clearButton.style.display = 'none';
-        }
+        clearButton.style.display = searchInput.value.trim() ? 'block' : 'none';
     }
-    
-    // Listen for input changes to show/hide clear button
-    searchInput.addEventListener('input', toggleClearButton);
-    
-    // Clear the search input when clear button is clicked
-    clearButton.addEventListener('click', function() {
+
+    // Sanitize input to allow valid characters
+    function sanitizeInput(value) {
+        // Allow alphanumeric, spaces, and common special characters (@, ., -, _)
+        return value.replace(/[^\w\s@.\-_]/g, '').trim();
+    }
+
+    // Debounce function to limit search requests
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func(...args), wait);
+        };
+    }
+
+    // Perform search
+    const performSearch = debounce(function() {
+        const searchInputValue = sanitizeInput(searchInput.value);
+        const url = new URL(window.location.href);
+        searchLoadingIcon.style.display = 'block';
+        searchInput.disabled = true;
+        searchButton.disabled = true;
+        clearButton.disabled = true;
+
+        if (searchInputValue) {
+            url.searchParams.set('search', encodeURIComponent(searchInputValue));
+        } else {
+            url.searchParams.delete('search');
+        }
+        url.searchParams.set('page', '1');
+        window.location.href = url.toString();
+    }, 200);
+
+    // Event listeners
+    searchInput.addEventListener('input', function(e) {
+        const sanitizedValue = sanitizeInput(e.target.value);
+        searchInput.value = sanitizedValue;
+        toggleClearButton();
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            performSearch();
+        }
+    });
+
+    searchButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        performSearch();
+    });
+
+    clearButton.addEventListener('click', function(e) {
+        e.preventDefault();
         searchInput.value = '';
         toggleClearButton();
         searchInput.focus();
-        // Trigger a search reset
-        const url = new URL(window.location.href);
-        url.searchParams.delete('search');
-        url.searchParams.set('page', '1');
-        window.location.href = url.toString();
-    });
-    
-    // Trigger search on button click
-    searchButton.addEventListener('click', function() {
-        const searchInputValue = searchInput.value.trim();
-        const url = new URL(window.location.href);
-        url.searchParams.set('search', searchInputValue);
-        url.searchParams.set('page', '1');
-        window.location.href = url.toString();
+        performSearch();
     });
 
-    // Handle Enter key for search
-    searchInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            searchButton.click();
-        }
+    // Reset loading state on page load
+    window.addEventListener('load', function() {
+        searchLoadingIcon.style.display = 'none';
+        searchInput.disabled = false;
+        searchButton.disabled = false;
+        clearButton.disabled = false;
+        toggleClearButton();
     });
-    
-    // Initial check for clear button visibility
-    toggleClearButton();
+
+    // Handle IME input
+    searchInput.addEventListener('compositionend', function(e) {
+        searchInput.value = sanitizeInput(e.target.value);
+        toggleClearButton();
+    });
 });
+
+async function handleBlockUserClick(userId) {
+    const button = document.querySelector(`button[onclick="handleBlockUserClick('${userId}')"]`);
+    button.setAttribute('aria-busy', 'true');
+    button.disabled = true;
+
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: 'This will block the user, logging them out and restricting their access.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, block user!',
+        cancelButtonText: 'Cancel'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(`/admin/blockUser/${userId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Non-JSON response:', text);
+                throw new Error('Server returned non-JSON response');
+            }
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Failed to block user');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'User Blocked',
+                text: data.message || 'User has been blocked successfully',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => location.reload());
+        } catch (error) {
+            console.error('Error blocking user:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'An error occurred while blocking the user'
+            });
+        } finally {
+            button.setAttribute('aria-busy', 'false');
+            button.disabled = false;
+        }
+    } else {
+        button.setAttribute('aria-busy', 'false');
+        button.disabled = false;
+    }
+}
+
+async function handleUnblockUserClick(userId) {
+    const button = document.querySelector(`button[onclick="handleUnblockUserClick('${userId}')"]`);
+    button.setAttribute('aria-busy', 'true');
+    button.disabled = true;
+
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: 'This will unblock the user, restoring their access.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, unblock user!',
+        cancelButtonText: 'Cancel'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(`/admin/unblockUser/${userId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Non-JSON response:', text);
+                throw new Error('Server returned non-JSON response');
+            }
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Failed to unblock user');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'User Unblocked',
+                text: data.message || 'User has been unblocked successfully',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => location.reload());
+        } catch (error) {
+            console.error('Error unblocking user:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'An error occurred while unblocking the user'
+            });
+        } finally {
+            button.setAttribute('aria-busy', 'false');
+            button.disabled = false;
+        }
+    } else {
+        button.setAttribute('aria-busy', 'false');
+        button.disabled = false;
+    }
+}
 </script>
 
 <%- include("../../views/partials/admin/footer") %>

@@ -1,12 +1,17 @@
-<!-- External Libraries -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<link rel="stylesheet" href="/css/admin-css/addprod.css">
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Products</title>
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin-css/addprod.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+</head>
 <body>
     <%- include("../../views/partials/admin/header") %>
 
@@ -207,7 +212,7 @@
                                 </div>
                             <% } %>
                             <input type="file" name="image<%= i %>" id="image<%= i %>" class="form-control"
-                                accept="image/*" onchange="previewImage(event, <%= i %>)">
+                                accept="image/png,image/jpeg,image/webp" onchange="previewImage(event, <%= i %>)">
                             <!-- Cropping Section -->
                             <div class="cropper-container" id="cropperContainer<%= i %>" style="display: none;">
                                 <h5 class="text-white">Crop Image</h5>
@@ -222,7 +227,7 @@
                                         Free
                                     </button>
                                     <button type="button" class="aspect-ratio-btn" data-index="<%= i %>"
-                                        data-ratio="30:37" onclick="setAspectRatio(<%= i %>, 30/37)">
+                                        data-ratio="30/37" onclick="setAspectRatio(<%= i %>, 30/37)">
                                         Fit image
                                     </button>
                                 </div>
@@ -248,7 +253,7 @@
                         </div>
                     <% } %>
                 </div>
-         <input type="hidden" value="<%=product._id%>" id="proID">
+                <input type="hidden" value="<%=product._id%>" id="proID">
                 <div class="button-container">
                     <button type="submit" class="add-btn">Update Product</button>
                 </div>
@@ -256,53 +261,54 @@
         </form>
     </div>
   
-    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
-
     <script>
         let croppers = {};
         let originalImages = {};
         let hasImage = <%= product && product.productImage && product.productImage.length > 0 ? 'true' : 'false' %>;
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Initialize image input listeners
             for (let i = 1; i <= 4; i++) {
                 document.getElementById(`image${i}`).addEventListener('change', function (event) {
                     previewImage(event, i);
                 });
             }
 
-            // Handle form submission via AJAX
             document.getElementById('editProductForm').addEventListener('submit', async function (event) {
                 event.preventDefault();
 
-                // Client-side validation
                 if (!validateForm()) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Error',
+                        text: 'Please correct the errors in the form before submitting.',
+                    });
                     return;
                 }
 
-                const productId = document.getElementById("proID").value
-
-                const form = this;
+                const productId = document.getElementById("proID").value;
+                const form = document.getElementById('editProductForm');
                 const formData = new FormData(form);
+
                 try {
                     const response = await fetch(`/admin/editProduct/${productId}`, {
                         method: 'POST',
-                        body: formData
+                        body: formData  
                     });
-                    console.log(response);
-                    
+                  
+
                     const result = await response.json();
-                    
-                    
+                    console.log('Response data:', result);
+
                     if (response.ok) {
                         Swal.fire({
                             icon: 'success',
                             title: 'Success',
-                            text: 'Product updated successfully!',
+                            text: result.message || 'Product updated successfully!',
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
@@ -312,10 +318,11 @@
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: result.error || 'Failed to update product.',
+                            text: result.message || 'Failed to update product.',
                         });
                     }
                 } catch (error) {
+                    console.error('Form submission error:', error);
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
@@ -347,18 +354,16 @@
                         const data = await response.json();
 
                         if (data.success) {
-                            // Hide the existing image container
                             const imageContainer = document.querySelector(`#imageContainer${imageIndex + 1} .existing-image-container`);
                             if (imageContainer) {
                                 imageContainer.style.display = 'none';
                             }
-                            // Reset the preview container
+                            
                             const previewContainer = document.getElementById(`previewContainer${imageIndex + 1}`);
                             previewContainer.style.display = 'none';
                             document.getElementById(`preview${imageIndex + 1}`).src = '#';
                             document.getElementById(`image${imageIndex + 1}`).value = '';
 
-                            // Update hasImage based on remaining images
                             hasImage = data.updatedImages.length > 0;
 
                             Swal.fire({
@@ -391,8 +396,37 @@
             const previewContainer = document.getElementById(`previewContainer${index}`);
             const cropperContainer = document.getElementById(`cropperContainer${index}`);
             const cropperImg = document.getElementById(`cropperImg${index}`);
+            const existingImageContainer = document.querySelector(`#imageContainer${index} .existing-image-container`);
 
             if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const validImageTypes = ['image/png', 'image/jpeg', 'image/webp'];
+                
+                if (!validImageTypes.includes(file.type)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid File Type',
+                        text: 'Please upload only PNG, JPEG, or WebP images.',
+                    });
+                    input.value = '';
+                    return;
+                }
+
+                if (file.size > 5 * 1024 * 1024) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'File Too Large',
+                        text: 'Image size must be less than 5MB.',
+                    });
+                    input.value = '';
+                    return;
+                }
+
+                // Hide existing image if present
+                if (existingImageContainer) {
+                    existingImageContainer.style.display = 'none';
+                }
+
                 const reader = new FileReader();
                 reader.onload = function (e) {
                     originalImages[index] = e.target.result;
@@ -426,7 +460,7 @@
 
                     setActiveAspectRatioButton(index, 'free');
                 };
-                reader.readAsDataURL(input.files[0]);
+                reader.readAsDataURL(file);
             }
         }
 
@@ -484,11 +518,11 @@
 
             if (cropper) {
                 const cropData = cropper.getData();
-                if (cropData.width < 10 || cropData.height < 10) {
+                if (cropData.width < 256 || cropData.height < 256) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Invalid Crop',
-                        text: 'Please select a larger area to crop.',
+                        text: 'Cropped image must be at least 256x256 pixels.',
                     });
                     return;
                 }
@@ -501,18 +535,24 @@
                     imageSmoothingEnabled: true,
                     imageSmoothingQuality: 'high',
                 });
-                preview.src = croppedCanvas.toDataURL('image/jpeg', 0.9);
+
+                // Determine file type based on original image
+                const fileInput = document.getElementById(`image${index}`);
+                const file = fileInput.files[0];
+                const mimeType = file.type;
+                const extension = mimeType.split('/')[1];
+
+                preview.src = croppedCanvas.toDataURL(mimeType, 0.9);
                 previewContainer.style.display = 'block';
                 croppedCanvas.toBlob((blob) => {
-                    const fileInput = document.getElementById(`image${index}`);
                     const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(new File([blob], `cropped_image_${index}.jpg`, {
-                        type: 'image/jpeg',
+                    dataTransfer.items.add(new File([blob], `cropped_image_${index}.${extension}`, {
+                        type: mimeType,
                         lastModified: Date.now()
                     }));
                     fileInput.files = dataTransfer.files;
                     hasImage = true;
-                }, 'image/jpeg', 0.9);
+                }, mimeType, 0.9);
                 cropperContainer.style.display = 'none';
             }
         }
@@ -550,94 +590,88 @@
 
             let isValid = true;
 
-            if (productName.trim() === "" || !/^[a-zA-Z0-9+()\-".,' ]*[a-zA-Z][a-zA-Z0-9+()\-".,' ]*$/.test(productName)) {
-                displayErrorMessage('productName-error', 'Please enter a valid product name.');
+            if (productName.trim() === "") {
+                displayErrorMessage('productName-error', 'Product name is required.');
                 isValid = false;
             }
 
-            if (description.trim() === "" || !/^(?=.*[a-zA-Z]).+$/.test(description)) {
-                displayErrorMessage('description-error', 'Please enter a valid product description.');
+            if (description.trim() === "") {
+                displayErrorMessage('description-error', 'Description is required.');
                 isValid = false;
             }
 
-            if (!/^\d+(\.\d{1,2})?$/.test(regularPrice) || parseFloat(regularPrice) <= 0) {
-                displayErrorMessage('regularPrice-error', 'Please enter a valid positive price.');
+            if (regularPrice.trim() === "") {
+                displayErrorMessage('regularPrice-error', 'Regular price is required.');
                 isValid = false;
             }
 
-            if (!/^\d+(\.\d{1,2})?$/.test(salePrice) || parseFloat(salePrice) <= 0) {
-                displayErrorMessage('offerPrice-error', 'Please enter a valid positive price.');
+            if (salePrice.trim() === "") {
+                displayErrorMessage('offerPrice-error', 'Sale price is required.');
                 isValid = false;
             }
 
-            if (parseFloat(salePrice) > parseFloat(regularPrice)) {
-                displayErrorMessage('offerPrice-error', 'Sale price should be less than regular price.');
-                isValid = false;
-            }
-
-            if (quantity < 0) {
-                displayErrorMessage('quantity-error', 'Please enter a valid stock count.');
+            if (quantity.trim() === "") {
+                displayErrorMessage('quantity-error', 'Stock count is required.');
                 isValid = false;
             }
 
             if (brand.trim() === "") {
-                displayErrorMessage('brandName-error', 'Please select a brand.');
+                displayErrorMessage('brandName-error', 'Brand is required.');
                 isValid = false;
             }
 
             if (category.trim() === "") {
-                displayErrorMessage('category-error', 'Please select a category.');
+                displayErrorMessage('category-error', 'Category is required.');
                 isValid = false;
             }
 
             if (processor.trim() === "") {
-                displayErrorMessage('processor-error', 'Please enter a valid processor.');
+                displayErrorMessage('processor-error', 'Processor is required.');
                 isValid = false;
             }
 
             if (graphicsCard.trim() === "") {
-                displayErrorMessage('gpu-error', 'Please enter a valid graphics card.');
+                displayErrorMessage('gpu-error', 'Graphics card is required.');
                 isValid = false;
             }
 
             if (ram.trim() === "") {
-                displayErrorMessage('ram-error', 'Please enter a valid RAM specification.');
+                displayErrorMessage('ram-error', 'RAM is required.');
                 isValid = false;
             }
 
             if (Storage.trim() === "") {
-                displayErrorMessage('storage-error', 'Please enter a valid storage specification.');
+                displayErrorMessage('storage-error', 'Storage is required.');
                 isValid = false;
             }
 
             if (display.trim() === "") {
-                displayErrorMessage('display-error', 'Please enter a valid display specification.');
+                displayErrorMessage('display-error', 'Display is required.');
                 isValid = false;
             }
 
             if (operatingSystem.trim() === "") {
-                displayErrorMessage('os-error', 'Please enter a valid operating system.');
+                displayErrorMessage('os-error', 'Operating system is required.');
                 isValid = false;
             }
 
             if (Battery.trim() === "") {
-                displayErrorMessage('battery-error', 'Please enter a valid battery specification.');
+                displayErrorMessage('battery-error', 'Battery is required.');
                 isValid = false;
             }
 
             if (Weight.trim() === "") {
-                displayErrorMessage('weight-error', 'Please enter a valid weight.');
+                displayErrorMessage('weight-error', 'Weight is required.');
                 isValid = false;
             }
 
             if (Warranty.trim() === "") {
-                displayErrorMessage('warranty-error', 'Please enter a valid warranty.');
+                displayErrorMessage('warranty-error', 'Warranty is required.');
                 isValid = false;
             }
 
-            // Optional: Require at least one image
             if (!hasImage) {
-                displayErrorMessage('image1-error', 'Please upload at least one product image.');
+                displayErrorMessage('image1-error', 'At least one product image is required.');
                 isValid = false;
             }
 
@@ -648,6 +682,7 @@
             const errorElement = document.getElementById(elementId);
             if (errorElement) {
                 errorElement.textContent = message;
+                errorElement.style.color = 'red';
                 errorElement.style.display = 'block';
             }
         }

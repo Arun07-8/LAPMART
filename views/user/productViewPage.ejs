@@ -1,9 +1,14 @@
-<%-include("../../views/partials/user/header")%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include("../../views/partials/user/header") %>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
   <style>
     body {
       font-family: Arial, sans-serif;
+      margin: 0;
     }
     
     .header-top {
@@ -27,29 +32,104 @@
       font-size: 24px;
     }
     
+    .product-thumbs-container {
+      display: flex;
+      overflow-x: auto;
+      padding: 5px 0;
+      justify-content: flex-start;
+      gap: 10px;
+    }
+    
     .product-thumb {
       border: 1px solid #e5e5e5;
       border-radius: 8px;
       padding: 5px;
-      margin-bottom: 10px;
       cursor: pointer;
-      width: 100%;
+      width: 100px;
+      height: 100px;
+      overflow: hidden;
+      transition: border 0.3s ease, transform 0.2s ease;
     }
     
-    .product-thumb.active {
+    .product-thumb.active,
+    .product-thumb:hover {
       border-color: #000;
+      transform: scale(1.05);
     }
     
-    .product-main-img {
+    .product-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .zoom-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      aspect-ratio: 1 / 1;
       background-color: #f5f5f5;
       border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
-    .product-main-img img {
-      max-width: 100%;
-      height: auto;
+    .zoom-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.3s ease, transform 0.5s ease;
+    }
+    
+    .zoom-lens {
+      position: absolute;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      cursor: crosshair;
+      width: 300px;
+      height: 300px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      background: rgba(255, 255, 255, 0.5);
+    }
+    
+    .zoom-container:hover .zoom-lens {
+      opacity: 1;
+    }
+    
+    .image-popup {
+      display: block;
+      text-decoration: none;
+    }
+    
+    .product-status {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .status-in-stock {
+      background-color: #e6f4ea;
+      color: #28a745;
+    }
+    
+    .status-out-of-stock {
+      background-color: #f8e8e8;
+      color: #dc3545;
+    }
+    
+    .status-locked {
+      background-color: #e9ecef;
+      color: #6c757d;
     }
     
     .rating {
@@ -71,30 +151,35 @@
     
     .spec-item {
       background-color: #f5f5f5;
-      border-radius: 50px;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
       padding: 8px 15px;
       margin-right: 10px;
       margin-bottom: 10px;
       display: inline-block;
       cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
     
     .spec-item.active {
       background-color: #000;
       color: white;
+      border-color: #000;
     }
     
     .quantity-input {
-      width: 80px;
+      width: 50px;
       text-align: center;
+      border-radius: 8px;
+      margin: 0 10px;
     }
     
     .btn-quantity {
       background-color: #f5f5f5;
-      border: none;
+      border: 1px solid #e5e5e5;
       width: 30px;
       height: 30px;
-      border-radius: 50%;
+      border-radius: 8px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -103,15 +188,25 @@
     .btn-cart {
       background-color: #000;
       color: white;
-      border-radius: 50px;
+      border-radius: 8px;
       padding: 10px 20px;
+      font-weight: bold;
+      flex: 1;
+      margin-right: 10px;
     }
     
     .btn-buy-now {
       background-color: #ff4d4d;
       color: white;
-      border-radius: 50px;
+      border-radius: 8px;
       padding: 10px 20px;
+      font-weight: bold;
+      flex: 1;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 10px;
     }
     
     .nav-tabs {
@@ -133,7 +228,11 @@
     }
     
     .review-card {
-      margin-bottom: 20px;
+      background-color: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
     }
     
     .review-options {
@@ -150,8 +249,8 @@
     .product-card {
       background-color: #f5f5f5;
       border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 20px;
+      padding: 10px;
+      margin-bottom: 10px;
       text-align: center;
       height: 100%;
     }
@@ -164,14 +263,14 @@
     .newsletter-box {
       background-color: #000;
       color: white;
-      padding: 30px;
+      padding: 20px;
       border-radius: 8px;
-      margin: 40px 0;
+      margin: 20px 0;
     }
     
     .footer {
       background-color: #f5f5f5;
-      padding: 40px 0;
+      padding: 20px 0;
     }
     
     .social-icon {
@@ -186,16 +285,44 @@
       margin-right: 8px;
     }
     
+    .container {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+    
+    .container.mb-5 {
+      margin-bottom: 2rem !important;
+    }
+    
     @media (max-width: 767px) {
       .product-thumbs-container {
         display: flex;
         overflow-x: auto;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
+        justify-content: flex-start;
       }
       
       .product-thumb {
         min-width: 70px;
         margin-right: 10px;
+        margin-bottom: 0;
+      }
+      
+      .zoom-container {
+        max-height: 400px;
+      }
+      
+      .zoom-image {
+        height: 400px;
+      }
+      
+      .zoom-lens {
+        display: none !important;
+      }
+      
+      .product-status {
+        font-size: 13px;
+        padding: 5px 10px;
       }
       
       .spec-section {
@@ -208,28 +335,28 @@
       }
       
       .quantity-controls {
-        margin-bottom: 15px;
+        margin-bottom: 10px;
       }
       
       .action-buttons {
         flex-direction: column;
+        gap: 10px;
       }
       
-      .action-buttons .btn {
-        margin-bottom: 10px;
+      .btn-cart, .btn-buy-now {
+        margin-right: 0;
+        width: 100%;
       }
     }
   </style>
 </head>
 <body>
-
   <!-- Breadcrumb -->
-  <div class="container mt-3">
+  <div class="container mt-2">
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">Home</a></li>
         <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">Shop</a></li>
-        <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">Electronics</a></li>
         <li class="breadcrumb-item active" aria-current="page">Laptops</li>
       </ol>
     </nav>
@@ -237,40 +364,52 @@
 
   <!-- Product Section -->
   <div class="container mb-5">
-    <div class="row">
-      <!-- Product Images -->
-      <div class="col-lg-6">
-        <div class="row">
-          <div class="col-md-2 col-sm-12">
-            <div class="product-thumbs-container d-md-block d-flex">
-              <div class="product-thumb active mb-md-2">
-                <img src="/api/placeholder/100/100" class="img-fluid" alt="Laptop thumbnail 1">
+    <div class="row align-items-stretch">
+      <div class="col-lg-6 h-100">
+        <div class="zoom-container" id="prod-image">
+          <% if (product.productImage && product.productImage.length > 0) { %>
+            <a href="<%= product.productImage[0] %>" class="image-popup prod-img-bg">
+              <img 
+                src="<%= product.productImage[0] %>" 
+                class="img-fluid w-100 mb-2 zoom-image" 
+                style="height: 650px; object-fit: cover;" 
+                alt="<%= product.productName %>" 
+                id="image-sec"
+              >
+            </a>
+            <div class="zoom-lens"></div>
+          <% } else { %>
+            <img 
+              src="/images/placeholder.jpg" 
+              class="img-fluid w-100" 
+              style="height: 650px; object-fit: cover;" 
+              alt="No Image Available"
+            >
+          <% } %>
+        </div>
+        <!-- Product Status -->
+        <div class="product-status 
+          <%= product.isLocked ? 'status-locked' : (product.quantity > 0 ? 'status-in-stock' : 'status-out-of-stock') %>">
+          <%= product.isLocked ? 'Locked' : (product.quantity > 0 ? 'In Stock' : 'Out of Stock') %>
+        </div>
+        <div class="product-thumbs-container">
+          <% if (product.productImage && product.productImage.length > 0) { %>
+            <% product.productImage.forEach((image, index) => { %>
+              <div class="product-thumb <%= index === 0 ? 'active' : '' %>" data-index="<%= index %>">
+                <img src="<%= image || '/images/placeholder.jpg' %>" class="img-fluid" alt="Product thumbnail <%= index + 1 %>">
               </div>
-              <div class="product-thumb mb-md-2">
-                <img src="/api/placeholder/100/100" class="img-fluid" alt="Laptop thumbnail 2">
-              </div>
-              <div class="product-thumb mb-md-2">
-                <img src="/api/placeholder/100/100" class="img-fluid" alt="Laptop thumbnail 3">
-              </div>
-              <div class="product-thumb mb-md-2">
-                <img src="/api/placeholder/100/100" class="img-fluid" alt="Laptop thumbnail 4">
-              </div>
-              <div class="product-thumb mb-md-2">
-                <img src="/api/placeholder/100/100" class="img-fluid" alt="Laptop thumbnail 5">
-              </div>
+            <% }) %>
+          <% } else { %>
+            <div class="product-thumb active">
+              <img src="/images/placeholder.jpg" class="img-fluid" alt="No image available">
             </div>
-          </div>
-          <div class="col-md-10 col-sm-12">
-            <div class="product-main-img">
-              <img src="/api/placeholder/400/400" class="img-fluid" alt="PRO SERIES LAPTOP">
-            </div>
-          </div>
+          <% } %>
         </div>
       </div>
       
       <!-- Product Info -->
-      <div class="col-lg-6">
-        <h1 class="fw-bold mb-1">PRO SERIES LAPTOP</h1>
+      <div class="col-lg-6 h-100 d-flex flex-column">
+        <h1 class="fw-bold mb-1"><%= product.productName %></h1>
         <div class="d-flex align-items-center mb-2">
           <div class="rating me-2">
             <i class="fas fa-star"></i>
@@ -283,65 +422,45 @@
           <a href="/reviews" class="ms-2 text-decoration-none">View all reviews</a>
         </div>
         
-        <div class="d-flex align-items-center mb-3">
-          <h2 class="fw-bold me-2 mb-0">$1,299</h2>
-          <span class="old-price me-2">$1,599</span>
+        <div class="d-flex align-items-center mb-2">
+          <h2 class="fw-bold me-2 mb-0">₹<%= product.salePrice.toLocaleString('en-IN') %></h2>
+          <span class="old-price me-2">₹<%= product.regularPrice.toLocaleString('en-IN') %></span>
           <span class="discount">-20%</span>
         </div>
         
-        <p class="mb-4">This high-performance laptop is perfect for any task. Crafted with premium materials and cutting-edge technology, it offers superior performance and reliability.</p>
+        <p class="mb-3">This high-performance laptop is perfect for any task. Crafted with premium materials and cutting-edge technology, it offers superior performance and reliability.</p>
         
         <!-- Processor Options -->
-        <div class="mb-4">
-          <h6 class="fw-bold mb-2">Select Processor</h6>
-          <div>
-            <span class="spec-item active">Intel i5</span>
-            <span class="spec-item">Intel i7</span>
-            <span class="spec-item">Intel i9</span>
-          </div>
+        <div class="mb-3">
+          <h6 class="fw-bold mb-2">Processor: <%= product.processor %></h6>
         </div>
         
         <!-- RAM Options -->
-        <div class="mb-4">
-          <h6 class="fw-bold mb-2">Select RAM</h6>
-          <div>
-            <span class="spec-item">8GB</span>
-            <span class="spec-item active">16GB</span>
-            <span class="spec-item">32GB</span>
-          </div>
+        <div class="mb-3">
+          <h6 class="fw-bold mb-2">RAM: <%= product.ram %></h6>
         </div>
         
         <!-- Storage Options -->
-        <div class="mb-4">
-          <h6 class="fw-bold mb-2">Select Storage</h6>
-          <div>
-            <span class="spec-item">256GB SSD</span>
-            <span class="spec-item active">512GB SSD</span>
-            <span class="spec-item">1TB SSD</span>
-          </div>
+        <div class="mb-3">
+          <h6 class="fw-bold mb-2">Storage: <%= product.Storage %></h6>
         </div>
         
         <!-- Quantity and Add to Cart -->
-        <div class="d-flex flex-column mt-4 mb-4">
+        <div class="d-flex flex-column mt-3 mb-3">
           <div class="d-flex align-items-center quantity-controls mb-3">
-            <label class="me-3 mb-0">Quantity:</label>
-            <button class="btn-quantity me-2">
+            <button class="btn-quantity" <%= product.isLocked || product.quantity === 0 ? 'disabled' : '' %>>
               <i class="fas fa-minus"></i>
             </button>
-            <input type="text" value="1" class="form-control quantity-input">
-            <button class="btn-quantity ms-2">
+            <input type="text" value="1" class="form-control quantity-input" <%= product.isLocked || product.quantity === 0 ? 'disabled' : '' %>>
+            <button class="btn-quantity" <%= product.isLocked || product.quantity === 0 ? 'disabled' : '' %>>
               <i class="fas fa-plus"></i>
             </button>
           </div>
           
           <!-- Action Buttons -->
-          <div class="d-flex action-buttons gap-2">
-            <button class="btn btn-cart flex-grow-1">
-              <i class="fas fa-shopping-cart me-2"></i>Add to Cart
-            </button>
-            <button class="btn btn-buy-now flex-grow-1">
-              <i class="fas fa-bolt me-2"></i>Buy Now
-            </button>
+          <div class="action-buttons">
+            <button class="btn btn-cart" <%= product.isLocked || product.quantity === 0 ? 'disabled' : '' %>>Add to Cart</button>
+            <button class="btn btn-buy-now" <%= product.isLocked || product.quantity === 0 ? 'disabled' : '' %>>Buy Now</button>
           </div>
         </div>
       </div>
@@ -361,49 +480,49 @@
         <button class="nav-link" id="faqs-tab" data-bs-toggle="tab" data-bs-target="#faqs" type="button">FAQs</button>
       </li>
     </ul>
-    <div class="tab-content py-4" id="productTabsContent">
+    <div class="tab-content py-3" id="productTabsContent">
       <!-- Product Details Tab -->
       <div class="tab-pane fade show active" id="details" role="tabpanel">
         <div class="row">
           <div class="col-md-12">
-            <h4 class="mb-3">Specifications</h4>
+            <h4 class="mb-2">Specifications</h4>
             <table class="table">
               <tbody>
                 <tr>
                   <td width="30%"><strong>Processor</strong></td>
-                  <td>Intel Core i7-12700H, 14 cores (6P+8E), up to 4.70 GHz</td>
+                  <td><%= product.processor %></td>
                 </tr>
                 <tr>
                   <td><strong>Memory</strong></td>
-                  <td>16GB DDR5-4800MHz (2x8GB, user-upgradeable to 64GB)</td>
+                  <td><%= product.ram %></td>
                 </tr>
                 <tr>
                   <td><strong>Storage</strong></td>
-                  <td>512GB PCIe NVMe M.2 SSD (user-upgradeable, dual slots)</td>
+                  <td><%= product.Storage %></td>
                 </tr>
                 <tr>
                   <td><strong>Display</strong></td>
-                  <td>15.6" QHD (2560x1440) IPS, 165Hz, 100% sRGB, 300 nits</td>
+                  <td><%= product.display %></td>
                 </tr>
                 <tr>
                   <td><strong>Graphics</strong></td>
-                  <td>NVIDIA GeForce RTX 3060, 6GB GDDR6 (100W TGP)</td>
+                  <td><%= product.graphicsCard %></td>
                 </tr>
                 <tr>
                   <td><strong>Connectivity</strong></td>
-                  <td>Wi-Fi 6E, Bluetooth 5.2</td>
+                  <td><%= product.additionalFeatures.split(', ').slice(0, 2).join(', ') %></td>
                 </tr>
                 <tr>
                   <td><strong>Ports</strong></td>
-                  <td>1x Thunderbolt 4, 2x USB-A 3.2 Gen 2, 1x HDMI 2.1, 1x SD card reader, audio jack</td>
+                  <td><%= product.additionalFeatures.split(', ').slice(2).join(', ') %></td>
                 </tr>
                 <tr>
                   <td><strong>Battery</strong></td>
-                  <td>80Wh, up to 8 hours</td>
+                  <td><%= product.Battery %></td>
                 </tr>
                 <tr>
                   <td><strong>Weight</strong></td>
-                  <td>4.63 lbs (2.1 kg)</td>
+                  <td><%= product.Weight %></td>
                 </tr>
               </tbody>
             </table>
@@ -413,7 +532,7 @@
       
       <!-- Ratings Tab -->
       <div class="tab-pane fade" id="ratings" role="tabpanel">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
           <h4 class="mb-0">All Reviews <span class="text-muted">(465)</span></h4>
           <div class="d-flex align-items-center">
             <div class="dropdown me-3">
@@ -426,29 +545,19 @@
                 <li><a class="dropdown-item" href="#">Lowest Rated</a></li>
               </ul>
             </div>
-            <a href="/reviews" class="btn btn-dark btn-sm px-3">See All Reviews</a>
             <button class="btn btn-outline-dark btn-sm px-3 ms-2">Write a Review</button>
           </div>
         </div>
         
-        <!-- Review Cards -->
         <div class="row">
-          <!-- Review 1 -->
           <div class="col-md-6">
             <div class="review-card">
-              <div class="d-flex justify-content-between mb-2">
-                <div>
-                  <div class="rating">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                  </div>
-                </div>
-                <div class="review-options">
-                  <i class="fas fa-ellipsis-h"></i>
-                </div>
+              <div class="rating mb-2">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
               </div>
               <div class="d-flex align-items-center mb-2">
                 <h6 class="mb-0">Michael T.</h6>
@@ -461,22 +570,14 @@
             </div>
           </div>
           
-          <!-- Review 2 -->
           <div class="col-md-6">
             <div class="review-card">
-              <div class="d-flex justify-content-between mb-2">
-                <div>
-                  <div class="rating">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="far fa-star"></i>
-                  </div>
-                </div>
-                <div class="review-options">
-                  <i class="fas fa-ellipsis-h"></i>
-                </div>
+              <div class="rating mb-2">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="far fa-star"></i>
               </div>
               <div class="d-flex align-items-center mb-2">
                 <h6 class="mb-0">Sarah L.</h6>
@@ -490,8 +591,8 @@
           </div>
         </div>
         
-        <div class="text-center mt-4">
-          <a href="/reviews" class="btn btn-outline-dark px-4">View All Reviews</a>
+        <div class="text-center mt-3">
+          <a href="/reviews" class="btn btn-outline-dark px-4">Load More Reviews</a>
         </div>
       </div>
       
@@ -557,96 +658,42 @@
 
   <!-- You Might Also Like Section -->
   <div class="container mb-5">
-    <h2 class="text-center fw-bold mb-4">YOU MIGHT ALSO LIKE</h2>
+    <h2 class="text-center fw-bold mb-3">YOU MIGHT ALSO LIKE</h2>
     <div class="row">
-      <!-- Product 1 -->
-      <div class="col-lg-3 col-md-6 mb-4">
-        <div class="product-card">
-          <img src="/api/placeholder/200/150" class="img-fluid mb-3" alt="Ultrabook Pro">
-          <h5>Ultrabook Pro</h5>
-          <div class="rating mb-2">
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="far fa-star"></i>
-            <span class="ms-1">4.0/5</span>
-          </div>
-          <div class="d-flex justify-content-center">
-            <h5 class="fw-bold me-2">$999</h5>
-            <span class="old-price">$1,199</span>
-            <span class="discount ms-2">-20%</span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Product 2 -->
-      <div class="col-lg-3 col-md-6 mb-4">
-        <div class="product-card">
-          <img src="/api/placeholder/200/150" class="img-fluid mb-3" alt="Gaming Laptop X">
-          <h5>Gaming Laptop X</h5>
-          <div class="rating mb-2">
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star-half-alt"></i>
-            <span class="ms-1">4.5/5</span>
-          </div>
-          <div class="d-flex justify-content-center">
-            <h5 class="fw-bold">$1,499</h5>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Product 3 -->
-      <div class="col-lg-3 col-md-6 mb-4">
-        <div class="product-card">
-          <img src="/api/placeholder/200/150" class="img-fluid mb-3" alt="Business Elite">
-          <h5>Business Elite</h5>
-          <div class="rating mb-2">
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <span class="ms-1">4.9/5</span>
-          </div>
-          <div class="d-flex justify-content-center">
-            <h5 class="fw-bold me-2">$1,299</h5>
-            <span class="old-price">$1,599</span>
-            <span class="discount ms-2">-20%</span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Product 4 -->
-      <div class="col-lg-3 col-md-6 mb-4">
-        <div class="product-card">
-          <img src="/api/placeholder/200/150" class="img-fluid mb-3" alt="Creator Workstation">
-          <h5>Creator Workstation</h5>
-          <div class="rating mb-2">
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="far fa-star"></i>
-            <span class="ms-1">4.0/5</span>
-          </div>
-          <div class="d-flex justify-content-center">
-            <h5 class="fw-bold">$1,899</h5>
-          </div>
-        </div>
-      </div>
+        <% similerProducts.forEach(item => { %>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="/productView?id=<%= item._id %>" class="text-decoration-none text-dark">
+                    <div class="product-card">
+                        <img src="<%= item.productImage[0] %>" class="img-fluid mb-2" alt="<%= item.productName %>">
+                        <h5><%= item.productName %></h5>
+                        <div class="rating mb-2">
+                            <% for(let i = 0; i < 4; i++) { %>
+                                <i class="fas fa-star"></i>
+                            <% } %>
+                            <i class="far fa-star"></i>
+                            <span class="ms-1">4.0/5</span>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <h5 class="fw-bold me-2">$<%= item.salePrice %></h5>
+                            <% if (item.regularPrice && item.regularPrice > item.salePrice) { %>
+                                <span class="old-price">$<%= item.regularPrice %></span>
+                                <% const discount = Math.round(((item.regularPrice - item.salePrice) / item.regularPrice) * 100); %>
+                                <span class="discount ms-2">-%<%= discount %></span>
+                            <% } %>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        <% }) %>
     </div>
-  </div>
+</div>
 
   <!-- Newsletter Section -->
   <div class="container">
     <div class="newsletter-box">
       <div class="row justify-content-center">
         <div class="col-lg-8 text-center">
-          <h3 class="fw-bold mb-3">STAY UP TO DATE ABOUT OUR LATEST OFFERS</h3>
+          <h3 class="fw-bold mb-2">STAY UP TO DATE ABOUT OUR LATEST OFFERS</h3>
           <div class="row g-2">
             <div class="col-md-8">
               <input type="email" class="form-control" placeholder="Enter your email address">
@@ -662,59 +709,107 @@
 
   <!-- Include Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Include Magnific Popup JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
   
   <!-- Custom JavaScript for product interaction -->
   <script>
-    // Handle thumbnail clicks
-    document.querySelectorAll('.product-thumb').forEach(thumb => {
-      thumb.addEventListener('click', function() {
-        // Remove active class from all thumbnails
-        document.querySelectorAll('.product-thumb').forEach(t => t.classList.remove('active'));
-        // Add active class to clicked thumbnail
-        this.classList.add('active');
-        
-        // Here you would normally update the main image
-        // For this example, we'll just log it
-        console.log('Thumbnail clicked: ' + this.querySelector('img').alt);
+    document.addEventListener('DOMContentLoaded', () => {
+      const thumbnails = document.querySelectorAll('.product-thumb');
+      const mainImage = document.querySelector('.zoom-image');
+      const imageLink = document.querySelector('.image-popup');
+
+      if (!mainImage || !imageLink) {
+        console.error('Main image or image link element not found');
+        return;
+      }
+
+      // Thumbnail switching
+      thumbnails.forEach(thumb => {
+        thumb.addEventListener('click', () => {
+          thumbnails.forEach(t => t.classList.remove('active'));
+          thumb.classList.add('active');
+          const newSrc = thumb.querySelector('img')?.src || '/images/placeholder.jpg';
+          const newAlt = thumb.querySelector('img')?.alt || 'Product main image';
+          mainImage.style.opacity = '0';
+          setTimeout(() => {
+            mainImage.src = newSrc;
+            mainImage.alt = newAlt;
+            imageLink.href = newSrc;
+            mainImage.style.opacity = '1';
+          }, 300);
+        });
       });
-    });
-    
-    // Handle spec item clicks
-    document.querySelectorAll('.spec-item').forEach(item => {
-      item.addEventListener('click', function() {
-        // Find parent category
-        const parent = this.parentElement;
-        // Remove active class from all items in this category
-        parent.querySelectorAll('.spec-item').forEach(i => i.classList.remove('active'));
-        // Add active class to clicked item
-        this.classList.add('active');
+
+      // Zoom functionality
+      document.querySelectorAll('.zoom-container').forEach(container => {
+        const img = container.querySelector('.zoom-image');
+        const lens = container.querySelector('.zoom-lens');
+
+        if (!img || !lens) {
+          console.error('Zoom image or lens not found');
+          return;
+        }
+
+        container.addEventListener('mousemove', (e) => {
+          if (window.innerWidth <= 767) return; // Disable zoom on mobile
+
+          const { left, top, width, height } = container.getBoundingClientRect();
+          const posX = e.clientX - left;
+          const posY = e.clientY - top;
+
+          const lensX = posX - (lens.offsetWidth / 2);
+          const lensY = posY - (lens.offsetHeight / 2);
+          lens.style.left = `${lensX}px`;
+          lens.style.top = `${lensY}px`;
+
+          const zoomedImgUrl = img.src;
+          lens.style.backgroundImage = `url(${zoomedImgUrl})`;
+          lens.style.backgroundSize = `${img.width * 2}px ${img.height * 2}px`;
+          lens.style.backgroundPosition = `-${posX * 2}px -${posY * 2}px`;
+        });
       });
-    });
-    
-    // Handle quantity buttons
-    const quantityInput = document.querySelector('.quantity-input');
-    document.querySelectorAll('.btn-quantity').forEach(btn => {
-      btn.addEventListener('click', function() {
-        let currentValue = parseInt(quantityInput.value);
-        if (this.querySelector('.fa-plus')) {
-          quantityInput.value = currentValue + 1;
-        } else if (this.querySelector('.fa-minus') && currentValue > 1) {
-          quantityInput.value = currentValue - 1;
+
+      // Initialize Magnific Popup
+      $('.image-popup').magnificPopup({
+        type: 'image',
+        closeOnContentClick: true,
+        mainClass: 'mfp-img-mobile',
+        image: {
+          verticalFit: true
         }
       });
-    });
-    
-    // Buy Now button functionality
-    document.querySelector('.btn-buy-now').addEventListener('click', function() {
-      // Redirect to checkout page
-      console.log('Buy Now clicked - would redirect to checkout');
-      // window.location.href = '/checkout';
-    });
-    
-    // Add to Cart button functionality
-    document.querySelector('.btn-cart').addEventListener('click', function() {
-      console.log('Add to Cart clicked - would add item to cart');
-      // Add cart functionality here
+
+      // Quantity controls
+      const quantityInput = document.querySelector('.quantity-input');
+      document.querySelectorAll('.btn-quantity').forEach(btn => {
+        btn.addEventListener('click', function () {
+          let currentValue = parseInt(quantityInput.value) || 1;
+          if (this.querySelector('.fa-plus')) {
+            quantityInput.value = currentValue + 1;
+          } else if (this.querySelector('.fa-minus') && currentValue > 1) {
+            quantityInput.value = currentValue - 1;
+          }
+        });
+      });
+
+      quantityInput.addEventListener('input', function () {
+        let value = parseInt(this.value);
+        if (isNaN(value) || value < 1) {
+          this.value = 1;
+        }
+      });
+
+      // Action buttons
+      document.querySelector('.btn-cart').addEventListener('click', function () {
+        console.log('Add to Cart clicked - would add item to cart');
+      });
+
+      document.querySelector('.btn-buy-now').addEventListener('click', function () {
+        console.log('Buy Now clicked - would redirect to checkout');
+      });
     });
   </script>
-  <%-include("../../views/partials/user/footer")%>
+  <%- include("../../views/partials/user/footer") %>
+</body>
+</html>

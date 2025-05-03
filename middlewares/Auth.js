@@ -18,11 +18,9 @@ const adminAuth=(req,res,next)=>{
 
 const userAuth=(req,res,next)=>{
     if(req.session.user){
-        console.log(user,"user");
-        
         User.findById(req.session.user)
         .then(data=>{
-             if(data && !data.iSListed){
+             if(data && !data.isBlocked){
                 next();
              }else{
                 res.redirect("/login")

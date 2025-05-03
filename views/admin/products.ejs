@@ -702,7 +702,7 @@
             const searchInput = document.getElementById('searchInput').value.trim();
             const url = new URL(window.location.href);
             url.searchParams.set('search', searchInput);
-            url.searchParams.set('page', '1'); // Reset to page 1
+            url.searchParams.set('page', '1')
             window.location.href = url.toString();
         }
 
@@ -714,7 +714,6 @@
             window.location.href = url.toString();
         }
 
-        // Real-time search after delay
         let searchTimeout;
         document.getElementById('searchInput').addEventListener('input', function () {
             clearTimeout(searchTimeout);
@@ -725,7 +724,7 @@
             }
         });
 
-        // Handle Enter key
+ 
         document.getElementById('searchInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -733,7 +732,7 @@
             }
         });
 
-        // Highlight active sidebar item
+        
         document.addEventListener('DOMContentLoaded', function() {
             const sidebarItems = document.querySelectorAll('.sidebar-item');
             sidebarItems.forEach(item => {

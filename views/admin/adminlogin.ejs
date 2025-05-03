@@ -334,7 +334,7 @@
     console.log(sessionData);
     
         let sessionMessage = sessionData.dataset.message;
-        // Convert string to object if not null
+   
         if (sessionMessage !== 'null') {
             try {
                 sessionMessage = JSON.parse(sessionMessage);
@@ -345,16 +345,15 @@
             sessionMessage = null;
         }
 
-        // Display session message with SweetAlert2 on page load
      
-                // Show session message or validation errors
+     
                 document.addEventListener("DOMContentLoaded", function () {
                     if (typeof Swal === 'undefined') {
                         console.error("SweetAlert2 not loaded");
                         return;
                     }
 
-                    // Show server session message
+                
                     if (sessionMessage) {
                         let text, icon, title;
                         if (typeof sessionMessage === 'string') {

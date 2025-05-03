@@ -9,8 +9,7 @@ const categoryInfo=async (req,res) => {
         const  page=parseInt(req.query.page)||1;
         const  limit=3;
         const  skip=(page-1)*limit;
-
-        const categoryData=await  Category.find({isDeleted:true})
+        const categoryData=await  Category.find({isDeleted:false})
         .sort({createdAt:-1})
         .skip(skip)
         .limit(limit);
@@ -35,7 +34,7 @@ const categoryInfo=async (req,res) => {
         const {name,description}=req.body;
     //   console.log(name);
       
-        const  existingCategory=await Category.findOne({name,isDeleted:true});
+        const  existingCategory=await Category.findOne({name,isDeleted:false});
      
         
         if(existingCategory){
@@ -85,8 +84,8 @@ const editCategory = async (req, res) => {
         let id = req.params.id;
         const { categoryname, description } = req.body;
 
-        // Check if category name already exists (except current category)
-        const existingCategory = await Category.findOne({ name: categoryname, _id: { $ne: id } ,isDeleted:false});
+        
+        const existingCategory = await Category.findOne({ name: categoryname, _id: { $ne: id } ,isDeleted:true});
         if (existingCategory) {
             return res.status(400).json({ error: "Category already exists. Please choose a different name" });
         }
@@ -113,7 +112,7 @@ const softDeleteCategory = async (req, res) => {
         const id = req.params.id;
         const category = await Category.findByIdAndUpdate(
             id,
-            { isDeleted: false },
+            { isDeleted: true },
             { new:true}
         );
         if (!category) {
