@@ -46,7 +46,7 @@ router.post("/login",userController.login)
 router.get("/forgot-password",profileController.getforgetPass)
 router.post("/forgot-Password",profileController.forgotEmailvalid)
 router.get("/Otp-verify",profileController.loadVerifyOtp)
-router.post("/forgot-verify",profileController.otpVerify);
+router.post("/Otp-verify",profileController.otpVerify);
 router.get("/reset-password",profileController.getRestPassPage);
 router.post("/reset-password",profileController.newPasswordSet)
 router.get("/forgot-resendOtp",profileController.loadresendOtp)

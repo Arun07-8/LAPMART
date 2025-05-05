@@ -12,7 +12,7 @@ const forgotEmailvalid = async (req, res) => {
     try {
         const { email } = req.body;
       
-        const findUser = await User.findOne({ email });
+        const findUser = await User.findOne({ email,isadmin:false });
         if (!findUser) {
             return res.status(404).json({
                 success: false,
@@ -49,8 +49,6 @@ const securePassword = async (password) => {
     try {
       
         const passwordHash = await bcrypt.hash(password,saltround); 
-        console.log(passwordHash,"helloeeeeeeeeee");
-        
         return passwordHash;
     } catch (error) {
         console.error("Error hashing password:", error.message, error.stack);
@@ -105,7 +103,7 @@ const getforgetPass = async (req, res) => {
 const loadVerifyOtp = async (req, res) => {
     try {
         if (!req.session.email) {
-            return res.redirect("/email-forgot");
+            return res.redirect("/forgot-password");
         }
         res.render("forget-Otp");
     } catch (error) {
@@ -125,7 +123,6 @@ const otpVerify = async (req, res) => {
                 message: "No OTP found or session expired",
             });
         }
-
         if (new Date() > new Date(storedOtpData.expiresAt)) {
             return res.status(400).json({
                 success: false,
@@ -156,7 +153,7 @@ const otpVerify = async (req, res) => {
 const getRestPassPage = async (req, res) => {
     try {
         if (!req.session.userOtp) {
-            return res.redirect("/email-forgot");
+            return res.redirect("/forgot-password");
         }
         res.render("changepassword");
     } catch (error) {
@@ -168,12 +165,13 @@ const getRestPassPage = async (req, res) => {
 const newPasswordSet=async (req,res) => {
   try {
     const {newPass1,newPass2}=req.body;
+    console.log(newPass1);
+    
     const email=req.session.email;
     if(newPass1===newPass2){
-      console.log("heelooo");
+    
       const passwordHash=await securePassword(newPass1);
       console.log("hello",passwordHash);
-      
       await User.updateOne(
         {email:email},
         {$set:{password:passwordHash}}

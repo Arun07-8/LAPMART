@@ -6,455 +6,8 @@
     <title>Category Management</title>
     <%- include("../../views/partials/admin/header") %>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        :root {
-            --primary-color: #3056D3;
-            --secondary-color: #2748BE;
-            --success-color: #219653;
-            --danger-color: #D74742;
-            --warning-color: #F59E0B;
-            --info-color: #0EA5E9;
-            --light-color: #F8FAFC;
-            --dark-color: #1E293B;
-            --border-color: #E2E8F0;
-            --shadow-color: rgba(0, 0, 0, 0.08);
-            --text-primary: #334155;
-            --text-secondary: #64748B;
-            --bg-light: #F1F5F9;
-        }
-
-        body {
-            font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
-            background-color: #F8FAFC;
-            color: var(--text-primary);
-            font-size: 16px;
-            line-height: 1.6;
-        }
-
-        .main-content {
-            padding: 24px;
-            transition: all 0.3s ease;
-        }
-
-        /* Top Admin Bar */
-        .top-admin-bar {
-            display: flex;
-            justify-content: flex-end;
-            padding: 16px 24px;
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px var(--shadow-color);
-            margin-bottom: 24px;
-            border: 1px solid var(--border-color);
-        }
-
-        .admin-profile {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .admin-profile img {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--primary-color);
-        }
-
-        .admin-profile span {
-            font-weight: 600;
-            color: var(--dark-color);
-            font-size: 16px;
-        }
-
-        /* Navigation */
-        .navbar {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px var(--shadow-color);
-            padding: 16px 24px;
-            margin-bottom: 24px;
-            border: 1px solid var(--border-color);
-        }
-
-        .toggle-sidebar {
-            cursor: pointer;
-            font-size: 1.3rem;
-            color: var(--dark-color);
-            margin-right: 20px;
-        }
-
-        .search-input-wrapper {
-            position: relative;
-            flex-grow: 1;
-            max-width: 500px;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-secondary);
-            font-size: 16px;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 14px 16px 14px 44px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s;
-            background-color: var(--bg-light);
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(48, 86, 211, 0.15);
-            background-color: white;
-        }
-
-        .search-buttons {
-            display: flex;
-            gap: 12px;
-        }
-
-        .btn-search, .btn-clear {
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s;
-            font-size: 16px;
-            color: white;
-        }
-
-        .btn-search {
-            background-color: var(--primary-color);
-            border: none;
-        }
-
-        .btn-search:hover {
-            background-color: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-
-        .btn-clear {
-            background-color: #6B7280;
-            border: none;
-        }
-
-        .btn-clear:hover {
-            background-color: #4B5563;
-            transform: translateY(-2px);
-        }
-
-        .add-button {
-            background-color: var(--success-color);
-            border: none;
-            padding: 12px 22px;
-            border-radius: 8px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s;
-            font-size: 16px;
-            white-space: nowrap;
-            color: white;
-        }
-
-        .add-button:hover {
-            background-color: #16803F;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(33, 150, 83, 0.2);
-        }
-
-        /* Page Heading */
-        .page-heading {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 28px;
-            padding-left: 12px;
-        }
-
-        .page-heading i {
-            font-size: 2.2rem;
-            color: var(--primary-color);
-        }
-
-        .page-heading h1 {
-            font-size: 2.5rem;
-            font-weight: 600;
-            color: var(--dark-color);
-            margin: 0;
-        }
-
-        /* Table Container */
-    /* Table Container */
-/* Table Container */
-.category-management-container {
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px var(--shadow-color);
-    padding: 28px;
-    margin-bottom: 32px;
-    border: 1px solid var(--border-color);
-}
-
-/* Table Styling */
-.table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-}
-
-.table-header {
-    background-color: var(--bg-light);
-}
-
-.table th {
-    padding: 24px 20px; /* Increased padding for larger appearance */
-    font-weight: 700;
-    color: var(--dark-color);
-    text-transform: uppercase;
-    font-size: 1.25rem; /* Slightly larger font size */
-    letter-spacing: 0.8px;
-    border-bottom: 2px solid var(--border-color);
-    text-align: center;
-    vertical-align: middle;
-    line-height: 1.4;
-}
-
-.table td {
-    padding: 24px 20px; /* Increased padding */
-    vertical-align: middle;
-    border-bottom: 1px solid var(--border-color);
-    font-size: 1.2rem; /* Slightly larger font size */
-    text-align: center;
-}
-
-.table tr:last-child td {
-    border-bottom: none;
-}
-
-.table tr:hover {
-    background-color: rgba(48, 86, 211, 0.04);
-}
-
-/* Status Buttons */
-.btn-status {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 20px;
-    border-radius: 24px;
-    font-size: 1rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    min-width: 120px;
-    height: 40px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    border: 1px solid transparent;
-}
-
-.btn-listed {
-    background: linear-gradient(135deg, #219653 0%, #2ecc71 100%);
-    color: white;
-    border-color: #1b8045;
-}
-
-.btn-listed:hover {
-    background: linear-gradient(135deg, #1b8045 0%, #27ae60 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(33, 150, 83, 0.3);
-}
-
-.btn-listed2 {
-    background: linear-gradient(135deg, #D74742 0%, #e74c3c 100%);
-    color: white;
-    border-color: #b93c38;
-}
-
-.btn-listed2:hover {
-    background: linear-gradient(135deg, #b93c38 0%, #c0392b 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(215, 71, 66, 0.3);
-}
-
-/* Action Buttons */
-.action-buttons {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 16px;
-    min-height: 56px; /* Increased to match larger content */
-    width: 100%;
-}
-
-.btn-action {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 50px; /* Slightly larger */
-    height: 50px;
-    border-radius: 10px;
-    transition: all 0.3s;
-    font-size: 1.25rem; /* Larger icons */
-    border: none;
-    line-height: 1;
-}
-
-.btn-edit {
-    background-color: rgba(245, 158, 11, 0.1);
-    color: var(--warning-color);
-}
-
-.btn-edit:hover {
-    background-color: var(--warning-color);
-    color: white;
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
-}
-
-.btn-delete {
-    background-color: rgba(215, 71, 66, 0.1);
-    color: var(--danger-color);
-    border: none;
-}
-
-.btn-delete:hover {
-    background-color: var(--danger-color);
-    color: white;
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(215, 71, 66, 0.2);
-}
-
-/* Pagination */
-.pagination-container {
-    display: flex;
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically */
-    margin-top: 32px;
-    width: 100%; /* Full width for consistent centering */
-    padding: 16px 0; /* Better spacing */
-}
-
-.pagination {
-    display: flex;
-    align-items: center;
-    padding-left: 0;
-    list-style: none;
-    border-radius: 0.25rem;
-    gap: 8px; /* Increased gap for spacing */
-    margin: 0; /* Remove default margins */
-}
-
-.page-item .page-link {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 20px;
-    line-height: 1.5;
-    color: var(--primary-color);
-    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%); /* Subtle gradient */
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    font-weight: 600;
-    font-size: 1rem;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    min-width: 40px;
-    text-align: center;
-}
-
-.page-item .page-link:hover {
-    z-index: 2;
-    color: var(--secondary-color);
-    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-    border-color: var(--primary-color);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(48, 86, 211, 0.2);
-}
-
-.page-item.active .page-link {
-    z-index: 3;
-    color: #fff;
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-    border-color: var(--primary-color);
-    box-shadow: 0 4px 12px rgba(48, 86, 211, 0.3);
-}
-
-.page-item.disabled .page-link {
-    color: var(--text-secondary);
-    background: #f8fafc;
-    border-color: var(--border-color);
-    box-shadow: none;
-    pointer-events: none;
-    cursor: not-allowed;
-}
-
-/* Responsive Design */
-@media (max-width: 992px) {
-    .search-buttons {
-        display: none;
-    }
-    .page-heading h1 {
-        font-size: 2rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .table th {
-        font-size: 1.15rem; /* Adjusted for smaller screens */
-        padding: 18px 14px;
-    }
-    .table td {
-        font-size: 1.1rem;
-        padding: 18px 14px;
-    }
-    .btn-status {
-        min-width: 100px;
-        height: 36px;
-        font-size: 0.9rem;
-    }
-    .btn-action {
-        width: 44px;
-        height: 44px;
-        font-size: 1.15rem;
-    }
-    .page-item .page-link {
-        padding: 10px 16px;
-        font-size: 0.9rem;
-        min-width: 36px;
-    }
-}
-
-@media (max-width: 576px) {
-    .action-buttons {
-        flex-direction: column;
-        gap: 10px;
-        justify-content: center;
-        align-items: center;
-    }
-    .page-heading {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-    .main-content {
-        padding: 16px;
-    }
-    .pagination-container {
-        padding: 12px 0;
-    }
-}
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin-css/categorymanagement.css" type="text/css">
 </head>
 <body>
     <section>
@@ -477,15 +30,20 @@
                         </span>
                         <div class="search-input-wrapper">
                             <i class="fas fa-search search-icon"></i>
-                            <input type="text" class="search-input" id="searchInput" placeholder="Search categories..." value="">
+                            <input type="text" class="search-input" id="searchInput" 
+                                   placeholder="Search by category name..." 
+                                   value="<%= search || '' %>"
+                                   aria-label="Search categories"
+                                   autocomplete="off">
+                            <i class="fas fa-spinner fa-spin search-loading-icon" id="searchLoadingIcon" style="display: none;"></i>
                         </div>
                     </div>
                     <div class="d-flex align-items-center gap-3">
                         <div class="search-buttons">
-                            <button class="btn btn-search" onclick="triggerSearch()">
+                            <button class="btn btn-search" onclick="triggerSearch()" aria-label="Search categories">
                                 <i class="fas fa-search"></i> Search
                             </button>
-                            <button class="btn btn-clear" onclick="clearSearch()">
+                            <button class="btn btn-clear" onclick="clearSearch()" aria-label="Clear search">
                                 <i class="fas fa-times"></i> Clear
                             </button>
                         </div>
@@ -516,38 +74,49 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <% cat.reverse().forEach((category, index) => { %>
+                                <% if (cat.length === 0) { %>
                                     <tr>
-                                        <td><%= category.name %></td>
-                                        <td><%= category.description %></td>
-                                        <td>
-                                            <%
-                                                const createdDate = new Date(category.createdAt);
-                                                const day = String(createdDate.getDate()).padStart(2, '0');
-                                                const month = String(createdDate.getMonth() + 1).padStart(2, '0');
-                                                const year = createdDate.getFullYear();
-                                            %>
-                                            <%= `${day}-${month}-${year}` %>
-                                        </td>
-                                        <td>
-                                            <% if (category.isListed) { %>
-                                             <button class="btn-status btn-listed" onclick="handleListedCatClick('<%= category._id %>')" aria-label="Unlist category">Listed</button>
-                                            <% } else { %>
-                                              <button class="btn-status btn-listed2" onclick="handleUnlistedCatClick('<%= category._id %>')" aria-label="List category">Unlisted</button>
-                                            <% } %>
-                                        </td>
-                                        <td>
-                                            <div class="action-buttons">
-                                                <button class="btn-action btn-edit" data-bs-toggle="modal" data-bs-target="#editCategoryModal" onclick="handleEditClick('<%= category._id %>', '<%= category.name %>', '<%= category.description %>')">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-                                                <button class="btn-action btn-delete" onclick="handleSoftDeleteClick('<%= category._id %>')" aria-label="Soft delete category">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
+                                        <td colspan="5" style="text-align: center; padding: 2rem;">
+                                            <div style="color: var(--text-secondary);">
+                                                <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                                                <p>No categories found matching your search criteria.</p>
                                             </div>
                                         </td>
                                     </tr>
-                                <% }) %>
+                                <% } else { %>
+                                    <% cat.reverse().forEach((category) => { %>
+                                        <tr>
+                                            <td><%= category.name %></td>
+                                            <td><%= category.description %></td>
+                                            <td>
+                                                <%
+                                                    const createdDate = new Date(category.createdAt);
+                                                    const day = String(createdDate.getDate()).padStart(2, '0');
+                                                    const month = String(createdDate.getMonth() + 1).padStart(2, '0');
+                                                    const year = createdDate.getFullYear();
+                                                %>
+                                                <%= `${day}-${month}-${year}` %>
+                                            </td>
+                                            <td>
+                                                <% if (category.isListed) { %>
+                                                    <button class="btn-status btn-listed" onclick="handleListedCatClick('<%= category._id %>')" aria-label="Unlist category">Listed</button>
+                                                <% } else { %>
+                                                    <button class="btn-status btn-listed2" onclick="handleUnlistedCatClick('<%= category._id %>')" aria-label="List category">Unlisted</button>
+                                                <% } %>
+                                            </td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <button class="btn-action btn-edit" data-bs-toggle="modal" data-bs-target="#editCategoryModal" onclick="handleEditClick('<%= category._id %>', '<%= category.name %>', '<%= category.description %>')">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                    <button class="btn-action btn-delete" onclick="handleSoftDeleteClick('<%= category._id %>')" aria-label="Soft delete category">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                <% } %>
                             </tbody>
                         </table>
                     </div>
@@ -559,23 +128,43 @@
                         <ul class="pagination">
                             <% if (currentPage > 1) { %>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
-                                        <span aria-hidden="true">«</span>
+                                    <a class="page-link" href="?page=<%= currentPage - 1 %>&search=<%= encodeURIComponent(search || '') %>" aria-label="Previous">
+                                        <i class="fas fa-chevron-left"></i>
                                     </a>
+                                </li>
+                            <% } else { %>
+                                <li class="page-item disabled">
+                                    <span class="page-link">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </span>
                                 </li>
                             <% } %>
 
-                            <% for (let i = 1; i <= totalPages; i++) { %>
+                            <% 
+                            let startPage = Math.max(1, currentPage - 2);
+                            let endPage = Math.min(totalPages, startPage + 4);
+                            
+                            if (endPage - startPage < 4 && totalPages > 5) {
+                                startPage = Math.max(1, endPage - 4);
+                            }
+                            
+                            for(let i = startPage; i <= endPage; i++) { %>
                                 <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
-                                    <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                                    <a class="page-link" href="?page=<%= i %>&search=<%= encodeURIComponent(search || '') %>"><%= i %></a>
                                 </li>
                             <% } %>
 
                             <% if (currentPage < totalPages) { %>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
-                                        <span aria-hidden="true">»</span>
+                                    <a class="page-link" href="?page=<%= currentPage + 1 %>&search=<%= encodeURIComponent(search || '') %>" aria-label="Next">
+                                        <i class="fas fa-chevron-right"></i>
                                     </a>
+                                </li>
+                            <% } else { %>
+                                <li class="page-item disabled">
+                                    <span class="page-link">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
                                 </li>
                             <% } %>
                         </ul>
@@ -627,7 +216,7 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="editCategoryForm" action="/admin/editCategory/:id" method="post" onsubmit="return handleEditFormSubmit(event)">
+                <form id="editCategoryForm" onsubmit="return handleEditFormSubmit(event)">
                     <div class="modal-body">
                         <input type="hidden" id="editCategoryId" name="categoryId">
                         <div class="form-group mb-4">
@@ -651,28 +240,81 @@
     </div>
 
     <script>
+        // Debounce function to limit search requests
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // Trigger search with loading state
+        async function triggerSearch() {
+            const searchInput = document.getElementById('searchInput').value.trim();
+            const loadingIcon = document.getElementById('searchLoadingIcon');
+            loadingIcon.style.display = 'block';
+
+            try {
+                const url = new URL(window.location.href);
+                url.searchParams.set('search', searchInput);
+                url.searchParams.set('page', '1');
+                window.location.href = url.toString();
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to perform search. Please try again.'
+                });
+            } finally {
+                loadingIcon.style.display = 'none';
+            }
+        }
+
+        // Clear search and reset
+        function clearSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const loadingIcon = document.getElementById('searchLoadingIcon');
+            searchInput.value = '';
+            loadingIcon.style.display = 'none';
+
+            const url = new URL(window.location.href);
+            url.searchParams.delete('search');
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
+        }
+
+        // Search input event listeners
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', debounce(function () {
+            if (this.value.length >= 2 || this.value.length === 0) {
+                triggerSearch();
+            }
+        }, 500));
+
+        searchInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                triggerSearch();
+            }
+        });
+
+        // Form submission handlers
         function handleFormSubmit(event) {
             event.preventDefault();
-
-            if (!validateForm()) {
-                return false;
-            }
+            if (!validateForm()) return false;
 
             const name = document.getElementById("categoryName").value.trim();
             const description = document.getElementById("categoryDescription").value.trim();
 
             fetch("/admin/addCategory", {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, description })
             })
             .then(response => response.json().then(data => ({ ok: response.ok, status: response.status, data })))
             .then(({ ok, status, data }) => {
-                if (!ok) {
-                    throw new Error(data.error || `Failed to add category (Status: ${status})`);
-                }
+                if (!ok) throw new Error(data.error || `Failed to add category (Status: ${status})`);
                 Swal.fire({
                     icon: 'success',
                     title: 'Category Added',
@@ -698,10 +340,7 @@
 
         function handleEditFormSubmit(event) {
             event.preventDefault();
-
-            if (!validateEditForm()) {
-                return;
-            }
+            if (!validateEditForm()) return;
 
             const categoryId = document.getElementById('editCategoryId').value;
             const name = document.getElementById('editCategoryName').value.trim();
@@ -709,16 +348,12 @@
 
             fetch(`/admin/editCategory/${categoryId}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ categoryname: name, description })
             })
             .then(response => response.json().then(data => ({ ok: response.ok, status: response.status, data })))
             .then(({ ok, status, data }) => {
-                if (!ok) {
-                    throw new Error(data.error || `Failed to update category (Status: ${status})`);
-                }
+                if (!ok) throw new Error(data.error || `Failed to update category (Status: ${status})`);
                 Swal.fire({
                     icon: 'success',
                     title: 'Category Updated',
@@ -738,23 +373,9 @@
                     text: error.message || 'An error occurred while updating the category.'
                 });
             });
-        }   
-        function displayErrorMessage(elementId, message) {
-    const errorElement = document.getElementById(elementId);
-    if (errorElement) {
-        errorElement.innerText = message;
-        errorElement.style.display = "block";
-    }
-}
+        }
 
-function clearErrorMessages() {
-    const errorElements = document.getElementsByClassName("error-message");
-    Array.from(errorElements).forEach(element => {
-        element.innerText = "";
-        element.style.display = "none";
-    });
-}
-
+        // Validation functions
         function validateForm() {
             clearErrorMessages();
             const name = document.getElementById("categoryName").value.trim();
@@ -799,136 +420,127 @@ function clearErrorMessages() {
             return isValid;
         }
 
+        // Other functions
         function handleEditClick(categoryId, categoryName, categoryDescription) {
             document.getElementById('editCategoryId').value = categoryId;
             document.getElementById('editCategoryName').value = categoryName;
             document.getElementById('editCategoryDescription').value = categoryDescription;
         }
 
-      // Unlist a listed category (Listed → Unlisted)
-async function handleListedCatClick(categoryId) {
-    const button = document.querySelector(`button[onclick="handleListedCatClick('${categoryId}')"]`);
-    button.setAttribute('aria-busy', 'true');
-    button.disabled = true;
+        async function handleListedCatClick(categoryId) {
+            const button = document.querySelector(`button[onclick="handleListedCatClick('${categoryId}')"]`);
+            button.setAttribute('aria-busy', 'true');
+            button.disabled = true;
 
-    const result = await Swal.fire({
-        title: 'Are you sure?',
-        text: 'This will unlist the category, making it hidden.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, unlist it!',
-        cancelButtonText: 'Cancel'
-    });
-
-    if (result.isConfirmed) {
-        try {
-            const response = await fetch(`/admin/unlistedCategory/${categoryId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                    // Add if needed: 'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-                }
-            });
-
-            // Check for JSON response
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                const text = await response.text();
-                console.error('Non-JSON response:', text);
-                throw new Error('Server returned non-JSON response, possibly due to authentication failure');
-            }
-
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error || 'Failed to unlist category');
-
-            Swal.fire({
-                icon: 'success',
-                title: 'Category Unlisted',
-                text: data.message || 'Category has been unlisted successfully',
-                timer: 1500,
-                showConfirmButton: false
-            }).then(() => location.reload());
-        } catch (error) {
-            console.error('Error unlisting category:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error.message || 'An error occurred while unlisting the category'
-            });
-        } finally {
-            button.setAttribute('aria-busy', 'false');
-            button.disabled = false;
-        }
-    } else {
-        button.setAttribute('aria-busy', 'false');
-        button.disabled = false;
-    }
-}
-
-// List an unlisted category (Unlisted → Listed)
-async function handleUnlistedCatClick(categoryId) {
-    const button = document.querySelector(`button[onclick="handleUnlistedCatClick('${categoryId}')"]`);
-    button.setAttribute('aria-busy', 'true');
-    button.disabled = true;
-
-    const result = await Swal.fire({
-        title: 'Are you sure?',
-        text: 'This will list the category, making it visible.',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, list it!',
-        cancelButtonText: 'Cancel'
-    });
-
-    if (result.isConfirmed) {
-        try {
-            const response = await fetch(`/admin/listedCategory/${categoryId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                    // Add if needed: 'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-                }
-            });
-
-            // Check for JSON response
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                const text = await response.text();
-                console.error('Non-JSON response:', text);
-                throw new Error('Server returned non-JSON response, possibly due to authentication failure');
-            }
-
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error || 'Failed to list category');
-
-            Swal.fire({
-                icon: 'success',
-                title: 'Category Listed',
-                text: data.message || 'Category has been listed successfully',
-                timer: 1500,
-                showConfirmButton: false
-            }).then(() => location.reload());
-        } catch (error) {
-            console.error('Error listing category:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error.message || 'An error occurred while listing the category'
-            });
-        } finally {
-            button.setAttribute('aria-busy', 'false');
-            button.disabled = false;
-        }
-    } else {
-        button.setAttribute('aria-busy', 'false');
-        button.disabled = false;
-    }
-}
-
-async function handleSoftDeleteClick(categoryId) {
             const result = await Swal.fire({
                 title: 'Are you sure?',
-                text: 'This will mark the Category as deleted. You can restore it later.',
+                text: 'This will unlist the category, making it hidden.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, unlist it!',
+                cancelButtonText: 'Cancel'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/admin/unlistedCategory/${categoryId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        const text = await response.text();
+                        console.error('Non-JSON response:', text);
+                        throw new Error('Server returned non-JSON response');
+                    }
+
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Failed to unlist category');
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Category Unlisted',
+                        text: data.message || 'Category has been unlisted successfully',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
+                } catch (error) {
+                    console.error('Error unlisting category:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.message || 'An error occurred while unlisting the category'
+                    });
+                } finally {
+                    button.setAttribute('aria-busy', 'false');
+                    button.disabled = false;
+                }
+            } else {
+                button.setAttribute('aria-busy', 'false');
+                button.disabled = false;
+            }
+        }
+
+        async function handleUnlistedCatClick(categoryId) {
+            const button = document.querySelector(`button[onclick="handleUnlistedCatClick('${categoryId}')"]`);
+            button.setAttribute('aria-busy', 'true');
+            button.disabled = true;
+
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: 'This will list the category, making it visible.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, list it!',
+                cancelButtonText: 'Cancel'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/admin/listedCategory/${categoryId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        const text = await response.text();
+                        console.error('Non-JSON response:', text);
+                        throw new Error('Server returned non-JSON response');
+                    }
+
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Failed to list category');
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Category Listed',
+                        text: data.message || 'Category has been listed successfully',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
+                } catch (error) {
+                    console.error('Error listing category:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.message || 'An error occurred while listing the category'
+                    });
+                } finally {
+                    button.setAttribute('aria-busy', 'false');
+                    button.disabled = false;
+                }
+            } else {
+                button.setAttribute('aria-busy', 'false');
+                button.disabled = false;
+            }
+        }
+
+        async function handleSoftDeleteClick(categoryId) {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: 'This will mark the category as deleted. You can restore it later.',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, delete it!',
@@ -939,24 +551,19 @@ async function handleSoftDeleteClick(categoryId) {
                 try {
                     const response = await fetch(`/admin/categoryDelete/${categoryId}`, {
                         method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        }
+                        headers: { 'Content-Type': 'application/json' }
                     });
 
                     const data = await response.json();
-
-                    if (!response.ok) {
-                        throw new Error(data.error || 'Failed to soft delete category');
-                    }
+                    if (!response.ok) throw new Error(data.error || 'Failed to soft delete category');
 
                     Swal.fire({
                         icon: 'success',
                         title: 'Deleted',
-                        text: data.message || 'Category has been soft deleted'
-                    }).then(() => {
-                        location.reload();
-                    });
+                        text: data.message || 'Category has been soft deleted',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
                 } catch (error) {
                     Swal.fire({
                         icon: 'error',
@@ -965,6 +572,22 @@ async function handleSoftDeleteClick(categoryId) {
                     });
                 }
             }
+        }
+
+        function displayErrorMessage(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            if (errorElement) {
+                errorElement.innerText = message;
+                errorElement.style.display = "block";
+            }
+        }
+
+        function clearErrorMessages() {
+            const errorElements = document.getElementsByClassName("error-message");
+            Array.from(errorElements).forEach(element => {
+                element.innerText = "";
+                element.style.display = "none";
+            });
         }
     </script>
     <%- include("../../views/partials/admin/footer") %>

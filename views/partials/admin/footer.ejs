@@ -7,34 +7,24 @@
         const mainContent = document.getElementById('main-content');
         const toggleSidebar = document.getElementById('toggle-sidebar');
         const errorContainer = document.getElementById('error-container');
-
-        // Sidebar toggle functionality
         toggleSidebar.addEventListener('click', () => {
             sidebar.classList.toggle('collapsed');
             mainContent.classList.toggle('expanded');
         });
-
-        // Example: Show 404 error conditionally (for demo purposes)
-        // You can replace this logic with your actual condition
-        const show404 = true; // Set to true to display the 404 error
+        const show404 = true; 
         if (show404) {
             errorContainer.classList.add('active');
         }
-        // Highlight active menu item based on current URL
-const navLinks = document.querySelectorAll('.sidebar .nav-link');
-const currentPath = window.location.pathname;
-
-// First remove all active classes
-navLinks.forEach(link => {
-  link.classList.remove('active');
-});
-
-// Then add active class to the matching link
-navLinks.forEach(link => {
-  const href = link.getAttribute('href');
-  if (href === currentPath) {
-    link.classList.add('active');
-  }
+         const navLinks = document.querySelectorAll('.sidebar .nav-link');
+       const currentPath = window.location.pathname;
+       navLinks.forEach(link => {
+        link.classList.remove('active');
+      });
+       navLinks.forEach(link => {
+       const href = link.getAttribute('href');
+       if (href === currentPath) {
+        link.classList.add('active');
+      }
 });
     </script>
 </body>

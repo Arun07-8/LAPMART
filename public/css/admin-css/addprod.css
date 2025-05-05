@@ -1,3 +1,37 @@
+.form-group .error-message {
+    color: #dc3545 !important;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-top: 0.25rem;
+    padding: 0.25rem 0;
+    display: none;
+    line-height: 1.2;
+}
+
+.form-group .error-message.active {
+    display: block !important;
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid,
+.form-group input[type="file"].is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+    background-image: none !important;
+    padding-right: 0.75rem !important;
+}
+
+.form-group .error-message[aria-live="polite"] {
+    display: none;
+}
+
+.form-group .error-message.active[aria-live="polite"] {
+    display: block !important;
+}
 body {
     background-color: #1a1a1a;
     color: #fff;

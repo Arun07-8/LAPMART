@@ -1,29 +1,39 @@
 const Brand = require("../../models/BrandSchema");
 
-const brandInfo=async (req,res) => {
-    try{
+const brandInfo = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 3;
+        const skip = (page - 1) * limit;
+        const search = req.query.search || '';
 
-        const  page=parseInt(req.query.page)||1;
-        const  limit=3;
-        const  skip=(page-1)*limit;
-        const branddata=await  Brand.find({isDeleted:false})
-        .sort({createdAt:-1})
-        .skip(skip)
-        .limit(limit);
+     
+        const query = { isDeleted: false };
+        if (search) {
+            query.name = { $regex: search, $options: 'i' };
+        }
 
-        const  totalBrands=await Brand.countDocuments();
-        const  totalPages=Math.ceil(totalBrands/limit); 
-        res.render("brandMangement",{
-            brand:branddata,
-            currentPage:page,
-            totalPages:totalPages,
-            totalBrands:totalBrands
-        }) 
-    }catch(error){
-       console.error(error);
-       res.redirect("/admin/pagenotFounderror")
+        const branddata = await Brand.find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+
+        const totalBrands = await Brand.countDocuments(query);
+        const totalPages = Math.ceil(totalBrands / limit);
+
+        res.render("brandMangement", {
+            brand: branddata,
+            currentPage: page,
+            totalPages: totalPages,
+            totalBrands: totalBrands,
+            search: search  
+        });
+    } catch (error) {
+        console.error('Error in brandInfo:', error);
+        res.redirect("/admin/pagenotFounderror");
     }
-}
+};
 //  add Brand
 const addbrand=async (req,res) => {
     try {

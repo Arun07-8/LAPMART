@@ -43,8 +43,8 @@ router.patch("/deleteBrand/:id",adminAuth,brandController.softdeleteBrand);
 router.get("/products",adminAuth,productController.produtInfo);
 router.get("/addProducts",adminAuth,productController.loadaddProduct)
 router.post("/addProducts",adminAuth,uploads,productController.addProducts)
-router.get("/listedProduct",adminAuth,productController.listedProduct);
-router.get("/unlistedProduct",adminAuth,productController.unlistedProduct);
+router.patch("/listedProduct/:id",adminAuth,productController.listedProduct);
+router.patch("/unlistedProduct/:id",adminAuth,productController.unlistedProduct);
 router.get("/editProduct/:id",adminAuth,productController.loadEditProduct)
 router.post("/editProduct/:id",adminAuth,uploads,productController.editProduct)
 router.delete("/remove-product-image/:productId/:imageIndex",adminAuth,productController.removeProductImage);

@@ -5,16 +5,21 @@ const User=require("../../models/userSchema");
 //  user Info rendering
 const customerInfo = async (req, res) => {
     try {
-        let search = req.query.search || "";
+        let search = decodeURIComponent(req.query.search || "").trim(); 
         let page = parseInt(req.query.page) || 1;
         const limit = 3;
-
+    
+        const searchTerms = search.split(/\s+/).filter(term => term.length > 0);
+        const regexQueries = searchTerms.map(term => ({
+            $or: [
+                { name: { $regex: term, $options: "i" } },
+                { email: { $regex: term, $options: "i" } }
+            ]
+        }));
+    
         const query = {
             isadmin: false,
-            $or: [
-                { name: { $regex: search, $options: "i" } },
-                { email: { $regex: search, $options: "i" } }
-            ]
+            ...(searchTerms.length > 0 ? { $and: regexQueries } : {})
         };
 
         const userData = await User.find(query)/*  */
