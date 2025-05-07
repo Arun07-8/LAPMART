@@ -12,11 +12,17 @@ const forgotEmailvalid = async (req, res) => {
     try {
         const { email } = req.body;
       
-        const findUser = await User.findOne({ email,isadmin:false });
+        const findUser = await User.findOne({ email,isadmin:false});
         if (!findUser) {
             return res.status(404).json({
                 success: false,
                 message: 'User with this email does not exist',
+            });
+        }
+        if (findUser.googleid) {
+            return res.status(404).json({
+                success: false,
+                message: 'Can not change password this google account',
             });
         }
         const otp = generateOtp();
@@ -195,15 +201,6 @@ const loadresendOtp = async (req, res) => {
                 message: "Email not found in session. Please start over.",
             });
         }
-
-        const findUser = await User.findOne({ email });
-        if (!findUser) {
-            return res.status(404).json({
-                success: false,
-                message: "User with this email does not exist",
-            });
-        }
-
         const otp = generateOtp();
         const otpExpiration = new Date(Date.now() + 30 * 1000); // OTP expires in 30 seconds
         const emailSent = await sendVerificationEmail(email, otp);

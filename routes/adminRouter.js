@@ -13,8 +13,8 @@ const {uploads}=require("../config/multer")
 router.get("/pagenotFounderror",adminController.pagenotFounderror);
 
 //  Admin Login
-router.get("/login",adminAuth,adminController.loadLogin);
-router.post("/login",adminAuth,adminController.login);
+router.get("/login",adminController.loadLogin);
+router.post("/login",adminController.login);
 router.get("/dashBoard",adminAuth,adminController.loadDashbard);
 router.get("/logout",adminController.logout);
 
@@ -42,12 +42,12 @@ router.patch("/deleteBrand/:id",adminAuth,brandController.softdeleteBrand);
 //  Products Managment
 router.get("/products",adminAuth,productController.produtInfo);
 router.get("/addProducts",adminAuth,productController.loadaddProduct)
-router.post("/addProducts",adminAuth,uploads,productController.addProducts)
+router.post("/addProduct",adminAuth,uploads,productController.addProducts)
 router.patch("/listedProduct/:id",adminAuth,productController.listedProduct);
 router.patch("/unlistedProduct/:id",adminAuth,productController.unlistedProduct);
 router.get("/editProduct/:id",adminAuth,productController.loadEditProduct)
 router.post("/editProduct/:id",adminAuth,uploads,productController.editProduct)
-router.delete("/remove-product-image/:productId/:imageIndex",adminAuth,productController.removeProductImage);
+router.delete("/remove-product-image/:productId/:index",adminAuth,productController.removeProductImage);
 router.post("/deleteImage",adminAuth,productController.deleteProductImage)
 router.patch("/deleteProducts/:id",adminAuth,productController.deleteProduct)
 module.exports=router;

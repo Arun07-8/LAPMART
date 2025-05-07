@@ -64,94 +64,99 @@ const loadaddProduct = async (req, res) => {
     }
 };
 
+
+
 const addProducts = async (req, res) => {
     try {
-        const products = req.body;
-        
+        console.log('req.body:', req.body);
+        console.log('req.files:', req.files);
+
+        // Access fields directly from req.body
+        const {
+            productName,
+            description,
+            brand,
+            category,
+            regularPrice,
+            salePrice,
+            quantity,
+            processor,
+            graphicsCard,
+            ram,
+            Storage,
+            display,
+            operatingSystem,
+            Battery,
+            Weight,
+            Warranty,
+            additionalFeatures
+        } = req.body;
+
+        // Check if product already exists
         const productExist = await Product.findOne({
-            productName: products.productName.trim(), 
+            productName: productName.trim(),
             isDeleted: false
         });
-        
+
+        console.log("test ====================")
+
         if (productExist) {
             return res.status(400).json({ error: 'Product already exists' });
         }
-        
-        // Create new product
-        const newProduct = new Product({
-            productName: products.productName,
-            description: products.description,
-            brand: products.brand,
-            category: products.category,
-            regularPrice: parseFloat(products.regularPrice),
-            salePrice: parseFloat(products.salePrice),
-            createdOn: new Date(),
-            quantity: parseInt(products.quantity),
-            productImage: [],
-            status: 'Available',
-            processor: products.processor || '',
-            graphicsCard: products.graphicsCard || '',
-            ram: products.ram || '',
-            Storage: products.Storage || '',
-            display: products.display || '',
-            operatingSystem: products.operatingSystem || '',
-            Battery: products.Battery || '',
-            Weight: products.Weight || '',
-            additionalFeatures: products.additionalFeatures || '',
-            Warranty: products.Warranty || ''
-        });
 
-        let images = [];
-        if (req.files && req.files.images) {
-            const files = Array.isArray(req.files.images) ? req.files.images : [req.files.images];
-            
-            for (let i = 0; i < files.length && i < 4; i++) {
-                const file = files[i];
-                
-                try {
-                    const result = await cloudinary.uploader.upload(file.path, {
-                        folder: 'Uploads',
-                        resource_type: 'image',
-                        quality: 'auto:good',
-                        fetch_format: 'auto',
-                        transformation: [{ width: 800, crop: 'limit' }]
-                    })
-                    images.push({
-                        url: result.secure_url,
-                        public_id: result.public_id
-                    });
-                    
-                    fs.unlink(file.path, (err) => {
-                        if (err) console.error(`Error removing temp file: ${file.path}`, err);
-                    });
-                } catch (uploadError) {
-                    console.error(`Error uploading image ${i + 1} to Cloudinary:`, uploadError);
-                    fs.unlink(file.path, (err) => {
-                        if (err) console.error(`Error removing temp file: ${file.path}`, err);
-                    });
-                    return res.status(500).json({ 
-                        error: `Error uploading image: ${uploadError.message}`,
-                        details: uploadError.message 
-                    });
-                }
-            }
+        // Validate images
+        if (!req.files || req.files.length < 2 || req.files.length > 5) {
+            return res.status(400).json({
+                error: `Please upload between 2 and 5 images. Received: ${req.files ? req.files.length : 0}.`
+            });
         }
 
-        newProduct.productImage = images.map(img => img.url);
+        // Use Cloudinary URLs from req.files
+        const images = req.files.map(file => ({
+            url: file.path,
+            public_id: file.filename
+        }));
+
+        // Create new product
+        const newProduct = new Product({
+            productName,
+            description,
+            brand,
+            category,
+            regularPrice: parseFloat(regularPrice),
+            salePrice: parseFloat(salePrice),
+            createdOn: new Date(),
+            quantity: parseInt(quantity),
+            productImage: images.map(img => img.url),
+            status: 'Available',
+            processor: processor || '',
+            graphicsCard: graphicsCard || '',
+            ram: ram || '',
+            Storage: Storage || '',
+            display: display || '',
+            operatingSystem: operatingSystem || '',
+            Battery: Battery || '',
+            Weight: Weight || '',
+            additionalFeatures: additionalFeatures || '',
+            Warranty: Warranty || ''
+        });
+
         const savedProduct = await newProduct.save();
-        return res.status(200).json({ 
-            success: true, 
+        return res.status(200).json({
+            success: true,
             message: 'Product added successfully',
             productId: savedProduct._id
         });
     } catch (error) {
         console.error('Error adding product:', error);
-        return res.status(500).json({ 
-            error: 'Internal server error', 
-            details: error.message 
+        return res.status(500).json({
+            error: 'Internal server error',
+            details: error.message
         });
     }
 };
+
+module.exports = { addProducts };
 const deleteImageFromCloudinary = async (publicId) => {
     if (!publicId) return;
     
@@ -215,8 +220,6 @@ const deleteImageFromCloudinary = async (publicId) => {
             res.redirect("/admin/pagenotFounderror")
         }
     }
-
-    
     const editProduct = async (req, res) => {
         try {
             const { id } = req.params;
@@ -226,7 +229,6 @@ const deleteImageFromCloudinary = async (publicId) => {
                 return res.status(400).json({ success: false, message: 'Invalid product ID' });
             }
     
-         
             const updatedFields = {
                 productName: data.productName ? data.productName.trim() : '',
                 description: data.description || '',
@@ -235,8 +237,6 @@ const deleteImageFromCloudinary = async (publicId) => {
                 regularPrice: parseFloat(data.regularPrice) || 0,
                 salePrice: parseFloat(data.salePrice) || 0,
                 quantity: parseInt(data.quantity) || 0,
-                productImage: [], 
-                status: 'Available',
                 processor: data.processor || '',
                 graphicsCard: data.graphicsCard || '',
                 ram: data.ram || '',
@@ -247,16 +247,162 @@ const deleteImageFromCloudinary = async (publicId) => {
                 Weight: data.Weight || '',
                 additionalFeatures: data.additionalFeatures || '',
                 Warranty: data.Warranty || '',
+                status: 'Available',
             };
     
+            // Validate required fields
+            const requiredFields = [
+                'productName', 'description', 'brand', 'category', 'regularPrice', 
+                'salePrice', 'quantity', 'processor', 'graphicsCard', 'ram', 
+                'Storage', 'display', 'operatingSystem', 'Battery', 'Weight', 'Warranty'
+            ];
+            for (const field of requiredFields) {
+                if (!updatedFields[field]) {
+                    return res.status(400).json({ 
+                        success: false, 
+                        message: `${field} is required` 
+                    });
+                }
+            }
     
             const product = await Product.findById(id);
             if (!product) {
                 return res.status(404).json({ success: false, message: 'Product not found' });
             }
     
+            // IMPORTANT: Start with existing images
             updatedFields.productImage = [...product.productImage];
-
+            console.log("Existing images:", updatedFields.productImage);
+    
+            // Process new images if they exist
+            if (req.files && req.files.images) {
+                // Handle single image or multiple images
+                const images = Array.isArray(req.files.images) ? req.files.images : [req.files.images];
+                console.log(`Processing ${images.length} new images`);
+    
+                for (let i = 0; i < images.length; i++) {
+                    const file = images[i];
+                    console.log(`Processing image ${i + 1}: ${file.name}`);
+    
+                    try {
+                        // Upload image to Cloudinary
+                        const result = await new Promise((resolve, reject) => {
+                            const uploadStream = cloudinary.uploader.upload_stream(
+                                {
+                                    folder: 'Uploads',
+                                    resource_type: 'image',
+                                    quality: 'auto:good',
+                                    fetch_format: 'auto',
+                                    transformation: [{ width: 800, crop: "limit" }]
+                                },
+                                (error, result) => {
+                                    if (error) reject(error);
+                                    else resolve(result);
+                                }
+                            );
+                            
+                            uploadStream.end(file.buffer);
+                        });
+    
+                        console.log(`Image ${i + 1} uploaded to Cloudinary:`, result.secure_url);
+                        updatedFields.productImage.push(result.secure_url);
+                    } catch (uploadError) {
+                        console.error(`Error uploading image ${i + 1} to Cloudinary:`, uploadError);
+                        return res.status(500).json({
+                            success: false,
+                            message: `Error uploading image ${i + 1}: ${uploadError.message}`
+                        });
+                    }
+                }
+            }
+    
+            // Validate total image count after all operations
+            if (updatedFields.productImage.length < 2) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Minimum 2 images required' 
+                });
+            }
+            if (updatedFields.productImage.length > 5) {
+                updatedFields.productImage = updatedFields.productImage.slice(0, 5);
+                console.log("Trimmed to maximum 5 images");
+            }
+    
+            // Ensure no duplicate or invalid URLs
+            updatedFields.productImage = [...new Set(updatedFields.productImage.filter(url => url && typeof url === 'string'))];
+            console.log("Final image URLs:", updatedFields.productImage);
+    
+            // Update the product
+            const updatedProduct = await Product.findByIdAndUpdate(id, updatedFields, { 
+                new: true,
+                runValidators: true
+            });
+    
+            if (!updatedProduct) {
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Failed to update product' 
+                });
+            }
+    
+            return res.status(200).json({ 
+                success: true, 
+                message: 'Product updated successfully', 
+                product: updatedProduct 
+            });
+        } catch (error) {
+            console.error('Error updating product:', error);
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Server error during product update', 
+                error: error.message 
+            });
+        }
+    };
+    
+    const removeProductImage = async (req, res) => {
+        try {
+            const { productId, index } = req.params;
+            const imageIndex = parseInt(index);
+            
+            console.log(`Received delete request for product: ${productId}, index: ${imageIndex}`);
+    
+            // Validate productId
+            if (!productId.match(/^[0-9a-fA-F]{24}$/)) {
+                console.error(`Invalid product ID: ${productId}`);
+                return res.status(400).json({ success: false, message: 'Invalid product ID' });
+            }
+    
+            // Validate imageIndex
+            if (isNaN(imageIndex) || imageIndex < 0) {
+                console.error(`Invalid image index: ${index}`);
+                return res.status(400).json({ success: false, message: 'Invalid image index' });
+            }
+    
+            // Find the product
+            const product = await Product.findById(productId);
+            if (!product) {
+                console.error(`Product not found: ${productId}`);
+                return res.status(404).json({ success: false, message: 'Product not found' });
+            }
+    
+            // Check if index is valid
+            if (imageIndex >= product.productImage.length) {
+                console.error(`Image index out of bounds: ${imageIndex}, Length: ${product.productImage.length}`);
+                return res.status(400).json({ success: false, message: 'Image index out of bounds' });
+            }
+    
+            // Check minimum image requirement
+            if (product.productImage.length <= 2) {
+                console.error(`Cannot remove image: Minimum 2 images required. Current count: ${product.productImage.length}`);
+                return res.status(400).json({ success: false, message: 'Cannot remove image: Minimum 2 images required' });
+            }
+    
+            // Get the image URL to remove
+            const imageUrl = product.productImage[imageIndex];
+            console.log(`Removing image at index ${imageIndex}: ${imageUrl}`);
+    
+            // Extract public ID from Cloudinary URL
             const getPublicIdFromUrl = (url) => {
                 if (!url) return null;
                 try {
@@ -269,157 +415,119 @@ const deleteImageFromCloudinary = async (publicId) => {
                 }
             };
     
-            // Process new images
-            for (let i = 1; i <= 4; i++) {
-                if (req.files && req.files[`image${i}`] && req.files[`image${i}`][0]) {
-                    const file = req.files[`image${i}`][0];
-                    // Delete old image from Cloudinary if it exists
-                    if (product.productImage[i - 1]) {
-                        const publicId = getPublicIdFromUrl(product.productImage[i - 1]);
-                        if (publicId) {
-                            try {
-                                const deleteResult = await cloudinary.uploader.destroy(publicId);
-                                console.log(`Deleted old image with public_id: ${publicId}`, deleteResult);
-                            } catch (deleteError) {
-                                console.error(`Failed to delete old image with public_id: ${publicId}`, deleteError);
-                            }
-                        }
-                    }
-    
-                    // Upload new image to Cloudinary
-                    try {
-                        const result = await cloudinary.uploader.upload(file.path, {
-                            folder: 'Uploads',
-                            resource_type: 'image',
-                            quality: 'auto:good',
-                            fetch_format: 'auto',
-                            transformation: [{ width: 800, crop: "limit" }]
-                        });
-    
-                        console.log(`Image${i} uploaded to Cloudinary:`, result.secure_url);
-    
-                        updatedFields.productImage[i - 1] = result.secure_url;
-    
-                        // Remove temporary file
-                        try {
-                            await fs.unlink(file.path);
-                            console.log(`Removed temporary file: ${file.path}`);
-                        } catch (unlinkError) {
-                            console.error(`Error removing temporary file: ${file.path}`, unlinkError);
-                            // Continue processing, as file deletion failure shouldn't block update
-                        }
-                    } catch (uploadError) {
-                        console.error(`Error uploading image${i} to Cloudinary:`, uploadError);
-                        try {
-                            await fs.unlink(file.path);
-                            console.log(`Removed temporary file after upload error: ${file.path}`);
-                        } catch (unlinkError) {
-                            console.error(`Error removing temporary file after upload error: ${file.path}`, unlinkError);
-                        }
-                        return res.status(500).json({
-                            success: false,
-                            message: `Error uploading image${i}: ${uploadError.message}`
-                        });
-                    }
-                }
-            }
-    
-            // Filter out any empty or invalid image entries
-            updatedFields.productImage = updatedFields.productImage.filter(url => url && typeof url === 'string');
-    
-            console.log('Updated fields:', updatedFields);
-    
-            // Update the product
-            const updatedProduct = await Product.findByIdAndUpdate(id, updatedFields, { new: true });
-    
-            return res.status(200).json({ success: true, message: 'Product edited successfully', product: updatedProduct });
-        } catch (error) {
-            console.error('Error updating product:', error);
-            return res.status(500).json({ success: false, message: 'Server error', error: error.message });
-        }
-    };
-
-
-    const removeProductImage = async (req, res) => {
-        try {
-            const productId = req.params.productId;
-            const imageIndex = parseInt(req.params.imageIndex); // Use parseInt
-    
-            // Validate inputs
-            if (!productId.match(/^[0-9a-fA-F]{24}$/)) {
-                console.error('Invalid productId:', productId);
-                return res.status(400).json({ success: false, message: 'Invalid product ID' });
-            }
-            if (isNaN(imageIndex) || imageIndex < 0) {
-                console.error('Invalid imageIndex:', imageIndex);
-                return res.status(400).json({ success: false, message: 'Invalid image index' });
-            }
-    
-            // Find the product
-            const product = await Product.findById(productId);
-            if (!product) {
-                console.error('Product not found for ID:', productId);
-                return res.status(404).json({ success: false, message: 'Product not found' });
-            }
-    
-            // Validate image index
-            if (imageIndex >= product.productImage.length) {
-                console.error('Image index out of bounds:', imageIndex, 'Length:', product.productImage.length);
-                return res.status(400).json({ success: false, message: 'Invalid image index' });
-            }
-    
-            const imageToDelete = product.productImage[imageIndex];
-    
-            // Optional: Delete image from Cloudinary
-            const getPublicIdFromUrl = (url) => {
-                if (!url) return null;
-                try {
-                    const parts = url.split('/');
-                    const uploadIndex = parts.indexOf('upload');
-                    if (uploadIndex === -1) {
-                        console.error('No "upload" segment in URL:', url);
-                        return null;
-                    }
-                    const path = parts.slice(uploadIndex + 2).join('/').split('.')[0];
-                    return path; // e.g., Uploads/filename
-                } catch (error) {
-                    console.error('Error parsing public_id from URL:', url, error);
-                    return null;
-                }
-            };
-    
-            const publicId = getPublicIdFromUrl(imageToDelete);
+            // Delete from Cloudinary if possible
+            const publicId = getPublicIdFromUrl(imageUrl);
             if (publicId) {
                 try {
                     const deleteResult = await cloudinary.uploader.destroy(publicId);
                     console.log(`Deleted image with public_id: ${publicId}`, deleteResult);
                 } catch (deleteError) {
                     console.error(`Failed to delete image with public_id: ${publicId}`, deleteError);
-                    // Continue to allow database update
+                    // Continue with removal even if Cloudinary deletion fails
                 }
-            } else {
-                console.warn('No valid publicId extracted from URL:', imageToDelete);
             }
     
-            // Remove image from product
+            // Remove image from product array
             product.productImage.splice(imageIndex, 1);
-            await product.save();
+            
+            // Save the updated product
+            const updatedProduct = await product.save();
+            console.log(`Image removed successfully. Remaining images: ${updatedProduct.productImage.length}`);
     
-            console.log('Image removed successfully for product:', productId, 'Index:', imageIndex);
-            res.json({
-                success: true,
+            return res.status(200).json({ 
+                success: true, 
                 message: 'Image removed successfully',
-                updatedImages: product.productImage
+                product: updatedProduct 
             });
         } catch (error) {
             console.error('Error removing product image:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Server error occurred while removing image',
-                error: error.message
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Server error during image removal', 
+                error: error.message 
             });
         }
     };
+    // const removeProductImage = async (req, res) => {
+    //     try {
+    //         const productId = req.params.productId;
+    //         const imageIndex = parseInt(req.params.imageIndex); // Use parseInt
+    
+    //         // Validate inputs
+    //         if (!productId.match(/^[0-9a-fA-F]{24}$/)) {
+    //             console.error('Invalid productId:', productId);
+    //             return res.status(400).json({ success: false, message: 'Invalid product ID' });
+    //         }
+    //         if (isNaN(imageIndex) || imageIndex < 0) {
+    //             console.error('Invalid imageIndex:', imageIndex);
+    //             return res.status(400).json({ success: false, message: 'Invalid image index' });
+    //         }
+    
+    //         // Find the product
+    //         const product = await Product.findById(productId);
+    //         if (!product) {
+    //             console.error('Product not found for ID:', productId);
+    //             return res.status(404).json({ success: false, message: 'Product not found' });
+    //         }
+    
+    //         // Validate image index
+    //         if (imageIndex >= product.productImage.length) {
+    //             console.error('Image index out of bounds:', imageIndex, 'Length:', product.productImage.length);
+    //             return res.status(400).json({ success: false, message: 'Invalid image index' });
+    //         }
+    
+    //         const imageToDelete = product.productImage[imageIndex];
+    
+    //         // Optional: Delete image from Cloudinary
+    //         const getPublicIdFromUrl = (url) => {
+    //             if (!url) return null;
+    //             try {
+    //                 const parts = url.split('/');
+    //                 const uploadIndex = parts.indexOf('upload');
+    //                 if (uploadIndex === -1) {
+    //                     console.error('No "upload" segment in URL:', url);
+    //                     return null;
+    //                 }
+    //                 const path = parts.slice(uploadIndex + 2).join('/').split('.')[0];
+    //                 return path; // e.g., Uploads/filename
+    //             } catch (error) {
+    //                 console.error('Error parsing public_id from URL:', url, error);
+    //                 return null;
+    //             }
+    //         };
+    
+    //         const publicId = getPublicIdFromUrl(imageToDelete);
+    //         if (publicId) {
+    //             try {
+    //                 const deleteResult = await cloudinary.uploader.destroy(publicId);
+    //                 console.log(`Deleted image with public_id: ${publicId}`, deleteResult);
+    //             } catch (deleteError) {
+    //                 console.error(`Failed to delete image with public_id: ${publicId}`, deleteError);
+    //                 // Continue to allow database update
+    //             }
+    //         } else {
+    //             console.warn('No valid publicId extracted from URL:', imageToDelete);
+    //         }
+    
+    //         // Remove image from product
+    //         product.productImage.splice(imageIndex, 1);
+    //         await product.save();
+    
+    //         console.log('Image removed successfully for product:', productId, 'Index:', imageIndex);
+    //         res.json({
+    //             success: true,
+    //             message: 'Image removed successfully',
+    //             updatedImages: product.productImage
+    //         });
+    //     } catch (error) {
+    //         console.error('Error removing product image:', error);
+    //         res.status(500).json({
+    //             success: false,
+    //             message: 'Server error occurred while removing image',
+    //             error: error.message
+    //         });
+    //     }
+    // };
     
     const deleteProductImage = async (req, res) => {
         try {

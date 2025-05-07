@@ -126,7 +126,7 @@
             </div>
         </div>
     </div>
-
+    <div id="msg" data-msg="<%=message%>" style="display: none;"></div>
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -147,7 +147,16 @@
             sessionMessage = null;
         }
 
-     
+      // SweetAlert2 message handler
+      const msg = document.getElementById('msg').dataset.msg;
+                if (msg && msg !== "none" && msg !== "") {
+                    Swal.fire({
+                        icon: "success",
+                        title: msg,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
      
                 document.addEventListener("DOMContentLoaded", function () {
                     if (typeof Swal === 'undefined') {

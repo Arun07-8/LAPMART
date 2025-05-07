@@ -1,13 +1,351 @@
-let croppers = {};
-let originalImages = {};
-let hasImage = `<%= product && product.productImage && product.productImage.length > 0 ? 'true' : 'false' %>`;
+let cropper = null;
+let currentImageIndex = -1;
+let isRecropping = false;
+let originalImages = [];
+let croppedImages = [];
+let existingImages = [];
+const minImages = 2; // Minimum images required (as per your form: Minimum 2, Maximum 5)
+const maxImages = 5; // Maximum images allowed
+const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+// Initialize existing images from the product
+<% if (product && product.productImage && product.productImage.length > 0) { %>
+    existingImages = <%- JSON.stringify(product.productImage) %>;
+    // Preload existing images into croppedImages for preview
+    existingImages.forEach((imageUrl, index) => {
+        croppedImages[index] = { dataUrl: imageUrl };
+    });
+<% } %>
+
+function sanitizeInput(input) {
+    const div = document.createElement('div');
+    div.textContent = input;
+    return div.innerHTML.replace(/[<>&"]/g, '');
+}
+
+// Drag and Drop
+const dropZone = document.getElementById('dropZone');
+const imageInput = document.getElementById('images');
+dropZone.addEventListener('click', () => imageInput.click());
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+});
+dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('dragover');
+});
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files);
+});
+
+// File Input Change
+imageInput.addEventListener('change', (e) => {
+    handleFiles(e.target.files);
+});
+
+function handleFiles(files) {
+    clearErrorMessage('images');
+    const newFiles = Array.from(files).filter(file => {
+        if (!allowedTypes.includes(file.type)) {
+            Swal.fire({ icon: 'error', title: 'Invalid File', text: `${file.name} is not a supported image type.` });
+            return false;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            Swal.fire({ icon: 'error', title: 'File Too Large', text: `${file.name} exceeds 5MB.` });
+            return false;
+        }
+        return true;
+    });
+    // Rest of the function remains the same
+}
+    originalImages = [];
+    newFiles.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            originalImages.push({ file, dataUrl: e.target.result });
+            if (originalImages.length === newFiles.length) {
+                startCrop(0);
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+
+
+    function updatePreview() {
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        previewContainer.innerHTML = '';
+        const productId = document.getElementById('proID').value;
+    
+        if (croppedImages.length > 0) {
+            // Main Image (First Image)
+            const mainImageContainer = document.createElement('div');
+            mainImageContainer.className = 'main-image-container';
+            const mainImageDiv = document.createElement('div');
+            mainImageDiv.className = 'main-image-preview';
+            mainImageDiv.innerHTML = `
+                <img src="${croppedImages[0].dataUrl}" alt="Main Preview">
+                <div class="preview-controls">
+                    <button type="button" class="recrop-btn" onclick="recropImage(0)" title="Recrop"><i class="fas fa-crop-alt"></i></button>
+                    <button type="button" class="remove-btn" onclick="removeImage('${productId}', 0)" title="Remove"><i class="fas fa-trash"></i></button>
+                </div>
+            `;
+            mainImageContainer.appendChild(mainImageDiv);
+            previewContainer.appendChild(mainImageContainer);
+    
+            // Secondary Images (2nd, 3rd, 4th, etc.)
+            if (croppedImages.length > 1) {
+                const secondaryImagesDiv = document.createElement('div');
+                secondaryImagesDiv.className = 'secondary-images';
+                croppedImages.slice(1).forEach((img, index) => {
+                    const actualIndex = index + 1; // Adjust index for secondary images
+                    const secondaryImageDiv = document.createElement('div');
+                    secondaryImageDiv.className = 'secondary-image-preview';
+                    secondaryImageDiv.innerHTML = `
+                        <img src="${img.dataUrl}" alt="Secondary Preview ${actualIndex}">
+                        <div class="preview-controls">
+                            <button type="button" class="recrop-btn" onclick="recropImage(${actualIndex})" title="Recrop"><i class="fas fa-crop-alt"></i></button>
+                            <button type="button" class="remove-btn" onclick="removeImage('${productId}', ${actualIndex})" title="Remove"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `;
+                    secondaryImagesDiv.appendChild(secondaryImageDiv);
+                });
+                previewContainer.appendChild(secondaryImagesDiv);
+            }
+        }
+    }
+function startCrop(index) {
+    if (index >= originalImages.length) {
+        updatePreview();
+        updateFormFiles();
+        return;
+    }
+    currentImageIndex = index;
+    const cropperContainer = document.getElementById('cropperContainer');
+    const cropperImg = document.getElementById('cropperImg');
+    const cropImageNumber = document.getElementById('cropImageNumber');
+    cropperImg.src = originalImages[index].dataUrl;
+    cropImageNumber.textContent = isRecropping ? `(Recropping Image ${index + 1})` : `(${index + 1} of ${originalImages.length})`;
+    cropperContainer.style.display = 'block';
+
+    if (cropper) cropper.destroy();
+    cropper = new Cropper(cropperImg, {
+        viewMode: 1,
+        dragMode: 'crop',
+        responsive: true,
+        restore: false,
+        center: true,
+        highlight: true,
+        background: true,
+        autoCrop: true,
+        autoCropArea: 0.8,
+        movable: true,
+        rotatable: false,
+        scalable: true,
+        zoomable: true,
+        zoomOnTouch: true,
+        zoomOnWheel: true,
+        aspectRatio: NaN
+    });
+
+    setActiveAspectRatioButton('free');
+}
+
+function recropImage(index) {
+    if (!croppedImages[index]) return;
+    originalImages = [{ dataUrl: croppedImages[index].dataUrl, file: null }];
+    currentImageIndex = 0;
+    isRecropping = true;
+    startCrop(0);
+}
+
+function setAspectRatio(ratio) {
+    if (cropper) {
+        cropper.setAspectRatio(ratio === 'free' ? NaN : ratio);
+        setActiveAspectRatioButton(ratio);
+    }
+}
+
+function setActiveAspectRatioButton(ratio) {
+    document.querySelectorAll('.aspect-ratio-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`.aspect-ratio-btn[data-ratio="${ratio}"]`).classList.add('active');
+}
+
+function cropImage() {
+    if (!cropper) return;
+    const cropData = cropper.getData();
+    if (cropData.width < 256 || cropData.height < 256) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Crop',
+            text: 'Cropped image must be at least 256x256 pixels.'
+        });
+        return;
+    }
+
+    const croppedCanvas = cropper.getCroppedCanvas({
+        minWidth: 256,
+        minHeight: 256,
+        maxWidth: 4096,
+        maxHeight: 4096,
+        fillColor: '#fff',
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high'
+    });
+
+    const mimeType = originalImages[currentImageIndex].file ? originalImages[currentImageIndex].file.type : 'image/jpeg';
+    const extension = mimeType.split('/')[1];
+
+    croppedCanvas.toBlob((blob) => {
+        const croppedFile = new File([blob], `cropped_image_${currentImageIndex}.${extension}`, {
+            type: mimeType,
+            lastModified: Date.now()
+        });
+        if (isRecropping) {
+            croppedImages[currentImageIndex] = {
+                file: croppedFile,
+                dataUrl: croppedCanvas.toDataURL(mimeType)
+            };
+        } else {
+            croppedImages.push({
+                file: croppedFile,
+                dataUrl: croppedCanvas.toDataURL(mimeType)
+            });
+        }
+        cropper.destroy();
+        cropper = null;
+        document.getElementById('cropperContainer').style.display = 'none';
+        if (!isRecropping && currentImageIndex + 1 < originalImages.length) {
+            startCrop(currentImageIndex + 1);
+        } else {
+            updatePreview();
+            updateFormFiles();
+        }
+        isRecropping = false;
+    }, mimeType, 0.9);
+}
+
+function cancelCrop() {
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+    document.getElementById('cropperContainer').style.display = 'none';
+    if (!isRecropping) {
+        originalImages = [];
+    }
+    updatePreview();
+    updateFormFiles();
+    isRecropping = false;
+}
+
+function removePreviewImage(index) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "This image will be removed from the preview!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, remove it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            croppedImages.splice(index, 1);
+            updatePreview();
+            updateFormFiles();
+            if (croppedImages.length < minImages) {
+                displayErrorMessage('images', `Please upload at least ${minImages} images.`);
+            }
+            Swal.fire({
+                icon: 'success',
+                title: 'Image removed from preview!',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        }
+    });
+}
+
+function updateFormFiles() {
+    const dataTransfer = new DataTransfer();
+    croppedImages.forEach(img => {
+        if (img.file) {
+            dataTransfer.items.add(img.file);
+        }
+    });
+    imageInput.files = dataTransfer.files;
+}
+
+async function removeImage(productId, imageIndex) {
+    if (!Number.isInteger(imageIndex) || imageIndex < 0 || imageIndex >= croppedImages.length) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Index',
+            text: 'The image index is invalid.'
+        });
+        return;
+    }
+       Swal.fire({
+                title: 'Processing...',
+                text: 'Adding your product',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            
+
+    Swal.fire({
+        title: "Are you sure?",
+        text: "This image will be permanently removed!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, remove it!"
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch(`/admin/remove-product-image/${productId}/${imageIndex}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    croppedImages.splice(imageIndex, 1);
+                    existingImages.splice(imageIndex, 1);
+                    updatePreview();
+                    updateFormFiles();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Image removed successfully!',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: data.message || 'Failed to remove the image!'
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'An error occurred while removing the image: ' + error.message
+                });
+            }
+        }
+    });
+}
 
 document.addEventListener('DOMContentLoaded', function () {
-    for (let i = 1; i <= 4; i++) {
-        document.getElementById(`image${i}`).addEventListener('change', function (event) {
-            previewImage(event, i);
-        });
-    }
+    // Initial preview of existing images
+    updatePreview();
 
     document.getElementById('editProductForm').addEventListener('submit', async function (event) {
         event.preventDefault();
@@ -21,7 +359,6 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-               
         Swal.fire({
             title: 'Processing...',
             text: 'Editing your product',
@@ -39,11 +376,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 method: 'POST',
                 body: formData  
             });
-          
 
             const result = await response.json();
-            console.log('Response data:', result);
-
             if (response.ok) {
                 Swal.fire({
                     icon: 'success',
@@ -62,7 +396,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             }
         } catch (error) {
-            console.error('Form submission error:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -71,283 +404,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
-
-async function removeImage(productId, imageIndex) {
-    // Validate imageIndex
-    if (!Number.isInteger(imageIndex) || imageIndex < 0 || imageIndex > 5) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Invalid Index',
-            text: 'The image index is invalid.'
-        });
-        return;
-    }
-
-    Swal.fire({
-        title: "Are you sure?",
-        text: "This image will be permanently removed!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: "Yes, remove it!"
-    }).then(async (result) => {
-        if (result.isConfirmed) {
-            const removeButton = document.querySelector(`#imageContainer${imageIndex + 1} .btn-danger`);
-            if (removeButton) {
-                removeButton.disabled = true;
-                removeButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Removing...';
-            }
-
-            try {
-                console.log('Sending request to remove image:', { productId, imageIndex });
-
-                // Get authentication token (adjust based on your auth mechanism)
-                const token = localStorage.getItem('adminToken') || ''; // Example: Retrieve token
-
-                const response = await fetch(`/admin/remove-product-image/${productId}/${imageIndex}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}` // Include if adminAuth requires it
-                    }
-                });
-
-                console.log('Response status:', response.status);
-
-                // Check if response is JSON
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    const text = await response.text();
-                    console.error('Non-JSON response:', text);
-                    throw new Error('Server returned a non-JSON response, likely an error page');
-                }
-
-                const data = await response.json();
-                console.log('Response data:', data);
-
-                if (data.success) {
-                    const imageContainer = document.querySelector(`#imageContainer${imageIndex + 1} .existing-image-container`);
-                    if (imageContainer) {
-                        imageContainer.style.display = 'none';
-                    }
-
-                    const previewContainer = document.getElementById(`previewContainer${imageIndex + 1}`);
-                    if (previewContainer) {
-                        previewContainer.style.display = 'none';
-                    }
-                    document.getElementById(`preview${imageIndex + 1}`).src = '#';
-                    document.getElementById(`image${imageIndex + 1}`).value = '';
-
-                    hasImage = data.updatedImages.length > 0;
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Image removed successfully!',
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                } else {
-                    console.error('Backend error:', data.message);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: data.message || 'Failed to remove the image!'
-                    });
-                }
-            } catch (error) {
-                console.error('Error removing image:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: 'An error occurred while removing the image: ' + error.message
-                });
-            } finally {
-                if (removeButton) {
-                    removeButton.disabled = false;
-                    removeButton.innerHTML = '<i class="fas fa-trash"></i> Remove';
-                }
-            }
-        }
-    });
-}
-function previewImage(event, index) {
-    const input = event.target;
-    const previewContainer = document.getElementById(`previewContainer${index}`);
-    const cropperContainer = document.getElementById(`cropperContainer${index}`);
-    const cropperImg = document.getElementById(`cropperImg${index}`);
-    const existingImageContainer = document.querySelector(`#imageContainer${index} .existing-image-container`);
-
-    if (input.files && input.files[0]) {
-        const file = input.files[0];
-        const validImageTypes = ['image/png', 'image/jpeg', 'image/webp'];
-        
-        if (!validImageTypes.includes(file.type)) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Invalid File Type',
-                text: 'Please upload only PNG, JPEG, or WebP images.',
-            });
-            input.value = '';
-            return;
-        }
-
-        if (file.size > 5 * 1024 * 1024) {
-            Swal.fire({
-                icon: 'error',
-                title: 'File Too Large',
-                text: 'Image size must be less than 5MB.',
-            });
-            input.value = '';
-            return;
-        }
-
-        // Hide existing image if present
-        if (existingImageContainer) {
-            existingImageContainer.style.display = 'none';
-        }
-
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            originalImages[index] = e.target.result;
-            cropperImg.src = e.target.result;
-            cropperContainer.style.display = 'block';
-            previewContainer.style.display = 'none';
-
-            if (croppers[index]) {
-                croppers[index].destroy();
-            }
-
-            croppers[index] = new Cropper(cropperImg, {
-                viewMode: 1,
-                dragMode: 'crop',
-                responsive: true,
-                restore: false,
-                center: true,
-                highlight: true,
-                background: true,
-                autoCrop: true,
-                autoCropArea: 0.8,
-                movable: true,
-                rotatable: false,
-                scalable: true,
-                zoomable: true,
-                zoomOnTouch: true,
-                zoomOnWheel: true,
-                aspectRatio: NaN,
-                crop: function (event) {}
-            });
-
-            setActiveAspectRatioButton(index, 'free');
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-function setAspectRatio(index, ratio) {
-    if (croppers[index]) {
-        if (ratio === 'free') {
-            croppers[index].setAspectRatio(NaN);
-        } else {
-            croppers[index].setAspectRatio(ratio);
-        }
-        setActiveAspectRatioButton(index, ratio);
-    }
-}
-
-function setActiveAspectRatioButton(index, ratio) {
-    const ratioButtons = document.querySelectorAll(`.aspect-ratio-btn[data-index="${index}"]`);
-    ratioButtons.forEach(button => button.classList.remove('active'));
-    const activeButton = document.querySelector(`.aspect-ratio-btn[data-index="${index}"][data-ratio="${ratio}"]`);
-    if (activeButton) activeButton.classList.add('active');
-}
-
-function recropImage(index) {
-    const previewContainer = document.getElementById(`previewContainer${index}`);
-    const cropperContainer = document.getElementById(`cropperContainer${index}`);
-    const cropperImg = document.getElementById(`cropperImg${index}`);
-
-    if (originalImages[index]) {
-        cropperImg.src = originalImages[index];
-        if (croppers[index]) croppers[index].destroy();
-        croppers[index] = new Cropper(cropperImg, {
-            viewMode: 1,
-            dragMode: 'crop',
-            responsive: true,
-            background: true,
-            autoCropArea: 0.8,
-            movable: true,
-            rotatable: false,
-            scalable: true,
-            zoomable: true,
-            guides: true,
-            aspectRatio: NaN,
-            ready: function () { this.cropper.crop(); }
-        });
-        setActiveAspectRatioButton(index, 'free');
-        cropperContainer.style.display = 'block';
-        previewContainer.style.display = 'none';
-    }
-}
-
-function cropImage(index) {
-    const cropper = croppers[index];
-    const preview = document.getElementById(`preview${index}`);
-    const cropperContainer = document.getElementById(`cropperContainer${index}`);
-    const previewContainer = document.getElementById(`previewContainer${index}`);
-
-    if (cropper) {
-        const cropData = cropper.getData();
-        if (cropData.width < 256 || cropData.height < 256) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Invalid Crop',
-                text: 'Cropped image must be at least 256x256 pixels.',
-            });
-            return;
-        }
-        const croppedCanvas = cropper.getCroppedCanvas({
-            minWidth: 256,
-            minHeight: 256,
-            maxWidth: 4096,
-            maxHeight: 4096,
-            fillColor: '#fff',
-            imageSmoothingEnabled: true,
-            imageSmoothingQuality: 'high',
-        });
-
-        // Determine file type based on original image
-        const fileInput = document.getElementById(`image${index}`);
-        const file = fileInput.files[0];
-        const mimeType = file.type;
-        const extension = mimeType.split('/')[1];
-
-        preview.src = croppedCanvas.toDataURL(mimeType, 0.9);
-        previewContainer.style.display = 'block';
-        croppedCanvas.toBlob((blob) => {
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(new File([blob], `cropped_image_${index}.${extension}`, {
-                type: mimeType,
-                lastModified: Date.now()
-            }));
-            fileInput.files = dataTransfer.files;
-            hasImage = true;
-        }, mimeType, 0.9);
-        cropperContainer.style.display = 'none';
-    }
-}
-
-function cancelCrop(index) {
-    const cropperContainer = document.getElementById(`cropperContainer${index}`);
-    const previewContainer = document.getElementById(`previewContainer${index}`);
-    if (croppers[index]) {
-        croppers[index].destroy();
-        delete croppers[index];
-    }
-    cropperContainer.style.display = 'none';
-    previewContainer.style.display = 'none';
-    document.getElementById(`image${index}`).value = '';
-}
 
 function validateForm() {
     clearErrorMessages();
@@ -361,12 +417,12 @@ function validateForm() {
     const processor = document.getElementById('processor').value;
     const graphicsCard = document.getElementById('gpu').value;
     const ram = document.getElementById('ram').value;
-    const Storage = document.getElementById('storage').value;
+    const Storage = document.getElementById('Storage').value;
     const display = document.getElementById('display').value;
-    const operatingSystem = document.getElementById('os').value;
-    const Battery = document.getElementById('battery').value;
-    const Weight = document.getElementById('weight').value;
-    const Warranty = document.getElementById('warranty').value;
+    const operatingSystem = document.getElementById('operatingSystem').value;
+    const Battery = document.getElementById('Battery').value;
+    const Weight = document.getElementById('Weight').value;
+    const Warranty = document.getElementById('Warranty').value;
 
     let isValid = true;
 
@@ -411,7 +467,7 @@ function validateForm() {
     }
 
     if (graphicsCard.trim() === "") {
-        displayErrorMessage('gpu-error', 'Graphics card is required.');
+        displayErrorMessage('graphicsCard-error', 'Graphics card is required.');
         isValid = false;
     }
 
@@ -421,7 +477,7 @@ function validateForm() {
     }
 
     if (Storage.trim() === "") {
-        displayErrorMessage('storage-error', 'Storage is required.');
+        displayErrorMessage('Storage-error', 'Storage is required.');
         isValid = false;
     }
 
@@ -431,27 +487,27 @@ function validateForm() {
     }
 
     if (operatingSystem.trim() === "") {
-        displayErrorMessage('os-error', 'Operating system is required.');
+        displayErrorMessage('operatingSystem-error', 'Operating system is required.');
         isValid = false;
     }
 
     if (Battery.trim() === "") {
-        displayErrorMessage('battery-error', 'Battery is required.');
+        displayErrorMessage('Battery-error', 'Battery is required.');
         isValid = false;
     }
 
     if (Weight.trim() === "") {
-        displayErrorMessage('weight-error', 'Weight is required.');
+        displayErrorMessage('Weight-error', 'Weight is required.');
         isValid = false;
     }
 
     if (Warranty.trim() === "") {
-        displayErrorMessage('warranty-error', 'Warranty is required.');
+        displayErrorMessage('Warranty-error', 'Warranty is required.');
         isValid = false;
     }
 
-    if (!hasImage) {
-        displayErrorMessage('image1-error', 'At least one product image is required.');
+    if (croppedImages.length < minImages) {
+        displayErrorMessage('images-error', `Please upload at least ${minImages} images.`);
         isValid = false;
     }
 
@@ -464,6 +520,19 @@ function displayErrorMessage(elementId, message) {
         errorElement.textContent = message;
         errorElement.style.color = 'red';
         errorElement.style.display = 'block';
+    }
+}
+
+function clearErrorMessage(id) {
+    const errorElement = document.getElementById(`${id}-error`);
+    if (errorElement) {
+        errorElement.textContent = '';
+        errorElement.classList.remove('active');
+        errorElement.style.display = 'none';
+    }
+    const element = document.getElementById(id);
+    if (element) {
+        element.classList.remove('is-invalid');
     }
 }
 

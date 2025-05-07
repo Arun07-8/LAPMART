@@ -1,9 +1,11 @@
 const User = require("../models/userSchema");
 
 const adminAuth=(req,res,next)=>{
-    User.findOne({isadmin:true})
+    if(req.session.admin){
+    User.findOne({_id:req.session.admin,isadmin:true})
     .then(data=>{
         if(data){
+
             next()
         }else{
             res.redirect("/admin/login");
@@ -13,6 +15,9 @@ const adminAuth=(req,res,next)=>{
         res.status(500).send("Internal Server error")
         
     })
+   }else{
+    res.redirect("/admin/login")
+   }
 }
 
 

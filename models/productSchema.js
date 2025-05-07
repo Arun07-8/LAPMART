@@ -89,7 +89,7 @@ const productSchema = new Schema({
     },
     isDeleted:{
         type:Boolean,
-        default:true,
+        default:false,
     }
 }, { timestamps: true });
 

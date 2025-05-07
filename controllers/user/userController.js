@@ -342,7 +342,7 @@ const loadShoppingPage = async (req, res) => {
       
       const relatedQuery = {
         isListed: true,
-        isDeleted: true,
+        isDeleted: false,
         quantity: { $gt: 0 },
         _id: { $nin: products.map(p => p._id) }, 
       };

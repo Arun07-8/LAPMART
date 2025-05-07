@@ -11,8 +11,6 @@ const productViewPage=async(req,res)=>{
         const product=await Product.findById({_id:productId}).populate('category');
         const findCategory=product.category;
         const similerProducts = await Product.find({category:findCategory,_id:{$ne:product._id}})
- 
-        
             res.render("productViewPage",{
             user:userData,
             product:product,

@@ -8,14 +8,16 @@ const userRouter=require("./routes/userRouter")
 const adminRouter=require("./routes/adminRouter")
 const passport=require("./config/passport");
 const nocache = require('nocache');
+const morgan=require('morgan');
 const cloudinary=require('cloudinary').v2;
 
 db()
 
 app.use(nocache())
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({limit:'50mb'}));
+app.use(express.urlencoded({ extended: true ,limit:'50mb'}));
 app.set("view engine","ejs");
+
 app.use(session({
     secret:process.env.SESSION_SECRET,
     resave: false,
@@ -26,16 +28,23 @@ app.use(session({
         maxAge: 1000 * 60 * 60 * 24
     }
 }))
-app.use(express.static("public"));
 
+app.use(express.static("public"));
 app.use(passport.initialize())
 app.use(passport.session())
+
+
 app.use('/uploads', express.static('uploads'));
 app.set("views",[path.join(__dirname,"views/user"),path.join(__dirname,"views/admin")]);
-app.use('/',userRouter);
+
+
 app.use("/admin",adminRouter);
-
-
+app.use('/',userRouter);
+app.use(morgan('dev'));
+app.use((req,res , next)=>{
+    console.log(req.url,'req.url ', req.baseUrl,'req.base url ' )
+    next()
+})
 app.listen(process.env.PORT,()=>{
     console.log("Server is Running");
     
