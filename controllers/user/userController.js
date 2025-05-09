@@ -259,8 +259,6 @@ const loadShoppingPage = async (req, res) => {
       if (user) {
         userData = await User.findOne({ _id: user }).lean();
       }
-  
-    
       const {
         category = 'all',
         brand = 'all',
@@ -412,7 +410,6 @@ const  logout=async (req,res) => {
       }       
     
 }
-
 
 
 

@@ -224,6 +224,9 @@ const deleteImageFromCloudinary = async (publicId) => {
         try {
             const { id } = req.params;
             const data = req.body;
+
+            console.log(req.files,"files log");
+            
     
             if (!id.match(/^[0-9a-fA-F]{24}$/)) {
                 return res.status(400).json({ success: false, message: 'Invalid product ID' });
@@ -248,12 +251,11 @@ const deleteImageFromCloudinary = async (publicId) => {
                 additionalFeatures: data.additionalFeatures || '',
                 Warranty: data.Warranty || '',
                 status: 'Available',
+                productImage: [] // Initialize to avoid undefined issues
             };
-    
-            // Validate required fields
             const requiredFields = [
                 'productName', 'description', 'brand', 'category', 'regularPrice', 
-                'salePrice', 'quantity', 'processor', 'graphicsCard', 'ram', 
+                'salePrice', 'processor', 'graphicsCard', 'ram', 
                 'Storage', 'display', 'operatingSystem', 'Battery', 'Weight', 'Warranty'
             ];
             for (const field of requiredFields) {
@@ -269,9 +271,25 @@ const deleteImageFromCloudinary = async (publicId) => {
             if (!product) {
                 return res.status(404).json({ success: false, message: 'Product not found' });
             }
+
+            // Use Cloudinary URLs from req.files
+        const images = req.files.map(file => ({
+            url: file.path,
+            public_id: file.filename
+        }));
+
+        console.log("images",images);
+
+        let destructedImage = images.map((img) => {
+            console.log(img)
+            return img.url  
+        })
+
+        console.log('desctructed Log: ', destructedImage)
+        
     
             // IMPORTANT: Start with existing images
-            updatedFields.productImage = [...product.productImage];
+            updatedFields.productImage = [...product.productImage, ...destructedImage];
             console.log("Existing images:", updatedFields.productImage);
     
             // Process new images if they exist

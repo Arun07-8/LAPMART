@@ -20,10 +20,8 @@ const loadLogin = async (req, res) => {
         if (req.session.admin) {
             return res.redirect('/admin/dashboard'); 
         }
-        const message = req.session.Mes || null; 
-      
-        
-        req.session.message = null; 
+        const message = req.session.Mes 
+        req.session.Mes = null; 
         res.render("adminlogin", { message }); 
     } catch (error) {
         console.error("Admin login page error:", error);
