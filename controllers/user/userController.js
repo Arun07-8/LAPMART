@@ -1,6 +1,6 @@
 const User = require("../../models/userSchema");
 const Category=require("../../models/categorySchema");
-const Product=require("../../models/productSchema");
+const Product = require("../../models/productSchema");
 const Brand=require("../../models/BrandSchema")
 const env = require("dotenv").config();
 const nodemailer = require("nodemailer");
@@ -263,7 +263,7 @@ const loadShoppingPage = async (req, res) => {
         category = 'all',
         brand = 'all',
         priceMin = 20000,
-        priceMax = 100000,
+        priceMax = 10000,
         sort = 'popular',
         page = 1,
         search = '',
@@ -322,12 +322,14 @@ const loadShoppingPage = async (req, res) => {
       const limit = 6;
       const skip = (parseInt(page) - 1) * limit;
       const totalProducts = await Product.countDocuments(query);
+      console.log(query)
       const products = await Product.find(query)
-        .sort(sortOption)
-        .skip(skip)
-        .limit(limit)
-        .lean();
-  
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit)
+      .lean();
+      
+  console.log(products,"hellooooooo")
       const totalPages = Math.ceil(totalProducts / limit);
   
     
@@ -375,7 +377,7 @@ const loadShoppingPage = async (req, res) => {
         sort: sort,
         search: search,
       };
-  
+    
       res.render('shopPage', {
         user: userData,
         product: products,

@@ -218,13 +218,13 @@ const loadresendOtp = async (req, res) => {
         res.status(200).json({
             success: true,
             message: "OTP resent successfully",
-        });
+        });                 
     } catch (error) {
         console.error("Error resending OTP:", error.message, error.stack);
         res.status(500).json({
             success: false,
             message: "Failed to resend OTP. Please try again.",
-        });
+        }); 
     }
 };
 
