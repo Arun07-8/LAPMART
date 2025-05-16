@@ -41,10 +41,6 @@ app.set("views",[path.join(__dirname,"views/user"),path.join(__dirname,"views/ad
 app.use("/admin",adminRouter);
 app.use('/',userRouter);
 app.use(morgan('dev'));
-app.use((req,res , next)=>{
-    console.log(req.url,'req.url ', req.baseUrl,'req.base url ' )
-    next()
-})
 app.listen(process.env.PORT,()=>{
     console.log("Server is Running");
     
