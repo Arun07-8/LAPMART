@@ -1,88 +1,240 @@
-<%-include("../../views/partials/user/header")%>
-<section class="hero">
-    <div class="hero-content">
-        <h1>FIND LAPTOPS THAT MATCH YOUR STYLE</h1>
-        <p>Browse through our curated collection of stylish laptops and electronics, designed to bring out your individuality and cater to your tech needs.</p>
-        <button class="btn"><a href="/shop" style="text-decoration: none;">Shop Now</a></button>
-    </div>
-    <div class="hero-image">
-        <img src="img/register/1600w-hcRknaj_Wu4.webp" alt="Premium laptops" class="laptop-image">
-    </div>
-    <div class="decorative-star" style="top: 100px; right: 200px;"></div>
-    <div class="decorative-star" style="bottom: 120px; left: 300px;"></div>
-</section>
-<section class="stats">
-    <div class="stat-item">
-        <h3>200+</h3>
-        <p>International Brands</p>
-    </div>
-    <div class="stat-item">
-        <h3>2,000+</h3>
-        <p>High-Quality Products</p>
-    </div>
-    <div class="stat-item">
-        <h3>30,000+</h3>
-        <p>Happy Customers</p>
-    </div>
-</section>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LapKart - Premium Electronics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
+    <link href="/css/userside-css/userside-css/Header.css" rel="stylesheet" type="text/css">
+    <link href="/css/userside-css/userside-css/home.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <!-- Header remains unchanged -->
+    <header class="site-header">
+        <div class="logo">
+            <a href="/home">
+                <div class="logo-container">
+                    <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="7" width="20" height="10" rx="2" ry="2"></rect>
+                        <path d="M16 21H8a2 2 0 0 1-2-2v-1h12v1a2 2 0 0 1-2 2z"></path>
+                        <line x1="12" y1="7" x2="12" y2="3"></line>
+                    </svg>
+                    <span class="logo-text">LapCart</span>
+                </div>
+            </a>
+        </div>
+        <div class="menu-toggle">
+            <div class="hamburger"></div>
+        </div>
+        <nav class="nav-links">
+            <a href="/home" class="nav-link">Home</a>
+            <a href="/shop" class="nav-link">Shop</a>
+            <a href="#" class="nav-link">Contacts</a>
+        </nav>
+        <div class="cart-profile">
+            <a href="/wishlist" aria-label="Wishlist">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+            </a>
+            <a href="#" aria-label="Cart">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+            </a>
+            <% if (locals.user) { %>
+                <div class="profile-container">
+                    <button class="profile-button" id="profileButton" aria-label="Profile">
+                        <div class="profile-avatar">
+                            <%= user.name.charAt(0).toUpperCase() %>
+                        </div>
+                        <span class="username"><%= user.name %></span>
+                        <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <div class="profile-header">
+                            <div class="profile-avatar">
+                                <%= user.name.charAt(0).toUpperCase() %>
+                            </div>
+                            <div class="profile-info">
+                                <h4><%= user.name %></h4>
+                                <p><%= user.email %></p>
+                            </div>
+                        </div>
+                        <ul class="profile-menu">
+                            <li><a href="/wishlist"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>Wishlist<span class="profile-badge">3</span></a></li>
+                            <li><a href="/orders"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>My Orders</a></li>
+                            <li><a href="/account"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Profile Settings</a></li>
+                            <li><a href="/logout" class="logout-link"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            <% } else { %>
+                <a href="/login" class="signin-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <polyline points="10 17 15 12 10 7"></polyline>
+                        <line x1="15" y1="12" x2="3" y2="12"></line>
+                    </svg>
+                    Sign In
+                </a>
+            <% } %>
+        </div>
+    </header>
 
-<h2 class="section-header">NEW ARRIVALS</h2>
-<!-- Product Grid Section -->
-<section class="product-grid" aria-label="New Arrivals">
-    <% if (Array.isArray(product) && product.length > 0) { %>
-        <% product.forEach((product) => { %>
-            <article class="product-card" role="region" aria-labelledby="product-<%= product._id %>-title">
-                <!-- Product Image -->
-                <div class="product-image">
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content animate-on-scroll">
+            <h1 class="hero-title">Discover Your Perfect Laptop</h1>
+            <p class="hero-subtitle">Explore our premium collection of high-performance laptops tailored to your style and needs.</p>
+            <a href="/shop" class="hero-btn">Shop Now</a>
+        </div>
+    </section>
+
+    <!-- New Arrivals Section -->
+    <h2 class="section-header animate-on-scroll">New Arrivals</h2>
+    <section class="product-grid" aria-label="New Arrivals">
+        <% if (Array.isArray(product) && product.length > 0) { %>
+            <% product.forEach((product) => { %>
+                <article class="product-card animate-on-scroll" role="region" aria-labelledby="product-<%= product._id %>-title">
                     <a href="/productview?id=<%= product._id %>" class="no-underline" aria-label="View <%= product.productName || 'Unnamed Product' %>">
-                        <img class="default-img" 
-                             src="<%= product.productImage && product.productImage[0] ? product.productImage[0] : 'placeholder.jpg' %>" 
-                             alt="<%= product.productName ? product.productName + ' laptop' : 'Laptop product image' %>">
+                        <!-- Product Image -->
+                        <div class="product-image">
+                            <img class="default-img" 
+                                 src="<%= product.productImage && product.productImage[0] ? product.productImage[0] : '/img/placeholder.jpg' %>" 
+                                 alt="<%= product.productName ? product.productName + ' laptop' : 'Laptop product image' %>">
+                        </div>
+                        <!-- Product Details -->
+                        <div class="product-details">
+                            <h3 class="product-title" id="product-<%= product._id %>-title">
+                                <%= product.productName || 'Unnamed Product' %>
+                            </h3>
+                            <div class="product-rating">
+                                <% const rating = product.rating || 5; %>
+                                <span class="stars" aria-label="Rating <%= rating %> out of 5">
+                                    <% 
+                                        const fullStars = Math.floor(rating);
+                                        const hasHalfStar = rating % 1 >= 0.5;
+                                        const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+                                    %>
+                                    <%= '★'.repeat(fullStars) %>
+                                    <%= hasHalfStar ? '🟊' : '' %>
+                                    <%= '☆'.repeat(emptyStars) %>
+                                </span>
+                                <span class="review-count">(<%= product.reviewCount || 45 %>)</span>
+                            </div>
+                            <div class="product-price-container">
+                                <span class="product-price">
+                                    ₹<%= product.salePrice ? product.salePrice.toLocaleString('en-IN') : 'Price not available' %>
+                                </span>
+                                <% if (product.regularPrice && product.regularPrice > product.salePrice) { %>
+                                    <span class="product-regular-price">
+                                        ₹<%= product.regularPrice.toLocaleString('en-IN') %>
+                                    </span>
+                                    <span class="product-discount">
+                                        <%= Math.round((product.regularPrice - product.salePrice) / product.regularPrice * 100) %>% off
+                                    </span>
+                                <% } %>
+                            </div>
+                        </div>
                     </a>
-                </div>
-                <!-- Product Details -->
-                <div class="product-details">
-                    <h3 class="product-title" id="product-<%= product._id %>-title">
-                        <%= product.productName || 'Unnamed Product' %>
-                    </h3>
-                    <div class="product-rating">
-                        <% const rating = product.rating || 5; %>
-                        <span class="stars" aria-label="Rating <%= rating %> out of 5">
-                            <%= '★'.repeat(Math.floor(rating)) %><%= rating % 1 ? '☆' : '' %>
-                        </span>
-                        <span class="review-count">(<%= product.reviewCount || 45 %>)</span>
-                    </div>
-                    <div class="product-price">
-                        ₹<%= product.salePrice ? product.salePrice.toLocaleString('en-IN') : 'Price not available' %>
-                    </div>
-                    <ul class="product-specs" aria-label="Product specifications">
-                        <li><i class="fa fa-microchip" aria-hidden="true"></i> <%= product.processor || 'N/A' %></li>
-                        <li><i class="fa fa-desktop" aria-hidden="true"></i> <%= product.graphicsCard || 'N/A' %></li>
-                        <li><i class="fa fa-tv" aria-hidden="true"></i> <%= product.display || 'N/A' %></li>
-                        <li><i class="fa fa-hdd-o" aria-hidden="true"></i> <%= product.Storage || 'N/A' %></li>
-                    </ul>
-                    <a href="/productview?id=<%= product._id %>" class="product-btn no-underline" aria-label="View <%= product.productName || 'Unnamed Product' %>">
-                        View Details
-                    </a>
-                </div>
-            </article>
-        <% }) %>
-    <% } else { %>
-        <p class="no-products">No products available</p>
-    <% } %>
-</section>
+                </article>
+            <% }) %>
+        <% } else { %>
+            <p class="no-products animate-on-scroll">No products available</p>
+        <% } %>
+    </section>
 
-<div class="view-all">
-    <a href="/shop">View All</a>
-</div>
+    <!-- Newsletter Section -->
+    <section class="newsletter animate-on-scroll">
+        <h2>Stay Updated</h2>
+        <p>Subscribe to our newsletter for the latest deals and product updates.</p>
+       
+    </section>
 
+    <%- include("../../views/partials/user/footer") %>
 
-<section class="newsletter">
-    <h2>STAY UP TO DATE ABOUT OUR LATEST OFFERS</h2>
-    <div class="newsletter-form">
-        <input type="email" placeholder="Enter your email" aria-label="Email address">
-        <button>Subscribe to Newsletter</button>
-    </div>
-</section>
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileButton = document.getElementById('profileButton');
+            const profileDropdown = document.getElementById('profileDropdown');
+            const profileContainer = document.querySelector('.profile-container');
+            const logo = document.querySelector('.logo');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            // Profile dropdown toggle
+            if (profileButton && profileDropdown) {
+                profileButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    profileDropdown.classList.toggle('active');
+                    profileContainer.classList.toggle('active');
+                });
+                
+                document.addEventListener('click', function(e) {
+                    if (!profileContainer.contains(e.target)) {
+                        profileDropdown.classList.remove('active');
+                        profileContainer.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Mobile menu toggle
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinksContainer = document.querySelector('.nav-links');
+            
+            if (menuToggle && navLinksContainer) {
+                menuToggle.addEventListener('click', function() {
+                    navLinksContainer.classList.toggle('active');
+                });
+            }
 
-<%-include("../../views/partials/user/footer")%>
+            // Home button click handling
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    if (this.getAttribute('href') === '/home') {
+                        logo.classList.add('home-active');
+                    } else {
+                        logo.classList.remove('home-active');
+                    }
+                });
+            });
+
+            // Set initial active state for Home if on homepage
+            if (window.location.pathname === '/home') {
+                document.querySelector('a[href="/home"]').classList.add('active');
+                logo.classList.add('home-active');
+            }
+
+            // Scroll-triggered animations
+            const animateElements = document.querySelectorAll('.animate-on-scroll');
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            animateElements.forEach(element => {
+                observer.observe(element);
+            });
+        });
+    </script>
+</body>
+</html>

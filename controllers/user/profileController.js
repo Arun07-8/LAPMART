@@ -27,7 +27,7 @@ const forgotEmailvalid = async (req, res) => {
         }
         const otp = generateOtp();
         console.log('Generated OTP:', otp);
-        const otpExpiration = new Date(Date.now() + 30 * 1000); // OTP expires in 30 seconds
+        const otpExpiration = new Date(Date.now() + 30 * 1000); 
         const emailSent = await sendVerificationEmail(email, otp);
         if (!emailSent) {
             return res.status(500).json({
@@ -202,7 +202,7 @@ const loadresendOtp = async (req, res) => {
             });
         }
         const otp = generateOtp();
-        const otpExpiration = new Date(Date.now() + 30 * 1000); // OTP expires in 30 seconds
+        const otpExpiration = new Date(Date.now() + 30 * 1000); 
         const emailSent = await sendVerificationEmail(email, otp);
 
         if (!emailSent) {

@@ -17,7 +17,6 @@ router.post("/resendOtp",userController.resendOtp)
 router.get("/auth/google", passport.authenticate("google", {
     scope: ["profile", "email"]
   }));
-  
   router.get('/auth/google/callback', (req, res, next) => {
     passport.authenticate('google', (err, user, info) => {
       if (err || !user) {
@@ -52,8 +51,8 @@ router.post("/reset-password",profileController.newPasswordSet)
 router.get("/forgot-resendOtp",profileController.loadresendOtp)
 
 //   Home page & Shopping page
-router.get("/home",userAuth,userController.LoadHomepage);
-router.get("/shop",userAuth,userController.loadShoppingPage)
+router.get("/home",userController.LoadHomepage);
+router.get("/shop",userController.loadShoppingPage)
 router.get("/logout",userController.logout);
 
 //   Product details

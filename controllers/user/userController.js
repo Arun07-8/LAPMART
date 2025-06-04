@@ -108,8 +108,6 @@ const verifyOtp = async (req, res) => {
     try {
         const { otp } = req.body;
         const storedOtpData = req.session.userOtp;
-
-        // Check if OTP exists and is not expired
         if (!storedOtpData || !storedOtpData.otp || !storedOtpData.expiresAt) {
             return res.status(400).json({ success: false, message: "No OTP found or session expired" });
         }
@@ -251,151 +249,148 @@ const LoadHomepage = async (req, res) => {
         console.error("Home page is not working", error);
         res.status(500).send("Server error");
     }
-};   
-const loadShoppingPage = async (req, res) => {
-    try {
-      const user = req.session.user;
-      let userData = null;
-      if (user) {
-        userData = await User.findOne({ _id: user }).lean();
-      }
-      const {
-        category = 'all',
-        brand = 'all',
-        priceMin = 20000,
-        priceMax = 10000,
-        sort = 'popular',
-        page = 1,
-        search = '',
-      } = req.query;
-  
-  
-      const query = { isListed: true, isDeleted: false, quantity: { $gt: 0 } };
-      if (category !== 'all') query.category = category;
-      if (brand !== 'all') query.brand = brand;
-      if (priceMin && priceMax) {
-        query.salePrice = { $gte: parseInt(priceMin), $lte: parseInt(priceMax) };
-      }
-  
-      let categoryIds = [];
-      if (search.trim()) {
-      
-        const categoriesSearch = await Category.find({
-          name: { $regex: search, $options: 'i' },
-          isListed: true,
-          isDeleted: false,
-        }).lean();
-        categoryIds = categoriesSearch.map(cat => cat._id);
-  
-       
-        query.$or = [
-          { productName: { $regex: search, $options: 'i' } },
-          { category: { $in: categoryIds } },
-        ];
-      }
-  
-   
-      const categories = await Category.find({ isListed: true, isDeleted: false }).lean();
-      const brands = await Brand.find({ isListed: true, isDeleted: false }).lean();
-  
     
-      let sortOption = {};
-      switch (sort) {
-        case 'price-low':
-          sortOption = { salePrice: 1 };
-          break;
-        case 'price-high':
-          sortOption = { salePrice: -1 };
-          break;
-        case 'name-asc':
-          sortOption = { productName: 1 };
-          break;
-        case 'name-desc':
-          sortOption = { productName: -1 };
-          break;
-        case 'popular':
-        default:
-          sortOption = { createdAt: -1 }; 
-          break;
-      }
-  
-      const limit = 6;
-      const skip = (parseInt(page) - 1) * limit;
-      const totalProducts = await Product.countDocuments(query);
-      console.log(query)
-      const products = await Product.find(query)
+};const loadShoppingPage = async (req, res) => {
+  try {
+    const user = req.session.user;
+    let userData = null;
+    if (user) {
+      userData = await User.findOne({ _id: user }).lean();
+    }
+    const {
+      category = 'all',
+      brand = 'all',
+      priceMin = 20000,
+      priceMax = 150000,
+      sort = 'popular',
+      page = 1,
+      search = '',
+    } = req.query;
+
+    const query = { isListed: true, isDeleted: false, quantity: { $gt: 0 } };
+    if (category !== 'all') query.category = category;
+    if (brand !== 'all') query.brand = brand;
+    if (priceMin !== '0' || priceMax !== '150000') {
+      query.salePrice = {
+        $gte: parseInt(priceMin) || 0,
+        $lte: parseInt(priceMax) || 150000,
+      };
+    }
+
+    let categoryIds = [];
+    if (search.trim()) {
+      const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const searchRegex = new RegExp(escapedSearch, 'i');
+      const categoriesSearch = await Category.find({
+        name: { $regex: searchRegex },
+        isListed: true,
+        isDeleted: false,
+      }).lean();
+      categoryIds = categoriesSearch.map(cat => cat._id);
+
+      query.$or = [
+        { productName: { $regex: searchRegex } },
+        { category: { $in: categoryIds } },
+      ];
+    }
+
+    const categories = await Category.find({ isListed: true, isDeleted: false }).lean();
+    const brands = await Brand.find({ isListed: true, isDeleted: false }).lean();
+
+    let sortOption = {};
+    switch (sort) {
+      case 'price-low':
+        sortOption = { salePrice: 1 };
+        break;
+      case 'price-high':
+        sortOption = { salePrice: -1 };
+        break;
+      case 'name-asc':
+        sortOption = { productName: 1 };
+        break;
+      case 'name-desc':
+        sortOption = { productName: -1 };
+        break;
+      case 'popular':
+      default:
+        sortOption = { createdAt: -1 };
+        break;
+    }
+
+    const limit = 6;
+    const skip = (parseInt(page) - 1) * limit;
+    const totalProducts = await Product.countDocuments(query);
+    const products = await Product.find(query)
       .sort(sortOption)
       .skip(skip)
       .limit(limit)
       .lean();
-      
-  console.log(products,"hellooooooo")
-      const totalPages = Math.ceil(totalProducts / limit);
-  
-    
-      let categoryName = 'Laptops';
-      if (category !== 'all') {
-        const selectedCategory = categories.find(cat => cat._id.toString() === category);
-        categoryName = selectedCategory ? selectedCategory.name : 'Laptops';
-      }
-  
-      
-      const relatedQuery = {
-        isListed: true,
-        isDeleted: false,
-        quantity: { $gt: 0 },
-        _id: { $nin: products.map(p => p._id) }, 
-      };
-      if (category !== 'all') {
-        relatedQuery.category = category; 
-      }
-      
-      if (search.trim()) {
-        relatedQuery.$or = [
-          { productName: { $regex: search, $options: 'i' } },
-          { category: { $in: categoryIds } },
-        ];
-      }
-      const relatedProducts = await Product.find(relatedQuery)
-        .sort({ createdAt: -1 }) 
-        .limit(4)
-        .lean();
-  
-      
-      relatedProducts.forEach(product => {
-        const discount = ((product.regularPrice - product.salePrice) / product.regularPrice) * 100;
-        product.isNew = product.createdAt > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); 
-        product.isSale = discount >= 20; 
-        product.isBestseller = (product.ratingCount || 0) > 150; 
-      });
- 
-      const filters = {
-        category: category,
-        brand: brand,
-        priceMin: parseInt(priceMin),
-        priceMax: parseInt(priceMax),
-        sort: sort,
-        search: search,
-      };
-    
-      res.render('shopPage', {
-        user: userData,
-        product: products,
-        category: categories,
-        brand: brands,
-        categoryName: categoryName,
-        currentPage: parseInt(page),
-        totalPages: totalPages,
-        totalProducts: totalProducts,
-        limit: limit,
-        filters: filters,
-        relatedProducts: relatedProducts,
-      });
-    } catch (error) {
-      console.error('Error:', error);
-      res.redirect('/pageNotFound');
+
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    let categoryName = 'Laptops';
+    if (category !== 'all') {
+      const selectedCategory = categories.find(cat => cat._id.toString() === category);
+      categoryName = selectedCategory ? selectedCategory.name : 'Laptops';
     }
-  };
+
+    const relatedQuery = {
+      isListed: true,
+      isDeleted: false,
+      quantity: { $gt: 0 },
+      _id: { $nin: products.map(p => p._id) },
+    };
+    if (category !== 'all') {
+      relatedQuery.category = category;
+    }
+    if (search.trim()) {
+      const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const searchRegex = new RegExp(escapedSearch, 'i');
+      relatedQuery.$or = [
+        { productName: { $regex: searchRegex } }, // Removed $options: 'i'
+        { category: { $in: categoryIds } },
+      ];
+    }
+    const relatedProducts = await Product.find(relatedQuery)
+      .sort({ createdAt: -1 })
+      .limit(4)
+      .lean();
+
+    relatedProducts.forEach(product => {
+      const discount = ((product.regularPrice - product.salePrice) / product.regularPrice) * 100;
+      product.isNew = product.createdAt > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      product.isSale = discount >= 20;
+      product.isBestseller = (product.ratingCount || 0) > 150;
+    });
+
+    const filters = {
+      category: category,
+      brand: brand,
+      priceMin: parseInt(priceMin) || 20000,
+      priceMax: parseInt(priceMax) || 150000,
+      sort: sort,
+      search: search,
+    };
+
+    res.render('shopPage', {
+      user: userData,
+      product: products,
+      category: categories,
+      brand: brands,
+      categoryName: categoryName,
+      currentPage: parseInt(page),
+      totalPages: totalPages,
+      totalProducts: totalProducts,
+      limit: limit,
+      filters: filters,
+      relatedProducts: relatedProducts,
+      errorMessage: null,
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    res.redirect('/pageNotFound');
+  }
+};
 const  logout=async (req,res) => {
       try{
           req.session.destroy((error)=>{
@@ -412,9 +407,6 @@ const  logout=async (req,res) => {
       }       
     
 }
-
-
-
 module.exports = {
     signup,
     LoadHomepage,

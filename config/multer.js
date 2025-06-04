@@ -4,14 +4,14 @@ const cloudinary = require('../config/cloudinary');
 
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
-    params: async (req, file) => ({
+    params: {
         folder: 'Uploads',
-        allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
-        public_id: `${Date.now()}-${file.originalname.split('.')[0]}`,
+        allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+        public_id: (req, file) => `${Date.now()}-${file.originalname.split('.')[0]}`,
         quality: 'auto:good',
         fetch_format: 'auto',
         transformation: [{ width: 800, crop: 'limit' }]
-    }),
+    }
 });
 
 const uploads = multer({

@@ -34,6 +34,9 @@ const brandInfo = async (req, res) => {
         res.redirect("/admin/pagenotFounderror");
     }
 };
+
+
+
 //  add Brand
 const addbrand=async (req,res) => {
     try {
@@ -57,8 +60,9 @@ const addbrand=async (req,res) => {
         
     }
 }
-// listed Brand
 
+
+// listed Brand
 const listedBrand=async (req,res) => {
     try{
      let id=req.params.id;
@@ -70,6 +74,8 @@ const listedBrand=async (req,res) => {
         res.redirect("/admin/pagenotFounderror");
     }
 }
+
+
 //  unlisted Brand
 const unlistedBrand=async (req,res) => {
     try{
@@ -101,8 +107,8 @@ const editBrand=async (req,res) => {
         
     }
 }
-//  deleted brand
 
+//  deleted brand
 const softdeleteBrand=async (req,res) => {
     try{
     

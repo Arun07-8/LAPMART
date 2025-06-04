@@ -48,6 +48,5 @@ router.patch("/unlistedProduct/:id",adminAuth,productController.unlistedProduct)
 router.get("/editProduct/:id",adminAuth,productController.loadEditProduct)
 router.post("/editProduct/:id",adminAuth,uploads,productController.editProduct)
 router.delete("/remove-product-image/:productId/:index",adminAuth,productController.removeProductImage);
-router.post("/deleteImage",adminAuth,productController.deleteProductImage)
 router.patch("/deleteProducts/:id",adminAuth,productController.deleteProduct)
 module.exports=router;
