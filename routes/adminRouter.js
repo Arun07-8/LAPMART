@@ -5,7 +5,7 @@ const customerController=require("../controllers/admin/customerController");
 const categoryController=require("../controllers/admin/categoryController");
 const brandController=require("../controllers/admin/brandController");
 const productController=require("../controllers/admin/productController")
-const  {adminAuth,userAuth}=require("../middlewares/Auth");
+const  {adminAuth}=require("../middlewares/adminAuth");
 const {uploads}=require("../config/multer")
 
 
@@ -19,7 +19,7 @@ router.get("/dashBoard",adminAuth,adminController.loadDashbard);
 router.get("/logout",adminController.logout);
 
 //  Customer Management 
-router.get("/users",adminAuth,customerController.customerInfo);
+router.get("/users",adminAuth,customerController.searchUsers);
 router.patch("/blockUser/:id",adminAuth,customerController.blockUser);
 router.patch("/unblockUser/:id",adminAuth,customerController.unblockUser);
 
@@ -40,7 +40,7 @@ router.post("/editBrand/:id",adminAuth,brandController.editBrand)
 router.patch("/deleteBrand/:id",adminAuth,brandController.softdeleteBrand);
 
 //  Products Managment
-router.get("/products",adminAuth,productController.produtInfo);
+router.get("/products",adminAuth,productController. productInfo); 
 router.get("/addProducts",adminAuth,productController.loadaddProduct)
 router.post("/addProduct",adminAuth,uploads,productController.addProducts)
 router.patch("/listedProduct/:id",adminAuth,productController.listedProduct);

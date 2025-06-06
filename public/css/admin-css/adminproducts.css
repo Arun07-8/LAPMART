@@ -284,15 +284,15 @@
     min-width: 68.01rem;
 }
 
-.search-input {
-    width: 100%;
+/* .search-input {
+    width: 289%;
     padding: 0.7rem 2.5rem;
-    border: 1px solid #e2e8f0;
+    /* border: 1px solid #e2e8f0; */
     border-radius: 8px;
     font-size: 0.95rem;
     height: 45px;
     min-width: 11.01rem;
-}
+} */
 
 .search-input:focus {
     border-color: #3b82f6;

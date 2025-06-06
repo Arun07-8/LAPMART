@@ -7,42 +7,60 @@ const path = require('path');
 const cloudinary = require('../../config/cloudinary');
 
 
-const produtInfo = async (req, res) => {
+const productInfo = async (req, res) => {
     try {
-        const search = req.query.search || "";
-        const page = parseInt(req.query.page)|| 1;
+        const search = decodeURIComponent(req.query.search || "").trim();
+        const page = Math.max(1, parseInt(req.query.page) || 1);
         const limit = 4;
+        let query = { isDeleted: false };
+        if (search) {
+            query.$and = [
+                { isDeleted: false },
+                {
+                    $or: [
+                        { productName: { $regex: search, $options: 'i' } },
+                        { 'category.name': { $regex: search, $options: 'i' } },
+                        { 'brand.name': { $regex: search, $options: 'i' } }
+                    ]
+                }
+            ];
+        }
 
-        const productData = await Product.find({isDeleted:false,
-            productName: { $regex: new RegExp(".*" + search + ".*", "i") }
-        })
+        const products = await Product.find(query)
+            .populate('category', 'name')
+            .populate('brand', 'name')
+            .select('productName productImage category brand quantity salePrice isListed _id')
             .limit(limit)
             .skip((page - 1) * limit)
-            .populate('category')
-            .populate('brand')
-            .exec();
+            .lean();
 
-        const count = await Product.countDocuments({
-                productName: { $regex: new RegExp(".*" + search + ".*", "i") }   
-        });
-
+        const count = await Product.countDocuments(query);
+        const totalPages = Math.ceil(count / limit);
+        if (req.headers.accept.includes('application/json')) {
+            return res.json({ products, currentPage: page, totalPages });
+        }
         const categories = await Category.find({ isListed: true, isDeleted: false });
         const brands = await Brand.find({ isListed: true, isDeleted: false });
 
-        if (categories && brands) {
-            res.render("products", {
-                product: productData,
+        if (categories.length > 0 && brands.length > 0) {
+            res.render('products', {
+                product: products,
                 currentPage: page,
-                totalPages: Math.ceil(count / limit),
+                totalPages,
                 category: categories,
-                brand:brands,
+                brand: brands,
+                search
             });
         } else {
-            res.redirect("/admin/pagenotFounderror");
+            res.status(404).redirect('/admin/pagenotFounderror');
         }
     } catch (error) {
-        console.error("Error in produtInfo:", error);
-        res.redirect("/admin/pagenotFounderror");
+        console.error('Error in productInfo:', error);
+        if (req.headers.accept.includes('application/json')) {
+            res.status(500).json({ error: 'Internal server error' });
+        } else {
+            res.status(500).render('error', { message: 'Internal Server Error' });
+        }
     }
 };
 
@@ -68,10 +86,7 @@ const loadaddProduct = async (req, res) => {
 
 const addProducts = async (req, res) => {
     try {
-        console.log('req.body:', req.body);
-        console.log('req.files:', req.files);
-
-        // Access fields directly from req.body
+    
         const {
             productName,
             description,
@@ -92,7 +107,6 @@ const addProducts = async (req, res) => {
             additionalFeatures
         } = req.body;
 
-        // Check if product already exists
         const productExist = await Product.findOne({
             productName: productName.trim(),
             isDeleted: false
@@ -104,20 +118,18 @@ const addProducts = async (req, res) => {
             return res.status(400).json({ error: 'Product already exists' });
         }
 
-        // Validate images
         if (!req.files || req.files.length < 2 || req.files.length > 5) {
             return res.status(400).json({
                 error: `Please upload between 2 and 5 images. Received: ${req.files ? req.files.length : 0}.`
             });
         }
 
-        // Use Cloudinary URLs from req.files
         const images = req.files.map(file => ({
             url: file.path,
             public_id: file.filename
         }));
 
-        // Create new product
+      
         const newProduct = new Product({
             productName,
             description,
@@ -174,8 +186,6 @@ const listedProduct=async (req,res) => {
     try {
         
         const id=req.params.id
-        console.log(id);
-        
         await Product.updateOne({_id:id},{$set:{isListed:true}})
         res.status(200).json({message:"Product listed Successfully"})
     } catch (error) {
@@ -291,7 +301,7 @@ const editProduct = async (req, res) => {
             updatedFields.productImage = updatedFields.productImage.slice(0, 5);
         }
     
-        // Remove duplicates and invalid URLs
+     
         updatedFields.productImage = [...new Set(updatedFields.productImage.filter(url => url && typeof url === 'string'))];
 
         const updatedProduct = await Product.findByIdAndUpdate(id, updatedFields, {
@@ -387,7 +397,6 @@ const removeProductImage = async (req, res) => {
     }
 };
 
-module.exports = { loadEditProduct, editProduct, removeProductImage };
 
 const deleteProduct=async(req,res) => {
     try{
@@ -408,8 +417,45 @@ const deleteProduct=async(req,res) => {
     }
 }
 
+// module.exports = { loadEditProduct, editProduct, removeProductImage };
+
+
+const searchproduct = async (req, res) => {
+    try {
+        const searchQuery = req.query.search ? req.query.search.trim() : '';
+
+        // Build query for MongoDB
+        let query = { isDeleted: false }; // Only include non-deleted products
+        if (searchQuery) {
+            query.$and = [
+                { isDeleted: false },
+                {
+                    $or: [
+                        { productName: { $regex: searchQuery, $options: 'i' } }, // Case-insensitive search on product name
+                        { 'category.name': { $regex: searchQuery, $options: 'i' } }, // Search category name
+                        { 'brand.name': { $regex: searchQuery, $options: 'i' } } // Search brand name
+                    ]
+                }
+            ];
+        }
+
+        // Fetch products with populated category and brand
+        const products = await Product.find(query)
+            .populate('category', 'name') // Only select category name
+            .populate('brand', 'name') // Only select brand name
+            .select('productName productImage category brand quantity salePrice isListed')
+            .lean(); // Convert to plain JavaScript object for faster processing
+
+        // Return JSON response
+        res.json({ products });
+    } catch (error) {
+        console.error('Error in live search:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
 module.exports={
-    produtInfo,
+    productInfo,
     listedProduct,
     unlistedProduct,
     addProducts,
@@ -419,4 +465,5 @@ module.exports={
     removeProductImage,
     deleteProduct,
     deleteImageFromCloudinary
+
 }

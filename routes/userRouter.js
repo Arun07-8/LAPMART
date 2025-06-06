@@ -3,7 +3,7 @@ const router=express.Router();
 const userController=require("../controllers/user/userController");
 const profileController=require("../controllers/user/profileController");
 const passport = require("passport");
-const  {adminAuth,userAuth}=require("../middlewares/Auth")
+const {userAuth}=require("../middlewares/userAuth")
 const productController=require("../controllers/user/productController")
 
 
@@ -24,12 +24,10 @@ router.get("/auth/google", passport.authenticate("google", {
        
         return res.redirect(`/signup?message=${encodeURIComponent(message)}`);
       }
-  
       req.logIn(user, (loginErr) => {
         if (loginErr) {
           return res.redirect(`/signup?message=${encodeURIComponent('Login failed')}`);
         }
-  
         req.session.user = user._id;
         return res.redirect('/home');
       });
@@ -51,8 +49,8 @@ router.post("/reset-password",profileController.newPasswordSet)
 router.get("/forgot-resendOtp",profileController.loadresendOtp)
 
 //   Home page & Shopping page
-router.get("/home",userController.LoadHomepage);
-router.get("/shop",userController.loadShoppingPage)
+router.get("/home",userAuth,userController.LoadHomepage);
+router.get("/shop",userAuth,userController.loadShoppingPage)
 router.get("/logout",userController.logout);
 
 //   Product details

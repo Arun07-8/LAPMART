@@ -144,8 +144,8 @@
                 } else if (phoneVal[0] === '0') {
                     showError(error3, "Phone number cannot start with 0");
                     return false;
-                } else if (phoneVal[0] !== '6') {
-                    showError(error3, "Phone number must start with 6");
+                }if (parseInt(phoneVal[0]) <= 6) {
+                    showError(error3, "Phone number must start with a digit greater than 6");
                     return false;
                 }
                 hideError(error3);

@@ -4,14 +4,13 @@ let isRecropping = false;
 let originalImages = [];
 let croppedImages = [];
 let existingImages = [];
-const minImages = 2; // Minimum images required (as per your form: Minimum 2, Maximum 5)
-const maxImages = 5; // Maximum images allowed
+const minImages = 2; 
+const maxImages = 5; 
 const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
-// Initialize existing images from the product
+/
 <% if (product && product.productImage && product.productImage.length > 0) { %>
     existingImages = <%- JSON.stringify(product.productImage) %>;
-    // Preload existing images into croppedImages for preview
     existingImages.forEach((imageUrl, index) => {
         croppedImages[index] = { dataUrl: imageUrl };
     });
@@ -58,7 +57,6 @@ function handleFiles(files) {
         }
         return true;
     });
-    // Rest of the function remains the same
 }
     originalImages = [];
     newFiles.forEach(file => {

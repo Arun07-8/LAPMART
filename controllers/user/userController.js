@@ -238,7 +238,6 @@ const LoadHomepage = async (req, res) => {
             quantity: { $gt: 0 }
         });
         productData.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
-
         if (user) {
             const userData = await User.findById(user);
             return res.render("home", { user: userData, product: productData });
@@ -250,7 +249,8 @@ const LoadHomepage = async (req, res) => {
         res.status(500).send("Server error");
     }
     
-};const loadShoppingPage = async (req, res) => {
+};
+const loadShoppingPage = async (req, res) => {
   try {
     const user = req.session.user;
     let userData = null;
@@ -347,7 +347,7 @@ const LoadHomepage = async (req, res) => {
       const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const searchRegex = new RegExp(escapedSearch, 'i');
       relatedQuery.$or = [
-        { productName: { $regex: searchRegex } }, // Removed $options: 'i'
+        { productName: { $regex: searchRegex } },
         { category: { $in: categoryIds } },
       ];
     }

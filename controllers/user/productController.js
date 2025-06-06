@@ -6,10 +6,11 @@ const User=require('../../models/userSchema');
 const productViewPage=async(req,res)=>{
     try{
         const userId=req.session.user;
-        const userData=await User.findById({_id:userId});
         const productId=req.query.id;
         const product=await Product.findById({_id:productId}).populate('category');
         const findCategory=product.category;
+        if(userId){
+        const userData=await User.findById({_id:userId});
         const similerProducts = await Product.find({category:findCategory,_id:{$ne:product._id},isDeleted:false,isListed:true})
             res.render("productViewPage",{
             user:userData,
@@ -18,6 +19,15 @@ const productViewPage=async(req,res)=>{
             category:findCategory,
             similerProducts
         })
+        }else{
+        const similerProducts = await Product.find({category:findCategory,_id:{$ne:product._id},isDeleted:false,isListed:true})
+            res.render("productViewPage",{
+            product:product,
+            quantity:product.quantity,
+            category:findCategory,
+            similerProducts
+        })
+        }
     }catch(error){
         console.error('error for fetching product details',error);
         res.redirect("/pageNotFound")

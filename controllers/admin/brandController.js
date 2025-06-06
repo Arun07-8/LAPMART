@@ -94,8 +94,7 @@ const editBrand=async (req,res) => {
     try{
         const {id}=req.params
         const {name,description}=req.body;
-        const updatedBrand = await Brand.findByIdAndUpdate(id,{name,description},{new:true})
-        console.log(updatedBrand);
+        const updatedBrand = await Brand.findByIdAndUpdate(id,{name,description},{new:true})    
         if(updatedBrand){
             return res.status(200).json({message:"Brand updated successfully",brand:updatedBrand})
         }else{

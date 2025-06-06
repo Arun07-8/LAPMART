@@ -3,569 +3,351 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LapKart Footer</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>LapKart Footer - Reduced Size</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Footer Styles - Scoped under .lapkart-footer for uniqueness */
-        .lapkart-footer {
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            border-top: 1px solid #e2e8f0;
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
             padding: 0;
-            margin-top: auto;
+            box-sizing: border-box;
+        }
+
+        /* Scoped Footer Styles */
+        .lk-footer-wrapper {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #1e1e1e;
+            color: #cccccc;
+            padding-top: 25px; /* Reduced from 30px */
             position: relative;
-            overflow: hidden;
         }
 
-        .lapkart-footer::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #2563eb 0%, #3b82f6 50%, #2563eb 100%);
-        }
-
-        .lapkart-footer .footer-content {
-            max-width: 1400px;
+        .lk-footer-container {
+            max-width: 1600px;
             margin: 0 auto;
-            padding: 40px 20px 0;
+            padding: 0 25px; /* Reduced from 30px */
         }
 
-        .lapkart-footer .footer-main {
+        .lk-footer-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 35px; /* Reduced from 40px */
+            padding-bottom: 25px; /* Reduced from 30px */
         }
 
-        .lapkart-footer .footer-brand {
-            padding-right: 20px;
+        /* Brand Section */
+        .lk-brand-section {
+            padding-right: 35px; /* Reduced from 40px */
         }
 
-        .lapkart-footer .footer-logo {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            gap: 10px;
+        .lk-brand-logo {
+            margin-bottom: 16px; /* Reduced from 20px */
         }
 
-        .lapkart-footer .footer-logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #2563eb, #3b82f6);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-            font-weight: bold;
-            box-shadow: 0 3px 10px rgba(37, 99, 235, 0.3);
-        }
-
-        .lapkart-footer .footer-logo-text {
-            font-size: 28px;
+        .lk-logo-text {
+            font-size: 42px; /* Reduced from 48px */
             font-weight: 700;
-            color: #1e293b;
-            letter-spacing: -0.5px;
+            color: #ffffff;
+            text-transform: uppercase;
         }
 
-        .lapkart-footer .footer-description {
-            color: #64748b;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            font-size: 14px;
+        .lk-brand-desc {
+            color: #cccccc;
+            line-height: 1.5; /* Reduced from 1.6 */
+            margin-bottom: 16px; /* Reduced from 20px */
+            font-size: 17px; /* Reduced from 20px */
+            max-width: 450px; /* Reduced from 500px */
         }
 
-        .lapkart-footer .footer-social {
+        .lk-social-links {
             display: flex;
-            gap: 12px;
-            margin-bottom: 15px;
+            gap: 20px; /* Reduced from 24px */
         }
 
-        .lapkart-footer .social-link {
-            width: 38px;
-            height: 38px;
-            background: #f1f5f9;
-            border-radius: 10px;
+        .lk-social-btn {
+            width: 52px; /* Reduced from 60px */
+            height: 52px; /* Reduced from 60px */
+            background: transparent;
+            border: 2px solid #cccccc;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #64748b;
+            color: #ffffff;
             text-decoration: none;
-            transition: all 0.3s ease;
-            border: 1px solid #e2e8f0;
+            font-size: 20px; /* Reduced from 24px */
+            transition: all 0.25s ease;
         }
 
-        .lapkart-footer .social-link:hover {
-            background: #2563eb;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
-            border-color: #2563eb;
+        .lk-social-btn:hover {
+            background: #555555;
+            border-color: #ffffff;
         }
 
-        .lapkart-footer .footer-contact {
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
+        .lk-contact-card {
+            padding: 12px 0; /* Reduced from 15px */
+            border: none;
         }
 
-        .lapkart-footer .contact-item {
+        .lk-contact-item {
             display: flex;
             align-items: flex-start;
-            gap: 10px;
-            margin-bottom: 10px;
-            color: #475569;
-            font-size: 13px;
+            gap: 14px; /* Reduced from 16px */
+            margin-bottom: 20px; /* Reduced from 24px */
+            color: #cccccc;
+            font-size: 16px; /* Reduced from 18px */
+            line-height: 1.4; /* Reduced from 1.5 */
         }
 
-        .lapkart-footer .contact-item:last-child {
-            margin-bottom: 0;
+        .lk-contact-item i {
+            display: none;
         }
 
-        .lapkart-footer .contact-item i {
-            color: #2563eb;
-            font-size: 15px;
-            margin-top: 2px;
-            width: 18px;
-        }
-
-        .lapkart-footer .footer-section {
+        /* Footer Sections */
+        .lk-footer-section {
             position: relative;
         }
 
-        .lapkart-footer .footer-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 15px;
-            position: relative;
-            padding-bottom: 8px;
+        .lk-section-title {
+            font-size: 24px; /* Reduced from 28px */
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 16px; /* Reduced from 20px */
+            text-transform: uppercase;
         }
 
-        .lapkart-footer .footer-title::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 25px;
-            height: 2px;
-            background: linear-gradient(90deg, #2563eb, #3b82f6);
-            border-radius: 2px;
-        }
-
-        .lapkart-footer .footer-links {
+        .lk-footer-nav {
             list-style: none;
         }
 
-        .lapkart-footer .footer-links li {
-            margin-bottom: 8px;
+        .lk-footer-nav li {
+            margin-bottom: 10px; /* Reduced from 12px */
         }
 
-        .lapkart-footer .footer-links a {
-            color: #64748b;
+        .lk-footer-nav a {
+            color: #cccccc;
             text-decoration: none;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            display: inline-block;
-            position: relative;
+            font-size: 16px; /* Reduced from 18px */
+            transition: all 0.25s ease;
+            line-height: 1.4; /* Reduced from 1.5 */
         }
 
-        .lapkart-footer .footer-links a:hover {
-            color: #2563eb;
-            transform: translateX(5px);
+        .lk-footer-nav a:hover {
+            color: #ffffff;
         }
 
-        .lapkart-footer .footer-links a::before {
-            content: '';
-            position: absolute;
-            left: -12px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 5px;
-            height: 5px;
-            background: #2563eb;
-            border-radius: 50%;
-            opacity: 0;
-            transition: all 0.3s ease;
+        /* Blog Section */
+        .lk-blog-section {
+            padding-top: 6px; /* Reduced from 8px */
         }
 
-        .lapkart-footer .footer-links a:hover::before {
-            opacity: 1;
+        .lk-blog-entry {
+            margin-bottom: 16px; /* Reduced from 20px */
         }
 
-        .lapkart-footer .newsletter {
-            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
+        .lk-blog-entry:last-child {
+            margin-bottom: 0;
         }
 
-        .lapkart-footer .newsletter-title {
-            font-size: 15px;
+        .lk-blog-date {
+            font-size: 17px; /* Reduced from 20px */
             font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 8px;
+            color: #dddddd;
+            margin-bottom: 12px; /* Reduced from 16px */
         }
 
-        .lapkart-footer .newsletter-text {
-            color: #64748b;
-            font-size: 13px;
-            margin-bottom: 15px;
-            line-height: 1.4;
+        .lk-blog-text {
+            font-size: 16px; /* Reduced from 18px */
+            color: #cccccc;
+            line-height: 1.5; /* Reduced from 1.6 */
+            margin-bottom: 6px; /* Reduced from 8px */
         }
 
-        .lapkart-footer .newsletter-form {
-            display: flex;
-            gap: 8px;
+        .lk-blog-divider {
+            width: 70px; /* Reduced from 80px */
+            height: 2px;
+            background: #cccccc;
+            margin: 16px 0; /* Reduced from 20px */
         }
 
-        .lapkart-footer .newsletter-input {
-            flex: 1;
-            padding: 10px 14px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 13px;
-            background: white;
-            transition: all 0.3s ease;
+        /* Footer Bottom */
+        .lk-footer-bottom {
+            background: #2a2a2a;
+            padding: 16px 0; /* Reduced from 20px */
+            text-align: center;
         }
 
-        .lapkart-footer .newsletter-input:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-        }
-
-        .lapkart-footer .newsletter-btn {
-            padding: 10px 18px;
-            background: linear-gradient(135deg, #2563eb, #3b82f6);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
-
-        .lapkart-footer .newsletter-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
-        }
-
-        .lapkart-footer .footer-bottom {
-            background: #f8fafc;
-            padding: 20px 0;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .lapkart-footer .footer-bottom-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .lapkart-footer .footer-copyright {
-            color: #64748b;
-            font-size: 13px;
-        }
-
-        .lapkart-footer .footer-links-bottom {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .lapkart-footer .footer-links-bottom a {
-            color: #64748b;
-            text-decoration: none;
-            font-size: 13px;
-            transition: color 0.3s ease;
-        }
-
-        .lapkart-footer .footer-links-bottom a:hover {
-            color: #2563eb;
-        }
-
-        .lapkart-footer .payment-methods {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .lapkart-footer .payment-methods span {
-            color: #64748b;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .lapkart-footer .payment-icons {
-            display: flex;
-            gap: 8px;
-        }
-
-        .lapkart-footer .payment-icon {
-            width: 36px;
-            height: 24px;
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: 600;
-            color: #475569;
+        .lk-copyright {
+            color: #cccccc;
+            font-size: 16px; /* Reduced from 18px */
         }
 
         /* Responsive Design */
-        @media (max-width: 1200px) {
-            .lapkart-footer .footer-main {
+        @media (max-width: 1024px) {
+            .lk-footer-grid {
                 grid-template-columns: 2fr 1fr 1fr 1fr;
-                gap: 30px;
-            }
-        }
-
-        @media (max-width: 992px) {
-            .lapkart-footer .footer-main {
-                grid-template-columns: 1fr 1fr;
-                gap: 30px;
+                gap: 25px; /* Reduced */
             }
             
-            .lapkart-footer .footer-brand {
-                padding-right: 0;
+            .lk-logo-text {
+                font-size: 36px; /* Reduced from 40px */
+            }
+            
+            .lk-section-title {
+                font-size: 22px; /* Reduced from 24px */
             }
         }
 
         @media (max-width: 768px) {
-            .lapkart-footer .footer-content {
-                padding: 30px 15px 0;
+            .lk-footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 20px; /* Reduced */
             }
             
-            .lapkart-footer .footer-main {
-                grid-template-columns: 1fr;
-                gap: 20px;
-                text-align: center;
+            .lk-brand-section {
+                grid-column: 1 / -1;
+                text-align: left;
             }
             
-            .lapkart-footer .footer-bottom-content {
-                flex-direction: column;
-                text-align: center;
-                gap: 10px;
+            .lk-logo-text {
+                font-size: 32px; /* Reduced from 36px */
             }
             
-            .lapkart-footer .footer-links-bottom {
-                justify-content: center;
-                gap: 15px;
+            .lk-section-title {
+                font-size: 20px; /* Reduced from 22px */
             }
             
-            .lapkart-footer .newsletter-form {
-                flex-direction: column;
+            .lk-footer-container {
+                padding: 0 20px; /* Reduced from 25px */
             }
         }
 
-        @media (max-width: 480px) {
-            .lapkart-footer .footer-logo-text {
-                font-size: 24px;
+        @media (max-width: 640px) {
+            .lk-footer-grid {
+                grid-template-columns: 1fr;
+                gap: 16px; /* Reduced from 20px */
             }
             
-            .lapkart-footer .footer-social {
-                justify-content: center;
+            .lk-social-links {
+                justify-content: flex-start;
             }
             
-            .lapkart-footer .payment-methods {
-                flex-direction: column;
-                gap: 8px;
+            .lk-logo-text {
+                font-size: 28px; /* Reduced from 32px */
+            }
+            
+            .lk-section-title {
+                font-size: 18px; /* Reduced from 20px */
+            }
+            
+            .lk-brand-desc {
+                font-size: 16px; /* Reduced from 18px */
+            }
+            
+            .lk-footer-nav a {
+                font-size: 15px; /* Reduced from 16px */
+            }
+            
+            .lk-contact-item {
+                font-size: 15px; /* Reduced from 16px */
             }
         }
     </style>
 </head>
 <body>
-    <footer class="lapkart-footer">
-        <div class="footer-content">
-            <!-- Main Footer Content -->
-            <div class="footer-main">
+    <!-- Reduced Size Footer -->
+    <footer class="lk-footer-wrapper">
+        <div class="lk-footer-container">
+            <!-- Main Footer Grid -->
+            <div class="lk-footer-grid">
                 <!-- Brand Section -->
-                <div class="footer-brand">
-                    <div class="footer-logo">
-                        <div class="footer-logo-icon">L</div>
-                        <div class="footer-logo-text">LapKart</div>
+                <div class="lk-brand-section">
+                    <div class="lk-brand-logo">
+                        <div class="lk-logo-text">LapKart</div>
                     </div>
-                    <p class="footer-description">
-                        Your trusted destination for premium laptops and technology solutions. We provide the latest models from top brands with unbeatable prices and exceptional customer service.
+                    <p class="lk-brand-desc">
+                        Your trusted destination for premium laptops and technology solutions with unbeatable prices and exceptional service.
                     </p>
-                    
-                    <div class="footer-social">
-                        <a href="#" class="social-link" aria-label="Facebook">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="social-link" aria-label="Twitter">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="social-link" aria-label="Instagram">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="social-link" aria-label="LinkedIn">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                        <a href="#" class="social-link" aria-label="YouTube">
-                            <i class="fab fa-youtube"></i>
-                        </a>
-                    </div>
-
-                    <div class="footer-contact">
-                        <div class="contact-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>123 Tech Street, Silicon Valley<br>California, USA 94025</span>
+                    <div class="lk-contact-card">
+                        <div class="lk-contact-item">
+                            <span>123 Tech Street, Silicon Valley, California, USA 94025</span>
                         </div>
-                        <div class="contact-item">
-                            <i class="fas fa-phone"></i>
+                        <div class="lk-contact-item">
                             <span>+1 (555) 123-4567</span>
                         </div>
-                        <div class="contact-item">
-                            <i class="fas fa-envelope"></i>
+                        <div class="lk-contact-item">
                             <span>info@lapkart.com</span>
                         </div>
                     </div>
+                    <div class="lk-social-links">
+                        <a href="#" class="lk-social-btn" aria-label="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="lk-social-btn" aria-label="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="lk-social-btn" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="lk-social-btn" aria-label="LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
                 </div>
 
-                <!-- Quick Links -->
-                <div class="footer-section">
-                    <h3 class="footer-title">Quick Links</h3>
-                    <ul class="footer-links">
+                <!-- Shopping Section -->
+                <div class="lk-footer-section">
+                    <h3 class="lk-section-title">Shopping</h3>
+                    <ul class="lk-footer-nav">
                         <li><a href="/shop">Shop All</a></li>
                         <li><a href="/categories">Categories</a></li>
                         <li><a href="/brands">Brands</a></li>
                         <li><a href="/deals">Special Deals</a></li>
                         <li><a href="/new-arrivals">New Arrivals</a></li>
-                        <li><a href="/bestsellers">Best Sellers</a></li>
                     </ul>
                 </div>
 
-                <!-- Customer Service -->
-                <div class="footer-section">
-                    <h3 class="footer-title">Customer Care</h3>
-                    <ul class="footer-links">
-                        <li><a href="/contact">Contact Us</a></li>
-                        <li><a href="/support">Help Center</a></li>
-                        <li><a href="/shipping">Shipping Info</a></li>
-                        <li><a href="/returns">Returns</a></li>
-                        <li><a href="/warranty">Warranty</a></li>
-                        <li><a href="/track-order">Track Order</a></li>
-                    </ul>
-                </div>
-
-                <!-- Company -->
-                <div class="footer-section">
-                    <h3 class="footer-title">Company</h3>
-                    <ul class="footer-links">
+                <!-- More Link Section -->
+                <div class="lk-footer-section">
+                    <h3 class="lk-section-title">More Link</h3>
+                    <ul class="lk-footer-nav">
                         <li><a href="/about">About Us</a></li>
                         <li><a href="/careers">Careers</a></li>
                         <li><a href="/press">Press</a></li>
-                        <li><a href="/investors">Investors</a></li>
                         <li><a href="/blog">Blog</a></li>
-                        <li><a href="/affiliate">Affiliate</a></li>
+                        <li><a href="/contact">Contact Us</a></li>
                     </ul>
                 </div>
 
-                <!-- Newsletter -->
-                <div class="footer-section">
-                    <h3 class="footer-title">Stay Updated</h3>
-                    <div class="newsletter">
-                        <h4 class="newsletter-title">Newsletter</h4>
-                        <p class="newsletter-text">Get the latest deals and tech news delivered to your inbox.</p>
-                        <form class="newsletter-form">
-                            <input type="email" class="newsletter-input" placeholder="Enter your email" required>
-                            <button type="submit" class="newsletter-btn">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </form>
+                <!-- From the Blog Section -->
+                <div class="lk-footer-section lk-blog-section">
+                    <h3 class="lk-section-title">From the Blog</h3>
+                    <div class="lk-blog-entry">
+                        <div class="lk-blog-date">26 May</div>
+                        <div class="lk-blog-text">
+                            Your trusted destination for premium laptops and technology solutions.
+                        </div>
+                        <div class="lk-blog-text">3 comments</div>
+                    </div>
+                    <div class="lk-blog-divider"></div>
+                    <div class="lk-blog-entry">
+                        <div class="lk-blog-date">27 May</div>
+                        <div class="lk-blog-text">
+                            Unbeatable prices and exceptional service for all your tech needs.
+                        </div>
+                        <div class="lk-blog-text">5 comments</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Footer Bottom -->
-        <div class="footer-bottom">
-            <div class="footer-bottom-content">
-                <div class="footer-copyright">
-                    © 2024 LapKart. All rights reserved. Built with passion for technology.
-                </div>
-                
-                <div class="footer-links-bottom">
-                    <a href="/privacy">Privacy Policy</a>
-                    <a href="/terms">Terms of Service</a>
-                    <a href="/cookies">Cookie Policy</a>
-                    <a href="/sitemap">Sitemap</a>
-                </div>
-
-                <div class="payment-methods">
-                    <span>We Accept:</span>
-                    <div class="payment-icons">
-                        <div class="payment-icon">VISA</div>
-                        <div class="payment-icon">MC</div>
-                        <div class="payment-icon">AMEX</div>
-                        <div class="payment-icon">PP</div>
-                    </div>
-                </div>
+        <div class="lk-footer-bottom">
+            <div class="lk-copyright">
+                LapKart &copy; 2024 All rights reserved
             </div>
         </div>
     </footer>
-
-    <script>
-        // Newsletter form submission
-        document.querySelector('.newsletter-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const email = this.querySelector('.newsletter-input').value;
-            
-            if (email) {
-                alert('Thank you for subscribing to LapKart newsletter!');
-                this.querySelector('.newsletter-input').value = '';
-            }
-        });
-
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // Add loading animation for external links
-        document.querySelectorAll('.footer-links a, .footer-links-bottom a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                if (this.getAttribute('href').startsWith('/')) {
-                    this.style.opacity = '0.7';
-                    setTimeout(() => {
-                        this.style.opacity = '1';
-                    }, 200);
-                }
-            });
-        });
-
-        // Social media link tracking (placeholder)
-        document.querySelectorAll('.social-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                console.log('Social media link clicked:', this.getAttribute('aria-label'));
-            });
-        });
-    </script>
 </body>
 </html>

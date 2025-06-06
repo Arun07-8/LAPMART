@@ -1,14 +1,11 @@
 const User=require("../../models/userSchema");
 
-
-
 //  user Info rendering
-const customerInfo = async (req, res) => {
+const searchUsers = async (req, res) => {
     try {
-        let search = decodeURIComponent(req.query.search || "").trim(); 
-        let page = parseInt(req.query.page) || 1;
-        const limit = 3;
-    
+        let search = decodeURIComponent(req.query.search || "").trim();
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10; // Users per page
         const searchTerms = search.split(/\s+/).filter(term => term.length > 0);
         const regexQueries = searchTerms.map(term => ({
             $or: [
@@ -16,33 +13,32 @@ const customerInfo = async (req, res) => {
                 { email: { $regex: term, $options: "i" } }
             ]
         }));
-    
         const query = {
             isadmin: false,
             ...(searchTerms.length > 0 ? { $and: regexQueries } : {})
         };
-
-        const userData = await User.find(query)/*  */
-            .limit(limit)
+        const users = await User.find(query)
+            .select('name email phoneNumber image createdAt isBlocked _id')
             .skip((page - 1) * limit)
-            .exec();
-
-          
-            
-        const count = await User.countDocuments(query)
-        res.render("usersManagement",{
-            data: userData,
-            currentPage: page,
-            totalPages: Math.ceil(count / limit),
-            search: search.trim(),
-            path:req.path
-        });
+            .limit(limit)
+            .lean();
+        const totalUsers = await User.countDocuments(query);
+        const totalPages = Math.ceil(totalUsers / limit);
+        if (req.headers.accept.includes('application/json')) {
+            res.json({ users, currentPage: page, totalPages });
+        } else {
+            res.render('usersManagement', { 
+                data: users, 
+                search, 
+                currentPage: page, 
+                totalPages 
+            });
+        }
     } catch (error) {
-        console.error("Error in customerInfo:", error);
-        res.redirect("/admin/pageNotFounderror")
+        console.error('Error fetching users:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
-
 
 //  blockuser
 const blockUser = async (req, res) => {
@@ -68,10 +64,10 @@ const unblockUser = async (req, res) => {
     }
 };
 
-module.exports = { blockUser, unblockUser };
+
 
 module.exports={
-    customerInfo,
+  searchUsers,
     blockUser,
     unblockUser
 }

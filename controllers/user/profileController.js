@@ -177,7 +177,6 @@ const newPasswordSet=async (req,res) => {
     if(newPass1===newPass2){
     
       const passwordHash=await securePassword(newPass1);
-      console.log("hello",passwordHash);
       await User.updateOne(
         {email:email},
         {$set:{password:passwordHash}}
@@ -227,7 +226,6 @@ const loadresendOtp = async (req, res) => {
         }); 
     }
 };
-
 module.exports = {
     getforgetPass,
     forgotEmailvalid,
