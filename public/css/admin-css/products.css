@@ -199,178 +199,176 @@ body {
     margin: 0;
 }
 
-/* Table Container */
+/* Product Management Container */
 .product-management-container {
     background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px var(--shadow-color);
-    padding: 20px;
-    margin-bottom: 16px;
+    border-radius: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    padding: 35px;
+    margin: 30px;
     border: 1px solid var(--border-color);
-    width: 100%;
+    width: calc(100% - 60px);
     box-sizing: border-box;
-    max-width: 100%;
 }
 
-.table-container {
-    overflow-x: auto;
-    width: 100%;
-    max-width: 100%;
-    min-height: 300px;
-}
-
+/* Table Design */
 .table {
     width: 100%;
-    min-width: 800px;
-    border-collapse: collapse;
+    border-collapse: separate;
     border-spacing: 0;
     margin: 0 auto;
-    table-layout: fixed;
-}
-
-.table-header {
-    background-color: var(--bg-light);
+    background: #fff;
 }
 
 .table th {
-    padding: 16px 12px;
-    font-weight: 600;
+    padding: 25px 20px;
+    font-weight: 700;
     color: var(--dark-color);
     text-transform: uppercase;
-    font-size: 1rem;
-    letter-spacing: 0.5px;
-    border-bottom: 1px solid var(--border-color);
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    border-bottom: 2px solid var(--border-color);
     text-align: center;
     vertical-align: middle;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    background: var(--bg-light);
 }
 
 .table td {
-    padding: 16px 12px;
+    padding: 25px 20px;
     vertical-align: middle;
     border-bottom: 1px solid var(--border-color);
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    background: #fff;
+    transition: all 0.3s ease;
+    color: var(--text-primary);
 }
 
-.table tr:last-child td {
-    border-bottom: none;
+.table tr:hover td {
+    background-color: rgba(48, 86, 211, 0.03);
 }
 
-.table tr:hover {
-    background-color: rgba(48, 86, 211, 0.04);
-}
-
-/* Product Image */
+/* Product Image Styling */
 .product-image {
-    width: 80px;
-    height: 80px;
+    width: 160px;
+    height: 160px;
     overflow: hidden;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    border: 1.5px solid var(--border-color);
     margin: 0 auto;
+    background: #fff;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    transition: all 0.4s ease;
+    position: relative;
+}
+
+.product-image:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .product-thumbnail {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    padding: 15px;
+    transition: transform 0.4s ease;
+}
+
+.product-image:hover .product-thumbnail {
+    transform: scale(1.08);
 }
 
 /* Product Name */
 .product-name {
-    font-weight: 600;
+    font-weight: 700;
     color: var(--dark-color);
-    font-size: 1rem;
+    font-size: 1.25rem;
+    margin: 0;
+    padding: 0 20px;
+    line-height: 1.5;
+    letter-spacing: 0.3px;
 }
 
 /* Status Buttons */
 .btn-status {
     display: inline-block;
-    padding: 8px 16px;
-    border-radius: 12px;
-    font-size: 0.9rem;
-    font-weight: 500;
+    padding: 14px 28px;
+    border-radius: 14px;
+    font-size: 1.1rem;
+    font-weight: 600;
     text-decoration: none;
     text-align: center;
-    transition: all 0.3s;
-    min-width: 90px;
+    transition: all 0.4s ease;
+    min-width: 140px;
+    border: none;
+    letter-spacing: 0.8px;
 }
 
 .btn-listed {
-    background-color: #219653;
+    background: linear-gradient(135deg, #219653 0%, #27ae60 100%);
     color: white;
+    box-shadow: 0 6px 16px rgba(33, 150, 83, 0.25);
 }
 
 .btn-listed:hover {
-    background-color: #16803F;
+    background: linear-gradient(135deg, #27ae60 0%, #219653 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(33, 150, 83, 0.35);
 }
 
 .btn-listed2 {
-    background-color: #D74742;
+    background: linear-gradient(135deg, #D74742 0%, #e74c3c 100%);
     color: white;
+    box-shadow: 0 6px 16px rgba(215, 71, 66, 0.25);
 }
 
 .btn-listed2:hover {
-    background-color: #C13934;
+    background: linear-gradient(135deg, #e74c3c 0%, #D74742 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(215, 71, 66, 0.35);
 }
 
 /* Action Buttons */
-.actions-cell {
-    text-align: center;
-}
-
 .action-buttons {
     display: flex;
     justify-content: center;
-    gap: 16px;
+    gap: 20px;
 }
 
 .edit-icon, .delete-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 4px;
-    transition: all 0.3s;
-    font-size: 1rem;
-}
-
-.edit-icon {
-    background-color: rgba(245, 158, 11, 0.1);
-    color: var(--warning-color);
-}
-
-.edit-icon:hover {
-    background-color: var(--warning-color);
-    color: white;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
-}
-
-.delete-btn {
-    background: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    transition: all 0.4s ease;
+    font-size: 1.3rem;
     border: none;
-    padding: 0;
     cursor: pointer;
 }
 
+.edit-icon {
+    background: linear-gradient(135deg, #F59E0B 0%, #fbbf24 100%);
+    color: white;
+    box-shadow: 0 6px 16px rgba(245, 158, 11, 0.25);
+}
+
+.edit-icon:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.35);
+}
+
 .delete-icon {
-    background-color: rgba(215, 71, 66, 0.1);
-    color: var(--danger-color);
+    background: linear-gradient(135deg, #D74742 0%, #e74c3c 100%);
+    color: white;
+    box-shadow: 0 6px 16px rgba(215, 71, 66, 0.25);
 }
 
 .delete-icon:hover {
-    background-color: var(--danger-color);
-    color: white;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(215, 71, 66, 0.35);
 }
 
 /* Column Widths */
@@ -563,9 +561,87 @@ body {
 }
 
 /* Responsive Design */
+@media (max-width: 1600px) {
+    .product-image {
+        width: 140px;
+        height: 140px;
+    }
+    
+    .table th, .table td {
+        padding: 22px 18px;
+    }
+}
+
+@media (max-width: 1400px) {
+    .product-image {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .table th, .table td {
+        padding: 20px 16px;
+        font-size: 1.05rem;
+    }
+    
+    .btn-status {
+        padding: 12px 24px;
+        min-width: 130px;
+        font-size: 1.05rem;
+    }
+}
+
 @media (max-width: 1200px) {
-    .table {
-        min-width: 750px;
+    .product-image {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .table th, .table td {
+        padding: 18px 14px;
+        font-size: 1rem;
+    }
+    
+    .btn-status {
+        padding: 10px 20px;
+        min-width: 120px;
+        font-size: 1rem;
+    }
+    
+    .edit-icon, .delete-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .product-image {
+        width: 90px;
+        height: 90px;
+    }
+    
+    .table th, .table td {
+        padding: 16px 12px;
+        font-size: 0.95rem;
+    }
+    
+    .btn-status {
+        padding: 8px 16px;
+        min-width: 110px;
+        font-size: 0.95rem;
+    }
+    
+    .edit-icon, .delete-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .product-image {
+        width: 80px;
+        height: 80px;
     }
     
     .table th, .table td {
@@ -573,27 +649,23 @@ body {
         font-size: 0.9rem;
     }
     
-    .product-image {
-        width: 70px;
-        height: 70px;
-    }
-    
     .btn-status {
-        padding: 6px 12px;
-        min-width: 80px;
-        font-size: 0.85rem;
+        padding: 7px 14px;
+        min-width: 100px;
+        font-size: 0.9rem;
     }
     
-    .page-item .page-link {
-        padding: 6px 10px;
-        font-size: 0.8rem;
-        min-width: 32px;
+    .edit-icon, .delete-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 1rem;
     }
 }
 
-@media (max-width: 992px) {
-    .table {
-        min-width: 700px;
+@media (max-width: 576px) {
+    .product-image {
+        width: 70px;
+        height: 70px;
     }
     
     .table th, .table td {
@@ -601,92 +673,15 @@ body {
         font-size: 0.85rem;
     }
     
-    .product-image {
-        width: 60px;
-        height: 60px;
-    }
-    
-    .action-buttons {
-        gap: 12px;
+    .btn-status {
+        padding: 6px 12px;
+        min-width: 90px;
+        font-size: 0.85rem;
     }
     
     .edit-icon, .delete-icon {
-        width: 32px;
-        height: 32px;
-        font-size: 0.9rem;
-    }
-    
-    .btn-status {
-        padding: 5px 10px;
-        min-width: 70px;
-        font-size: 0.8rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .table th, .table td {
-        padding: 10px 6px;
-        font-size: 0.8rem;
-    }
-    
-    .product-image {
-        width: 50px;
-        height: 50px;
-    }
-    
-    .action-buttons {
-        gap: 10px;
-    }
-    
-    .edit-icon, .delete-icon {
-        width: 28px;
-        height: 28px;
-        font-size: 0.8rem;
-    }
-    
-    .btn-status {
-        padding: 4px 8px;
-        min-width: 60px;
-        font-size: 0.75rem;
-    }
-    
-    .page-item .page-link {
-        padding: 4px 8px;
-        font-size: 0.7rem;
-        min-width: 28px;
-    }
-}
-
-@media (max-width: 576px) {
-    .table {
-        min-width: 650px;
-    }
-    
-    .table th, .table td {
-        padding: 8px 4px;
-        font-size: 0.75rem;
-    }
-    
-    .action-buttons {
-        flex-direction: column;
-        gap: 8px;
-        align-items: center;
-    }
-    
-    .product-image {
-        width: 45px;
-        height: 45px;
-    }
-    
-    .btn-status {
-        padding: 3px 6px;
-        font-size: 0.7rem;
-        min-width: 50px;
-    }
-    
-    .page-item .page-link {
-        padding: 2px 6px;
-        font-size: 0.65rem;
-        min-width: 24px;
+        width: 35px;
+        height: 35px;
+        font-size: 0.95rem;
     }
 }

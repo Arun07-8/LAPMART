@@ -493,74 +493,80 @@
             isRecropping = false;
         }
 
-        async function removeImage(productId, imageIndex) {
-            if (!Number.isInteger(imageIndex) || imageIndex < 0 || imageIndex >= existingImages.length) {
+      // Fixed Frontend JavaScript Function
+async function removeImage(userId) {
+    // Check if user has a profile image
+    const profileImage = document.getElementById('profileImage');
+    const defaultIcon = document.getElementById('defaultIcon');
+    
+    if (!profileImage.src || profileImage.style.display === 'none') {
+        Swal.fire({
+            icon: 'warning',
+            title: 'No Image',
+            text: 'There is no profile image to remove.'
+        });
+        return;
+    }
+    
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'This will permanently remove your profile picture!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, remove it!'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                // Show loading
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Index',
-                    text: 'The image index is invalid.'
-                });
-                return;
-            }
-
-            if (existingImages.length <= minImages) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Cannot Remove',
-                    text: `At least ${minImages} images are required.`
-                });
-                return;
-            }
-
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'This image will be permanently removed from the server!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, remove it!'
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    try {
-                        const response = await fetch(`/admin/remove-product-image/${productId}/${imageIndex}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            }
-                        });
-
-                        const data = await response.json();
-                        if (data.success) {
-                            croppedImages.splice(imageIndex, 1);
-                            existingImages.splice(imageIndex, 1);
-                            updatePreview();
-                            updateFormFiles();
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Image Removed',
-                                text: 'The image has been removed successfully.',
-                                showConfirmButton: false,
-                                timer: 1500
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Removal Failed',
-                                text: data.message || 'Failed to remove the image.'
-                            });
-                        }
-                    } catch (error) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'An error occurred while removing the image: ' + error.message
-                        });
+                    title: 'Removing...',
+                    text: 'Please wait while we remove your profile picture',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
                     }
+                });
+                
+                // Since we're removing the first (and likely only) profile image, use index 0
+                const response = await fetch(`/removeuserimage/0`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update UI to show default icon
+                    profileImage.style.display = 'none';
+                    profileImage.src = '';
+                    defaultIcon.style.display = 'block';
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Image Removed',
+                        text: 'Your profile picture has been removed successfully.',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                } else {
+                    throw new Error(data.message || 'Failed to remove the image.');
                 }
-            });
+            } catch (error) {
+                console.error('Error removing image:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while removing the image: ' + error.message
+                });
+            }
         }
-
+    });
+}
         function updateFormFiles() {
             const dataTransfer = new DataTransfer();
             croppedImages.forEach(img => {

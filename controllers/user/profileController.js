@@ -13,6 +13,7 @@ const forgotEmailvalid = async (req, res) => {
         const { email } = req.body;
       
         const findUser = await User.findOne({ email,isadmin:false});
+    
         if (!findUser) {
             return res.status(404).json({
                 success: false,

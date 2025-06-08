@@ -79,7 +79,6 @@
 
         // Check maximum images
         if (totalImages > maxImages) {
-            console.log(maxImages , ' } ] ] ] ] ] ] ] ] ');
             
             Swal.fire({
                 icon: 'error',

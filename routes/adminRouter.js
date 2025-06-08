@@ -6,7 +6,7 @@ const categoryController=require("../controllers/admin/categoryController");
 const brandController=require("../controllers/admin/brandController");
 const productController=require("../controllers/admin/productController")
 const  {adminAuth}=require("../middlewares/adminAuth");
-const {uploads}=require("../config/multer")
+const {  productUpload}=require("../config/multer")
 
 
 //  error 404
@@ -42,11 +42,11 @@ router.patch("/deleteBrand/:id",adminAuth,brandController.softdeleteBrand);
 //  Products Managment
 router.get("/products",adminAuth,productController. productInfo); 
 router.get("/addProducts",adminAuth,productController.loadaddProduct)
-router.post("/addProduct",adminAuth,uploads,productController.addProducts)
+router.post("/addProduct",adminAuth,productUpload,productController.addProducts)
 router.patch("/listedProduct/:id",adminAuth,productController.listedProduct);
 router.patch("/unlistedProduct/:id",adminAuth,productController.unlistedProduct);
 router.get("/editProduct/:id",adminAuth,productController.loadEditProduct)
-router.post("/editProduct/:id",adminAuth,uploads,productController.editProduct)
+router.post("/editProduct/:id",adminAuth,productUpload,productController.editProduct)
 router.delete("/remove-product-image/:productId/:index",adminAuth,productController.removeProductImage);
 router.patch("/deleteProducts/:id",adminAuth,productController.deleteProduct)
 module.exports=router;

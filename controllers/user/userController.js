@@ -214,7 +214,7 @@ const   login = async (req, res) => {
             return res.redirect("/login");
         }
 
-        req.session.user = findUser._id; 
+        req.session.user = {_id:findUser._id,username:findUser.email}; 
      
         
         res.redirect("/home");

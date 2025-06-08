@@ -5,7 +5,8 @@ const profileController=require("../controllers/user/profileController");
 const passport = require("passport");
 const {userAuth}=require("../middlewares/userAuth")
 const productController=require("../controllers/user/productController")
-
+const userProfile=require("../controllers/user/userProfile")
+const {profileUpload}=require("../config/multer")
 
 router.get("/pageNotFound",userController.pageNotFound)
 
@@ -51,13 +52,20 @@ router.get("/forgot-resendOtp",profileController.loadresendOtp)
 //   Home page & Shopping page
 router.get("/home",userAuth,userController.LoadHomepage);
 router.get("/shop",userAuth,userController.loadShoppingPage)
-router.get("/logout",userController.logout);
-
-//   Product details
 router.get("/productview",userAuth,productController.productViewPage);
 
+//   User Profile
+router.get("/profile",userAuth,userProfile.userProfile)
+router.get("/editprofile",userAuth,userProfile.userEditprofile)
+router.post("/editprofile",userAuth,profileUpload,userProfile.profileUpdate)
+router.delete("/removeuserimage/:index",userAuth,userProfile.removeUserImage);
+router.post("/change-password",userAuth,userProfile.changepassword)
+router.post("/change-email", userAuth, userProfile.editemail);
+router.get("/email-otp", userAuth, userProfile.getOtpPage);
+router.post("/email-otp", userAuth, userProfile.verifyOtp);
+router.post("/resend-Otp", userAuth, userProfile.resendOtp);
 
 
-     
+router.get("/logout",userController.logout)
 
 module.exports=router;                

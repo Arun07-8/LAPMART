@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noor Fragrances - Admin Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 250px;
+            background: #ffffff;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .sidebar-brand {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            text-decoration: none;
+            display: block;
+        }
+
+        .sidebar-subtitle {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            margin-bottom: 5px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #6c757d;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-radius: 0;
+        }
+
+        .nav-link:hover {
+            background-color: #f8f9fa;
+            color: #495057;
+        }
+
+        .nav-link.active {
+            background-color: #343a40;
+            color: #ffffff;
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        .logout-btn {
+            position: absolute;
+            bottom: 30px;
+            left: 20px;
+            right: 20px;
+        }
+
+        .logout-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            color: #dc3545;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .logout-link i {
+            margin-right: 10px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            background: #ffffff;
+            padding: 15px 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .admin-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .admin-name {
+            color: #2c3e50;
+            font-weight: 500;
+            margin-right: 10px;
+        }
+
+        /* Content Area */
+        .content-area {
+            padding: 30px;
+        }
+
+        .page-header {
+            background: #ffffff;
+            padding: 25px 30px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        /* Filters */
+        .filters-section {
+            background: #ffffff;
+            padding: 25px 30px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .search-input {
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .date-inputs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-control {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 0.2rem rgba(108, 92, 231, 0.25);
+        }
+
+        .btn-search {
+            background: #6c5ce7;
+            border: none;
+            color: white;
+            padding: 10px 25px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .btn-clear {
+            background: #6c757d;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+        }
+
+        /* Orders Table */
+        .orders-table-container {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .table-header {
+            background: #343a40;
+            color: #ffffff;
+            padding: 0;
+        }
+
+        .table-header th {
+            background: #343a40;
+            color: #ffffff;
+            border: none;
+            padding: 15px 12px;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .orders-table {
+            margin: 0;
+        }
+
+        .orders-table td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+
+        .orders-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .order-image {
+            width: 40px;
+            height: 40px;
+            background: #6c5ce7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        .order-id {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #495057;
+        }
+
+        .customer-name {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .order-date {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .total-amount {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: #ff7675;
+            color: white;
+        }
+
+        .status-cancelled {
+            background: #fd79a8;
+            color: white;
+        }
+
+        .status-delivered {
+            background: #00b894;
+            color: white;
+        }
+
+        .btn-view {
+            background: #6c5ce7;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 5px;
+        }
+
+        .page-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border: 1px solid #dee2e6;
+            background: #ffffff;
+            color: #6c757d;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .page-link:hover {
+            background: #6c5ce7;
+            color: white;
+            border-color: #6c5ce7;
+        }
+
+        .page-link.active {
+            background: #6c5ce7;
+            color: white;
+            border-color: #6c5ce7;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .date-inputs {
+                flex-direction: column;
+            }
+
+            .orders-table-container {
+                overflow-x: auto;
+            }
+
+            .orders-table {
+                min-width: 800px;
+            }
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #2c3e50;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-toggle {
+                display: block;
+            }
+        }
+
+        .dropdown-select {
+            min-width: 120px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="#" class="sidebar-brand">NOOR FRAGRANCES</a>
+            <div class="sidebar-subtitle">Admin Dashboard</div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="fas fa-home"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="fas fa-chart-bar"></i>
+                        Sales Report
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="fas fa-box"></i>
+                        Products
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="fas fa-tags"></i>
+                        Category
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="fas fa-users"></i>
+                        Users
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">
+                        <i class="fas fa-shopping-cart"></i>
+                        Orders
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="fas fa-gift"></i>
+                        Offers
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="fas fa-ticket-alt"></i>
+                        Coupons
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="logout-btn">
+            <a href="#" class="logout-link">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Navigation -->
+        <div class="top-nav">
+            <div class="d-flex align-items-center">
+                <button class="mobile-toggle me-3" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">Admin Dashboard</h1>
+            </div>
+            <div class="admin-profile">
+                <div class="admin-avatar">A</div>
+                <span class="admin-name">Admin</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="section-title">Orders Management</h2>
+                    <select class="form-select dropdown-select">
+                        <option selected>All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="delivered">Delivered</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-section">
+                <div class="filter-row">
+                    <div class="search-input">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0" placeholder="Search orders by ID, customer name or status...">
+                        </div>
+                    </div>
+                    <div class="date-inputs">
+                        <input type="text" class="form-control" placeholder="From (dd/mm/yyyy)">
+                        <input type="text" class="form-control" placeholder="To (dd/mm/yyyy)">
+                    </div>
+                    <button class="btn btn-search">Search</button>
+                    <button class="btn btn-clear">
+                        <i class="fas fa-times"></i> Clear
+                    </button>
+                </div>
+            </div>
+
+            <!-- Orders Table -->
+            <div class="orders-table-container">
+                <table class="table orders-table mb-0">
+                    <thead class="table-header">
+                        <tr>
+                            <th>IMAGE</th>
+                            <th>ORDER ID</th>
+                            <th>CUSTOMER NAME</th>
+                            <th>ORDER DATE</th>
+                            <th>TOTAL AMOUNT</th>
+                            <th>STATUS</th>
+                            <th>ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="order-image">
+                                    <i class="fas fa-shopping-bag"></i>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="order-id">ORD_174887809554_310</div>
+                            </td>
+                            <td>
+                                <div class="customer-name">siddique</div>
+                            </td>
+                            <td>
+                                <div class="order-date">02/06/2025</div>
+                            </td>
+                            <td>
+                                <div class="total-amount">₹19998</div>
+                            </td>
+                            <td>
+                                <span class="status-badge status-pending">Pending</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-view">VIEW</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="order-image">
+                                    <i class="fas fa-shopping-bag"></i>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="order-id">ORD_174887492801_91</div>
+                            </td>
+                            <td>
+                                <div class="customer-name">siddique</div>
+                            </td>
+                            <td>
+                                <div class="order-date">02/06/2025</div>
+                            </td>
+                            <td>
+                                <div class="total-amount">₹0</div>
+                            </td>
+                            <td>
+                                <span class="status-badge status-cancelled">Cancelled</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-view">VIEW</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="order-image">
+                                    <i class="fas fa-shopping-bag"></i>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="order-id">ORD_174868421428_984</div>
+                            </td>
+                            <td>
+                                <div class="customer-name">Shana K</div>
+                            </td>
+                            <td>
+                                <div class="order-date">31/05/2025</div>
+                            </td>
+                            <td>
+                                <div class="total-amount">₹0</div>
+                            </td>
+                            <td>
+                                <span class="status-badge status-cancelled">Cancelled</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-view">VIEW</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="order-image">
+                                    <i class="fas fa-shopping-bag"></i>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="order-id">ORD_174824936811_116</div>
+                            </td>
+                            <td>
+                                <div class="customer-name">siddique</div>
+                            </td>
+                            <td>
+                                <div class="order-date">26/05/2025</div>
+                            </td>
+                            <td>
+                                <div class="total-amount">₹19998</div>
+                            </td>
+                            <td>
+                                <span class="status-badge status-delivered">Delivered</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-view">VIEW</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="order-image">
+                                    <i class="fas fa-shopping-bag"></i>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="order-id">ORD_174816413702_872</div>
+                            </td>
+                            <td>
+                                <div class="customer-name">siddique</div>
+                            </td>
+                            <td>
+                                <div class="order-date">25/05/2025</div>
+                            </td>
+                            <td>
+                                <div class="total-amount">₹14598</div>
+                            </td>
+                            <td>
+                                <span class="status-badge status-pending">Pending</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-view">VIEW</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="order-image">
+                                    <i class="fas fa-shopping-bag"></i>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="order-id">ORD_174815769195_373</div>
+                            </td>
+                            <td>
+                                <div class="customer-name">siddique</div>
+                            </td>
+                            <td>
+                                <div class="order-date">25/05/2025</div>
+                            </td>
+                            <td>
+                                <div class="total-amount">₹28395</div>
+                            </td>
+                            <td>
+                                <span class="status-badge status-pending">Pending</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-view">VIEW</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-container">
+                <div class="pagination">
+                    <a href="#" class="page-link active">1</a>
+                    <a href="#" class="page-link">2</a>
+                    <a href="#" class="page-link">3</a>
+                    <a href="#" class="page-link">4</a>
+                    <a href="#" class="page-link">5</a>
+                    <a href="#" class="page-link">6</a>
+                    <a href="#" class="page-link">7</a>
+                    <a href="#" class="page-link">8</a>
+                    <a href="#" class="page-link">9</a>
+                    <a href="#" class="page-link">10</a>
+                    <a href="#" class="page-link">11</a>
+                    <a href="#" class="page-link">12</a>
+                    <a href="#" class="page-link">13</a>
+                    <a href="#" class="page-link">14</a>
+                    <a href="#" class="page-link">15</a>
+                    <a href="#" class="page-link">16</a>
+                    <a href="#" class="page-link">17</a>
+                    <a href="#" class="page-link">18</a>
+                    <a href="#" class="page-link">19</a>
+                    <a href="#" class="page-link">20</a>
+                    <a href="#" class="page-link">21</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const toggle = document.querySelector('.mobile-toggle');
+            
+            if (window.innerWidth <= 768) {
+                if (!sidebar.contains(event.target) && !toggle.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+            }
+        });
+
+        // Add functionality to buttons
+        document.querySelectorAll('.btn-view').forEach(btn => {
+            btn.addEventListener('click', function() {
+                alert('Order details view functionality would go here');
+            });
+        });
+
+        document.querySelector('.btn-search').addEventListener('click', function() {
+            alert('Search functionality would be implemented here');
+        });
+
+        document.querySelector('.btn-clear').addEventListener('click', function() {
+            document.querySelector('input[placeholder*="Search orders"]').value = '';
+            document.querySelector('input[placeholder*="From"]').value = '';
+            document.querySelector('input[placeholder*="To"]').value = '';
+        });
+
+        // Status filter functionality
+        document.querySelector('.dropdown-select').addEventListener('change', function() {
+            const selectedStatus = this.value;
+            console.log('Filter by status:', selectedStatus);
+            // Here you would implement the actual filtering logic
+        });
+    </script>
+</body>
+</html>

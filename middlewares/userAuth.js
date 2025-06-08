@@ -16,7 +16,7 @@ const userAuth=(req,res,next)=>{
             res.status(500).send("Internal Server error");
         })  
     }else{
-        next()
+        res.redirect("/login")
     }
 }
 module.exports={userAuth}

@@ -12,6 +12,10 @@ const userSchema=new Schema({
         required:true,
         unique:true
     },
+     profileImage: {
+     type: [String],    
+     required: true,
+    },
     phoneNumber:{
         type:String,
         required:false,
@@ -52,10 +56,6 @@ const userSchema=new Schema({
         type:Schema.Types.ObjectId,
         ref:"Order"
     }],
-    createdAt:{
-        type:Date,
-        default:Date.now,
-    },
     referalCode:{
         type:String,
         // required:true
@@ -83,7 +83,7 @@ const userSchema=new Schema({
         }
     }]
 
-})
+},{ timestamps: true })
 const User=mongoose.model("User",userSchema);
 
 module.exports=User;

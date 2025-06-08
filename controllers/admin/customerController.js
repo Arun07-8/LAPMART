@@ -1,29 +1,38 @@
 const User=require("../../models/userSchema");
 
-//  user Info rendering
+
 const searchUsers = async (req, res) => {
     try {
         let search = decodeURIComponent(req.query.search || "").trim();
         const page = parseInt(req.query.page) || 1;
-        const limit = 10; // Users per page
+        const limit = 3; 
         const searchTerms = search.split(/\s+/).filter(term => term.length > 0);
+
+        if (searchTerms.some(term => term.length < 2)) {
+            return res.status(400).json({ error: 'Search terms must be at least 2 characters long' });
+        }
+
         const regexQueries = searchTerms.map(term => ({
             $or: [
                 { name: { $regex: term, $options: "i" } },
                 { email: { $regex: term, $options: "i" } }
             ]
         }));
+
         const query = {
             isadmin: false,
             ...(searchTerms.length > 0 ? { $and: regexQueries } : {})
         };
+
         const users = await User.find(query)
             .select('name email phoneNumber image createdAt isBlocked _id')
             .skip((page - 1) * limit)
             .limit(limit)
             .lean();
+
         const totalUsers = await User.countDocuments(query);
         const totalPages = Math.ceil(totalUsers / limit);
+
         if (req.headers.accept.includes('application/json')) {
             res.json({ users, currentPage: page, totalPages });
         } else {
@@ -31,11 +40,11 @@ const searchUsers = async (req, res) => {
                 data: users, 
                 search, 
                 currentPage: page, 
-                totalPages 
+                totalPages,
             });
         }
     } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error('Error fetching users:', error.message, error.stack);
         res.status(500).json({ error: 'Internal server error' });
     }
 };

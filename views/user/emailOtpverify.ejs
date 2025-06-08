@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="/css/userside-css/userside-css/SignupOtp.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <div class="container">
+        <h2>Email Verification</h2>
+        <p class="description">Enter the 6-digit code sent to your email</p>
+        <form id="otpForm" action="/verify-Otp" method="post" onsubmit="return validateOtpForm()">
+            <div class="otp-inputs">
+                <input type="text" id="otp1" maxlength="1" class="otp-input" oninput="handleInput(this, 0)" onkeydown="handleKeyDown(event, 0)">
+                <input type="text" id="otp2" maxlength="1" class="otp-input" oninput="handleInput(this, 1)" onkeydown="handleKeyDown(event, 1)">
+                <input type="text" id="otp3" maxlength="1" class="otp-input" oninput="handleInput(this, 2)" onkeydown="handleKeyDown(event, 2)">
+                <input type="text" id="otp4" maxlength="1" class="otp-input" oninput="handleInput(this, 3)" onkeydown="handleKeyDown(event, 3)">
+                <input type="text" id="otp5" maxlength="1" class="otp-input" oninput="handleInput(this, 4)" onkeydown="handleKeyDown(event, 4)">
+                <input type="text" id="otp6" maxlength="1" class="otp-input" oninput="handleInput(this, 5)" onkeydown="handleKeyDown(event, 5)">
+            </div>
+            <button id="submitBtn" type="submit" disabled class="submit-button">
+                Submit
+            </button>
+            <p class="timer-text">Resend code in <span id="timer">60</span> seconds</p>
+            <p id="resend" class="resend-text">Resend</p>
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script>
+        const inputs = document.querySelectorAll('.otp-input');
+        const submitBtn = document.getElementById('submitBtn');
+        const timerDisplay = document.getElementById('timer');
+        const resendBtn = document.getElementById('resend');
+        let timerInterval;
+        let isResending = false;
+        let isOtpExpired = false;
+
+        function handleInput(input, index) {
+            input.value = input.value.replace(/[^0-9]/g, '');
+            if (input.value.length === 1 && index < inputs.length - 1) {
+                inputs[index + 1].focus();
+            }
+            checkOTPComplete();
+        }
+
+        function handleKeyDown(event, index) {
+            if (event.key === 'Backspace' && !inputs[index].value && index > 0) {
+                inputs[index - 1].focus();
+            }
+        }
+
+        function checkOTPComplete() {
+            let otp = '';
+            inputs.forEach(input => otp += input.value);
+            submitBtn.disabled = otp.length !== 6 || isOtpExpired;
+            if (otp.length === 6 && !isOtpExpired) {
+                submitBtn.classList.add('active');
+                submitBtn.style.cursor = 'pointer';
+            } else {
+                submitBtn.classList.remove('active');
+                submitBtn.style.cursor = 'not-allowed';
+            }
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            let timeLeft = 30;
+            timerDisplay.textContent = timeLeft;
+            resendBtn.classList.remove('active');
+            resendBtn.style.opacity = '0.5';
+            resendBtn.style.pointerEvents = 'none';
+            resendBtn.style.cursor = 'not-allowed';
+            isResending = false;
+            isOtpExpired = false;
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+
+                if (timeLeft === 0) {
+                    clearInterval(timerInterval);
+                    isOtpExpired = true;
+                    inputs.forEach(input => input.value = '');
+                    checkOTPComplete();
+                    resendBtn.classList.add('active');
+                    resendBtn.style.opacity = '1';
+                    resendBtn.style.pointerEvents = 'auto';
+                    resendBtn.style.cursor = 'pointer';
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'OTP Expired',
+                        text: 'Please resend a new OTP.',
+                        showConfirmButton: false,
+                        timer: 1500,
+                    });
+                }
+            }, 1000);
+        }
+
+        resendBtn.addEventListener('click', () => {
+            if (resendBtn.style.pointerEvents !== 'none' && !isResending) {
+                isResending = true;
+                resendBtn.classList.remove('active');
+                resendBtn.style.opacity = '0.5';
+                resendBtn.style.pointerEvents = 'none';
+                resendBtn.style.cursor = 'not-allowed';
+
+                Swal.fire({
+                    title: 'Processing...',
+                    text: 'Please wait while we resend the OTP.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
+
+                $.ajax({
+                    type: 'POST', // Changed to POST for consistency
+                    url: '/resend-Otp',
+                    data: {},
+                    success: function (response) {
+                        Swal.close();
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'OTP Resent Successfully',
+                                showConfirmButton: false,
+                                timer: 1500,
+                            });
+                            inputs.forEach(input => input.value = '');
+                            startTimer();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.message || 'Failed to resend OTP. Please try again.',
+                                showConfirmButton: false,
+                                timer: 2000,
+                            });
+                            if (response.message && response.message.includes('No pending email change request')) {
+                                setTimeout(() => {
+                                    window.location.href = '/profile';
+                                }, 2000);
+                            }
+                        }
+                        isResending = false;
+                        resendBtn.classList.add('active');
+                        resendBtn.style.opacity = '1';
+                        resendBtn.style.pointerEvents = 'auto';
+                        resendBtn.style.cursor = 'pointer';
+                    },
+                    error: function (xhr) {
+                        Swal.close();
+                        let errorMessage = 'Failed to resend OTP. Please try again.';
+                        if (xhr.status === 404) {
+                            errorMessage = 'Resend OTP service unavailable. Please contact support.';
+                        } else {
+                            try {
+                                const errorData = JSON.parse(xhr.responseText);
+                                errorMessage = errorData.message || errorMessage;
+                            } catch (e) {
+                                console.error('JSON parsing error:', e);
+                            }
+                        }
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: errorMessage,
+                            showConfirmButton: false,
+                            timer: 2000,
+                        });
+                        if (errorMessage.includes('No pending email change request')) {
+                            setTimeout(() => {
+                                window.location.href = '/profile';
+                            }, 2000);
+                        }
+                        isResending = false;
+                        resendBtn.classList.add('active');
+                        resendBtn.style.opacity = '1';
+                        resendBtn.style.pointerEvents = 'auto';
+                        resendBtn.style.cursor = 'pointer';
+                    },
+                });
+            }
+        });
+
+        function validateOtpForm() {
+            if (isOtpExpired) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'OTP Expired',
+                    text: 'Please resend a new OTP.',
+                    showConfirmButton: false,
+                    timer: 1500,
+                });
+                return false;
+            }
+
+            let otp = '';
+            inputs.forEach(input => otp += input.value);
+
+            Swal.fire({
+                title: 'Verifying OTP...',
+                text: 'Please wait while we verify your OTP.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+
+            $.ajax({
+                type: 'POST',
+                url: '/email-otp',
+                data: { otp },
+                success: function (response) {
+                    Swal.close();
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Email Updated Successfully',
+                            showConfirmButton: false,
+                            timer: 1500,
+                        }).then(() => {
+                            window.location.href = '/profile';
+                        });
+                    } else {
+                        const isExpired = response.message && response.message.toLowerCase().includes('expired');
+                        Swal.fire({
+                            icon: 'error',
+                            title: isExpired ? 'OTP Expired' : 'Invalid OTP',
+                            text: response.message || (isExpired ? 'Please resend a new OTP.' : 'Please try again.'),
+                            showConfirmButton: false,
+                            timer: 2000,
+                        });
+                        if (isExpired) {
+                            isOtpExpired = true;
+                            inputs.forEach(input => input.value = '');
+                            checkOTPComplete();
+                            resendBtn.classList.add('active');
+                            resendBtn.style.opacity = '1';
+                            resendBtn.style.pointerEvents = 'auto';
+                            resendBtn.style.cursor = 'pointer';
+                        }
+                    }
+                },
+                error: function (xhr) {
+                    Swal.close();
+                    let errorMessage = 'An error occurred. Please try again.';
+                    let isExpired = false;
+                    if (xhr.status === 404) {
+                        errorMessage = 'OTP verification service unavailable. Please contact support.';
+                    } else {
+                        try {
+                            const errorData = JSON.parse(xhr.responseText);
+                            errorMessage = errorData.message || errorMessage;
+                            isExpired = errorMessage.toLowerCase().includes('expired');
+                        } catch (e) {
+                            console.error('JSON parsing error:', e);
+                        }
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: isExpired ? 'OTP Expired' : 'Error',
+                        text: errorMessage,
+                        showConfirmButton: false,
+                        timer: 2000,
+                    });
+                    if (isExpired) {
+                        isOtpExpired = true;
+                        inputs.forEach(input => input.value = '');
+                        checkOTPComplete();
+                        resendBtn.classList.add('active');
+                        resendBtn.style.opacity = '1';
+                        resendBtn.style.pointerEvents = 'auto';
+                        resendBtn.style.cursor = 'pointer';
+                    }
+                },
+            });
+            return false;
+        }
+
+        // // Display session message if available
+        // <% if (message) { %>
+        //     Swal.fire({
+        //         icon: '<%= message.type %>',
+        //         title: '<%= message.type === "success" ? "Success" : "Error" %>',
+        //         text: '<%= message.text %>',
+        //         showConfirmButton: false,
+        //         timer: 2000, 
+        //     });
+        // <% } %>
+
+        startTimer();
+    </script>
+</body>
+</html>

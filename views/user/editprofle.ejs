@@ -1,0 +1,894 @@
+<%- include("../../views/partials/user/header") %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+    <link href="css/userside-css/userside-css/editprofile.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <div class="page-container">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Compact Sidebar -->
+                <div class="col-lg-2 col-md-3 p-0">
+                    <div class="sidebar">
+                        <div class="sidebar-header">
+                            <h5>Hello <%=user.name%></h5>
+                            <p>Edit your Profile</p>
+                        </div>
+                        
+                        <nav class="sidebar-menu">
+                            <a class="nav-link active" href="#">
+                                <i class="fas fa-edit"></i>
+                                Edit Profile
+                            </a>
+                            <a class="nav-link" href="/">
+                                <i class="fas fa-map-marker-alt"></i>
+                                Addresses
+                            </a>
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-box"></i>
+                                My orders
+                            </a>
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-wallet"></i>
+                                Wallet
+                            </a>
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-gift"></i>
+                                Refer and Earn
+                            </a>
+                            <a class="nav-link" href="/logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Sign out
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-lg-10 col-md-9 p-0">
+                    <div class="main-content">
+                        <div class="content-header">
+                            <h2>Edit Profile</h2>
+                            <p>Update your personal information and profile picture</p>
+                        </div>
+
+                        <div class="edit-content">
+                            <div class="row justify-content-center">
+                                <div class="col-lg-11 col-xl-10">
+                                    <!-- Profile Image Section -->
+                             
+<!-- FIXED HTML TEMPLATE - Replace your profile image section with this -->
+
+<!-- Profile Image Section -->
+<div class="profile-image-section">
+    <div class="current-avatar" id="currentAvatar">
+        <!-- Always include both elements, control visibility with style -->
+        <% if (user.profileImage && user.profileImage[0]) { %>
+            <!-- User has profile image -->
+            <img id="profileImage" src="<%= user.profileImage[0] %>" alt="Profile Picture" class="profile-img" style="display: block;">
+            <i class="far fa-user" id="defaultIcon" style="display: none;"></i>
+        <% } else { %>
+            <!-- User has no profile image -->
+            <img id="profileImage" alt="Profile Picture" class="profile-img" style="display: none;">
+            <i class="far fa-user" id="defaultIcon" style="display: block;"></i>
+        <% } %>
+    </div>
+
+    <div class="image-controls">
+        <button type="button" class="image-btn upload-btn" onclick="document.getElementById('imageUpload').click()">
+            <i class="fas fa-camera"></i>
+            Upload Picture
+        </button>
+        <button type="button" class="image-btn remove-btn" id="removeImageBtn" onclick="removeImageFixed()">
+            <i class="fas fa-trash"></i>
+            Remove Picture
+        </button>
+    </div>
+    <input type="file" id="imageUpload" accept="image/*" onchange="handleImageUpload(event)">
+</div>
+
+                                    <!-- Form Section -->
+                                   <form id="formdata" onsubmit="return handleFormSubmit(event)">
+    <input type="hidden" id="userId" name="userId" value="<%= userId ? userId._id : '' %>">
+    <div class="form-section">
+        <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" 
+                   class="form-input" 
+                   id="fullName" 
+                   value="<%=user.name%>" 
+                   placeholder="Enter your full name" 
+                   name="name" 
+                   required>
+            <div class="invalid-feedback" id="nameError"></div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" 
+                   class="form-input" 
+                   id="phoneNumber" 
+                   value="<%= user.phoneNumber || 'N/A' %>" 
+                   placeholder="Enter your phone number" 
+                   name="phoneNumber" 
+                   required>
+            <div class="invalid-feedback" id="phoneError"></div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button type="submit" class="save-btn">
+                <i class="fas fa-save me-2"></i>
+                Save Changes
+            </button>
+            <button type="button" class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left me-2"></i>
+                Back to Profile
+            </button>
+        </div>
+    </div>
+</form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crop Modal -->
+    <div id="cropModal" class="crop-modal">
+        <div class="crop-modal-content">
+            <h3 style="text-align: center; margin-bottom: 1rem; color: var(--primary-black);">Crop Your Image</h3>
+            <div class="crop-container">
+                <img id="cropImage" style="max-width: 100%;">
+            </div>
+            <div class="crop-controls">
+                <button class="crop-btn crop-confirm" onclick="confirmCrop()">
+                    <i class="fas fa-check me-1"></i>
+                    Confirm
+                </button>
+                <button class="crop-btn crop-cancel" onclick="cancelCrop()">
+                    <i class="fas fa-times me-1"></i>
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <%- include("../../views/partials/user/footer") %>    
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+/// Complete Navigation Control System - Replace your entire script section with this
+
+let cropper = null;
+let currentImageFile = null;
+let isSubmitting = false;
+let imageRemoved = false;
+let originalImageSrc = '';
+let originalFormData = {};
+let navigationBlocked = false;
+let pendingNavigation = null;
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    setupRealTimeValidation();
+    storeOriginalValues();
+    setupNavigationControl();
+});
+
+// Store original form values and image
+function storeOriginalValues() {
+    const nameInput = document.getElementById('fullName');
+    const phoneInput = document.getElementById('phoneNumber');
+    const profileImage = document.getElementById('profileImage');
+    
+    originalFormData = {
+        name: nameInput.value.trim(),
+        phoneNumber: phoneInput.value.trim()
+    };
+    
+    if (profileImage && profileImage.src && profileImage.style.display !== 'none') {
+        originalImageSrc = profileImage.src;
+    }
+    
+    nameInput.setAttribute('data-original', nameInput.value);
+    phoneInput.setAttribute('data-original', phoneInput.value);
+}
+
+// ===== NAVIGATION CONTROL SYSTEM =====
+
+function setupNavigationControl() {
+    // 1. Intercept ALL navigation links on the page
+    interceptAllLinks();
+    
+    // 2. Handle browser back/forward buttons
+    setupHistoryControl();
+    
+    // 3. Handle page refresh and tab close (minimal approach)
+    setupMinimalBeforeUnload();
+}
+
+function interceptAllLinks() {
+    // Intercept sidebar navigation links
+    const sidebarLinks = document.querySelectorAll('.sidebar-menu .nav-link');
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const href = this.getAttribute('href');
+            if (href && href !== '#') {
+                handleNavigation(href);
+            }
+        });
+    });
+    
+    // Intercept any other navigation links (header, footer, etc.)
+    const allLinks = document.querySelectorAll('a[href]:not(.sidebar-menu .nav-link)');
+    allLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        // Only intercept internal navigation, not external links or javascript:void(0)
+        if (href && href !== '#' && !href.startsWith('javascript:') && !href.startsWith('http') && !href.startsWith('mailto:')) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                handleNavigation(href);
+            });
+        }
+    });
+}
+
+function setupHistoryControl() {
+    // Add a dummy state to history to catch back button
+    history.pushState({ page: 'edit-profile' }, '', window.location.href);
+    
+    // Listen for back/forward button presses
+    window.addEventListener('popstate', function(e) {
+        // Push the state back to stay on current page
+        history.pushState({ page: 'edit-profile' }, '', window.location.href);
+        
+        // Check for unsaved changes and show confirmation
+        const hasUnsavedChanges = checkForUnsavedChanges();
+        
+        if (hasUnsavedChanges) {
+            showNavigationConfirmation(() => {
+                // User confirmed exit - actually go back
+                history.go(-2); // Go back 2 steps to account for our pushState
+            });
+        } else {
+            // No unsaved changes - allow navigation
+            history.go(-2);
+        }
+    });
+}
+
+
+function handleNavigation(targetUrl) {
+    const hasUnsavedChanges = checkForUnsavedChanges();
+    
+    if (hasUnsavedChanges) {
+        showNavigationConfirmation(() => {
+            // User confirmed - proceed with navigation
+            window.location.href = targetUrl;
+        });
+    } else {
+        // No unsaved changes - proceed directly
+        window.location.href = targetUrl;
+    }
+}
+
+function showNavigationConfirmation(onConfirm) {
+    Swal.fire({
+        title: 'Unsaved Changes',
+        text: 'You have unsaved changes. What would you like to do?',
+        icon: 'warning',
+        showCancelButton: true,
+        showDenyButton: true,
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#6c757d',
+        denyButtonColor: '#d33',
+        confirmButtonText: 'Save & Continue',
+        cancelButtonText: 'Continue Editing',
+        denyButtonText: 'Exit Without Saving',
+        allowOutsideClick: false,
+        allowEscapeKey: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Save changes first, then navigate
+            saveChangesAndThen(onConfirm);
+        } else if (result.isDenied) {
+            // Exit without saving
+            restoreAllOriginalValues();
+            onConfirm();
+        }
+        // If cancelled (Continue Editing) - do nothing, stay on page
+    });
+}
+
+async function saveChangesAndThen(callback) {
+    // Validate first
+    const fullName = document.getElementById('fullName').value;
+    const phoneNumber = document.getElementById('phoneNumber').value;
+    
+    clearValidationError('fullName', 'nameError');
+    clearValidationError('phoneNumber', 'phoneError');
+    
+    const nameValidation = validateName(fullName);
+    const phoneValidation = validatePhone(phoneNumber);
+    
+    if (!nameValidation.isValid) {
+        showValidationError('fullName', 'nameError', nameValidation.message);
+        document.getElementById('fullName').focus();
+        return;
+    }
+    
+    if (!phoneValidation.isValid) {
+        showValidationError('phoneNumber', 'phoneError', phoneValidation.message);
+        document.getElementById('phoneNumber').focus();
+        return;
+    }
+    
+    // If validation passes, save
+    if (isSubmitting) return;
+    
+    isSubmitting = true;
+    
+    Swal.fire({
+        title: 'Saving...',
+        text: 'Please wait while we update your profile',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    
+    try {
+        // Handle image removal if needed
+        if (imageRemoved) {
+            const removeResponse = await fetch('/removeuserimage/0', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            });
+            
+            const removeData = await removeResponse.json();
+            if (!removeResponse.ok || !removeData.success) {
+                throw new Error(removeData.message || 'Failed to remove image');
+            }
+        }
+
+        const form = document.getElementById("formdata");
+        const formData = new FormData(form);
+        
+        // Add profile image if exists and not removed
+        const profileImage = document.getElementById('profileImage');
+        if (!imageRemoved && profileImage.src && profileImage.style.display !== 'none' && profileImage.src.startsWith('data:')) {
+            const response = await fetch(profileImage.src);
+            const blob = await response.blob();
+            formData.append('profileImage', blob, 'profile.jpg');
+        }
+        
+        const response = await fetch('/editprofile', {
+            method: "POST",
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Profile Updated!',
+                text: 'Your profile has been updated successfully',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                callback(); // Execute the pending navigation
+            });
+        } else {
+            throw new Error(result.message || 'Failed to update profile');
+        }
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        
+        if (imageRemoved && originalImageSrc) {
+            restoreOriginalImage();
+        }
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Save Failed',
+            text: error.message || 'Failed to save changes. Please try again.',
+            confirmButtonColor: '#dc3545'
+        });
+    } finally {
+        isSubmitting = false;
+    }
+}
+
+// ===== FORM HANDLING =====
+
+function handleFormSubmit(event) {
+    event.preventDefault();
+    
+    if (isSubmitting) return false;
+    
+    const fullName = document.getElementById('fullName').value;
+    const phoneNumber = document.getElementById('phoneNumber').value;
+    
+    let isValid = true;
+    
+    clearValidationError('fullName', 'nameError');
+    clearValidationError('phoneNumber', 'phoneError');
+    
+    const nameValidation = validateName(fullName);
+    if (!nameValidation.isValid) {
+        showValidationError('fullName', 'nameError', nameValidation.message);
+        isValid = false;
+    }
+    
+    const phoneValidation = validatePhone(phoneNumber);
+    if (!phoneValidation.isValid) {
+        showValidationError('phoneNumber', 'phoneError', phoneValidation.message);
+        isValid = false;
+    }
+    
+    if (!isValid) {
+        const firstInvalid = document.querySelector('.is-invalid');
+        if (firstInvalid) firstInvalid.focus();
+        return false;
+    }
+    
+    saveChanges();
+    return false;
+}
+
+async function saveChanges() {
+    if (isSubmitting) return;
+    
+    isSubmitting = true;
+    
+    Swal.fire({
+        title: 'Saving...',
+        text: 'Please wait while we update your profile',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    
+    try {
+        if (imageRemoved) {
+            const removeResponse = await fetch('/removeuserimage/0', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            });
+            
+            const removeData = await removeResponse.json();
+            if (!removeResponse.ok || !removeData.success) {
+                throw new Error(removeData.message || 'Failed to remove image');
+            }
+        }
+
+        const form = document.getElementById("formdata");
+        const formData = new FormData(form);
+        
+        const profileImage = document.getElementById('profileImage');
+        if (!imageRemoved && profileImage.src && profileImage.style.display !== 'none' && profileImage.src.startsWith('data:')) {
+            const response = await fetch(profileImage.src);
+            const blob = await response.blob();
+            formData.append('profileImage', blob, 'profile.jpg');
+        }
+        
+        const response = await fetch('/editprofile', {
+            method: "POST",
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Profile Updated!',
+                text: result.message || "Your profile has been updated successfully",
+                timer: 2000,
+                confirmButtonColor: '#28a745'
+            }).then(() => {
+                window.location.href = '/profile';
+            });
+        } else {
+            throw new Error(result.message || 'Failed to update profile');
+        }
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        
+        if (imageRemoved && originalImageSrc) {
+            restoreOriginalImage();
+        }
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message || 'An unexpected error occurred while updating your profile',
+            confirmButtonColor: '#dc3545'
+        });
+    } finally {
+        isSubmitting = false;
+    }
+}
+
+// ===== VALIDATION FUNCTIONS =====
+
+function validateName(name) {
+    const nameRegex = /^[A-Za-z\s]+$/;
+    
+    if (!name || name.trim().length === 0) {
+        return { isValid: false, message: 'Name is required' };
+    }
+    
+    const trimmedName = name.trim();
+    
+    if (trimmedName.length < 3) {
+        return { isValid: false, message: 'Name must be at least 3 characters long' };
+    }
+    
+    if (trimmedName.length > 50) {
+        return { isValid: false, message: 'Name must be less than 50 characters' };
+    }
+    
+    if (!nameRegex.test(trimmedName)) {
+        return { isValid: false, message: 'Name should contain only letters and spaces' };
+    }
+    
+    if (trimmedName.includes('  ')) {
+        return { isValid: false, message: 'Name cannot contain multiple consecutive spaces' };
+    }
+    
+    return { isValid: true, message: '' };
+}
+
+function validatePhone(phone) {
+    if (!phone || phone.trim().length === 0) {
+        return { isValid: false, message: 'Phone number is required' };
+    }
+    
+    const cleanPhone = phone.replace(/\D/g, '');
+    
+    if (cleanPhone.length !== 10) {
+        return { isValid: false, message: 'Phone number must be exactly 10 digits' };
+    }
+    
+    const firstDigit = cleanPhone.charAt(0);
+    if (!['6', '7', '8', '9'].includes(firstDigit)) {
+        return { isValid: false, message: 'Phone number must start with 6, 7, 8, or 9' };
+    }
+    
+    if (/^(.)\1{9}$/.test(cleanPhone)) {
+        return { isValid: false, message: 'Phone number cannot be all same digits' };
+    }
+    
+    return { isValid: true, message: '' };
+}
+
+function showValidationError(inputId, errorId, message) {
+    const input = document.getElementById(inputId);
+    const errorDiv = document.getElementById(errorId);
+    
+    input.classList.add('is-invalid');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+}
+
+function clearValidationError(inputId, errorId) {
+    const input = document.getElementById(inputId);
+    const errorDiv = document.getElementById(errorId);
+    
+    input.classList.remove('is-invalid');
+    errorDiv.textContent = '';
+    errorDiv.style.display = 'none';
+}
+
+// ===== IMAGE HANDLING =====
+
+function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+            Swal.fire({
+                icon: 'error',
+                title: 'File Too Large',
+                text: 'Please select an image smaller than 5MB',
+            });
+            event.target.value = '';
+            return;
+        }
+        
+        if (!file.type.startsWith('image/')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid File Type',
+                text: 'Please select a valid image file',
+            });
+            event.target.value = '';
+            return;
+        }
+        
+        currentImageFile = file;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const cropImage = document.getElementById('cropImage');
+            cropImage.src = e.target.result;
+            showCropModal();
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function showCropModal() {
+    const modal = document.getElementById('cropModal');
+    modal.style.display = 'block';
+    
+    const cropImage = document.getElementById('cropImage');
+    cropper = new Cropper(cropImage, {
+        aspectRatio: 1,
+        viewMode: 1,
+        dragMode: 'move',
+        autoCropArea: 0.8,
+        restore: false,
+        guides: true,
+        center: true,
+        highlight: false,
+        cropBoxMovable: true,
+        cropBoxResizable: true,
+        toggleDragModeOnDblclick: false,
+    });
+}
+
+function confirmCrop() {
+    if (cropper) {
+        const canvas = cropper.getCroppedCanvas({
+            width: 200,
+            height: 200,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high',
+        });
+        
+        const croppedImageUrl = canvas.toDataURL('image/jpeg', 0.8);
+        
+        const profileImage = document.getElementById('profileImage');
+        const defaultIcon = document.getElementById('defaultIcon');
+        
+        profileImage.src = croppedImageUrl;
+        profileImage.style.display = 'block';
+        defaultIcon.style.display = 'none';
+        
+        closeCropModal();
+    }
+}
+
+function cancelCrop() {
+    closeCropModal();
+    document.getElementById('imageUpload').value = '';
+    currentImageFile = null;
+}
+
+function closeCropModal() {
+    const modal = document.getElementById('cropModal');
+    modal.style.display = 'none';
+    
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+}
+
+function removeImageFixed() {
+    try {
+        const profileImage = document.getElementById('profileImage');
+        const defaultIcon = document.getElementById('defaultIcon');
+        
+        if (!profileImage || !defaultIcon) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Page Error',
+                text: 'Required page elements are missing.',
+            });
+            return;
+        }
+        
+        const hasImage = profileImage.src && 
+                         profileImage.src !== window.location.href && 
+                         profileImage.src !== '' &&
+                         profileImage.style.display !== 'none';
+        
+        if (!hasImage) {
+            Swal.fire({
+                icon: 'info',
+                title: 'No Image',
+                text: 'There is no profile image to remove.',
+            });
+            return;
+        }
+        
+        Swal.fire({
+            title: 'Remove Profile Picture?',
+            text: 'This will remove your profile picture when you save changes.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, remove it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if (!originalImageSrc && profileImage.src) {
+                    originalImageSrc = profileImage.src;
+                }
+                
+                profileImage.style.display = 'none';
+                profileImage.src = '';
+                defaultIcon.style.display = 'block';
+                imageRemoved = true;
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Image Marked for Removal',
+                    text: 'Profile picture will be removed when you save changes.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error marking image for removal:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred. Please try again.',
+        });
+    }
+}
+
+// ===== UTILITY FUNCTIONS =====
+
+function restoreOriginalImage() {
+    const profileImage = document.getElementById('profileImage');
+    const defaultIcon = document.getElementById('defaultIcon');
+    
+    if (originalImageSrc && profileImage && defaultIcon) {
+        profileImage.src = originalImageSrc;
+        profileImage.style.display = 'block';
+        defaultIcon.style.display = 'none';
+        imageRemoved = false;
+    }
+}
+
+function restoreAllOriginalValues() {
+    const nameInput = document.getElementById('fullName');
+    const phoneInput = document.getElementById('phoneNumber');
+    
+    nameInput.value = originalFormData.name;
+    phoneInput.value = originalFormData.phoneNumber;
+    
+    clearValidationError('fullName', 'nameError');
+    clearValidationError('phoneNumber', 'phoneError');
+    
+    restoreOriginalImage();
+    
+    const fileInput = document.getElementById('imageUpload');
+    if (fileInput) fileInput.value = '';
+}
+
+function checkForUnsavedChanges() {
+    const nameInput = document.getElementById('fullName');
+    const phoneInput = document.getElementById('phoneNumber');
+    
+    const nameChanged = nameInput.value.trim() !== originalFormData.name;
+    const phoneChanged = phoneInput.value.trim() !== originalFormData.phoneNumber;
+    
+    const profileImage = document.getElementById('profileImage');
+    const imageChanged = imageRemoved || (profileImage.src && profileImage.src.startsWith('data:'));
+    
+    return nameChanged || phoneChanged || imageChanged;
+}
+
+// Updated goBack function to use the new navigation system
+function goBack() {
+    handleNavigation('/profile');
+}
+
+// ===== SETUP FUNCTIONS =====
+
+function setupRealTimeValidation() {
+    const nameInput = document.getElementById('fullName');
+    const phoneInput = document.getElementById('phoneNumber');
+    
+    nameInput.addEventListener('input', function() {
+        const validation = validateName(this.value);
+        if (this.value.trim() && !validation.isValid) {
+            showValidationError('fullName', 'nameError', validation.message);
+        } else {
+            clearValidationError('fullName', 'nameError');
+        }
+    });
+    
+    phoneInput.addEventListener('input', function() {
+        const validation = validatePhone(this.value);
+        if (this.value.trim() && !validation.isValid) {
+            showValidationError('phoneNumber', 'phoneError', validation.message);
+        } else {
+            clearValidationError('phoneNumber', 'phoneError');
+        }
+    });
+}
+
+// Input focus effects
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.form-input').forEach(input => {
+        input.addEventListener('focus', function() {
+            this.style.transform = 'scale(1.02)';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+});
+
+// Modal controls
+window.onclick = function(event) {
+    const modal = document.getElementById('cropModal');
+    if (event.target === modal) {
+        cancelCrop();
+    }
+}
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const modal = document.getElementById('cropModal');
+        if (modal.style.display === 'block') {
+            cancelCrop();
+        }
+    }
+});
+
+// Add validation styles
+const style = document.createElement('style');
+style.textContent = `
+    .invalid-feedback {
+        display: none;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+    }
+    
+    .form-input.is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+    
+    .form-input.is-invalid:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+`;
+document.head.appendChild(style);
+</script>
+</body>
+</html>
