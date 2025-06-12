@@ -32,7 +32,7 @@ const loadLogin = async (req, res) => {
 const login=async(req,res)=>{
     try{
         const {email,password}=req.body;
-          
+           console.log(email,password)
         const admin=await User.findOne({email,isadmin:true})
         if(admin){
             const passwordmatch = await bcrypt.compare(password, admin.password);

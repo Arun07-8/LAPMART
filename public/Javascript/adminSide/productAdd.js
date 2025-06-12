@@ -298,10 +298,7 @@
                     method: 'POST',
                     body: formData,
                 });
-                console.log('Response status:', response.status);
-                console.log('Response headers:', response.headers);
                 const result = await response.json();
-                console.log('Response body:', result);
                 if (response.ok) {
                     Swal.fire({
                         icon: 'success',
@@ -314,7 +311,7 @@
                     });
                 } else {
                     const text = await response.text()
-                    console.error('Server error:', result ,' - - - ' , text);
+                    console.error('Server error:', text);
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',

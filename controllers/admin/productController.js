@@ -117,6 +117,7 @@ const addProducts = async (req, res) => {
         if (productExist) {
             return res.status(400).json({ error: 'Product already exists' });
         }
+     
 
         if (!req.files || req.files.length < 2 || req.files.length > 5) {
             return res.status(400).json({

@@ -296,49 +296,51 @@
             });
         }
 
-        function updatePreview() {
-            const previewContainer = document.getElementById('imagePreviewContainer');
-            previewContainer.innerHTML = '';
-            const productId = document.getElementById('proID').value;
+      function updatePreview() {
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    previewContainer.innerHTML = '';
+    const productId = document.getElementById('proID').value;
 
-            const imagesToDisplay = croppedImages.length > 0 ? croppedImages : existingImages.map(url => ({ dataUrl: url, file: null }));
+    const imagesToDisplay = croppedImages.length > 0 ? croppedImages : existingImages.map(url => ({ dataUrl: url, file: null }));
 
-            if (imagesToDisplay.length > 0) {
-                const mainImageContainer = document.createElement('div');
-                mainImageContainer.className = 'main-image-container';
-                const mainImageDiv = document.createElement('div');
-                mainImageDiv.className = 'main-image-preview';
-                mainImageDiv.innerHTML = `
-                    <img src="${imagesToDisplay[0].dataUrl}" alt="Main Preview">
-                    <div class="preview-controls">
-                        <button type="button" class="recrop-btn" onclick="recropImage(0)" title="Recrop"><i class="fas fa-crop-alt"></i></button>
-                        <button type="button" class="remove-btn" onclick="removeImage('${productId}', 0)" title="Remove"><i class="fas fa-trash"></i></button>
-                    </div>
-                `;
-                mainImageContainer.appendChild(mainImageDiv);
-                previewContainer.appendChild(mainImageContainer);
+    if (imagesToDisplay.length === 0) {
+        previewContainer.innerHTML = '<p class="text-white">No images uploaded.</p>';
+        return;
+    }
 
-                if (imagesToDisplay.length > 1) {
-                    const secondaryImagesDiv = document.createElement('div');
-                    secondaryImagesDiv.className = 'secondary-images';
-                    imagesToDisplay.slice(1).forEach((img, index) => {
-                        const actualIndex = index + 1;
-                        const secondaryImageDiv = document.createElement('div');
-                        secondaryImageDiv.className = 'secondary-image-preview';
-                        secondaryImageDiv.innerHTML = `
-                            <img src="${img.dataUrl}" alt="Secondary Preview ${actualIndex}">
-                            <div class="preview-controls">
-                                <button type="button" class="recrop-btn" onclick="recropImage(${actualIndex})" title="Recrop"><i class="fas fa-crop-alt"></i></button>
-                                <button type="button" class="remove-btn" onclick="removeImage('${productId}', ${actualIndex})" title="Remove"><i class="fas fa-trash"></i></button>
-                            </div>
-                        `;
-                        secondaryImagesDiv.appendChild(secondaryImageDiv);
-                    });
-                    previewContainer.appendChild(secondaryImagesDiv);
-                }
-            }
-        }
+    const mainImageContainer = document.createElement('div');
+    mainImageContainer.className = 'main-image-container';
+    const mainImageDiv = document.createElement('div');
+    mainImageDiv.className = 'main-image-preview';
+    mainImageDiv.innerHTML = `
+        <img src="${imagesToDisplay[0].dataUrl}" alt="Main Preview">
+        <div class="preview-controls">
+            <button type="button" class="recrop-btn" onclick="recropImage(0)" title="Recrop"><i class="fas fa-crop-alt"></i></button>
+            <button type="button" class="remove-btn" onclick="removeImage('${productId}', 0)" title="Remove"><i class="fas fa-trash"></i></button>
+        </div>
+    `;
+    mainImageContainer.appendChild(mainImageDiv);
+    previewContainer.appendChild(mainImageContainer);
 
+    if (imagesToDisplay.length > 1) {
+        const secondaryImagesDiv = document.createElement('div');
+        secondaryImagesDiv.className = 'secondary-images';
+        imagesToDisplay.slice(1).forEach((img, index) => {
+            const actualIndex = index + 1;
+            const secondaryImageDiv = document.createElement('div');
+            secondaryImageDiv.className = 'secondary-image-preview';
+            secondaryImageDiv.innerHTML = `
+                <img src="${img.dataUrl}" alt="Secondary Preview ${actualIndex}">
+                <div class="preview-controls">
+                    <button type="button" class="recrop-btn" onclick="recropImage(${actualIndex})" title="Recrop"><i class="fas fa-crop-alt"></i></button>
+                    <button type="button" class="remove-btn" onclick="removeImage('${productId}', ${actualIndex})" title="Remove"><i class="fas fa-trash"></i></button>
+                </div>
+            `;
+            secondaryImagesDiv.appendChild(secondaryImageDiv);
+        });
+        previewContainer.appendChild(secondaryImagesDiv);
+    }
+}
         function startCrop(index) {
             if (index >= originalImages.length) {
                 updatePreview();
@@ -493,24 +495,31 @@
             isRecropping = false;
         }
 
-      // Fixed Frontend JavaScript Function
-async function removeImage(userId) {
-    // Check if user has a profile image
-    const profileImage = document.getElementById('profileImage');
-    const defaultIcon = document.getElementById('defaultIcon');
-    
-    if (!profileImage.src || profileImage.style.display === 'none') {
+ async function removeImage(productId, index) {
+    // Check if image exists at the given index
+    if (!existingImages[index] && !croppedImages[index]) {
         Swal.fire({
             icon: 'warning',
             title: 'No Image',
-            text: 'There is no profile image to remove.'
+            text: 'There is no image to remove at this position.'
         });
         return;
     }
-    
+
+    // Check if removing the image would violate the minimum image requirement
+    const totalImages = existingImages.length + croppedImages.filter(img => img.file).length;
+    if (totalImages <= minImages) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Minimum Images Required',
+            text: `You must have at least ${minImages} images. Cannot remove this image.`
+        });
+        return;
+    }
+
     Swal.fire({
         title: 'Are you sure?',
-        text: 'This will permanently remove your profile picture!',
+        text: 'This will permanently remove the product image!',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
@@ -522,40 +531,44 @@ async function removeImage(userId) {
                 // Show loading
                 Swal.fire({
                     title: 'Removing...',
-                    text: 'Please wait while we remove your profile picture',
+                    text: 'Please wait while we remove the product image',
                     allowOutsideClick: false,
                     allowEscapeKey: false,
                     didOpen: () => {
                         Swal.showLoading();
                     }
                 });
-                
-                // Since we're removing the first (and likely only) profile image, use index 0
-                const response = await fetch(`/removeuserimage/0`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    // Update UI to show default icon
-                    profileImage.style.display = 'none';
-                    profileImage.src = '';
-                    defaultIcon.style.display = 'block';
-                    
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Image Removed',
-                        text: 'Your profile picture has been removed successfully.',
-                        showConfirmButton: false,
-                        timer: 1500
+
+                // If the image is an existing image (stored on the server), send a DELETE request
+                if (existingImages[index] && !croppedImages[index]?.file) {
+                    const response = await fetch(`/admin/remove-product-image/${productId}/${index}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
                     });
-                } else {
-                    throw new Error(data.message || 'Failed to remove the image.');
+
+                    const data = await response.json();
+                    if (!data.success) {
+                        throw new Error(data.message || 'Failed to remove the image.');
+                    }
                 }
+
+                // Remove the image from arrays
+                existingImages.splice(index, 1);
+                croppedImages.splice(index, 1);
+
+                // Update UI
+                updatePreview();
+                updateFormFiles();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Image Removed',
+                    text: 'The product image has been removed successfully.',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
             } catch (error) {
                 console.error('Error removing image:', error);
                 Swal.fire({

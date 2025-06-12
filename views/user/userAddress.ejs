@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Addresses</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="/css/userside-css/userside-css/addresspage.css" rel="stylesheet"  >
+</head>
+<body class="address-page-container">
+    <%- include("../../views/partials/user/header") %>
+    <div class="page-container">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-lg-2 col-md-3 p-0">
+                    <div class="sidebar">
+                        <div class="sidebar-header">
+                            <h5>Hello <%= user ? user.name : 'User' %></h5>
+                            <p>Welcome to your Account</p>
+                        </div>
+                        <nav class="sidebar-menu">
+                            <a class="nav-link" href="/profile"><i class="far fa-user"></i>My Info</a>
+                            <a class="nav-link active" href="/address"><i class="fas fa-map-marker-alt"></i>Addresses</a>
+                            <a class="nav-link" href="/orders"><i class="fas fa-box"></i>My Orders</a>
+                            <a class="nav-link" href="/wallet"><i class="fas fa-wallet"></i>Wallet</a>
+                            <a class="nav-link" href="/refer"><i class="fas fa-gift"></i>Refer and Earn</a>
+                            <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i>Sign Out</a>
+                        </nav>
+                    </div>
+                </div>
+                
+                <!-- Main Content -->
+                <div class="col-lg-10 col-md-9 p-0">
+                    <div class="main-content">
+                        <div class="content-header">
+                            <h2>My Addresses</h2>
+                            <!-- Top Add New Address Button (hidden initially if no addresses) -->
+                            <a href="/address/add" class="add-address-btn" id="topAddAddressBtn" style="display: none;">
+                                <i class="fas fa-plus"></i>
+                                Add New Address
+                            </a>
+                        </div>
+
+<!-- Address Grid -->
+<div class="address-grid" id="addressGrid">
+    <% if (addresses && addresses.length > 0) { %>
+        <% addresses.forEach(address => { %>
+            <div class="address-card <%= address.defaultAddress ? 'default' : '' %>" data-id="<%= address._id %>">
+                <!-- Success Message Container -->
+                <div class="success-message" id="successMessage-<%= address._id %>" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    Default address set successfully!
+                </div>
+                
+                <div class="address-type-badge <%= address.addressType ? address.addressType.toLowerCase() : 'other' %>">
+                    <i class="fas fa-<%= address.addressType && address.addressType.toLowerCase() === 'home' ? 'home' : address.addressType && address.addressType.toLowerCase() === 'work' ? 'briefcase' : 'map-pin' %>"></i>
+                    <%= address.addressType || 'Other' %>
+                </div>
+                
+                <div class="address-name">
+                    <i class="fas fa-user"></i>
+                    <%= address.name %>
+                    <!-- <% if (address.isDefault) { %>
+                        <div class="default-badge">Default</div>
+                    <% } %> -->
+                </div>
+                
+                <div class="address-contact">
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <%= address.phone %>
+                    </div>
+                    <% if (address.altPhone) { %>
+                        <div class="contact-item">
+                            <i class="fas fa-phone-alt"></i>
+                            <%= address.altPhone %>
+                        </div>
+                    <% } %>
+                </div>
+                
+                <div class="address-details">
+                    <div class="address-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div class="address-text">
+                            <%= address.fullAddress %>
+                        </div>
+                    </div>
+                    
+                    <div class="address-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-map-pin"></i>
+                            <%= address.pincode %>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-city"></i>
+                            <%= address.city %>, <%= address.state %>
+                        </div>
+                        <% if (address.landmark) { %>
+                            <div class="meta-item">
+                                <i class="fas fa-landmark"></i>
+                                <%= address.landmark %>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+                
+                <div class="address-actions">
+                    <% if (!address.isDefault) { %>
+                        <div>
+                            <button class="action-btn edit-btn set-default-btn" onclick="setDefaultAddress('<%= address._id %>')">
+                                <i class="fas fa-check"></i>
+                                Set Default
+                            </button>
+                        </div>
+                    <% } else { %>
+                        <div class="default-badge">Default</div>
+                    <% } %>
+                    <div style="display: flex; gap: 8px;">
+                        <a href="/address/edit/<%= address._id %>" class="action-btn edit-btn">
+                            <i class="fas fa-edit"></i>
+                            Edit
+                        </a>
+                        <button class="action-btn delete-btn" onclick="deleteAddress('<%= address._id %>')">
+                            <i class="fas fa-trash"></i>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    <% } %>
+</div>
+
+                        <!-- Empty State -->
+                        <div class="empty-state" id="emptyState" style="display: none;">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <h3>No Addresses Found</h3>
+                            <p>Add a new address to get started</p>
+                            <a href="/address/add" class="add-address-btn">
+                                <i class="fas fa-plus"></i>
+                                Add New Address
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <%- include("../../views/partials/user/footer") %>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        // Function to check and toggle UI elements based on address count
+        function updateUI() {
+            const addressGrid = document.getElementById('addressGrid');
+            const emptyState = document.getElementById('emptyState');
+            const topAddAddressBtn = document.getElementById('topAddAddressBtn');
+            const addressCards = addressGrid.querySelectorAll('.address-card');
+
+            if (addressCards.length === 0) {
+                // No addresses: hide grid and top button, show empty state
+                addressGrid.style.display = 'none';
+                emptyState.style.display = 'block';
+                topAddAddressBtn.style.display = 'none';
+            } else {
+                // Addresses present: show grid and top button, hide empty state
+                addressGrid.style.display = 'grid';
+                emptyState.style.display = 'none';
+                topAddAddressBtn.style.display = 'inline-flex';
+            }
+        }
+
+        // Function to delete address
+        function deleteAddress(addressId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/address/delete/${addressId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Remove the address card from the DOM
+                            const addressCard = document.querySelector(`.address-card[data-id="${addressId}"]`);
+                            if (addressCard) {
+                                addressCard.remove();
+                            }
+                            Swal.fire('Deleted!', 'Your address has been deleted.', 'success');
+                            updateUI(); // Update UI after deletion
+                        } else {
+                            Swal.fire('Error!', data.message || 'Failed to delete address.', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('Error!', 'Something went wrong.', 'error');
+                    });
+                }
+            });
+        }
+
+        // Function to set default address
+        function setDefaultAddress(addressId) {
+            fetch(`/address/set-default/${addressId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Default address updated successfully!',
+                        timer: 1500,
+                        showConfirmButton: false,
+                    }).then(() => {
+                        location.reload(); // Reload to reflect the new default address
+                    });
+                } else {
+                    Swal.fire(
+                        'Error!',
+                        data.message || 'Failed to update default address.',
+                        'error'
+                    );
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire(
+                    'Error!',
+                    'Something went wrong. Please try again.',
+                    'error'
+                );
+            });
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUI();
+        });
+    </script>
+</body>
+</html>

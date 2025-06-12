@@ -25,14 +25,13 @@ const searchUsers = async (req, res) => {
         };
 
         const users = await User.find(query)
-            .select('name email phoneNumber image createdAt isBlocked _id')
+            .select('name email phoneNumber profileImage createdAt isBlocked _id ')
             .skip((page - 1) * limit)
             .limit(limit)
             .lean();
 
         const totalUsers = await User.countDocuments(query);
         const totalPages = Math.ceil(totalUsers / limit);
-
         if (req.headers.accept.includes('application/json')) {
             res.json({ users, currentPage: page, totalPages });
         } else {

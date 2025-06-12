@@ -6,7 +6,7 @@ const categoryController=require("../controllers/admin/categoryController");
 const brandController=require("../controllers/admin/brandController");
 const productController=require("../controllers/admin/productController")
 const  {adminAuth}=require("../middlewares/adminAuth");
-const {  productUpload}=require("../config/multer")
+const {productUpload}=require("../config/multer")
 
 
 //  error 404

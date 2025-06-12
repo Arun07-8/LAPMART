@@ -72,7 +72,7 @@
         <!-- Always include both elements, control visibility with style -->
         <% if (user.profileImage && user.profileImage[0]) { %>
             <!-- User has profile image -->
-            <img id="profileImage" src="<%= user.profileImage[0] %>" alt="Profile Picture" class="profile-img" style="display: block;">
+            <img id="profileImage" src="<%= user.profileImage[0]%>" alt="Profile Picture" class="profile-img" style="display: block;">
             <i class="far fa-user" id="defaultIcon" style="display: none;"></i>
         <% } else { %>
             <!-- User has no profile image -->

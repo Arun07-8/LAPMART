@@ -267,7 +267,7 @@ const loadShoppingPage = async (req, res) => {
       search = '',
     } = req.query;
 
-    const query = { isListed: true, isDeleted: false, quantity: { $gt: 0 } };
+    const query = { isListed: true, isDeleted: false};
     if (category !== 'all') query.category = category;
     if (brand !== 'all') query.brand = brand;
     if (priceMin !== '0' || priceMax !== '150000') {

@@ -193,8 +193,6 @@ const newPasswordSet=async (req,res) => {
 const loadresendOtp = async (req, res) => {
     try {
         const email = req.session.email;
-        console.log('Resend OTP email:', email);
-
         if (!email) {
             return res.status(400).json({
                 success: false,

@@ -8,7 +8,7 @@ const minImages = 2;
 const maxImages = 5; 
 const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
-/
+
 <% if (product && product.productImage && product.productImage.length > 0) { %>
     existingImages = <%- JSON.stringify(product.productImage) %>;
     existingImages.forEach((imageUrl, index) => {

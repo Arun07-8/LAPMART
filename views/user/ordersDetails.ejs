@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        body.address-page-container {
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+        .page-container {
+            margin-top: 20px;
+        }
+        .sidebar {
+            background-color: #fff;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        .sidebar-header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-top: 20px;
+        }
+        .nav-link {
+            color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-link.active, .nav-link:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .main-content {
+            padding: 20px;
+            background-color: #fff;
+            min-height: 100vh;
+        }
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .order-details-container {
+            max-width: 100%;
+        }
+        .order-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #fff;
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .order-status {
+            font-weight: bold;
+            color: #28a745;
+        }
+        .order-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        .order-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .order-item-details {
+            flex-grow: 1;
+        }
+        .order-summary, .shipping-details, .payment-details {
+            margin-top: 20px;
+        }
+        .order-summary h5, .shipping-details h5, .payment-details h5 {
+            margin-bottom: 15px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .action-btn {
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .track-btn {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+        }
+        .cancel-btn {
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: static;
+                height: auto;
+            }
+            .main-content {
+                padding: 15px;
+            }
+            .order-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .order-item img {
+                width: 60px;
+                height: 60px;
+            }
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body class="address-page-container">
+    <%- include("../../views/partials/user/header") %>
+    <div class="page-container">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Sidebar (Unchanged) -->
+                <div class="col-lg-2 col-md-3 p-0">
+                    <div class="sidebar">
+                        <div class="sidebar-header">
+                            <h5>Hello <%= user ? user.name : 'User' %></h5>
+                            <p>Welcome to your Account</p>
+                        </div>
+                        <nav class="sidebar-menu">
+                            <a class="nav-link" href="/profile"><i class="far fa-user"></i>My Info</a>
+                            <a class="nav-link" href="/address"><i class="fas fa-map-marker-alt"></i>Addresses</a>
+                            <a class="nav-link active" href="/orders"><i class="fas fa-box"></i>My Orders</a>
+                            <a class="nav-link" href="/wallet"><i class="fas fa-wallet"></i>Wallet</a>
+                            <a class="nav-link" href="/refer"><i class="fas fa-gift"></i>Refer and Earn</a>
+                            <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i>Sign Out</a>
+                        </nav>
+                    </div>
+                </div>
+                
+                <!-- Main Content (Order Details) -->
+                <div class="col-lg-10 col-md-9 p-0">
+                    <div class="main-content">
+                        <div class="content-header">
+                            <h2>Order Details</h2>
+                            <a href="/orders" class="action-btn track-btn"><i class="fas fa-arrow-left"></i> Back to Orders</a>
+                        </div>
+                        <div class="order-details-container">
+                            <div class="order-card">
+                                <div class="order-header">
+                                    <div>
+                                        <h4>Order #123456</h4>
+                                        <p>Placed on: October 25, 2025</p>
+                                    </div>
+                                    <div class="order-status">Delivered</div>
+                                </div>
+                                <!-- Order Items -->
+                                <div class="order-items">
+                                    <h5>Items</h5>
+                                    <div class="order-item">
+                                        <img src="https://via.placeholder.com/80" alt="Product Image">
+                                        <div class="order-item-details">
+                                            <h6>Product Name</h6>
+                                            <p>Quantity: 2</p>
+                                            <p>Price: $29.99</p>
+                                        </div>
+                                    </div>
+                                    <div class="order-item">
+                                        <img src="https://via.placeholder.com/80" alt="Product Image">
+                                        <div class="order-item-details">
+                                            <h6>Another Product</h6>
+                                            <p>Quantity: 1</p>
+                                            <p>Price: $49.99</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Order Summary -->
+                                <div class="order-summary">
+                                    <h5>Order Summary</h5>
+                                    <div class="summary-row">
+                                        <span>Subtotal</span>
+                                        <span>$79.97</span>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span>Shipping</span>
+                                        <span>$5.00</span>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span>Tax</span>
+                                        <span>$6.40</span>
+                                    </div>
+                                    <div class="summary-row">
+                                        <strong>Total</strong>
+                                        <strong>$91.37</strong>
+                                    </div>
+                                </div>
+                                <!-- Shipping Details -->
+                                <div class="shipping-details">
+                                    <h5>Shipping Address</h5>
+                                    <p>John Doe</p>
+                                    <p>123 Main St, Apt 4B</p>
+                                    <p>New York, NY 10001</p>
+                                    <p>Phone: (123) 456-7890</p>
+                                </div>
+                                <!-- Payment Details -->
+                                <div class="payment-details">
+                                    <h5>Payment Method</h5>
+                                    <p>Visa ending in 1234</p>
+                                    <p>Billing Address: Same as shipping</p>
+                                </div>
+                                <!-- Actions -->
+                                <div class="order-actions">
+                                    <button class="action-btn track-btn"><i class="fas fa-truck"></i> Track Order</button>
+                                    <button class="action-btn cancel-btn"><i class="fas fa-times"></i> Cancel Order</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <%- include("../../views/partials/user/footer") %>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Placeholder for order action functions
+        function trackOrder() {
+            Swal.fire('Info', 'Tracking not implemented in this demo.', 'info');
+        }
+        function cancelOrder() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to cancel this order?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, cancel it!',
+                cancelButtonText: 'No'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Cancelled!', 'Your order has been cancelled.', 'success');
+                }
+            });
+        }
+        document.querySelector('.track-btn').addEventListener('click', trackOrder);
+        document.querySelector('.cancel-btn').addEventListener('click', cancelOrder);
+    </script>
+</body>
+</html>

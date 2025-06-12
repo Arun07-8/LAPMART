@@ -4,7 +4,7 @@ const nodemailer = require("nodemailer");
 const saltround = 10;
 
 const userProfile = async (req, res) => {
-    try {
+    try { 
         let user = req.session.user
         if (user) {
             const userData = await User.findById(user)

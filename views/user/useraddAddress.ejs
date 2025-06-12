@@ -1,0 +1,418 @@
+
+   <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Address</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="/css/userside-css/userside-css/addAddresspage.css"  rel="stylesheet">
+</head>
+<body class="address-page-container">
+    <%- include("../../views/partials/user/header") %>
+    <div class="page-container">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-lg-2 col-md-3 p-0">
+                    <div class="sidebar">
+                        <div class="sidebar-header">
+                            <h5>Hello User</h5>
+                            <p>Welcome to your Account</p>
+                        </div>
+                        <nav class="sidebar-menu">
+                            <a class="nav-link" href="/profile"><i class="far fa-user"></i>My Info</a>
+                            <a class="nav-link active" href="/address"><i class="fas fa-map-marker-alt"></i>Addresses</a>
+                            <a class="nav-link" href="#"><i class="fas fa-box"></i>My Orders</a>
+                            <a class="nav-link" href="#"><i class="fas fa-wallet"></i>Wallet</a>
+                            <a class="nav-link" href="#"><i class="fas fa-gift"></i>Refer and Earn</a>
+                            <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i>Sign Out</a>
+                        </nav>
+                    </div>
+                </div>
+                <!-- Main Content -->
+                <div class="col-lg-10 col-md-9 p-0">
+                    <div class="main-content">
+                        <div class="content-header">
+                            <a href="/address" class="back-btn">
+                                <i class="fas fa-arrow-left"></i>
+                                Back to Addresses
+                            </a>
+                            <h2>Add New Address</h2>
+                        </div>
+
+                        <div class="address-form-container">
+                            <form id="addressForm">
+                                <!-- Address Type Section -->
+                                <div class="address-type-section">
+                                    <div class="section-header">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <h4>Address Type</h4>
+                                    </div>
+                                    <div class="address-type-options">
+                                        <div class="address-type-option">
+                                            <input type="radio" id="home" name="addressType" value="Home" checked>
+                                            <label for="home" class="address-type-label">
+                                                <i class="fas fa-home"></i>
+                                                Home
+                                            </label>
+                                        </div>
+                                        <div class="address-type-option">
+                                            <input type="radio" id="work" name="addressType" value="Work">
+                                            <label for="work" class="address-type-label">
+                                                <i class="fas fa-briefcase"></i>
+                                                Work
+                                            </label>
+                                        </div>
+                                        <div class="address-type-option">
+                                            <input type="radio" id="other" name="addressType" value="Other">
+                                            <label for="other" class="address-type-label">
+                                                <i class="fas fa-map-pin"></i>
+                                                Other
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Personal Information Section -->
+                                <div class="section-header">
+                                    <i class="fas fa-user"></i>
+                                    <h4>Personal Information</h4>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="fullName" class="form-label required">Full Name</label>
+                                    <input type="text" id="fullName" name="fullName" class="form-input" placeholder="Enter your full name">
+                                    <input type="hidden" name="from" value="<%= from %>">
+                                    <span class="error-text" id="fullNameError"></span>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="phoneNumber" class="form-label required">Phone Number</label>
+                                        <input type="tel" id="phoneNumber" name="phoneNumber" class="form-input" placeholder="Enter your phone number">
+                                        <small style="color: #6c757d; font-size: 12px; margin-top: 5px; display: block;">We'll use this as the primary contact number</small>
+                                        <span class="error-text" id="phoneNumberError"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="alternativePhone" class="form-label">Alternative Phone</label>
+                                        <input type="tel" id="alternativePhone" name="alternativePhone" class="form-input" placeholder="Enter alternative phone number">
+                                        <span class="error-text" id="alternativePhoneError"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Address Details Section -->
+                                <div class="section-header">
+                                    <i class="fas fa-map"></i>
+                                    <h4>Address Details</h4>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="city" class="form-label required">City</label>
+                                        <input type="text" id="city" name="city" class="form-input" placeholder="Enter your city">
+                                        <span class="error-text" id="cityError"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="state" class="form-label required">State</label>
+                                        <input type="text" id="state" name="state" class="form-input" placeholder="Enter your state">
+                                        <span class="error-text" id="stateError"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="landmark" class="form-label required">Landmark</label>
+                                        <input type="text" id="landmark" name="landmark" class="form-input" placeholder="Nearby recognizable location (e.g., mall, school, etc.)">
+                                        <small style="color: #6c757d; font-size: 12px; margin-top: 5px; display: block;">Nearby recognizable location (e.g., mall, school, etc.)</small>
+                                        <span class="error-text" id="landmarkError"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pincode" class="form-label required">Pincode</label>
+                                        <input type="text" id="pincode" name="pincode" class="form-input" placeholder="Enter your pincode">
+                                        <span class="error-text" id="pincodeError"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label for="fullAddress" class="form-label required">Full Address</label>
+                                    <textarea id="fullAddress" name="fullAddress" class="form-input" rows="4" placeholder="Enter your complete address including house number, street, area"></textarea>
+                                    <span class="error-text" id="fullAddressError"></span>
+                                </div>
+
+                                <!-- Default Address Checkbox -->
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="defaultAddress" name="isDefault">
+                                    <label for="defaultAddress">Set as default address for delivery</label>
+                                </div>
+
+                                <button type="submit" class="submit-btn" id="submitBtn">
+                                    <i class="fas fa-plus-circle"></i>
+                                    Save Address
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <%- include("../../views/partials/user/footer") %>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const form = document.getElementById('addressForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Validation rules for client-side
+        const validationRules = {
+            fullName: {
+                required: true,
+                errorElement: document.getElementById('fullNameError'),
+                validate: value => {
+                    if (!value.trim()) return 'Full name must be at least 2 characters';
+                    if (value.length < 2) return 'Full name must be at least 2 characters';
+                    return '';
+                }
+            },
+            phoneNumber: {
+                required: true,
+                errorElement: document.getElementById('phoneNumberError'),
+                validate: value => {
+                    if (!value.trim()) return 'Phone number must be exactly 10 digits';
+                    if (!/^\d{10}$/.test(value)) return 'Phone number must be exactly 10 digits';
+                    return '';
+                }
+            },
+            alternativePhone: {
+                required: false,
+                errorElement: document.getElementById('alternativePhoneError'),
+                validate: value => {
+                    if (value && !/^\d{10}$/.test(value)) return 'Alternative phone must be exactly 10 digits';
+                    return '';
+                }
+            },
+            city: {
+                required: true,
+                errorElement: document.getElementById('cityError'),
+                validate: value => {
+                    if (!value.trim()) return 'City must be at least 2 characters';
+                    if (value.length < 2) return 'City must be at least 2 characters';
+                    return '';
+                }
+            },
+            state: {
+                required: true,
+                errorElement: document.getElementById('stateError'),
+                validate: value => {
+                    if (!value.trim()) return 'State must be at least 2 characters';
+                    if (value.length < 2) return 'State must be at least 2 characters';
+                    return '';
+                }
+            },
+            landmark: {
+                required: true,
+                errorElement: document.getElementById('landmarkError'),
+                validate: value => {
+                    if (!value.trim()) return 'Landmark must be at least 3 characters';
+                    if (value.length < 3) return 'Landmark must be at least 3 characters';
+                    return '';
+                }
+            },
+            pincode: {
+                required: true,
+                errorElement: document.getElementById('pincodeError'),
+                validate: value => {
+                    if (!value.trim()) return 'Pincode must be exactly 6 digits';
+                    if (!/^\d{6}$/.test(value)) return 'Pincode must be exactly 6 digits';
+                    return '';
+                }
+            },
+            fullAddress: {
+                required: true,
+                errorElement: document.getElementById('fullAddressError'),
+                validate: value => {
+                    if (!value.trim()) return 'Full address must be at least 10 characters';
+                    if (value.length < 10) return 'Full address must be at least 10 characters';
+                    return '';
+                }
+            }
+        };
+
+        // Validate a single field
+        function validateField(fieldId) {
+            const field = document.getElementById(fieldId);
+            const rule = validationRules[fieldId];
+            const value = field.value.trim();
+            const errorMessage = rule.validate(value);
+            const errorElement = rule.errorElement;
+
+            if (errorMessage) {
+                field.classList.add('invalid');
+                errorElement.textContent = errorMessage;
+                errorElement.style.display = 'block';
+            } else {
+                field.classList.remove('invalid');
+                errorElement.textContent = '';
+                errorElement.style.display = 'none';
+            }
+
+            return !errorMessage;
+        }
+
+        // Check if all required fields are empty
+        function areAllRequiredFieldsEmpty() {
+            const requiredFields = Object.keys(validationRules).filter(id => validationRules[id].required);
+            return requiredFields.every(fieldId => !document.getElementById(fieldId).value.trim());
+        }
+
+        // Validate empty fields on direct submit
+        function validateEmptyFields() {
+            let isValid = true;
+            const requiredFields = Object.keys(validationRules).filter(id => validationRules[id].required);
+
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
+                    field.classList.add('invalid');
+                    validationRules[fieldId].errorElement.textContent = `${field.previousElementSibling.textContent.replace(' *', '')} is required`;
+                    validationRules[fieldId].errorElement.style.display = 'block';
+                    isValid = false;
+                }
+            });
+
+            if (!isValid) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    text: 'Please fill in all required fields',
+                });
+            }
+
+            return isValid;
+        }
+
+        // Validate entire form
+        function validateForm() {
+            let isValid = true;
+            Object.keys(validationRules).forEach(fieldId => {
+                if (!validateField(fieldId)) {
+                    isValid = false;
+                }
+            });
+
+            if (!isValid) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    text: 'Please correct the errors in the form',
+                });
+            }
+
+            return isValid;
+        }
+
+        // Add live validation
+        Object.keys(validationRules).forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            field.addEventListener('input', () => {
+                validateField(fieldId);
+            });
+
+            // Restrict numeric fields
+            if (['phoneNumber', 'alternativePhone', 'pincode'].includes(fieldId)) {
+                field.addEventListener('input', () => {
+                    field.value = field.value.replace(/\D/g, '');
+                });
+            }
+        });
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // Client-side validation
+            if (areAllRequiredFieldsEmpty() && !validateEmptyFields()) {
+                return;
+            }
+
+            if (!validateForm()) {
+                return;
+            }
+
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+
+            // Collect form data
+            const formData = new FormData(form);
+            const addressData = {};
+
+            for (let [key, value] of formData.entries()) {
+                addressData[key] = value;
+            }
+
+            // Handle checkbox
+addressData.isDefault = document.getElementById('defaultAddress').checked.toString(); // converts to "true"/"false"
+
+
+            try {
+                const response = await fetch('/address/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(addressData),
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Address added successfully!',
+                        timer: 1500,
+                        showConfirmButton: false,
+                    }).then(() => {
+                        form.reset();
+                        window.location.href = result.redirectTo;
+                    });
+                } else {
+                    if (result.errors) {
+                        let errorText = 'Please correct the following errors:\n';
+                        Object.keys(result.errors).forEach(fieldId => {
+                            errorText += `${result.errors[fieldId]}\n`;
+                        });
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Validation Error',
+                            text: errorText,
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: result.message || 'Failed to add address. Please try again.',
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error adding address:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Something went wrong. Please try again.',
+                });
+            } finally {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Auto-focus first field
+        document.getElementById('fullName').focus();
+    </script>
+</body>
+</html>

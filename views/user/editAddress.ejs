@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Address</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+     <style>
+        /* Main container for the page */
+        .address-page-container {
+            overflow-x: hidden;
+            min-height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .address-page-container .page-container {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .address-page-container .container-fluid {
+            flex: 1;
+            display: flex;
+        }
+
+        .address-page-container .row {
+            flex: 1;
+            display: flex;
+            min-height: 100%;
+        }
+
+        /* Sidebar styling */
+        .address-page-container .sidebar {
+            width: 352px;
+            min-height: 143vh;
+            top: 0;
+            left: 0;
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            margin: 35px 20px;
+            border-radius: 10px;
+            z-index: 1000;
+        }
+
+        .address-page-container .sidebar-header {
+            padding: 25px 20px;
+            border-bottom: 1px solid #e9ecef;
+            background: linear-gradient(135deg, #C4A676, #8B7355);
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .address-page-container .sidebar-header h5 {
+            margin: 0 0 12px 0;
+            font-weight: 700;
+            font-size: 22px;
+            letter-spacing: 0.5px;
+        }
+
+        .address-page-container .sidebar-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 16px;
+            font-weight: 300;
+        }
+
+        .address-page-container .sidebar-menu {
+            padding: 25px 0;
+        }
+
+        .address-page-container .sidebar-menu .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            color: #495057;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            font-size: 17px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .address-page-container .sidebar-menu .nav-link:hover {
+            background: linear-gradient(90deg, #f8f9fa, #fff);
+            color: #C4A676;
+            border-left-color: #C4A676;
+            transform: translateX(3px);
+        }
+
+        .address-page-container .sidebar-menu .nav-link.active {
+            background: linear-gradient(90deg, #f8f9fa, #fff);
+            color: #C4A676;
+            border-left-color: #C4A676;
+            font-weight: 600;
+            box-shadow: inset 0 2px 4px rgba(196, 166, 118, 0.1);
+        }
+
+        .address-page-container .sidebar-menu .nav-link i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        /* Main content styling */
+        .address-page-container .main-content {
+            padding: 30px 25px;
+            background: #ffffff;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            margin-left: 270px; /* Offset for fixed sidebar */
+            margin-right: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+
+        .main-content {
+            max-width: 1200px; /* Increased width */
+            margin: 0 auto;
+            padding: 30px;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 40px);
+        }
+
+        .content-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: absolute;
+            left: 0;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        .content-header h2 {
+            color: #495057;
+            font-weight: 700;
+            margin: 0 auto;
+            font-size: 28px;
+            text-align: center;
+            flex: 1;
+        }
+
+        .address-form-container {
+            background: #fff;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+            width: 100%;
+            max-width: 1200px; /* Increased width */
+            margin: 0 auto;
+            margin-bottom: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 35px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+
+        .section-header i {
+            color: #C4A676;
+            font-size: 22px;
+        }
+
+        .section-header h4 {
+            color: #495057;
+            font-weight: 600;
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .address-type-section {
+            margin-bottom: 40px;
+        }
+
+        .address-type-options {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .address-type-option {
+            position: relative;
+        }
+
+        .address-type-option input[type="radio"] {
+            display: none;
+        }
+
+        .address-type-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            font-weight: 500;
+            color: #495057;
+            min-width: 130px;
+            justify-content: center;
+        }
+
+        .address-type-option input[type="radio"]:checked + .address-type-label {
+            border-color: #C4A676;
+            background: linear-gradient(135deg, #C4A676, #8B7355);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(196, 166, 118, 0.3);
+        }
+
+        .address-type-label i {
+            font-size: 16px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            display: block;
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .form-label.required::after {
+            content: " *";
+            color: #dc3545;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 18px 22px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fff;
+            color: #495057;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #C4A676;
+            box-shadow: 0 0 0 3px rgba(196, 166, 118, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-input::placeholder {
+            color: #adb5bd;
+        }
+
+        .form-input.invalid {
+            border-color: #dc3545;
+            background: #fff5f5;
+            animation: shake 0.3s ease;
+        }
+
+        .error-text {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+            position: absolute;
+            left: 0;
+            bottom: -20px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 30px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #C4A676;
+            cursor: pointer;
+        }
+
+        .checkbox-container label {
+            color: #495057;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #C4A676, #8B7355);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 30px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(196, 166, 118, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .submit-btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .submit-btn.loading::after {
+            content: '';
+            width: 18px;
+            height: 18px;
+            border: 2px solid transparent;
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            display: inline-block;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .success-message {
+            background: #d1edff;
+            color: #0c5460;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+            border-left: 4px solid #0dcaf0;
+        }
+
+        /* Responsive design */
+        @media (max-width: 1200px) {
+            .address-page-container .sidebar {
+                width: 220px;
+            }
+
+            .address-page-container .main-content {
+                margin-left: 240px;
+            }
+
+            .address-page-container .sidebar-header h5 {
+                font-size: 20px;
+            }
+
+            .address-page-container .sidebar-header p {
+                font-size: 15px;
+            }
+
+            .address-page-container .sidebar-menu .nav-link {
+                font-size: 16px;
+                padding: 14px 18px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .address-page-container .sidebar {
+                position: relative;
+                width: 100%;
+                margin: 15px;
+                min-height: auto;
+            }
+
+            .address-page-container .main-content {
+                margin-left: 15px;
+                margin-right: 15px;
+                min-height: auto;
+            }
+
+            .main-content {
+                max-width: 100%;
+                min-height: auto;
+            }
+
+            .address-form-container {
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .address-page-container .main-content {
+                padding: 15px;
+            }
+
+            .main-content {
+                padding: 15px;
+            }
+
+            .address-form-container {
+                padding: 25px 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .content-header {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .content-header h2 {
+                font-size: 24px;
+            }
+
+            .back-btn {
+                position: static;
+                margin-bottom: 15px;
+            }
+
+            .address-type-options {
+                justify-content: center;
+            }
+
+            .address-type-label {
+                min-width: 110px;
+                padding: 12px 16px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .address-page-container .main-content {
+                padding: 12px;
+            }
+
+            .address-page-container {
+                padding: 10px;
+            }
+
+            .main-content {
+                padding: 10px;
+            }
+
+            .address-form-container {
+                padding: 20px 15px;
+            }
+
+            .address-type-options {
+                flex-direction: column;
+            }
+
+            .address-type-label {
+                min-width: auto;
+                width: 100%;
+            }
+
+            .form-input {
+                padding: 14px 18px;
+                font-size: 15px;
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+        }
+    </style>
+</head>
+<body class="address-page-container">
+    <%- include("../../views/partials/user/header") %>
+    <div class="page-container">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-lg-2 col-md-3 p-0">
+                    <div class="sidebar">
+                        <div class="sidebar-header">
+                            <h5>Hello <%= user?.name || 'User' %></h5>
+                            <p>Welcome to your Account</p>
+                        </div>
+                        <nav class="sidebar-menu">
+                            <a class="nav-link" href="/profile"><i class="far fa-user"></i>My Info</a>
+                            <a class="nav-link active" href="/address"><i class="fas fa-map-marker-alt"></i>Edit Address</a>
+                            <a class="nav-link" href="#"><i class="fas fa-box"></i>My Orders</a>
+                            <a class="nav-link" href="#"><i class="fas fa-wallet"></i>Wallet</a>
+                            <a class="nav-link" href="#"><i class="fas fa-gift"></i>Refer and Earn</a>
+                            <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i>Sign Out</a>
+                        </nav>
+                    </div>
+                </div>
+                <!-- Main Content -->
+                <div class="col-lg-10 col-md-9 p-0">
+                    <div class="main-content">
+                        <div class="content-header">
+                            <a href="/address" class="back-btn">
+                                <i class="fas fa-arrow-left"></i>
+                                Back to Addresses
+                            </a>
+                            <h2>Edit Address</h2>
+                        </div>
+
+                        <div class="address-form-container">
+                            <form id="addressForm">
+                                <!-- Hidden field for address ID -->
+                                <input type="hidden" name="addressId" value="<%= address?._id || '' %>">
+
+                                <!-- Address Type Section -->
+                                <div class="address-type-section">
+                                    <div class="section-header">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <h4>Address Type</h4>
+                                    </div>
+                                    <div class="address-type-options">
+                                        <div class="address-type-option">
+                                            <input type="radio" id="home" name="addressType" value="Home" <%= address?.addressType === 'Home' ? 'checked' : '' %> required>
+                                            <label for="home" class="address-type-label">
+                                                <i class="fas fa-home"></i>
+                                                Home
+                                            </label>
+                                        </div>
+                                        <div class="address-type-option">
+                                            <input type="radio" id="work" name="addressType" value="Work" <%= address?.addressType === 'Work' ? 'checked' : '' %> required>
+                                            <label for="work" class="address-type-label">
+                                                <i class="fas fa-briefcase"></i>
+                                                Work
+                                            </label>
+                                        </div>
+                                        <div class="address-type-option">
+                                            <input type="radio" id="other" name="addressType" value="Other" <%= address?.addressType === 'Other' ? 'checked' : '' %> required>
+                                            <label for="other" class="address-type-label">
+                                                <i class="fas fa-map-pin"></i>
+                                                Other
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <span class="error-text" id="addressTypeError"></span>
+                                </div>
+
+                                <!-- Personal Information Section -->
+                                <div class="section-header">
+                                    <i class="fas fa-user"></i>
+                                    <h4>Personal Information</h4>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="fullName" class="form-label required">Full Name</label>
+                                    <input type="text" id="fullName" name="fullName" class="form-input" placeholder="Enter your full name" value="<%= address?.name || '' %>">
+                                    <input type="hidden" name="from" value="<%= from %>">
+                                    <span class="error-text" id="fullNameError"></span>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="phoneNumber" class="form-label required">Phone Number</label>
+                                        <input type="tel" id="phoneNumber" name="phoneNumber" class="form-input" placeholder="Enter your phone number" value="<%= address?.phone || '' %>">
+                                        <small style="color: #6c757d; font-size: 12px; margin-top: 5px; display: block;">We'll use this as the primary contact number</small>
+                                        <span class="error-text" id="phoneNumberError"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="alternativePhone" class="form-label">Alternative Phone</label>
+                                        <input type="tel" id="alternativePhone" name="alternativePhone" class="form-input" placeholder="Enter alternative phone number" value="<%= address?.altPhone || '' %>">
+                                        <span class="error-text" id="alternativePhoneError"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Address Details Section -->
+                                <div class="section-header">
+                                    <i class="fas fa-map"></i>
+                                    <h4>Address Details</h4>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="city" class="form-label required">City</label>
+                                        <input type="text" id="city" name="city" class="form-input" placeholder="Enter your city" value="<%= address?.city || '' %>">
+                                        <span class="error-text" id="cityError"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="state" class="form-label required">State</label>
+                                        <input type="text" id="state" name="state" class="form-input" placeholder="Enter your state" value="<%= address?.state || '' %>">
+                                        <span class="error-text" id="stateError"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="landmark" class="form-label required">Landmark</label>
+                                        <input type="text" id="landmark" name="landmark" class="form-input" placeholder="Nearby recognizable location (e.g., mall, school, etc.)" value="<%= address?.landmark || '' %>">
+                                        <small style="color: #6c757d; font-size: 12px; margin-top: 5px; display: block;">Nearby recognizable location (e.g., mall, school, etc.)</small>
+                                        <span class="error-text" id="landmarkError"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pincode" class="form-label required">Pincode</label>
+                                        <input type="text" id="pincode" name="pincode" class="form-input" placeholder="Enter your pincode" value="<%= address?.pincode || '' %>">
+                                        <span class="error-text" id="pincodeError"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label for="fullAddress" class="form-label required">Full Address</label>
+                                    <textarea id="fullAddress" name="fullAddress" class="form-input" rows="4" placeholder="Enter your complete address including house number, street, area"><%= address?.fullAddress || '' %></textarea>
+                                    <span class="error-text" id="fullAddressError"></span>
+                                </div>
+
+                                <!-- Default Address Checkbox -->
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="defaultAddress" name="defaultAddress" <%= address?.isDefault ? 'checked' : '' %>>
+                                    <label for="defaultAddress">Set as default address for delivery</label>
+                                </div>
+
+                                <button type="submit" class="submit-btn" id="submitBtn">
+                                    <i class="fas fa-save"></i>
+                                    Update Address
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <%- include("../../views/partials/user/footer") %>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   <script>
+  const form = document.getElementById('addressForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const backBtn = document.querySelector('.back-btn');
+  const addressId = '<%= address?._id || '' %>';
+
+  // Validation rules
+const validationRules = {
+  addressType: {
+    required: true,
+    errorElement: document.getElementById('addressTypeError'),
+    validate: value => {
+      if (!value || !['Home', 'Work', 'Other'].includes(value)) return 'Address type must be Home, Work, or Other';
+      return '';
+    }
+  },
+  fullName: {
+    required: true,
+    errorElement: document.getElementById('fullNameError'),
+    validate: value => {
+      if (!value.trim()) return 'Full name must be at least 2 characters';
+      if (value.length < 2) return 'Full name must be at least 2 characters';
+      if (!/^[A-Za-z\s]+$/.test(value)) return 'Full name can only contain letters and spaces';
+      return '';
+    }
+  },
+  phoneNumber: {
+    required: true,
+    errorElement: document.getElementById('phoneNumberError'),
+    validate: (value, formData) => {
+      if (!value.trim()) return 'Phone number must be exactly 10 digits';
+      if (!/^[6-9]\d{9}$/.test(value)) return 'Phone number must be 10 digits starting with 6, 7, 8, or 9';
+      if (formData && formData.alternativePhone && value === formData.alternativePhone) {
+        return 'Phone number and alternative phone number cannot be the same';
+      }
+      return '';
+    }
+  },
+  alternativePhone: {
+    required: false,
+    errorElement: document.getElementById('alternativePhoneError'),
+    validate: (value, formData) => {
+      if (value && !/^[6-9]\d{9}$/.test(value)) return 'Alternative phone must be 10 digits starting with 6, 7, 8, or 9';
+      if (value && formData && formData.phoneNumber && value === formData.phoneNumber) {
+        return 'Alternative phone number and phone number cannot be the same';
+      }
+      return '';
+    }
+  },
+  city: {
+    required: true,
+    errorElement: document.getElementById('cityError'),
+    validate: value => {
+      if (!value.trim()) return 'City must be at least 2 characters';
+      if (value.length < 2) return 'City must be at least 2 characters';
+      if (!/^[A-Za-z\s]+$/.test(value)) return 'City can only contain letters and spaces';
+      return '';
+    }
+  },
+  state: {
+    required: true,
+    errorElement: document.getElementById('stateError'),
+    validate: value => {
+      if (!value.trim()) return 'State must be at least 2 characters';
+      if (value.length < 2) return 'State must be at least 2 characters';
+      if (!/^[A-Za-z\s]+$/.test(value)) return 'State can only contain letters and spaces';
+      return '';
+    }
+  },
+  landmark: {
+    required: true,
+    errorElement: document.getElementById('landmarkError'),
+    validate: value => {
+      if (!value.trim()) return 'Landmark must be at least 3 characters';
+      if (value.length < 3) return 'Landmark must be at least 3 characters';
+      if (!/^[A-Za-z\s]+$/.test(value)) return 'Landmark can only contain letters and spaces';
+      return '';
+    }
+  },
+  pincode: {
+    required: true,
+    errorElement: document.getElementById('pincodeError'),
+    validate: value => {
+      if (!value.trim()) return 'Pincode must be exactly 6 digits';
+      if (!/^\d{6}$/.test(value)) return 'Pincode must be exactly 6 digits';
+      return '';
+    }
+  },
+  fullAddress: {
+    required: true,
+    errorElement: document.getElementById('fullAddressError'),
+    validate: value => {
+      if (!value.trim()) return 'Full address must be at least 10 characters';
+      if (value.length < 10) return 'Full address must be at least 10 characters';
+      if (!/^[A-Za-z\s]+$/.test(value)) return 'Full address can only contain letters and spaces';
+      return '';
+    }
+  }
+};
+
+  // Validate a single field
+  function validateField(fieldId, value) {
+    const rule = validationRules[fieldId];
+    const errorMessage = rule.validate(value);
+    const errorElement = rule.errorElement;
+    let field;
+    let label;
+
+    if (fieldId === 'addressType') {
+      field = document.querySelector(`input[name="addressType"][value="${value}"]`);
+      label = field ? field.nextElementSibling : document.querySelector('.address-type-options'); // Fallback to container
+    } else {
+      field = document.getElementById(fieldId);
+      label = field; // For other inputs, apply to the input itself
+    }
+
+    if (errorMessage) {
+      if (label) {
+        label.classList.add('invalid');
+      }
+      errorElement.textContent = errorMessage;
+      errorElement.style.display = 'block';
+    } else {
+      if (label) {
+        label.classList.remove('invalid');
+      }
+      errorElement.textContent = '';
+      errorElement.style.display = 'none';
+    }
+
+    return !errorMessage;
+  }
+
+  // Validate empty fields on direct submit
+  function validateEmptyFields() {
+    let isValid = true;
+    const requiredFields = Object.keys(validationRules).filter(id => validationRules[id].required);
+
+    requiredFields.forEach(fieldId => {
+      const field = fieldId === 'addressType' ? document.querySelector('input[name="addressType"]:checked') : document.getElementById(fieldId);
+      const value = field ? (fieldId === 'addressType' ? field.value : field.value.trim()) : '';
+      if (!value) {
+        const errorElement = validationRules[fieldId].errorElement;
+        errorElement.textContent = `${fieldId === 'addressType' ? 'Address Type' : field?.previousElementSibling.textContent.replace(' *', '') || fieldId} is required`;
+        errorElement.style.display = 'block';
+        if (field) {
+          if (fieldId === 'addressType') {
+            document.querySelector('.address-type-options').classList.add('invalid');
+          } else {
+            field.classList.add('invalid');
+          }
+        } else if (fieldId === 'addressType') {
+          document.querySelector('.address-type-options').classList.add('invalid');
+        }
+        isValid = false;
+      }
+    });
+
+    if (!isValid) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Please fill in all required fields',
+      });
+    }
+
+    return isValid;
+  }
+
+  // Validate entire form
+  function validateForm() {
+    let isValid = true;
+
+    Object.keys(validationRules).forEach(fieldId => {
+      const field = fieldId === 'addressType' ? document.querySelector('input[name="addressType"]:checked') : document.getElementById(fieldId);
+      const value = field ? (fieldId === 'addressType' ? field.value : field.value.trim()) : '';
+      if (!validateField(fieldId, value)) {
+        isValid = false;
+      }
+    });
+
+    if (!isValid) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Please correct the errors in the form',
+      });
+    }
+
+    return isValid;
+  }
+
+  // Add live validation
+  Object.keys(validationRules).forEach(fieldId => {
+    if (fieldId === 'addressType') {
+      const radios = document.querySelectorAll('input[name="addressType"]');
+      radios.forEach(radio => {
+        radio.addEventListener('change', () => {
+          document.querySelector('.address-type-options').classList.remove('invalid');
+          validateField('addressType', radio.value);
+        });
+      });
+    } else {
+      const field = document.getElementById(fieldId);
+      if (field) {
+        field.addEventListener('input', () => {
+          validateField(fieldId, field.value.trim());
+        });
+
+        // Restrict numeric fields
+        if (['phoneNumber', 'alternativePhone', 'pincode'].includes(fieldId)) {
+          field.addEventListener('input', () => {
+            field.value = field.value.replace(/\D/g, '');
+          });
+        }
+      }
+    }
+  });
+
+  // Form submission for updating address
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    // Check if addressId is valid
+    if (!addressId) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Invalid address ID. Please select a valid address to edit.',
+      });
+      return;
+    }
+
+    // Client-side validation
+    if (!validateEmptyFields() || !validateForm()) {
+      return;
+    }
+
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+
+    // Collect form data
+    const formData = new FormData(form);
+    const addressData = {};
+
+    for (let [key, value] of formData.entries()) {
+      addressData[key] = value;
+    }
+
+    // Handle checkbox
+    addressData.defaultAddress = document.getElementById('defaultAddress').checked;
+
+    // Handle alternativePhone
+    if (!addressData.alternativePhone.trim()) {
+      addressData.alternativePhone = '';
+    }
+
+    try {
+      const response = await fetch(`/address/edit/${addressId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(addressData),
+      });
+
+      const result = await response.json();
+      console.log("shelllooo", result);
+
+      if (response.ok && result.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: result.message || 'Address updated successfully!',
+          timer: 1500,
+          showConfirmButton: false,
+        }).then(() => {
+          window.location.href = result.redirectTo;
+        });
+      } else {
+        let errorText = result.message || 'Failed to update address. Please try again.';
+        if (result.errors) {
+          errorText = Object.values(result.errors).join('\n');
+          Object.keys(result.errors).forEach(fieldId => {
+            const errorElement = document.getElementById(`${fieldId}Error`);
+            if (errorElement) {
+              errorElement.textContent = result.errors[fieldId];
+              errorElement.style.display = 'block';
+              const field = fieldId === 'addressType' ? document.querySelector(`input[name="addressType"][value="${addressData.addressType}"]`) : document.getElementById(fieldId);
+              if (field) {
+                const target = fieldId === 'addressType' ? field.nextElementSibling : field;
+                if (target) target.classList.add('invalid');
+              }
+            }
+          });
+        }
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: errorText,
+        });
+      }
+    } catch (error) {
+      console.error('Error updating address:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Something went wrong. Please try again.',
+      });
+    } finally {
+      submitBtn.classList.remove('loading');
+      submitBtn.disabled = false;
+    }
+  });
+
+  // Handle back button click
+  backBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (history.length > 1) {
+      history.back();
+    } else {
+      window.location.href = '/address';
+    }
+  });
+
+  // Auto-focus first field
+  document.getElementById('fullName').focus();
+</script>
+</body>
+</html>
