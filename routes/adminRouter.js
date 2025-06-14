@@ -5,6 +5,7 @@ const customerController=require("../controllers/admin/customerController");
 const categoryController=require("../controllers/admin/categoryController");
 const brandController=require("../controllers/admin/brandController");
 const productController=require("../controllers/admin/productController")
+const orderMangementController=require("../controllers/admin/orderMangementController")
 const  {adminAuth}=require("../middlewares/adminAuth");
 const {productUpload}=require("../config/multer")
 
@@ -49,4 +50,13 @@ router.get("/editProduct/:id",adminAuth,productController.loadEditProduct)
 router.post("/editProduct/:id",adminAuth,productUpload,productController.editProduct)
 router.delete("/remove-product-image/:productId/:index",adminAuth,productController.removeProductImage);
 router.patch("/deleteProducts/:id",adminAuth,productController.deleteProduct)
+
+//  OrderMangement
+router.get("/order-management",adminAuth,orderMangementController.getOrderManagementPage)
+router.get("/order-view/:orderId",adminAuth,orderMangementController.getOrderDetailspage)
+router.patch("/orders-status/:orderId",adminAuth,orderMangementController.updateStatus)
+router.patch("/orders/:orderId/accept/:productId",orderMangementController.acceptReturn)
+router.patch("/orders/:orderId/reject/:productId",orderMangementController.rejectReturn)
+
+
 module.exports=router;

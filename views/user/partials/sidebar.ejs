@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="/css/userside-css/userside-css/sidebar.css" rel="stylesheet">   
+</head>
+<body>
+    
+    <!-- User Account Sidebar -->
+    <div class="col-lg-2 col-md-3 p-0">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h5>Hello <%= user ? user.name : 'User' %></h5>
+                <p>Welcome to your Account</p>
+            </div>
+            <nav class="sidebar-menu">
+                <a class="nav-link <%= currentPage === 'profile' ? 'active' : '' %>" href="/profile">
+                    <i class="far fa-user"></i>My Info
+                </a>
+                <a class="nav-link <%= currentPage === 'address' ? 'active' : '' %>" href="/address">
+                    <i class="fas fa-map-marker-alt"></i>Addresses
+                </a>
+                <a class="nav-link <%= currentPage === 'orders' ? 'active' : '' %>" href="/order-details">
+                    <i class="fas fa-box"></i>My Orders
+                </a>
+                <a class="nav-link <%= currentPage === 'wallet' ? 'active' : '' %>" href="/wallet">
+                    <i class="fas fa-wallet"></i>Wallet
+                </a>
+                <a class="nav-link <%= currentPage === 'refer' ? 'active' : '' %>" href="/refer">
+                    <i class="fas fa-gift"></i>Refer and Earn
+                </a>
+                <a class="nav-link" href="/logout">
+                    <i class="fas fa-sign-out-alt"></i>Sign Out
+                </a>
+            </nav>
+        </div>
+    </div>
+</body>
+</html>

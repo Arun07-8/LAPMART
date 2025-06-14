@@ -12,12 +12,14 @@ const  addressPageload=async (req,res) => {
         addresses: [],
         message: "No addresses found",
         user: userData,
+        currentPage:"address"
       });
 
     }res.render("userAddress", {
       addresses: addressDoc.address,
       message: null,
       user: userData,
+      currentPage:"address"
     });
 
     } catch (error) {

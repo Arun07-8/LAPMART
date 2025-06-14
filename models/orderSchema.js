@@ -26,7 +26,37 @@ const orderSchema = new Schema({
     price: {
       type: Number,
       default: 0,
-    }
+    },
+    status: {
+      type: String,
+      enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Return Request", "Returned" ,"Return Rejected"  ],
+      default: "Pending",
+      required: true
+    },
+    isCancelled: {
+    type: Boolean,
+    default: false,
+    },
+    cancelReason: {
+    type: String,
+    default: '',
+    },
+    additionalNote: {
+    type: String,
+    default: '', 
+    },
+     isReturned: {
+       type: Boolean,
+       default: false,
+   },returnReason: {
+    type: String,
+    default: '', 
+   },
+   returnNote: {
+    type: String,
+    default: '',
+  },
+    
   }],
   totalPrice: {
     type: Number,
@@ -55,12 +85,6 @@ const orderSchema = new Schema({
   invoiceDate: {
     type: Date,
   },
-  status: {
-    type: String,
-    enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Return Request", "Returned"],
-    default: "Pending",
-    required: true
-  },
   paymentMethod: {
     type: String,
     enum: ["Cash on Delivery","wallect"],
@@ -69,7 +93,19 @@ const orderSchema = new Schema({
   couponApplied: {
     type: Boolean,
     default: false,
-  }
+  },
+  isCancelled: {
+    type: Boolean,
+    default: false,
+  },
+  cancelReason: {
+    type: String,
+    default: '', 
+  },
+  additionalNote: {
+    type: String,
+    default: '', 
+  },
 }, {
   timestamps: true 
 });

@@ -22,7 +22,7 @@ const userEditprofile = async (req, res) => {
     try {
         const userId = req.session.user
         const user = await User.findById(userId)
-        res.render("editprofle", { user: user, userId: userId })
+        res.render("editprofle", { user: user, userId: userId ,currentPage:"editprofile"})
 
     } catch (error) {
         console.log("edit profile occur error", error)

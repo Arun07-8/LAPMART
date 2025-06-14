@@ -1,4 +1,4 @@
-const express=require("express")
+ const express=require("express")
 const router=express.Router();
 const userController=require("../controllers/user/userController");
 const profileController=require("../controllers/user/profileController");
@@ -99,4 +99,7 @@ router.post("/checkout",userAuth,checkOutController.checkoutHandler)
 router.get("/order/:orderId",userAuth,OrderController.getOrderPage)
 router.post("/place-order",userAuth,OrderController.placeOrder)
 router.get("/view-order",userAuth,OrderController.getViewOrderpage)
+router.get("/order-details/:orderId",userAuth,OrderController.getOrderViewPage)
+router.post("/order-details/cancel",userAuth,OrderController.cancelOrder)
+router.post("/order-details/return",userAuth,OrderController.orderReturn)
 module.exports=router;                
