@@ -1,54 +1,516 @@
 <%- include("../../views/partials/admin/header") %>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<link rel="stylesheet" href="/css/admin-css/addprod.css">
-<link rel="stylesheet" href="/css/admin-css/products.css" type="text/css">
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Product - Clean White Design</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffffff;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .main-content {
+            background: #ffffff;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            padding: 25px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .form-section {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #f0f0f0;
+        }
+
+        .form-section h3 {
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #2c3e50;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group label.required::after {
+            content: " *";
+            color: #e74c3c;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #e0e6ed;
+            border-radius: 8px;
+            background: #ffffff;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            min-height: 50px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1), 0 4px 12px rgba(0,0,0,0.08);
+            background: #ffffff;
+        }
+
+        .form-control::placeholder {
+            color: #a0a0a0;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        .specifications-section {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #f0f0f0;
+        }
+
+        .section-header {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .section-subtitle {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .specs-container .row {
+            margin-bottom: 10px;
+        }
+
+        .specs-container .form-label {
+            color: #2c3e50;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .specs-container .form-label.required::after {
+            content: " *";
+            color: #e74c3c;
+        }
+
+        .image-upload-container {
+            grid-column: 1 / -1;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #f0f0f0;
+            margin-top: 20px;
+        }
+
+        .image-upload-container h4 {
+            color: #2c3e50;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .drop-zone {
+            border: 2px dashed #bdc3c7;
+            border-radius: 12px;
+            padding: 60px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+            color: #7f8c8d;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: #3498db;
+            background: #f8fbff;
+            color: #3498db;
+        }
+
+        .image-preview-container {
+            margin-top: 25px;
+        }
+
+        .main-image-container {
+            margin-bottom: 20px;
+        }
+
+        .main-image-preview {
+            position: relative;
+            display: inline-block;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            background: #ffffff;
+            border: 2px solid #f0f0f0;
+        }
+
+        .main-image-preview img {
+            width: 280px;
+            height: 280px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .secondary-images {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .secondary-image-preview {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            background: #ffffff;
+            border: 2px solid #f0f0f0;
+        }
+
+        .secondary-image-preview img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .preview-controls {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .main-image-preview:hover .preview-controls,
+        .secondary-image-preview:hover .preview-controls {
+            opacity: 1;
+        }
+
+        .recrop-btn, .remove-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .recrop-btn {
+            background: rgba(52, 152, 219, 0.9);
+            color: white;
+        }
+
+        .recrop-btn:hover {
+            background: #3498db;
+        }
+
+        .remove-btn {
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+        }
+
+        .remove-btn:hover {
+            background: #e74c3c;
+        }
+
+        .cropper-container {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border: 1px solid #f0f0f0;
+        }
+
+        .cropper-container h5 {
+            color: #2c3e50;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .cropper-wrapper {
+            max-height: 400px;
+            margin-bottom: 20px;
+        }
+
+        .aspect-ratio-controls {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .aspect-ratio-controls span {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .aspect-ratio-btn {
+            padding: 8px 16px;
+            border: 1px solid #e0e6ed;
+            border-radius: 6px;
+            background: #ffffff;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 13px;
+        }
+
+        .aspect-ratio-btn:hover {
+            background: #f8f9fa;
+            border-color: #3498db;
+        }
+
+        .aspect-ratio-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .cropper-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .button-container {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            padding: 16px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+        }
+
+        .button-container a {
+            background: #ecf0f1;
+            color: #2c3e50;
+            padding: 16px 40px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid #bdc3c7;
+        }
+
+        .button-container a:hover {
+            background: #d5dbdb;
+            transform: translateY(-1px);
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 20px;
+            }
+            
+            .form-section,
+            .specifications-section,
+            .image-upload-container {
+                padding: 20px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .main-image-preview img {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .secondary-image-preview img {
+                width: 80px;
+                height: 80px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="main-content">
         <div class="header">
-            <h1 class="text-white">Edit Products</h1>
+            <h1>Edit Product</h1>
             <div class="user-profile"></div>
         </div>
 
         <form id="editProductForm" enctype="multipart/form-data" onsubmit="return validateForm()">
             <input type="hidden" id="productId" name="productId" value="<%= product ? product._id : '' %>">
-            <div class="container">
-                <!-- Left Form Section -->
-                <div class="form-section">
-                    <h3 class="text-white mb-4">Product Details</h3>
+           <div class="container">
+        <div class="form-section">
+            <h3>Product Details</h3>
+            <div class="form-group">
+                <label for="productName" class="required">Product Name</label>
+                <input type="text" id="productName" name="productName" class="form-control"
+                    placeholder="Enter product name" value="<%= product.productName || '' %>">
+                <div id="productName-error" class="error-message"></div>
+            </div>
                     <div class="form-group">
-                        <label for="productName" class="required">Product Name:</label>
-                        <input type="text" id="productName" name="productName" class="form-control"
-                            placeholder="Enter product name" value="<%= product ? product.productName : '' %>">
-                        <div id="productName-error" class="error-message"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="description" class="required">Product Description:</label>
+                        <label for="description" class="required">Product Description</label>
                         <textarea id="description" name="description" class="form-control" rows="4"
-                            placeholder="Enter product description"><%= product ? product.description : '' %></textarea>
+                            placeholder="Enter product description" ><%= product ? product.description : '' %></textarea>
                         <div id="description-error" class="error-message"></div>
                     </div>
-                    <div class="form-group">
-                        <label for="brandId" class="required">Brand:</label>
-                        <select name="brand" class="form-control" id="brandId">
-                            <option value="" disabled>Select Brand</option>
-                            <% for(let i=0; i < brand.length; i++) { %>
+                  <div class="form-group">
+                <label for="brandId" class="required">Brand</label> 
+                <select name="brand" class="form-control" id="brandId">
+                    <option value="" disabled <%= !product.brand ? 'selected' : '' %>>Select Brand</option>
+                    <% for(let i=0; i < brand.length; i++) { %>
                                 <option value="<%= brand[i]._id %>" <%= product && product.brand && product.brand._id.toString() === brand[i]._id.toString() ? 'selected' : '' %>>
                                     <%= brand[i].name %>
                                 </option>
                             <% } %>
-                        </select>
-                        <div id="brandName-error" class="error-message"></div>
-                    </div>
+                </select>
+                <div id="brandName-error" class="error-message"></div>
+            </div>
                     <div class="form-group">
-                        <label for="categoryId" class="required">Category:</label>
+                        <label for="categoryId" class="required">Category</label>
                         <select name="category" class="form-control" id="categoryId">
-                            <option value="" disabled>Select Category</option>
-                            <% for(let i=0; i < category.length; i++) { %>
+                            <option value="" disabled <%= !product.category ? 'selected' : '' %>>Select Category</option>
+                             <% for(let i=0; i < category.length; i++) { %>
                                 <option value="<%= category[i]._id %>" <%= product && product.category && product.category._id.toString() === category[i]._id.toString() ? 'selected' : '' %>>
                                     <%= category[i].name %>
                                 </option>
@@ -57,19 +519,19 @@
                         <div id="category-error" class="error-message"></div>
                     </div>
                     <div class="form-group">
-                        <label for="productAmount" class="required">Product Price:</label>
+                        <label for="productAmount" class="required">Product Price</label>
                         <input type="number" id="productAmount" name="regularPrice" class="form-control"
-                            placeholder="Enter product price" value="<%= product ? product.regularPrice : '' %>">
+                            placeholder="Enter product price"value="<%= product ? product.regularPrice : '' %>">
                         <div id="regularPrice-error" class="error-message"></div>
                     </div>
                     <div class="form-group">
-                        <label for="offerAmount" class="required">Offer Price:</label>
+                        <label for="offerAmount" class="required">Offer Price</label>
                         <input type="number" id="offerAmount" name="salePrice" class="form-control"
                             placeholder="Enter offer price" value="<%= product ? product.salePrice : '' %>">
                         <div id="offerPrice-error" class="error-message"></div>
                     </div>
                     <div class="form-group">
-                        <label for="stockCount" class="required">Stock Count:</label>
+                        <label for="stockCount" class="required">Stock Count</label>
                         <input type="number" id="stockCount" name="quantity" class="form-control"
                             placeholder="Enter total stock count" value="<%= product ? product.quantity : '' %>">
                         <div id="quantity-error" class="error-message"></div>
@@ -79,101 +541,90 @@
                 <!-- Product Specifications Section -->
                 <div class="specifications-section">
                     <div class="section-header">
-                        <h2 class="section-title text-white">
-                            <i class="bi bi-laptop"></i> Laptop Specifications
+                        <h2 class="section-title">
+                            <i class="fas fa-laptop"></i> Laptop Specifications
                         </h2>
-                        <p class="section-subtitle text-white">Enter essential laptop specifications</p>
+                        <p class="section-subtitle">Enter essential laptop specifications</p>
                     </div>
                     <div class="specs-container">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required text-white">Processor</label>
+                                <label class="form-label required">Processor</label>
                                 <input type="text" class="form-control" id="processor" name="processor"
-                                    placeholder="e.g., Intel Core i7-13700H" required
-                                    value="<%= product && product.processor ? product.processor : '' %>">
+                                    placeholder="e.g., Intel Core i7-13700H" value="<%= product && product.processor ? product.processor : '' %>">
                                 <div id="processor-error" class="error-message"></div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required text-white">Graphics Card</label>
+                                <label class="form-label required">Graphics Card</label>
                                 <input type="text" class="form-control" id="gpu" name="graphicsCard"
-                                    placeholder="e.g., NVIDIA RTX 4060" required
-                                    value="<%= product && product.graphicsCard ? product.graphicsCard : '' %>">
+                                    placeholder="e.g., NVIDIA RTX 4060"  value="<%= product && product.graphicsCard ? product.graphicsCard : '' %>">
                                 <div id="graphicsCard-error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required text-white">RAM</label>
+                                <label class="form-label required">RAM</label>
                                 <input type="text" class="form-control" id="ram" name="ram"
-                                    placeholder="e.g., 16GB DDR5-5200" required
-                                    value="<%= product && product.ram ? product.ram : '' %>">
+                                    placeholder="e.g., 16GB DDR5-5200" value="<%= product && product.ram ? product.ram : '' %>">
                                 <div id="ram-error" class="error-message"></div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required text-white">Storage</label>
+                                <label class="form-label required">Storage</label>
                                 <input type="text" class="form-control" id="Storage" name="Storage"
-                                    placeholder="e.g., 1TB PCIe NVMe SSD" required
-                                    value="<%= product && product.Storage ? product.Storage : '' %>">
+                                    placeholder="e.g., 1TB PCIe NVMe SSD" required  value="<%= product && product.Storage ? product.Storage : '' %>">
                                 <div id="Storage-error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12 mb-3">
-                                <label class="form-label required text-white">Display</label>
+                                <label class="form-label required">Display</label>
                                 <input type="text" class="form-control" id="display" name="display"
-                                    placeholder="e.g., 15.6 inch IPS (2560x1440)" required
-                                    value="<%= product && product.display ? product.display : '' %>">
+                                    placeholder="e.g., 15.6 inch IPS (2560x1440)" required   value="<%= product && product.display ? product.display : '' %>">
                                 <div id="display-error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12 mb-3">
-                                <label class="form-label required text-white">Operating System</label>
+                                <label class="form-label required">Operating System</label>
                                 <input type="text" class="form-control" id="operatingSystem" name="operatingSystem"
-                                    placeholder="e.g., Windows 11 Home" required
-                                    value="<%= product && product.operatingSystem ? product.operatingSystem : '' %>">
+                                    placeholder="e.g., Windows 11 Home" required   value="<%= product && product.operatingSystem ? product.operatingSystem : '' %>">
                                 <div id="operatingSystem-error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required text-white">Battery</label>
+                                <label class="form-label required">Battery</label>
                                 <input type="text" class="form-control" id="Battery" name="Battery"
-                                    placeholder="e.g., 80Wh" required
-                                    value="<%= product && product.Battery ? product.Battery : '' %>">
+                                    placeholder="e.g., 80Wh" required  value="<%= product && product.Battery ? product.Battery : '' %>">
                                 <div id="Battery-error" class="error-message"></div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required text-white">Weight</label>
+                                <label class="form-label required">Weight</label>
                                 <input type="text" class="form-control" id="Weight" name="Weight"
-                                    placeholder="e.g., 1.8kg" required
-                                    value="<%= product && product.Weight ? product.Weight : '' %>">
+                                    placeholder="e.g., 1.8kg" required value="<%= product && product.Weight ? product.Weight : '' %>">
                                 <div id="Weight-error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12 mb-3">
-                                <label class="form-label text-white">Additional Features</label>
+                                <label class="form-label">Additional Features</label>
                                 <input type="text" class="form-control" id="additionalFeatures" name="additionalFeatures"
-                                    placeholder="e.g., Backlit Keyboard"
-                                    value="<%= product && product.additionalFeatures ? product.additionalFeatures : '' %>">
+                                    placeholder="e.g., Backlit Keyboard" value="<%= product && product.additionalFeatures ? product.additionalFeatures : '' %>">
                                 <div id="additionalFeatures-error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12 mb-3">
-                                <label class="form-label required text-white">Warranty</label>
+                                <label class="form-label required">Warranty</label>
                                 <input type="text" class="form-control" id="Warranty" name="Warranty"
-                                    placeholder="e.g., 2 Year Limited Warranty" required
-                                    value="<%= product && product.Warranty ? product.Warranty : '' %>">
+                                    placeholder="e.g., 2 Year Limited Warranty" required   value="<%= product && product.Warranty ? product.Warranty : '' %>">
                                 <div id="Warranty-error" class="error-message"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Image Upload Section -->
-                <div class="image-upload-container">
+             <div class="image-upload-container">
                     <h4 class="text-white">Product Images (Minimum 2, Maximum 5)</h4>
                     <div class="form-group">
                         <label for="images" class="text-white">Select Images</label>
@@ -215,7 +666,7 @@
         </form>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"

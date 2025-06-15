@@ -34,7 +34,7 @@ const getaddressAddpage=async (req,res) => {
         const userId=req.session.user
         const userData=await User.findById(userId)
         const fromPage = req.query.from || "";
-        console.log(fromPage)
+
         res.render("useraddAddress",{user:userData,from: fromPage})
     } catch (error) {
         console.error("the address page not loading",error)

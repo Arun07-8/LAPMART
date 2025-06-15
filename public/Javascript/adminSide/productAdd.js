@@ -63,11 +63,10 @@
 
         // Calculate total images
         const totalImages = croppedImages.length + newFiles.length;
-        console.log(`Current croppedImages: ${croppedImages.length}, New files: ${newFiles.length}, Total: ${totalImages}`); // Debugging
 
         // Check minimum images
         if (totalImages < minImages) {
-            console.log("hello",minImages);
+       
             
             Swal.fire({
                 icon: 'error',
@@ -277,227 +276,228 @@
     }
 
     // Form Submission
-    document.getElementById('addProductForm').addEventListener('submit', async function (event) {
-        event.preventDefault();
-        if (validateForm()) {
-            const form = this;
-            const formData = new FormData(form);
-            console.log('FormData contents:');
-            for (const [key, value] of formData.entries()) {
-                console.log(`${key}:`, value);
-            }
-            Swal.fire({
-                title: 'Processing...',
-                text: 'Adding your product',
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
+    // Form Submission
+document.getElementById('editProductForm').addEventListener('submit', async function (event) {
+    event.preventDefault();
+    if (validateForm()) {
+        const form = this;
+        const formData = new FormData(form);
+        console.log('FormData contents:');
+        for (const [key, value] of formData.entries()) {
+            console.log(`${key}:`, value);
+        }
+        Swal.fire({
+            title: 'Processing...',
+            text: 'Updating your product',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        try {
+            const response = await fetch('/admin/addProduct', {
+                method: 'POST',
+                body: formData,
             });
-    
-            try {
-                const response = await fetch('/admin/addProduct', {
-                    method: 'POST',
-                    body: formData,
+            const result = await response.json();
+            if (response.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: result.message || 'Product updated successfully!',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = '/admin/products';
                 });
-                const result = await response.json();
-                if (response.ok) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: result.message || 'Product added successfully!',
-                        timer: 2000,
-                        showConfirmButton: false
-                    }).then(() => {
-                        window.location.href = '/admin/products';
-                    });
-                } else {
-                    const text = await response.text()
-                    console.error('Server error:', text);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: result.error || 'Failed to add product.'
-                    });
-                }
-            } catch (error) {
-                console.error('Fetch error:', error);
+            } else {
+                console.error('Server error:', await response.text());
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: `An unexpected error occurred: ${error.message}. Please try again.`
+                    text: result.error || 'Failed to update product.'
                 });
             }
-        } else {
-             const firstInvalid = document.querySelector('.is-invalid');
-             if (firstInvalid) {
+        } catch (error) {
+            console.error('Fetch error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: `An unexpected error occurred: ${error.message}. Please try again.`
+            });
+        }
+    } else {
+        const firstInvalid = document.querySelector('.is-invalid');
+        if (firstInvalid) {
             firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-           }
-           Swal.fire({
-               icon: 'error',
-               title: 'Validation Error',
-                text: 'Please correct the errors in the form before submitting.'
-           });
-         }
-    });
-    function validateForm() {
-        clearErrorMessages();
-        let isValid = true;
-        let firstInvalidField = null;
-
-        const fields = [
-            { id: 'productName', validate: (value) => {
-                value = sanitizeInput(value);
-                if (!value) return 'Product name is required.';
-                const wordCount = value.trim().split(/\s+/).length;
-                if (wordCount < 3) return 'Product name must contain at least 3 words.';
-                return '';
-            }},
-            { id: 'description', validate: (value) => {
-                value = sanitizeInput(value);
-                if (!value) return 'Description is required.';
-                const wordCount = value.trim().split(/\s+/).length;
-                if (wordCount < 5) return 'Description must contain at least 5 words.';
-                return '';
-            }},
-            { id: 'brand', validate: (value) => !value ? 'Please select a brand.' : '' },
-            { id: 'category', validate: (value) => !value ? 'Please select a category.' : '' },
-            { id: 'regularPrice', validate: (value) => {
-                if (!value) return 'Regular price is required.';
-                const price = parseFloat(value);
-                if (isNaN(price) || price < 15000 || price > 150000) return 'Regular price must be between 15000 and 150,000.';
-                return '';
-            }},
-            { id: 'salePrice', validate: (value) => {
-                if (!value) return 'Offer price is required.';
-                const price = parseFloat(value);
-                if (isNaN(price) || price < 15000 || price > 150000) return 'Offer price must be between 15000 and 150,000.';
-                return '';
-            }},
-            { id: 'quantity', validate: (value) => {
-                if (!value) return 'Stock count is required.';
-                const qty = parseInt(value);
-                if (isNaN(qty) || qty < 0 || qty > 1000) return 'Stock count must be between 0 and 1,000.';
-                return '';
-            }},
-            { id: 'processor', validate: (value) => {
-                value = sanitizeInput(value);
-                if (!value) return 'Processor is required.';
-                const wordCount = value.trim().split(/\s+/).length;
-                if (wordCount < 2) return 'Processor must contain at least 2 words.';
-                return '';
-            }},
-            { id: 'graphicsCard', validate: (value) => {
-                value = sanitizeInput(value);
-                if (!value) return 'Graphics card is required.';
-                const wordCount = value.trim().split(/\s+/).length;
-                if (wordCount < 2) return 'Graphics card must contain at least 2 words.';
-                return '';
-            }},
-            { id: 'ram', validate: (value) => {
-                value = sanitizeInput(value);
-                if (!value) return 'RAM is required.';
-                const wordCount = value.trim().split(/\s+/).length;
-                if (wordCount < 2) return 'RAM must contain at least 2 words.';
-                return '';
-            }},
-            { id: 'Storage', validate: (value) => {
-                value = sanitizeInput(value);
-                if (!value) return 'Storage is required.';
-                const wordCount = value.trim().split(/\s+/).length;
-                if (wordCount < 2) return 'Storage must contain at least 2 words.';
-                return '';
-            }},
-            { id: 'display', validate: (value) => {
-                value = sanitizeInput(value);
-                if (!value) return 'Display is required.';
-                const wordCount = value.trim().split(/\s+/).length;
-                if (wordCount < 2) return 'Display must contain at least 2 words.';
-                return '';
-            }},
-            { id: 'operatingSystem', validate: (value) => {
-                value = sanitizeInput(value);
-                if (!value) return 'Operating system is required.';
-                const wordCount = value.trim().split(/\s+/).length;
-                if (wordCount < 2) return 'Operating system must contain at least 2 words.';
-                return '';
-            }},
-            { id: 'Battery', validate: (value) => {
-                value = sanitizeInput(value);
-                if (!value) return 'Battery is required.';
-                const wordCount = value.trim().split(/\s+/).length;
-                if (wordCount < 2) return 'Battery must contain at least 2 words.';
-                return '';
-            }},
-            { id: 'Weight', validate: (value) => {
-                value = sanitizeInput(value);
-                if (!value) return 'Weight is required.';
-                const wordCount = value.trim().split(/\s+/).length;
-                if (wordCount < 2) return 'Weight must contain at least 2 words.';
-                return '';
-            }},
-            { id: 'Warranty', validate: (value) => {
-                value = sanitizeInput(value);
-                if (!value) return 'Warranty is required.';
-                const wordCount = value.trim().split(/\s+/).length;
-                if (wordCount < 2) return 'Warranty must contain at least 2 words.';
-                return '';
-            }},
-            { id: 'additionalFeatures', validate: (value) => {
-                value = sanitizeInput(value);
-                if (value && value.trim().split(/\s+/).length < 2) return 'Additional features must contain at least 2 words.';
-                return '';
-            }}
-        ];
-
-        fields.forEach(field => {
-            const element = document.getElementById(field.id);
-            if (!element) {
-                isValid = false;
-                return;
-            }
-            const value = element.value.trim();
-            const errorMessage = field.validate(value);
-            if (errorMessage) {
-                displayErrorMessage(field.id, errorMessage);
-                element.classList.add('is-invalid');
-                if (!firstInvalidField) firstInvalidField = element;
-                isValid = false;
-            }
+        }
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'Please correct the errors in the form before submitting.'
         });
+    }
+});
 
-        const regularPrice = parseFloat(document.getElementById('regularPrice').value);
-        const salePrice = parseFloat(document.getElementById('salePrice').value);
-        if (!isNaN(regularPrice) && !isNaN(salePrice) && salePrice > regularPrice) {
-            displayErrorMessage('salePrice', 'Offer price must be less than or equal to regular price.');
-            document.getElementById('salePrice').classList.add('is-invalid');
-            if (!firstInvalidField) firstInvalidField = document.getElementById('salePrice');
+function validateForm() {
+    clearErrorMessages();
+    let isValid = true;
+    let firstInvalidField = null;
+
+    const fields = [
+        { id: 'productName', validate: (value) => {
+            value = sanitizeInput(value);
+            if (!value) return 'Product name is required.';
+            const wordCount = value.trim().split(/\s+/).length;
+            if (wordCount < 3) return 'Product name must contain at least 3 words.';
+            return '';
+        }},
+        { id: 'description', validate: (value) => {
+            value = sanitizeInput(value);
+            if (!value) return 'Description is required.';
+            const wordCount = value.trim().split(/\s+/).length;
+            if (wordCount < 5) return 'Description must contain at least 5 words.';
+            return '';
+        }},
+        { id: 'brandId', validate: (value) => !value ? 'Please select a brand.' : '' }, // Corrected ID
+        { id: 'categoryId', validate: (value) => !value ? 'Please select a category.' : '' }, // Corrected ID
+        { id: 'productAmount', validate: (value) => { // Corrected ID to match input
+            if (!value) return 'Regular price is required.';
+            const price = parseFloat(value);
+            if (isNaN(price) || price < 15000 || price > 150000) return 'Regular price must be between 15000 and 150,000.';
+            return '';
+        }},
+        { id: 'offerAmount', validate: (value) => { // Corrected ID to match input
+            if (!value) return 'Offer price is required.';
+            const price = parseFloat(value);
+            if (isNaN(price) || price < 15000 || price > 150000) return 'Offer price must be between 15000 and 150,000.';
+            return '';
+        }},
+        { id: 'stockCount', validate: (value) => { // Corrected ID to match input
+            if (!value) return 'Stock count is required.';
+            const qty = parseInt(value);
+            if (isNaN(qty) || qty < 0 || qty > 1000) return 'Stock count must be between 0 and 1,000.';
+            return '';
+        }},
+        { id: 'processor', validate: (value) => {
+            value = sanitizeInput(value);
+            if (!value) return 'Processor is required.';
+            const wordCount = value.trim().split(/\s+/).length;
+            if (wordCount < 2) return 'Processor must contain at least 2 words.';
+            return '';
+        }},
+        { id: 'gpu', validate: (value) => { // Corrected ID to match input
+            value = sanitizeInput(value);
+            if (!value) return 'Graphics card is required.';
+            const wordCount = value.trim().split(/\s+/).length;
+            if (wordCount < 2) return 'Graphics card must contain at least 2 words.';
+            return '';
+        }},
+        { id: 'ram', validate: (value) => {
+            value = sanitizeInput(value);
+            if (!value) return 'RAM is required.';
+            const wordCount = value.trim().split(/\s+/).length;
+            if (wordCount < 2) return 'RAM must contain at least 2 words.';
+            return '';
+        }},
+        { id: 'Storage', validate: (value) => {
+            value = sanitizeInput(value);
+            if (!value) return 'Storage is required.';
+            const wordCount = value.trim().split(/\s+/).length;
+            if (wordCount < 2) return 'Storage must contain at least 2 words.';
+            return '';
+        }},
+        { id: 'display', validate: (value) => {
+            value = sanitizeInput(value);
+            if (!value) return 'Display is required.';
+            const wordCount = value.trim().split(/\s+/).length;
+            if (wordCount < 2) return 'Display must contain at least 2 words.';
+            return '';
+        }},
+        { id: 'operatingSystem', validate: (value) => {
+            value = sanitizeInput(value);
+            if (!value) return 'Operating system is required.';
+            const wordCount = value.trim().split(/\s+/).length;
+            if (wordCount < 2) return 'Operating system must contain at least 2 words.';
+            return '';
+        }},
+        { id: 'Battery', validate: (value) => {
+            value = sanitizeInput(value);
+            if (!value) return 'Battery is required.';
+            const wordCount = value.trim().split(/\s+/).length;
+            if (wordCount < 2) return 'Battery must contain at least 2 words.';
+            return '';
+        }},
+        { id: 'Weight', validate: (value) => {
+            value = sanitizeInput(value);
+            if (!value) return 'Weight is required.';
+            const wordCount = value.trim().split(/\s+/).length;
+            if (wordCount < 2) return 'Weight must contain at least 2 words.';
+            return '';
+        }},
+        { id: 'Warranty', validate: (value) => {
+            value = sanitizeInput(value);
+            if (!value) return 'Warranty is required.';
+            const wordCount = value.trim().split(/\s+/).length;
+            if (wordCount < 2) return 'Warranty must contain at least 2 words.';
+            return '';
+        }},
+        { id: 'additionalFeatures', validate: (value) => {
+            value = sanitizeInput(value);
+            if (value && value.trim().split(/\s+/).length < 2) return 'Additional features must contain at least 2 words.';
+            return '';
+        }}
+    ];
+
+    fields.forEach(field => {
+        const element = document.getElementById(field.id);
+        if (!element) {
+            console.error(`Element with ID ${field.id} not found.`);
+            isValid = false;
+            return;
+        }
+        const value = element.value.trim();
+        const errorMessage = field.validate(value);
+        if (errorMessage) {
+            displayErrorMessage(field.id, errorMessage);
+            element.classList.add('is-invalid');
+            if (!firstInvalidField) firstInvalidField = element;
             isValid = false;
         }
+    });
 
-        if (croppedImages.length < minImages) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Insufficient Images',
-                text: `You have ${croppedImages.length} images. Please add at least ${minImages - croppedImages.length} more images to meet the minimum requirement of ${minImages}.`
-            });
-            displayErrorMessage('images', `Please upload and crop at least ${minImages} images (maximum ${maxImages}).`);
-            document.getElementById('images').classList.add('is-invalid');
-            if (!firstInvalidField) firstInvalidField = document.getElementById('images');
-            isValid = false;
-        } else if (croppedImages.length > maxImages) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Maximum Images Exceeded',
-                text: `You have ${croppedImages.length} images. Please remove ${croppedImages.length - maxImages} image(s) to stay within the maximum limit of ${maxImages}.`
-            });
-            displayErrorMessage('images', `You have uploaded ${croppedImages.length} images. Please remove ${croppedImages.length - maxImages} image(s) to stay within the maximum limit of ${maxImages}.`);
-            document.getElementById('images').classList.add('is-invalid');
-            if (!firstInvalidField) firstInvalidField = document.getElementById('images');
-            isValid = false;
-        }
-
-        return isValid;
+    const regularPrice = parseFloat(document.getElementById('productAmount').value);
+    const salePrice = parseFloat(document.getElementById('offerAmount').value);
+    if (!isNaN(regularPrice) && !isNaN(salePrice) && salePrice > regularPrice) {
+        displayErrorMessage('offerAmount', 'Offer price must be less than or equal to regular price.');
+        document.getElementById('offerAmount').classList.add('is-invalid');
+        if (!firstInvalidField) firstInvalidField = document.getElementById('offerAmount');
+        isValid = false;
     }
 
+    if (croppedImages.length < minImages) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Insufficient Images',
+            text: `You have ${croppedImages.length} images. Please add at least ${minImages - croppedImages.length} more images to meet the minimum requirement of ${minImages}.`
+        });
+        displayErrorMessage('images', `Please upload and crop at least ${minImages} images (maximum ${maxImages}).`);
+        document.getElementById('images').classList.add('is-invalid');
+        if (!firstInvalidField) firstInvalidField = document.getElementById('images');
+        isValid = false;
+    } else if (croppedImages.length > maxImages) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Maximum Images Exceeded',
+            text: `You have ${croppedImages.length} images. Please remove ${croppedImages.length - maxImages} image(s) to stay within the maximum limit of ${maxImages}.`
+        });
+        displayErrorMessage('images', `You have uploaded ${croppedImages.length} images. Please remove ${croppedImages.length - maxImages} image(s) to stay within the maximum limit of ${maxImages}.`);
+        document.getElementById('images').classList.add('is-invalid');
+        if (!firstInvalidField) firstInvalidField = document.getElementById('images');
+        isValid = false;
+    }
+
+    return isValid;
+}
     function displayErrorMessage(id, message) {
         const errorElement = document.getElementById(`${id}-error`);
         if (errorElement) {

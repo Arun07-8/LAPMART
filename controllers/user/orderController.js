@@ -27,110 +27,123 @@ const getOrderPage = async (req, res) => {
         res.redirect("/pageNotFound");
     }
 };
-  const placeOrder = async (req, res) => {
-      try {
-          const userId = req.session.user;
-          const { addressId, paymentMethod } = req.body;
-          if (!addressId || !paymentMethod) {
-              console.error("Missing addressId or paymentMethod:", { addressId, paymentMethod });
-              return res.status(400).json({
-                  success: false,
-                  message: { title: "Invalid Input", text: "Please select an address and payment method.", icon: "warning" },
-              });
-          }
 
-          const validPaymentMethods = ["Cash on Delivery"];
-          if (!validPaymentMethods.includes(paymentMethod)) {
-              console.error("Invalid payment method:", paymentMethod);
-              return res.status(400).json({
-                  success: false,
-                  message: { title: "Invalid Payment Method", text: "Selected payment method is not supported.", icon: "warning" },
-              });
-          }
+ const placeOrder = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { addressId, paymentMethod } = req.body;
 
+        if (!addressId || !paymentMethod) {
+            return res.status(400).json({
+                success: false,
+                message: { title: "Invalid Input", text: "Please select an address and payment method.", icon: "warning" },
+            });
+        }
+
+        const validPaymentMethods = ["Cash on Delivery"];
+        if (!validPaymentMethods.includes(paymentMethod)) {
+            return res.status(400).json({
+                success: false,
+                message: { title: "Invalid Payment", text: "This payment method is not supported.", icon: "warning" },
+            });
+        }
           const cart = await Cart.findOne({ userId }).populate("items.productId");
-          if (!cart || cart.items.length === 0) {
-              console.error("Cart is empty or not found for userId:", userId);
-              return res.status(400).json({
-                  success: false,
-                  message: { title: "Empty Cart", text: "Your cart is empty.", icon: "warning" },
-              });
-          }
-
-     
-          const totalPrice = cart.items.reduce((sum, item) => sum + item.productId.salePrice * item.quantity, 0);
-
-      const selectedAddress= await Address.findOne(
-    { userId, "address._id":addressId },
-    { "address.$": 1 } 
-  );
-
-          if (!selectedAddress) {
-              console.error("Address not found for addressId:", addressId);
-              return res.status(400).json({
-                  success: false,
-                  message: { title: "Invalid Address", text: "The selected address does not exist.", icon: "warning" },
-              });
-          }
  
+        if (!cart || cart.items.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: { title: "Empty Cart", text: "Your cart is empty.", icon: "warning" },
+            });
+        }
 
-      
-          const orderItems = cart.items.map((item) => ({
-              product: item.productId._id,
-              quantity: item.quantity,
-              price: item.productId.salePrice,
-          }));
+        const selectedAddress = await Address.findOne(
+            { userId, "address._id": addressId },
+            { "address.$": 1 }
+        );
 
-          const discount = 0;
-          const finalAmount = totalPrice - discount;
-          const addr = selectedAddress.address[0]; 
-
-
-          
-          const order = new Order({
-              userId,
-              orderedItems: orderItems,
-              totalPrice,
-              discount,
-              finalAmount,
-              shippingAddress: addr,
-              paymentMethod,
-              invoiceDate: new Date(),
-              status: "Pending",
-          });
-
-          const savedOrder = await order.save();
-
-          await Cart.updateOne({ userId }, { $set: { items: [] } });
-
-          // Clear wishlist (if applicable)
-          const wishlist = await Wishlist.findOne({ userId });
-          console.log("wishlist",wishlist)
-          if (wishlist) {
-              await Wishlist.updateOne({ userId }, { $set: { items: [] } });
-              console.log("Wishlist cleared for userId:", userId);
+        if (!selectedAddress) {
+            return res.status(400).json({
+                success: false,
+                message: { title: "Invalid Address", text: "Selected address not found.", icon: "warning" },
+            });
           }
+        const orderItems = [];
 
-          res.status(200).json({
-              success: true,
-              orderId: savedOrder._id,
-              message: { title: "Success", text: "Order placed successfully!", icon: "success" },
-          });
-      } catch (error) {
-          console.error("Place order error:", error.stack);
-          res.status(500).json({
-              success: false,
-              message: { title: "Error", text: "Failed to place order. Please try again.", icon: "error" },
-          });
-      }
-  };
+        for (const item of cart.items) {
+            const product = await Product.findById(item.productId._id);
+  
+
+            if (product.quantity< item.quantity) {
+                return res.status(400).json({
+                    success: false,
+                    message: {
+                        title: "Out of Stock",
+                        text: `${product.name} has only ${product.stock} in stock.`,
+                        icon: "warning",
+                    },
+                });
+            }
+
+            product.quantity -= item.quantity; 
+            await product.save(); 
+
+            orderItems.push({
+                product: product._id,
+                quantity: item.quantity,
+                price: product.salePrice,
+            });
+        }
+
+        const totalPrice = cart.items.reduce((sum, item) => sum + item.productId.salePrice * item.quantity, 0);
+        const discount = 0;
+        const finalAmount = totalPrice - discount;
+        const addr = selectedAddress.address[0];
+
+        const order = new Order({
+            userId,
+            orderedItems: orderItems,
+            totalPrice,
+            discount,
+            finalAmount,
+            shippingAddress: addr,
+            paymentMethod,
+            invoiceDate: new Date(),
+            status: "Pending",
+        });
+
+        const savedOrder = await order.save();
+
+        await Cart.updateOne({ userId }, { $set: { items: [] } });
+
+      const orderedProductIds = cart.items.map(item => item.productId._id.toString());
+
+await Wishlist.updateOne(
+  { userId },
+  { $pull: { products: { productId: { $in: orderedProductIds } } } }
+);
+
+        res.status(200).json({
+            success: true,
+            orderId: savedOrder._id,
+            message: { title: "Success", text: "Order placed successfully!", icon: "success" },
+        });
+
+    } catch (error) {
+        console.error("Place order error:", error.stack);
+        res.status(500).json({
+            success: false,
+            message: { title: "Error", text: "Failed to place order. Please try again.", icon: "error" },
+        });
+    }
+};
+
 
     const getViewOrderpage = async (req, res) => {
     try {
         const userId = req.session.user;
 
-        const page = parseInt(req.query.page) || 1; // current page
-        const limit = 3; // number of orders per page
+        const page = parseInt(req.query.page) || 1; 
+        const limit = 5; 
         const skip = (page - 1) * limit;
 
         const totalOrders = await Order.countDocuments({ userId });
@@ -138,11 +151,10 @@ const getOrderPage = async (req, res) => {
 
         const orders = await Order.find({ userId })
         .populate("orderedItems.product")
-        .sort({ createdAt: -1 }) // recent first
+        .sort({ createdAt: -1 }) 
         .skip(skip)
         .limit(limit);
-        
-        console.log(orders)
+    
         const user = await User.findById(userId);
 
         res.render("ordersDetails", {
@@ -242,7 +254,7 @@ const cancelOrder = async (req, res) => {
 const orderReturn = async (req, res) => {
   try {
     const { orderId, productId, reason, note } = req.body;
-    console.log("ordersss",orderId,productId,reason,note)
+
 
     if (productId) {
       await Order.updateOne(
@@ -255,6 +267,7 @@ const orderReturn = async (req, res) => {
             "orderedItems.$.returnNote": note
           }
         }
+        
       );
     } else {
       await Order.findByIdAndUpdate(orderId, {
@@ -269,7 +282,7 @@ const orderReturn = async (req, res) => {
     res.status(200).json({ success: true });
 
   } catch (err) {
-    console.log("Return submit error", err);
+    console.error("Return submit error", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

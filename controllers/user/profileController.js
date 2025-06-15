@@ -27,7 +27,7 @@ const forgotEmailvalid = async (req, res) => {
             });
         }
         const otp = generateOtp();
-        console.log('Generated OTP:', otp);
+
         const otpExpiration = new Date(Date.now() + 30 * 1000); 
         const emailSent = await sendVerificationEmail(email, otp);
         if (!emailSent) {
@@ -172,8 +172,7 @@ const getRestPassPage = async (req, res) => {
 const newPasswordSet=async (req,res) => {
   try {
     const {newPass1,newPass2}=req.body;
-    console.log(newPass1);
-    
+
     const email=req.session.email;
     if(newPass1===newPass2){
     

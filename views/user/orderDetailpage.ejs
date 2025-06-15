@@ -1,9 +1,4 @@
 <%- include("../../views/partials/user/header") %>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Details - #<%= order.orderId || 'Unknown' %></title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -43,34 +38,119 @@
         min-height: 100vh;
     }
 
+    /* Fix sidebar position in header and page layout */
+    .user-account-page {
+        overflow-x: hidden;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: #f8f9fa;
+    }
+
     .user-account-page .page-container {
         flex: 1;
         display: flex;
-        flex-direction: row;
+        min-height: 100vh;
+        padding: 35px 20px;
+        gap: 20px;
     }
 
-    .user-account-page .container-fluid {
-        flex: 1;
-        display: flex;
+    .user-account-page .sidebar {
+        width: 352px;
+        min-height: calc(100vh - 70px);
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-radius: 10px;
     }
 
-    .user-account-page .row {
-        flex: 1;
+    .user-account-page .sidebar-header {
+        padding: 25px 20px;
+        border-bottom: 1px solid #e9ecef;
+        background: linear-gradient(135deg, #C4A676, #8B7355);
+        color: white;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .user-account-page .sidebar-header h5 {
+        margin: 0 0 12px 0;
+        font-weight: 700;
+        font-size: 22px;
+        letter-spacing: 0.5px;
+    }
+
+    .user-account-page .sidebar-header p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 16px;
+        font-weight: 300;
+    }
+
+    .user-account-page .sidebar-menu {
+        padding: 25px 0;
+    }
+
+    .user-account-page .sidebar-menu .nav-link {
         display: flex;
-        min-height: 100%;
+        align-items: center;
+        padding: 16px 20px;
+        color: #495057;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+        font-size: 17px;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .user-account-page .sidebar-menu .nav-link:hover {
+        background: linear-gradient(90deg, #f8f9fa, #fff);
+        color: #C4A676;
+        border-left-color: #C4A676;
+        transform: translateX(3px);
+    }
+
+    .user-account-page .sidebar-menu .nav-link.active {
+        background: linear-gradient(90deg, #f8f9fa, #fff);
+        color: #C4A676;
+        border-left-color: #C4A676;
+        font-weight: 600;
+        box-shadow: inset 0 2px 4px rgba(196, 166, 118, 0.1);
+    }
+
+    .user-account-page .sidebar-menu .nav-link i {
+        margin-right: 12px;
+        width: 20px;
+        text-align: center;
+        font-size: 16px;
     }
 
     .main-content {
         flex: 1;
-        margin-left: 92px;
-        margin-right: 44px;
-        margin-top: 36px;
         padding-bottom: 50px;
+        min-height: calc(100vh - 70px);
+    }
+
+    @media (max-width: 1200px) {
+        .user-account-page .sidebar {
+            width: 280px;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .user-account-page .page-container {
+            flex-direction: column;
+            padding: 15px;
+        }
+        .user-account-page .sidebar {
+            width: 100%;
+            margin-bottom: 20px;
+        }
     }
 
     /* Order Header with Enhanced Design */
     .order-header {
-        background: var(--gradient-primary);
+        background: linear-gradient(135deg, #C4A676, #8B7355);
         border-radius: 20px;
         padding: 35px 40px;
         margin-bottom: 30px;
@@ -290,16 +370,15 @@
     }
 
     .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 15px 25px;
-        border-radius: 12px;
-        font-size: 0.9rem;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-top: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
     }
 
     .status-badge.status-pending {
@@ -318,7 +397,7 @@
     }
 
     .status-badge.status-delivered {
-        background: var(--gradient-success);
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
         color: white;
     }
 
@@ -335,6 +414,11 @@
     .status-badge.status-returned {
         background: linear-gradient(135deg, #e6e6fa, #dadaeb);
         color: #1b2631;
+    }
+
+    .status-badge.status-return-rejected {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        color: white;
     }
 
     /* Enhanced Cards */
@@ -453,11 +537,6 @@
     .price-tag {
         font-weight: 700;
         font-size: 1.2rem;
-        color: var(--accent-color);
-        padding: 8px 16px;
-        background: rgba(255, 0, 0, 0.1);
-        border-radius: 8px;
-        border: 1px solid rgba(255, 0, 0, 0.2);
     }
 
     .cancel-btn-product {
@@ -670,7 +749,6 @@
         border: none;
         font-size: 1.2rem;
         cursor: pointer;
-        color: var(--text-muted);
         padding: 8px;
         width: 36px;
         height: 36px;
@@ -778,125 +856,6 @@
         to { 
             transform: translateY(0);
             opacity: 1;
-        }
-    }
-
-    /* Responsive Design */
-    @media (max-width: 992px) {
-        .main-content {
-            margin-left: 20px;
-            margin-right: 20px;
-            margin-top: 20px;
-        }
-
-        .order-header {
-            padding: 25px;
-        }
-
-        .order-header-content {
-            flex-direction: column;
-            gap: 20px;
-            text-align: center;
-        }
-
-        .order-title-section h1 {
-            font-size: 1.8rem;
-        }
-
-        .status-timeline {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .status-timeline::before,
-        .status-timeline::after {
-            top: 0;
-            left: 20px;
-            width: 4px;
-            height: calc(100% - 60px);
-            border-radius: 2px;
-        }
-
-        .status-step {
-            flex-direction: row;
-            width: 100%;
-            margin-bottom: 25px;
-            align-items: center;
-            text-align: left;
-        }
-
-        .status-icon {
-            margin-right: 20px;
-            margin-bottom: 0;
-        }
-
-        .product-item {
-            flex-direction: column;
-            align-items: flex-start;
-            text-align: center;
-            gap: 15px;
-            position: relative;
-            padding-bottom: 50px;
-        }
-
-        .product-image {
-            margin-right: 0;
-            margin-bottom: 0;
-            align-self: center;
-        }
-
-        .product-details {
-            width: 100%;
-            text-align: center;
-        }
-
-        .product-actions {
-            position: static;
-            transform: none;
-            justify-content: center;
-            width: 100%;
-            margin-top: 15px;
-        }
-
-        .price-tag {
-            margin-left: 0;
-            align-self: center;
-        }
-
-        .modal-content {
-            padding: 25px;
-            margin: 20px;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .order-header {
-            padding: 20px;
-        }
-
-        .order-title-section h1 {
-            font-size: 1.5rem;
-        }
-
-        .status-section,
-        .info-card {
-            padding: 20px;
-        }
-
-        .modal-content {
-            padding: 20px;
-            margin: 10px;
-        }
-
-        .order-actions {
-            flex-direction: column;
-            width: 100%;
-        }
-
-        .cancel-btn-main,
-        .invoice-btn {
-            width: 100%;
-            justify-content: center;
         }
     }
 
@@ -1050,7 +1009,13 @@
                                         <button class="cancel-btn-product return-btn-product" data-order-id="<%= order._id %>" data-product-id="<%= item.product._id %>" onclick="openReturnModal('<%= order._id %>', '<%= item.product._id %>')">
                                             <i class="fas fa-undo"></i> Return Item
                                         </button>
-                                    <% } %>
+                                    <% } else if (item.status === 'Return Rejected') { %>
+                                 <button class="btn btn-outline-danger" disabled>
+                                                      <%= item.returnNote %>
+                                       </button>
+
+                                       
+                                       <%}%> 
                                 </div>
                             </div>
                         </div>

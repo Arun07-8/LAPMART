@@ -1,26 +1,21 @@
-const Order=require("../../models/orderSchema")
-
+const Order = require("../../models/orderSchema")
+const User = require("../../models/userSchema")
 
 function getmainOrderStatus(orderedItems) {
-  const statuses = orderedItems.map(item => item.status);
-
-  if (statuses.every(status => status === "Cancelled")) {
-    return "Cancelled";
-  } else if (statuses.every(status => status === "Delivered")) {
-    return "Delivered";
-  } else if (statuses.includes("Pending")) {
-    return "Pending";
-  } else if (statuses.includes("Return Request")) {
-    return "Return Request";
-  } else if (statuses.includes("Returned")) {
-    return "Returned";
-  } else {
-    return "Processing";
-  }
+  if (!orderedItems || orderedItems.length === 0) return 'Pending';
+  const statuses = orderedItems.map((item) => item.status);
+  if (statuses.includes('Cancelled')) return 'Cancelled';
+  if (statuses.includes('Pending')) return 'Pending';
+  if (statuses.includes('Return Request')) return 'Return Request';
+  if (statuses.includes('Returned')) return 'Returned';
+  if (statuses.every((status) => status === 'Delivered')) return 'Delivered';
+  return 'Processing';
 }
 
 const getOrderManagementPage = async (req, res) => {
     try {
+        console.log("Received search query:", req.query);
+
         const page = Math.max(1, parseInt(req.query.page) || 1);
         const limit = 4;
         const skip = (page - 1) * limit;
@@ -28,20 +23,53 @@ const getOrderManagementPage = async (req, res) => {
         // Build search query
         let query = {};
         
-        // Search by order ID or customer name
-        if (req.query.search) {
-            query.$or = [
-                { orderId: { $regex: req.query.search, $options: 'i' } },
-                { 'userId.name': { $regex: req.query.search, $options: 'i' } }
-            ];
+        // Search by multiple fields
+        if (req.query.search && req.query.search.trim() !== '') {
+            const searchTerm = req.query.search.trim();
+            console.log("Search term:", searchTerm);
+
+            try {
+                // Create a regex that matches the term anywhere in the string
+                const searchRegex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+                
+                // Build the search query for multiple fields
+                query.$or = [
+                    { orderId: searchRegex },
+                    { 'shippingAddress.name': searchRegex },
+                    { 'shippingAddress.street': searchRegex },
+                    { 'shippingAddress.city': searchRegex },
+                    { 'shippingAddress.state': searchRegex }
+                ];
+            } catch (error) {
+                console.error("Search regex error:", error);
+                // If regex fails, fall back to simple string matching
+                query.$or = [
+                    { orderId: searchTerm },
+                    { 'shippingAddress.name': searchTerm }
+                ];
+            }
+        }
+
+        // Filter by payment method
+        if (req.query.paymentMethod && req.query.paymentMethod !== 'All') {
+            query.paymentMethod = req.query.paymentMethod.toUpperCase();
         }
 
         // Filter by date range
-        if (req.query.fromDate && req.query.toDate) {
-            query.createdAt = {
-                $gte: new Date(req.query.fromDate),
-                $lte: new Date(req.query.toDate + 'T23:59:59.999Z')
-            };
+        if (req.query.fromDate || req.query.toDate) {
+            query.createdAt = {};
+            if (req.query.fromDate) {
+                const fromDate = new Date(req.query.fromDate);
+                if (!isNaN(fromDate)) {
+                    query.createdAt.$gte = new Date(fromDate.setHours(0, 0, 0, 0));
+                }
+            }
+            if (req.query.toDate) {
+                const toDate = new Date(req.query.toDate);
+                if (!isNaN(toDate)) {
+                    query.createdAt.$lte = new Date(toDate.setHours(23, 59, 59, 999));
+                }
+            }
         }
 
         // Filter by status
@@ -49,27 +77,42 @@ const getOrderManagementPage = async (req, res) => {
             query['orderedItems.status'] = req.query.status;
         }
 
+        console.log("Final query:", JSON.stringify(query, null, 2));
+
+        // Get total count for pagination
         const totalOrders = await Order.countDocuments(query);
         const totalPages = Math.ceil(totalOrders / limit);
 
+        // Fetch orders with pagination
         const orders = await Order.find(query)
-            .populate("userId", "name email")
-            .populate("orderedItems.product")
+            .populate({
+                path: "userId",
+                select: "name email address"
+            })
+            .populate({
+                path: "orderedItems.product",
+                select: "name images"
+            })
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
 
+        console.log("Found orders:", orders.length);
+
+        // Add main status to each order
         orders.forEach(order => {
             order.mainStatus = getmainOrderStatus(order.orderedItems);
         });
 
         // If it's an AJAX request, send JSON response
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        if (req.xhr || req.headers.accept?.includes('json') || req.headers['x-requested-with'] === 'XMLHttpRequest') {
             return res.json({
                 orders,
                 currentPage: page,
                 totalPages,
-                totalOrders
+                totalOrders,
+                hasResults: orders.length > 0,
+                searchQuery: req.query.search || ''
             });
         }
 
@@ -81,13 +124,18 @@ const getOrderManagementPage = async (req, res) => {
             search: req.query.search || '',
             fromDate: req.query.fromDate || '',
             toDate: req.query.toDate || '',
-            status: req.query.status || 'All Orders'
+            status: req.query.status || 'All Orders',
+            paymentMethod: req.query.paymentMethod || 'All'
         });
 
     } catch (error) {
         console.error("Error loading orders:", error);
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-            return res.status(500).json({ error: 'Internal server error' });
+        if (req.xhr || req.headers.accept?.includes('json') || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+            return res.status(500).json({ 
+                error: 'Internal server error',
+                message: 'Failed to load orders. Please try again.',
+                details: error.message
+            });
         }
         res.redirect("/admin/pagenotFounderror");
     }
@@ -128,7 +176,6 @@ const updateStatus = async (req, res) => {
     });
 
     await order.save();
-  console.log("or",order)
     res.status(200).json({
       success: true,
       message: `Order status updated to "${newStatus}"`,
@@ -142,7 +189,7 @@ const updateStatus = async (req, res) => {
  const acceptReturn = async (req, res) => {
   try {
     const { orderId, productId } = req.params;
-  console.log(orderId,productId)
+
     const order = await Order.findById(orderId);
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 

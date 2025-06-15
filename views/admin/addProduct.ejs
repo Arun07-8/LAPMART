@@ -1,67 +1,82 @@
 <%- include("../../views/partials/admin/header") %>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<link rel="stylesheet" href="/css/admin-css/addprod.css">
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Product - Clean White Design</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="/css/admin-css/addprod.css" rel="stylesheet">
 </head>
 <body>
     <div class="main-content">
         <div class="header">
-            <h1 class="text-white">Add Products</h1>
-            <div class="user-profile">
-                <!-- <img src="/api/placeholder/36/36" alt="User Profile"> -->
-            </div>
+            <h1>Edit Product</h1>
+            <div class="user-profile"></div>
         </div>
-
-        <form  enctype="multipart/form-data" id="addProductForm">
+           <form id="editProductForm" enctype="multipart/form-data" onsubmit="return validateForm()">
+            <input type="hidden" id="productId" name="productId" value="">
             <div class="container">
                 <!-- Left Form Section -->
                 <div class="form-section">
-                    <h3 class="text-white mb-4">Product Details</h3>
+                    <h3>Product Details</h3>
                     <div class="form-group">
-                        <label for="productName" class="required">Product Name:</label>
-                        <input type="text" id="productName" name="productName" class="form-control" placeholder="Enter laptop model name">
+                        <label for="productName" class="required">Product Name</label>
+                        <input type="text" id="productName" name="productName" class="form-control"
+                            placeholder="Enter product name" value="">
                         <div id="productName-error" class="error-message"></div>
                     </div>
                     <div class="form-group">
-                        <label for="description" class="required">Product Description:</label>
-                        <textarea id="description" name="description" class="form-control" rows="4" placeholder="Enter product description"></textarea>
+                        <label for="description" class="required">Product Description</label>
+                        <textarea id="description" name="description" class="form-control" rows="4"
+                            placeholder="Enter product description"></textarea>
                         <div id="description-error" class="error-message"></div>
                     </div>
                     <div class="form-group">
-                        <label for="brand" class="required">Brand:</label>
-                        <select name="brand" class="form-control" id="brand">
-                            <option value="" disabled selected>Select Brand</option>
+                        <label for="brandId" class="required">Brand</label>
+                        <select name="brand" class="form-control" id="brandId">
+                            <option value="" >Select Brand</option>
                             <% for(let i=0; i < brand.length; i++) { %>
-                                <option value="<%= brand[i]._id %>"><%= brand[i].name %></option>
+                                <option value="<%= brand[i]._id %>" <%= product && product.brand && product.brand._id.toString() === brand[i]._id.toString() ? 'selected' : '' %>>
+                                    <%= brand[i].name %>
+                                </option>
                             <% } %>
                         </select>
-                        <div id="brand-error" class="error-message"></div>
+                        </select>
+                        <div id="brandName-error" class="error-message"></div>
                     </div>
                     <div class="form-group">
-                        <label for="category" class="required">Category:</label>
-                        <select name="category" class="form-control" id="category">
-                            <option value="" disabled selected>Select Category</option>
+                        <label for="categoryId" class="required">Category</label>
+                        <select name="category" class="form-control" id="categoryId">
+                              <option value="" >Select Category</option>
                             <% for(let i=0; i < category.length; i++) { %>
-                                <option value="<%= category[i]._id %>"><%= category[i].name %></option>
+                                <option value="<%= category[i]._id %>" <%= product && product.category && product.category._id.toString() === category[i]._id.toString() ? 'selected' : '' %>>
+                                    <%= category[i].name %>
+                                </option>
                             <% } %>
                         </select>
                         <div id="category-error" class="error-message"></div>
                     </div>
                     <div class="form-group">
-                        <label for="regularPrice" class="required">Product Price:</label>
-                        <input type="number" id="regularPrice" name="regularPrice" class="form-control" placeholder="Enter product price" step="0.01">
+                        <label for="productAmount" class="required">Product Price</label>
+                        <input type="number" id="productAmount" name="regularPrice" class="form-control"
+                            placeholder="Enter product price" value="">
                         <div id="regularPrice-error" class="error-message"></div>
                     </div>
                     <div class="form-group">
-                        <label for="salePrice" class="required">Offer Price:</label>
-                        <input type="number" id="salePrice" name="salePrice" class="form-control" placeholder="Enter offer price" step="0.01">
-                        <div id="salePrice-error" class="error-message"></div>
+                        <label for="offerAmount" class="required">Offer Price</label>
+                        <input type="number" id="offerAmount" name="salePrice" class="form-control"
+                            placeholder="Enter offer price" value="">
+                        <div id="offerPrice-error" class="error-message"></div>
                     </div>
                     <div class="form-group">
-                        <label for="quantity" class="required">Stock Count:</label>
-                        <input type="number" id="quantity" name="quantity" class="form-control" placeholder="Enter total stock count">
+                        <label for="stockCount" class="required">Stock Count</label>
+                        <input type="number" id="stockCount" name="quantity" class="form-control"
+                            placeholder="Enter total stock count" value="">
                         <div id="quantity-error" class="error-message"></div>
                     </div>
                 </div>
@@ -69,73 +84,83 @@
                 <!-- Product Specifications Section -->
                 <div class="specifications-section">
                     <div class="section-header">
-                        <h2 class="section-title text-white">
-                            <i class="bi bi-laptop"></i> Laptop Specifications
+                        <h2 class="section-title">
+                            <i class="fas fa-laptop"></i> Laptop Specifications
                         </h2>
-                        <p class="section-subtitle text-white">Enter essential laptop specifications</p>
+                        <p class="section-subtitle">Enter essential laptop specifications</p>
                     </div>
                     <div class="specs-container">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required text-white">Processor</label>
-                                <input type="text" class="form-control" id="processor" name="processor" placeholder="e.g., Intel Core i7-13700H, AMD Ryzen 9 7940HS">
+                                <label class="form-label required">Processor</label>
+                                <input type="text" class="form-control" id="processor" name="processor"
+                                    placeholder="e.g., Intel Core i7-13700H"  value="">
                                 <div id="processor-error" class="error-message"></div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required text-white">Graphics Card</label>
-                                <input type="text" class="form-control" id="graphicsCard" name="graphicsCard" placeholder="e.g., NVIDIA RTX 4060, AMD Radeon RX 7600M">
+                                <label class="form-label required">Graphics Card</label>
+                                <input type="text" class="form-control" id="gpu" name="graphicsCard"
+                                    placeholder="e.g., NVIDIA RTX 4060"  value="">
                                 <div id="graphicsCard-error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required text-white">RAM</label>
-                                <input type="text" class="form-control" id="ram" name="ram" placeholder="e.g., 16GB DDR5-5200">
+                                <label class="form-label required">RAM</label>
+                                <input type="text" class="form-control" id="ram" name="ram"
+                                    placeholder="e.g., 16GB DDR5-5200"  value="">
                                 <div id="ram-error" class="error-message"></div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required text-white">Storage</label>
-                                <input type="text" class="form-control" id="Storage" name="Storage" placeholder="e.g., 1TB PCIe NVMe SSD">
+                                <label class="form-label required">Storage</label>
+                                <input type="text" class="form-control" id="Storage" name="Storage"
+                                    placeholder="e.g., 1TB PCIe NVMe SSD" value="">
                                 <div id="Storage-error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12 mb-3">
-                                <label class="form-label required text-white">Display</label>
-                                <input type="text" class="form-control" id="display" name="display" placeholder="e.g., 15.6 inch IPS (2560x1440) 165Hz">
+                                <label class="form-label required">Display</label>
+                                <input type="text" class="form-control" id="display" name="display"
+                                    placeholder="e.g., 15.6 inch IPS (2560x1440)" value="">
                                 <div id="display-error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12 mb-3">
-                                <label class="form-label required text-white">Operating System</label>
-                                <input type="text" class="form-control" id="operatingSystem" name="operatingSystem" placeholder="e.g., Windows 11 Home, macOS Sequoia">
+                                <label class="form-label required">Operating System</label>
+                                <input type="text" class="form-control" id="operatingSystem" name="operatingSystem"
+                                    placeholder="e.g., Windows 11 Home" value="">
                                 <div id="operatingSystem-error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required text-white">Battery</label>
-                                <input type="text" class="form-control" id="Battery" name="Battery" placeholder="e.g., 80Wh, Up to 10 hours">
+                                <label class="form-label required">Battery</label>
+                                <input type="text" class="form-control" id="Battery" name="Battery"
+                                    placeholder="e.g., 80Wh"  value="">
                                 <div id="Battery-error" class="error-message"></div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required text-white">Weight</label>
-                                <input type="text" class="form-control" id="Weight" name="Weight" placeholder="e.g., 1.8kg (4.0 lbs)">
+                                <label class="form-label required">Weight</label>
+                                <input type="text" class="form-control" id="Weight" name="Weight"
+                                    placeholder="e.g., 1.8kg"  value="">
                                 <div id="Weight-error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12 mb-3">
-                                <label class="form-label text-white">Additional Features</label>
-                                <input type="text" class="form-control" id="additionalFeatures" name="additionalFeatures" placeholder="e.g., Backlit Keyboard, Fingerprint Reader, 1080p Webcam">
+                                <label class="form-label">Additional Features</label>
+                                <input type="text" class="form-control" id="additionalFeatures" name="additionalFeatures"
+                                    placeholder="e.g., Backlit Keyboard" value="">
                                 <div id="additionalFeatures-error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12 mb-3">
-                                <label class="form-label required text-white">Warranty</label>
-                                <input type="text" class="form-control" id="Warranty" name="Warranty" placeholder="e.g., 2 Year Limited Warranty">
+                                <label class="form-label required">Warranty</label>
+                                <input type="text" class="form-control" id="Warranty" name="Warranty"
+                                    placeholder="e.g., 2 Year Limited Warranty"  value="">
                                 <div id="Warranty-error" class="error-message"></div>
                             </div>
                         </div>
@@ -144,26 +169,29 @@
 
                 <!-- Image Upload Section -->
                 <div class="image-upload-container">
-                    <h4 class="text-white">Product Images (Maximum 5)</h4>
+                    <h4>Product Images (Minimum 2, Maximum 5)</h4>
                     <div class="form-group">
-                        <label for="images" class="text-white">Select Images</label>
+                        <label for="images">Select Images</label>
                         <div class="drop-zone" id="dropZone">
-                            Drag and drop images here or click to select (Minimum 2, Maximum 5 images)
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 48px; margin-bottom: 15px; color: #bdc3c7;"></i><br>
+                            Drag and drop images here or click to select<br>
+                            <small>(Minimum 2, Maximum 5 images • JPEG, PNG, WebP • Max 5MB each)</small>
                         </div>
                         <input type="file" name="images" id="images" class="form-control" accept="image/jpeg,image/png,image/webp" multiple style="display: none;">
                         <div id="images-error" class="error-message"></div>
                     </div>
-                    <div class="image-preview-container" id="imagePreviewContainer"></div>
-                    <!-- Cropping Section -->
+                    <div class="image-preview-container" id="imagePreviewContainer">
+                        <p style="color: #7f8c8d; text-align: center; padding: 20px;">No images uploaded yet</p>
+                    </div>
                     <div class="cropper-container" id="cropperContainer" style="display: none;">
-                        <h5 class="text-white">Crop Image <span id="cropImageNumber"></span></h5>
+                        <h5>Crop Image <span id="cropImageNumber"></span></h5>
                         <div class="cropper-wrapper">
                             <img id="cropperImg" alt="Image to crop">
                         </div>
                         <div class="aspect-ratio-controls">
-                            <span class="text-white me-2">Aspect Ratio:</span>
+                            <span>Aspect Ratio:</span>
                             <button type="button" class="aspect-ratio-btn active" data-ratio="free" onclick="setAspectRatio('free')">Free</button>
-                            <button type="button" class="aspect-ratio-btn" data-ratio="30/37" onclick="setAspectRatio(30/37)">Fit image</button>
+                            <button type="button" class="aspect-ratio-btn" data-ratio="30/37" onclick="setAspectRatio(30/37)">Fit Image</button>
                         </div>
                         <div class="cropper-controls">
                             <button type="button" class="btn btn-primary" onclick="cropImage()">
@@ -175,11 +203,17 @@
                         </div>
                     </div>
                 </div>
+                <input type="hidden" value="" id="proID">
                 <div class="button-container">
-                    <button type="submit" class="add-btn">Add Product</button>
+                    <button type="submit" class="add-btn">
+                        <i class="fas fa-save"></i> Update Product
+                    </button>
+                    <a href="/admin/products">
+                        <i class="fas fa-arrow-left"></i> Cancel
+                    </a>
                 </div>
             </div>
-        </form>
+        </form> 
     </div>
 
     <!-- Scripts -->

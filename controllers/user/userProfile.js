@@ -25,7 +25,7 @@ const userEditprofile = async (req, res) => {
         res.render("editprofle", { user: user, userId: userId ,currentPage:"editprofile"})
 
     } catch (error) {
-        console.log("edit profile occur error", error)
+        console.error("edit profile occur error", error)
         res.redirect("/pageNotFound")
     }
 }

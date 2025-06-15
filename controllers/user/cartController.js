@@ -49,104 +49,93 @@ cart.items = cart.items.filter(item => {
   }
 };
 
-
 const addTocart = async (req, res) => {
   try {
     const userId = req.session.user;
     if (!userId) {
-      return res.status(401).json({ 
-        success: false, 
-        message: "Please login to add items to cart" 
-      });
+      return res.status(401).json({ success: false, message: "Please login to add items to cart" });
     }
 
-    const { productId, price, quantity = 1 } = req.body;
+    const { productId, quantity = 1 } = req.body;
     const product = await Product.findOne({
       _id: productId,
       isDeleted: false,
       isListed: true
-    });
+    }).populate('category').populate('brand');
 
-    if (!product) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Product not found or unavailable" 
-      });
-    }
-
-    if (product.quantity < quantity) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Insufficient stock available" 
-      });
-    }
-    if (quantity > product.quantity) {
-    return res.json({
-    success: false,
-    message: `You requested ${quantity} for "${product.ame}", but only ${product.quantity} available.`,
-  });
+     if (!product) return res.status(404).json({ success: false, message: "Product not found or unavailable" });
+     if (!product.isListed || !product.category?.isListed || !product.brand?.isListed) { 
+      return res.status(403).json({success: false,message: "This product or its category/brand is blocked." });
 }
 
+
+    const maximumQuantity = 5;
 
     let cart = await Cart.findOne({ userId: userId });
 
     if (cart) {
-      const existingItemIndex = cart.items.findIndex(
-        item => item.productId.toString() === productId
-      );
+      const existingItemIndex = cart.items.findIndex(item => item.productId.toString() === productId);
 
       if (existingItemIndex > -1) {
-        const newQuantity = cart.items[existingItemIndex].quantity + quantity;
-        
-        if (product.quantity < newQuantity) {
-          return res.status(400).json({ 
-            success: false, 
-            message: "Cannot add more items. Stock limit reached" 
-          });
+        const existingQty = cart.items[existingItemIndex].quantity;
+        const newQty = existingQty + quantity;
+
+        if (newQty > product.quantity) {
+          return res.status(400).json({ success: false, message: `Only ${product.quantity - existingQty} more in stock.` });
         }
 
-        cart.items[existingItemIndex].quantity = newQuantity;
-        cart.items[existingItemIndex].totalPrice = product.salePrice * newQuantity;
+        if (newQty > maximumQuantity) {
+          return res.status(400).json({ success: false, message: `Maximum ${maximumQuantity} units per product allowed.` });
+        }
+
+        cart.items[existingItemIndex].quantity = newQty;
+        cart.items[existingItemIndex].totalPrice = product.salePrice * newQty;
       } else {
-        // Add new item to cart
-        const newItem = {
+        if (quantity > product.quantity) {
+          return res.status(400).json({ success: false, message: `Only ${product.quantity} items available.` });
+        }
+
+        if (quantity > maximumQuantity) {
+          return res.status(400).json({ success: false, message: `Maximum ${maximumQuantity} units per product allowed.` });
+        }
+
+        cart.items.push({
           productId: product._id,
           salePrice: product.salePrice,
-          quantity: quantity,
+          quantity,
           totalPrice: product.salePrice * quantity
-        };
-        cart.items.push(newItem);
+        });
       }
     } else {
-      // Create new cart
+      if (quantity > product.quantity) {
+        return res.status(400).json({ success: false, message: `Only ${product.quantity} items available.` });
+      }
+
+      if (quantity > maximumQuantity) {
+        return res.status(400).json({ success: false, message: `Maximum ${maximumQuantity} units per product allowed.` });
+      }
+
       cart = new Cart({
         userId: userId,
         items: [{
           productId: product._id,
           price: product.regularPrice,
           salePrice: product.salePrice,
-          quantity: quantity,
+          quantity,
           totalPrice: product.salePrice * quantity
         }]
       });
     }
 
     await cart.save();
-
-    res.status(200).json({ 
-      success: true, 
-      message: "Product added to cart successfully!" 
-      
-    });
+    res.status(200).json({ success: true, message: "Product added to cart successfully!" });
 
   } catch (error) {
     console.error("Add to cart error:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Server error. Please try again." 
-    });
+    res.status(500).json({ success: false, message: "Server error. Please try again." });
   }
 };
+
 const updateCartQuantity = async (req, res) => {
   try {
     const { productId, quantity } = req.body;

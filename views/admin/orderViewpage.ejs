@@ -700,7 +700,8 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <% const returnItems = order.orderedItems.filter(item => item.isReturned); %>
+                                    <% const returnItems = order.orderedItems.filter(item => item.status === "Return Request"); %>
+
                                     <% if (returnItems.length > 0) { %>
                                         <% returnItems.forEach(returnItem => { %>
                                             <tr>

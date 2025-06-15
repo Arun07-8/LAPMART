@@ -11,7 +11,7 @@ const getWishlistPage = async (req, res) => {
     }
 
     const page = parseInt(req.query.page) || 1;
-    const limit = 4; 
+    const limit = 3; 
     const skip = (page - 1) * limit; 
 
     const wishlist = await Wishlist.findOne({ userId })
@@ -92,8 +92,6 @@ const deleteWishlistProduct = async (req, res) => {
     const userId = req.session.user;
     const productId = req.params.productId;
     const wishlist = await Wishlist.findOne({ userId });
-    console.log('Wishlist:', wishlist);
-
     if (!wishlist || !wishlist.products.some(p => p.productId.toString() === productId)) {
       return res.status(404).json({ success: false, message: 'Product not found in wishlist' });
     }
