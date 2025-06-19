@@ -1,218 +1,291 @@
-
 <%- include("../../views/partials/user/header") %>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Complete Your Order - Checkout</title>
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    <link href="/css/userside-css/userside-css/checkoutpage.css" rel="stylesheet">
-</head>
-<body>
-    <div class="checkout-main-container">
-        <!-- Breadcrumb Navigation -->
-        <nav class="checkout-breadcrumb-nav">
-            <a href="#">Home</a>
-            <span>›</span>
-            <a href="#">Cart</a>
-            <span>›</span>
-            <span class="checkout-breadcrumb-current">Check Out</span>
-        </nav>
+    <!DOCTYPE html>
+    <html lang="en">
 
-        <!-- Main Title -->
-        <h1 class="checkout-page-title">Complete Your Order</h1>
-        <div class="checkout-title-underline"></div>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Complete Your Order - Checkout</title>
+        <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+        <link href="/css/userside-css/userside-css/checkoutpage.css" rel="stylesheet">
+    </head>
 
-        <div class="checkout-content-grid">
-            <!-- Left Column -->
-            <div class="checkout-left-section">
-                <!-- Delivery Address Section -->
-                <div class="checkout-info-section">
-                    <div class="checkout-section-header">
-                        <span class="checkout-section-icon">📍</span>
-                        Delivery Address
-                    </div>
-                    <div class="checkout-section-subtitle">Select the address for delivery</div>
-                    
-                    <% if (Address && Address.length > 0) { %>
-                        <div id="checkout-address-list">
-                            <% Address.forEach((address, index) => { %>
-                                <div class="checkout-address-card <%= address.isDefault ? 'checkout-address-selected' : '' %> <%= index >= 2 ? 'checkout-address-hidden' : '' %>" data-address-id="<%= address._id %>">
-                                    <div class="checkout-address-header">
-                                        <div class="checkout-address-name"><%= address.name || '' %></div>
-                                        <div style="display: flex; align-items: center; gap: 15px;">
-                                            <% if (address.isDefault) { %>
-                                                <div class="checkout-default-badge">Default</div>
-                                            <% } %>
-                                            <input type="radio" 
-                                                   name="checkout-address" 
-                                                   value="<%= address._id %>" 
-                                                   class="checkout-address-radio" 
-                                                   <%= address.isDefault ? 'checked' : '' %>>
+    <body>
+        <div class="checkout-main-container">
+            <!-- Breadcrumb Navigation -->
+            <nav class="checkout-breadcrumb-nav">
+                <a href="#">Home</a>
+                <span>›</span>
+                <a href="#">Cart</a>
+                <span>›</span>
+                <span class="checkout-breadcrumb-current">Check Out</span>
+            </nav>
+
+            <!-- Main Title -->
+            <h1 class="checkout-page-title">Complete Your Order</h1>
+            <div class="checkout-title-underline"></div>
+
+            <div class="checkout-content-grid">
+                <!-- Left Column -->
+                <div class="checkout-left-section">
+                    <!-- Delivery Address Section -->
+                    <div class="checkout-info-section">
+                        <div class="checkout-section-header">
+                            <span class="checkout-section-icon">📍</span>
+                            Delivery Address
+                        </div>
+                        <div class="checkout-section-subtitle">Select the address for delivery</div>
+
+                        <% if (Address && Address.length> 0) { %>
+                            <div id="checkout-address-list">
+                                <% Address.forEach((address, index)=> { %>
+                                    <div class="checkout-address-card <%= address.isDefault ? 'checkout-address-selected' : '' %> <%= index >= 2 ? 'checkout-address-hidden' : '' %>"
+                                        data-address-id="<%= address._id %>">
+                                        <div class="checkout-address-header">
+                                            <div class="checkout-address-name">
+                                                <%= address.name || '' %>
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 15px;">
+                                                <% if (address.isDefault) { %>
+                                                    <div class="checkout-default-badge">Default</div>
+                                                    <% } %>
+                                                        <input type="radio" name="checkout-address"
+                                                            value="<%= address._id %>" class="checkout-address-radio"
+                                                            <%=address.isDefault ? 'checked' : '' %>>
+                                            </div>
+                                        </div>
+
+                                        <div class="checkout-address-details">
+                                            📞 <%= address.phone %>
+                                                <% if (address.altPhone) { %>, <%= address.altPhone %>
+                                                        <% } %><br>
+                                                            📍 <%= address.fullAddress %><br>
+                                                                🏙️ <%= address.city %>, <%= address.state %> - <%=
+                                                                            address.pincode %>
+                                                                            <% if (address.landmark) { %><br>🚩 <%=
+                                                                                    address.landmark %>
+                                                                                    <% } %>
+                                        </div>
+
+                                        <div class="checkout-address-tags">
+                                            <div class="checkout-address-tag-group">
+                                                <span class="checkout-address-tag">
+                                                    <%= (address.addressType || 'OTHER' ).toUpperCase() %>
+                                                </span>
+                                            </div>
+                                            <a href="/address/edit/<%= address._id %>?from=checkout"
+                                                class="checkout-edit-link">✏️ Edit</a>
                                         </div>
                                     </div>
-                                    
-                                    <div class="checkout-address-details">
-                                        📞 <%= address.phone %><% if (address.altPhone) { %>, <%= address.altPhone %><% } %><br>
-                                        📍 <%= address.fullAddress %><br>
-                                        🏙️ <%= address.city %>, <%= address.state %> - <%= address.pincode %>
-                                        <% if (address.landmark) { %><br>🚩 <%= address.landmark %><% } %>
-                                    </div>
-                                    
-                                    <div class="checkout-address-tags">
-                                        <div class="checkout-address-tag-group">
-                                            <span class="checkout-address-tag"><%= (address.addressType || 'OTHER').toUpperCase() %></span>
-                                        </div>
-                                        <a href="/address/edit/<%= address._id %>?from=checkout" class="checkout-edit-link">✏️ Edit</a>
-                                    </div>
-                                </div>
-                            <% }) %>
-                        </div>
-                        
-                        <% if (Address.length > 2) { %>
-                            <button id="checkout-show-more-addresses" class="checkout-show-more-btn">
-                                <span id="checkout-show-more-text">📋 Show More Addresses (<%= Address.length - 2 %> more)</span>
-                                <span id="checkout-show-less-text" style="display: none;">📋 Show Less Addresses</span>
-                            </button>
-                        <% } %>
-                        
-                        <a href="/address/add?from=checkout" class="checkout-btn checkout-btn-dark" style="margin-top: 25px;">
-                            + Add New Address
-                        </a>
-                    <% } else { %>
-                        <div class="checkout-empty-state">
-                            <p>No addresses found</p>
-                            <a href="/address/add?from=checkout" class="checkout-btn checkout-btn-dark" style="margin-top: 20px;">
-                                + Add New Address
-                            </a>
-                        </div>
-                    <% } %>
-                </div>
+                                    <% }) %>
+                            </div>
 
-                <!-- Payment Method Section -->
-                <div class="checkout-info-section">
-                    <div class="checkout-section-header">
-                        <span class="checkout-section-icon">💳</span>
-                        Payment Method
-                    </div>
-                    
-                    <div class="checkout-security-note">
-                        <span class="checkout-security-icon">🔒</span>
-                        All transactions are secure and encrypted
-                    </div>
-
-                    <div class="checkout-payment-option checkout-payment-selected">
-                        <div class="checkout-payment-header">
-                     <input type="radio" name="paymentMethod" value="Cash on Delivery" class="checkout-payment-radio" >
-                            <div class="checkout-payment-icon">💵</div>
-                            <div class="checkout-payment-name">Cash on Delivery</div>
-                        </div>
-                        <div class="checkout-payment-desc">
-                            Pay with cash upon delivery.<br>
-                            <!-- COD is only available for orders below ₹1,000. -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column - Order Summary -->
-            <div class="checkout-order-summary">
-                <div class="checkout-summary-header">
-                    <span class="checkout-summary-icon">🛍️</span>
-                    Order Summary
-                </div>
-
-             <% if (Cart && Cart.items && Cart.items.length > 0) { %>
-
-                    <!-- Dynamic Product Items -->
-                    <% let subtotal = 0; %>
-                    <% let totalSavings = 0; %>
-                    <% Cart.items.forEach((item, index) => { %>
-
-                        <% 
-                            const regularPrice = item.productId?.regularPrice || item.salePrice;
-                            const salePrice = item.salePrice;
-                            const itemTotal = item.totalPrice || salePrice * item.quantity;
-                            const itemSavings = (regularPrice - salePrice) * item.quantity;
-                            subtotal += itemTotal;
-                            totalSavings += itemSavings;
-                        %>
-                        <div class="checkout-product-item">
-                            <div class="checkout-product-image">
-                                <% if (item.productId?.productImage && item.productId.productImage.length > 0) { %>
-                                    <img src="<%= item.productId.productImage[0] %>" alt="<%= item.productId.productName %>">
-                                <% } else { %>
-                                    <%= item.productId?.productName?.charAt(0) || 'P' %>
+                            <% if (Address.length> 2) { %>
+                                <button id="checkout-show-more-addresses" class="checkout-show-more-btn">
+                                    <span id="checkout-show-more-text">📋 Show More Addresses (<%= Address.length - 2 %>
+                                            more)</span>
+                                    <span id="checkout-show-less-text" style="display: none;">📋 Show Less
+                                        Addresses</span>
+                                </button>
                                 <% } %>
-                            </div>
-                            <div class="checkout-product-details">
-                                <div class="checkout-product-name"><%= item.productId?.productName || 'Unknown Product' %></div>
-                                <div class="checkout-product-meta">
-                                    Size: <%= item.productId?.size || 'N/A' %> • Qty: <%= item.quantity %>
-                                </div>
-                                <div class="checkout-product-price">
-                                    <% if (regularPrice > salePrice) { %>
-                                        <span class="checkout-original-price">₹<%= regularPrice.toFixed(2) %></span>
-                                    <% } %>
-                                    <div class="checkout-current-price">₹<%= itemTotal.toFixed(2) %></div>
-                                </div>
-                            </div>
-                        </div>
-                    <% }) %>
 
-                    <!-- Price Breakdown -->
-                    <div class="checkout-price-breakdown">
-                        <div class="checkout-price-row">
-                            <span class="checkout-price-label">Subtotal</span>
-                            <span class="checkout-price-value">₹<%= subtotal.toFixed(2) %></span>
-                        </div>
-                        <div class="checkout-price-row">
-                            <span class="checkout-price-label">Savings</span>
-                            <span class="checkout-price-value checkout-savings">- ₹<%= totalSavings.toFixed(2) %></span>
-                        </div>
-                        <div class="checkout-price-row">
-                            <span class="checkout-price-label">Shipping</span>
-                            <span class="checkout-price-value">₹0.00</span>
-                        </div>
+                                    <a href="/address/add?from=checkout" class="checkout-btn checkout-btn-dark"
+                                        style="margin-top: 25px;">
+                                        + Add New Address
+                                    </a>
+                                    <% } else { %>
+                                        <div class="checkout-empty-state">
+                                            <p>No addresses found</p>
+                                            <a href="/address/add?from=checkout" class="checkout-btn checkout-btn-dark"
+                                                style="margin-top: 20px;">
+                                                + Add New Address
+                                            </a>
+                                        </div>
+                                        <% } %>
                     </div>
 
-                    <div class="checkout-grand-total">
-                        <span>Grand Total</span>
-                        <span>₹<%= subtotal.toFixed(2) %></span>
+                    <!-- Payment Method Section -->
+                    <div class="checkout-info-section">
+                        <div class="checkout-section-header">
+                            <span class="checkout-section-icon">💳</span>
+                            Payment Method
+                        </div>
+
+                        <div class="checkout-security-note">
+                            <span class="checkout-security-icon">🔒</span>
+                            All transactions are secure and encrypted
+                        </div>
+
+                        <!-- Checkout Payment Section -->
+                        <div class="payment-section">
+                            <div class="payment-header">
+                                <h2 class="section-title">Select Payment Method</h2>
+                            </div>
+                            <div class="payment-options-box">
+                                <div class="payment-option">
+                                    <label class="payment-label">
+                                        <input type="radio" name="paymentMethod" value="Cash on Delivery" checked>
+
+                                        <div class="payment-content">
+                                            <div class="payment-icon">
+                                                <i class="fas fa-money-bill-wave"></i>
+                                            </div>
+                                            <div class="payment-details">
+                                                <h3>Cash on Delivery</h3>
+                                                <p>Pay with cash upon delivery.</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="payment-option">
+                                    <label class="payment-label">
+                                        <input type="radio" name="paymentMethod" value="Razorpay" id="razorpay_radio">
+                                        <input type="hidden" id="totalAmount"
+                                            value="<%= typeof Cart.totalPrice === 'number' ? Cart.totalPrice : 0 %>">
+
+                                        <!-- pass Razorpay key via data attribute -->
+                                        <div id="checkout-data" data-key-id="<%= key_id %>"></div>
+
+
+
+
+                                        <div class="payment-content">
+
+                                            <div class="payment-icon">
+                                                <i class="fas fa-credit-card"></i>
+                                            </div>
+                                            <div class="payment-details">
+                                                <h3>Razorpay</h3>
+                                                <p>Pay securely using Razorpay.</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="payment-option">
+                                    <label class="payment-label">
+                                        <input type="radio" name="paymentMethod" value="wallet">
+                                        <div class="payment-content">
+                                            <div class="payment-icon">
+                                                <i class="fas fa-wallet"></i>
+                                            </div>
+                                            <div class="payment-details">
+                                                <h3>Wallet</h3>
+                                                <p>Pay using your wallet balance.</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                <% } else { %>
-                    <div class="checkout-empty-state">
-                        <p>Your cart is empty</p>
-                        <a href="/products" class="checkout-btn checkout-btn-dark" style="margin-top: 20px;">
-                            🛒 Shop Now
-                        </a>
+                </div>
+
+                <!-- Right Column - Order Summary -->
+                <div class="checkout-order-summary">
+                    <div class="checkout-summary-header">
+                        <span class="checkout-summary-icon">🛍️</span>
+                        Order Summary
                     </div>
-                <% } %>
-                <!-- Coupon Section -->
-                <!-- <div class="checkout-coupon-section">
+
+                    <% if (Cart && Cart.items && Cart.items.length> 0) { %>
+
+                        <!-- Dynamic Product Items -->
+                        <% let subtotal=0; %>
+                            <% let totalSavings=0; %>
+                                <% Cart.items.forEach((item, index)=> { %>
+
+                                    <% const regularPrice=item.productId?.regularPrice || item.salePrice; const
+                                        salePrice=item.salePrice; const itemTotal=item.totalPrice || salePrice *
+                                        item.quantity; const itemSavings=(regularPrice - salePrice) * item.quantity;
+                                        subtotal +=itemTotal; totalSavings +=itemSavings; %>
+                                        <div class="checkout-product-item">
+                                            <div class="checkout-product-image">
+                                                <% if (item.productId?.productImage &&
+                                                    item.productId.productImage.length> 0) { %>
+                                                    <img src="<%= item.productId.productImage[0] %>"
+                                                        alt="<%= item.productId.productName %>">
+                                                    <% } else { %>
+                                                        <%= item.productId?.productName?.charAt(0) || 'P' %>
+                                                            <% } %>
+                                            </div>
+                                            <div class="checkout-product-details">
+                                                <div class="checkout-product-name">
+                                                    <%= item.productId?.productName || 'Unknown Product' %>
+                                                </div>
+                                                <div class="checkout-product-meta">
+                                                    Size: <%= item.productId?.size || 'N/A' %> • Qty: <%= item.quantity
+                                                            %>
+                                                </div>
+                                                <div class="checkout-product-price">
+                                                    <% if (regularPrice> salePrice) { %>
+                                                        <span class="checkout-original-price">₹<%=
+                                                                regularPrice.toFixed(2) %></span>
+                                                        <% } %>
+                                                            <div class="checkout-current-price">₹<%=
+                                                                    itemTotal.toFixed(2) %>
+                                                            </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <% }) %>
+
+                                            <!-- Price Breakdown -->
+                                            <div class="checkout-price-breakdown">
+                                                <div class="checkout-price-row">
+                                                    <span class="checkout-price-label">Subtotal</span>
+                                                    <span class="checkout-price-value">₹<%= subtotal.toFixed(2) %>
+                                                            </span>
+                                                </div>
+                                                <div class="checkout-price-row">
+                                                    <span class="checkout-price-label">Savings</span>
+                                                    <span class="checkout-price-value checkout-savings">- ₹<%=
+                                                            totalSavings.toFixed(2) %></span>
+                                                </div>
+                                                <div class="checkout-price-row">
+                                                    <span class="checkout-price-label">Shipping</span>
+                                                    <span class="checkout-price-value">₹0.00</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="checkout-grand-total">
+                                                <span>Grand Total</span>
+                                                <span>₹<%= subtotal.toFixed(2) %></span>
+                                            </div>
+                                            <% } else { %>
+                                                <div class="checkout-empty-state">
+                                                    <p>Your cart is empty</p>
+                                                    <a href="/products" class="checkout-btn checkout-btn-dark"
+                                                        style="margin-top: 20px;">
+                                                        🛒 Shop Now
+                                                    </a>
+                                                </div>
+                                                <% } %>
+                                                    <!-- Coupon Section -->
+                                                    <div class="checkout-coupon-section">
                     <div class="checkout-coupon-input">
                         <input type="text" class="checkout-coupon-field" placeholder="Enter Coupon Code" id="checkout-coupon-input">
                         <button class="checkout-apply-btn" id="checkout-apply-coupon">Apply</button>
                     </div>
                     <button class="checkout-view-coupons" id="checkout-view-coupons">🎫 View Available Coupons</button>
-                </div> -->
+                </div>
 
-                <!-- Place Order Button -->
-                <button id="place-order" class="checkout-btn-primary" <%= Cart && Cart.items && Cart.items.length > 0 ? '' : 'disabled' %>>
-                    🔒 Place Order
-                </button>
-                <!-- Security Badge -->
-                <div class="checkout-secure-checkout">
-                    <span class="checkout-secure-icon">🔒</span>
-                    Secure checkout
+                                                    <!-- Place Order Button -->
+                                                    <button id="place-order" class="checkout-btn-primary" <%=Cart &&
+                                                        Cart.items && Cart.items.length> 0 ? '' : 'disabled' %>>
+                                                        🔒 Place Order
+                                                    </button>
+                                                    <!-- Security Badge -->
+                                                    <div class="checkout-secure-checkout">
+                                                        <span class="checkout-secure-icon">🔒</span>
+                                                        Secure checkout
+                                                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="/Javascript/userSide/checkoutpage.js"></script>
-</body>
-</html>
-<%- include("../../views/partials/user/footer") %>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+        <script src="/Javascript/userSide/checkoutpage.js"></script>
+    </body>
 
+    </html>
+    <%- include("../../views/partials/user/footer") %>

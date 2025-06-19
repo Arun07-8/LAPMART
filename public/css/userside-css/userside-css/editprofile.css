@@ -589,4 +589,140 @@
             }
         }
 
+              .page-container > .container-fluid > .row {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: stretch; /* Stretch children to fill height */
+            gap: 20px; /* Space between sidebar and main content */
+            flex: 1; /* Allow the row to grow */
+            min-height: 600px; /* Ensure a minimum height */
+        }
         
+
+        /* Sidebar column styling */
+        .edit-sidebar-col {
+            flex: 0 0 250px; /* Fixed width of 250px, no grow/shrink */
+            max-width: 250px; /* Ensure it doesn't expand beyond 250px */
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Override sidebar styles */
+        .edit-sidebar-col .sidebar {
+            width: 100% !important;
+            height: auto !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            position: static !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+            border-radius: 0 !important;
+            z-index: auto !important;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        /* Re-apply styles for inner sidebar elements */
+        .edit-sidebar-col .sidebar .sidebar-header {
+            padding: 25px 20px;
+            border-bottom: 1px solid #e9ecef;
+            background: linear-gradient(135deg, #C4A676, #8B7355);
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .edit-sidebar-col .sidebar .sidebar-header h5 {
+            margin: 0 0 12px 0;
+            font-weight: 700;
+            font-size: 22px;
+            letter-spacing: 0.5px;
+        }
+
+        .edit-sidebar-col .sidebar .sidebar-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 16px;
+            font-weight: 300;
+        }
+
+        .edit-sidebar-col .sidebar .sidebar-menu {
+            padding: 25px 0;
+        }
+
+        .edit-sidebar-col .sidebar .sidebar-menu .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            color: #495057;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            font-size: 17px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .edit-sidebar-col .sidebar .sidebar-menu .nav-link:hover {
+            background: linear-gradient(90deg, #f8f9fa, #fff);
+            color: #C4A676;
+            border-left-color: #C4A676;
+            transform: translateX(3px);
+        }
+
+        .edit-sidebar-col .sidebar .sidebar-menu .nav-link.active {
+            background: linear-gradient(90deg, #f8f9fa, #fff);
+            color: #C4A676;
+            border-left-color: #C4A676;
+            font-weight: 600;
+            box-shadow: inset 0 2px 4px rgba(196, 166, 118, 0.1);
+        }
+
+        .edit-sidebar-col .sidebar .sidebar-menu .nav-link i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        /* Main content column styling */
+        .edit-main-content-col {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .page-container > .container-fluid > .row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .edit-sidebar-col {
+                flex: 0 0 auto;
+                max-width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+                border-radius: 10px;
+                margin-bottom: 15px;
+            }
+            .edit-sidebar-col .sidebar-header {
+                border-radius: 10px 10px 0 0;
+            }
+            .edit-main-content-col {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .edit-sidebar-col {
+                margin: 0;
+            }
+        }

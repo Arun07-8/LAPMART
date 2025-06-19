@@ -317,7 +317,7 @@ const loadShoppingPage = async (req, res) => {
         break;
     }
 
-    const limit = 6;
+    const limit = 5;
     const skip = (parseInt(page) - 1) * limit;
     const totalProducts = await Product.countDocuments(query);
     const products = await Product.find(query)

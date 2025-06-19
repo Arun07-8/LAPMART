@@ -1,6 +1,6 @@
-const Cart=require("../../models/cartSchema")
-const Product=require("../../models/productSchema")
-const User=require("../../models/userSchema")
+const Cart = require("../../models/cartSchema")
+const Product = require("../../models/productSchema")
+const User = require("../../models/userSchema")
 
 const renderCartPage = async (req, res) => {
   try {
@@ -16,22 +16,22 @@ const renderCartPage = async (req, res) => {
       });
     }
 
-let updated = false;
-cart.items = cart.items.filter(item => {
-  const product = item.productId;
-  
-  if (!product || product.quantity === 0) {
-    updated = true;
-    return false; 
-  }
+    let updated = false;
+    cart.items = cart.items.filter(item => {
+      const product = item.productId;
+
+      if (!product || product.quantity === 0) {
+        updated = true;
+        return false;
+      }
 
 
-  return true; 
-});
+      return true;
+    });
 
 
     if (updated) {
-      await cart.save(); 
+      await cart.save();
     }
 
     res.render("cartPage", {
@@ -63,11 +63,16 @@ const addTocart = async (req, res) => {
       isListed: true
     }).populate('category').populate('brand');
 
-     if (!product) return res.status(404).json({ success: false, message: "Product not found or unavailable" });
-     if (!product.isListed || !product.category?.isListed || !product.brand?.isListed) { 
-      return res.status(403).json({success: false,message: "This product or its category/brand is blocked." });
-}
-
+    if (!product) return res.status(404).json({ success: false, message: "Product not found or unavailable" });
+    if (!product.isListed || !product.category?.isListed || !product.brand?.isListed) {
+      return res.status(403).json({ success: false, message: "This product  is blocked." });
+    }
+    if(!product.category?.isListed){
+       return res.status(403).json({ success: false, message: "This product  its category is blocked." });
+    }
+    if(!product.brand?.isListed){
+       return res.status(403).json({ success: false, message: "This product   its brand is blocked." });
+    }
 
     const maximumQuantity = 5;
 
@@ -115,6 +120,10 @@ const addTocart = async (req, res) => {
         return res.status(400).json({ success: false, message: `Maximum ${maximumQuantity} units per product allowed.` });
       }
 
+
+
+      
+
       cart = new Cart({
         userId: userId,
         items: [{
@@ -154,19 +163,24 @@ const updateCartQuantity = async (req, res) => {
       return res.status(400).json({ message: "Product is out of stock" });
     }
 
-// Important: Allow decrease, block only when increasing above stock
-if (quantity > product.quantity) {
-  // Only block if user is increasing beyond stock
-  if (quantity > item.quantity) {
-    return res.status(400).json({ message: `Only ${product.quantity} units available.` });
-  }
-}
+    const maximumQuantity = 5;
+      if (quantity > maximumQuantity) {
+        return res.status(400).json({ success: false, message: `Maximum ${maximumQuantity} units per product allowed.` });
+      }
+
+    if (quantity > product.quantity) {
+
+      if (quantity > item.quantity) {
+        return res.status(400).json({ message: `Only ${product.quantity} units available.` });
+      }
+    }
 
 
     item.quantity = quantity;
     item.totalPrice = quantity * product.salePrice;
 
     await cart.save();
+
 
     const totalPrice = cart.items.reduce((sum, i) => sum + i.quantity * i.productId.salePrice, 0);
 
@@ -209,7 +223,7 @@ const removeCartProduct = async (req, res) => {
     await cart.save();
     const totalPrice = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
 
-   
+
     res.status(200).json({
       message: 'Item removed from cart',
       cart: {
@@ -223,9 +237,9 @@ const removeCartProduct = async (req, res) => {
     res.status(500).json({ message: 'Server error removing item' });
   }
 };
-module.exports={
-    renderCartPage,
-    addTocart,
-    removeCartProduct,
-    updateCartQuantity
+module.exports = {
+  renderCartPage,
+  addTocart,
+  removeCartProduct,
+  updateCartQuantity
 }

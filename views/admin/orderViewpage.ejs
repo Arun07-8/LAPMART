@@ -730,6 +730,7 @@
                         Reject
                     </button>
                 </td>
+                
                                             </tr>
                                         <% }) %>
                                     <% } else { %>
@@ -836,7 +837,7 @@ async function confirmAcceptReturn(orderId, productId) {
     confirmButtonColor: '#10b981',
   });
 
-  if (result.isConfirmed) {
+  if (result.isConfirmed) {       
     try {
       const response = await fetch(`/admin/orders/${orderId}/accept/${productId}`, {
         method: 'PATCH',

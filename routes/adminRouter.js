@@ -6,6 +6,7 @@ const categoryController=require("../controllers/admin/categoryController");
 const brandController=require("../controllers/admin/brandController");
 const productController=require("../controllers/admin/productController")
 const orderMangementController=require("../controllers/admin/orderMangementController")
+const couponController=require("../controllers/admin/couponController")
 const  {adminAuth}=require("../middlewares/adminAuth");
 const {productUpload}=require("../config/multer")
 
@@ -51,12 +52,21 @@ router.post("/editProduct/:id",adminAuth,productUpload,productController.editPro
 router.delete("/remove-product-image/:productId/:index",adminAuth,productController.removeProductImage);
 router.patch("/deleteProducts/:id",adminAuth,productController.deleteProduct)
 
-//  OrderMangement
+//  OrderManagement
 router.get("/order-management", adminAuth, orderMangementController.getOrderManagementPage);
 router.get("/order-view/:orderId", adminAuth, orderMangementController.getOrderDetailspage);
 router.patch("/orders-status/:orderId", adminAuth, orderMangementController.updateStatus);
 router.patch("/orders/:orderId/accept/:productId", adminAuth, orderMangementController.acceptReturn);
 router.patch("/orders/:orderId/reject/:productId", adminAuth, orderMangementController.rejectReturn);
 
+//  CouponManagement
+router.get("/coupon",adminAuth,couponController.couponManagementpage)
+router.get("/addcoupon",adminAuth,couponController.addCouponpage)
+router.post("/addcoupon",adminAuth,couponController.addnewCoupon)
+router.patch("/active-coupon/:id",adminAuth,couponController.activeCoupon)
+router.patch("/inactive-coupon/:id",adminAuth,couponController.inactiveCoupon)
+router.get("/edit-coupon/:couponId",adminAuth,couponController.editCoupon)
+router.post("/edit-coupon/:couponId",adminAuth,couponController.editpageCoupon)
+router.patch("/coupondelete/:id",adminAuth,couponController.deleteCoupon)
 
 module.exports=router;

@@ -3,7 +3,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="/css/userside-css/userside.css" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
     :root {
         --primary-color: #2c3e50;
@@ -920,12 +920,25 @@
                                 Cancel Order
                             </button>
                         <% } %>
-                        <% if (orderStatus === 'Delivered') { %>
-                            <button class="invoice-btn" onclick="downloadInvoice('<%= order._id %>')">
-                                <i class="fas fa-download"></i>
-                                Download Invoice
-                            </button>
-                        <% } %>
+                    <% if (isRetry) { %>
+  <p>Status: Payment Failed</p>
+  <button id="retry-payment-btn">Retry Payment</button>
+<% } else { %>
+
+  <p>Status: <%= order.status %></p>
+
+  <% if (order.status === 'Delivered') { %>
+    <button class="invoice-btn" onclick="downloadInvoice('<%= order._id %>')">
+      <i class="fas fa-download"></i> Download Invoice
+    </button>
+  <% } else { %>
+    <button id="place-order-btn">Place Order</button>
+  <% } %>
+
+<% } %>
+
+
+
                     </div>
                 </div>
             </div>
@@ -1194,7 +1207,7 @@
                     Swal.fire({
                         icon: 'success',
                         title: 'Success',
-                        text: 'Return request submitted successfully! You will receive a confirmation email shortly.',
+                        text: 'Return request submitted successfully! You will receive a your refundamount in  shortly.',
                         confirmButtonColor: '#ff0000',
                         confirmButtonText: 'OK'
                     }).then(() => {

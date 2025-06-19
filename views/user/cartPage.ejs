@@ -147,7 +147,8 @@
                             <span id="grandTotal">₹<%= cart ? cart.reduce((total, item)=> total + item.salePrice *
                                     item.quantity, 0).toLocaleString() : '0' %></span>
                         </div>
-                        <button class="cart-checkout-button" id="checkoutBtn" >PROCEED TO CHECKOUT</button>
+                        <button class="cart-checkout-button" id="checkoutBtn"
+                              >PROCEED TO CHECKOUT</button>
                     </div>
                 </div>
             </div>

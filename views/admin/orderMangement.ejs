@@ -523,9 +523,9 @@
                     <!-- Payment Method Dropdown -->
                     <select id="paymentMethodFilter" class="dropdown">
                         <option value="All">All Payment Methods</option>
-                        <!-- <option value="Card">Wallet</option>
-                        <option value="UPI">UPI</option> -->
                         <option value="Cash on Delivery">Cash on Delivery</option>
+                        <option value="Razorpay">Razorpay</option> 
+                        <option value="Wallet">Wallet</option>
                     </select>
 
                     <!-- Clear Button -->
@@ -678,7 +678,7 @@
     },
   });
 
-  // Debounce function to limit the rate of search execution
+
   function debounce(func, delay) {
     let timeoutId;
     return function (...args) {
@@ -687,7 +687,6 @@
     };
   }
 
-  // Format date from dd/mm/yyyy to yyyy-mm-dd for backend compatibility
   function formatDateForBackend(dateStr) {
     if (!dateStr) return '';
     const [day, month, year] = dateStr.split('/');
@@ -695,7 +694,7 @@
     return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
   }
 
-  // Initialize totalPages from server-side value
+
   let totalPages = parseInt('<%= totalPages %>') || 1;
 
   // Function to get all search parameters

@@ -6,10 +6,12 @@ const session=require("express-session");
 const db=require("./config/db");
 const userRouter=require("./routes/userRouter")
 const adminRouter=require("./routes/adminRouter")
+const paymentRouter=require("./routes/paymentRouter")
 const passport=require("./config/passport");
 const nocache = require('nocache');
 const morgan=require('morgan');
 const cloudinary=require('cloudinary').v2;
+require('dotenv').config();
 
 db()
 
@@ -23,7 +25,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false,       // For development; set true in production (with HTTPS)
+        secure: false,       
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24  // 1 day
     }
@@ -41,6 +43,8 @@ app.set("views",[path.join(__dirname,"views/user"),path.join(__dirname,"views/ad
 
 app.use("/admin",adminRouter);
 app.use('/',userRouter);
+app.use("/payment", paymentRouter); 
+
 app.use(morgan('dev'));
 app.listen(process.env.PORT,()=>{
     console.log("Server is Running");

@@ -82,6 +82,8 @@ const addWishlist=async (req,res) => {
         console.error("product adding wishlist error",error)
     }
 }
+
+
 const deleteWishlistProduct = async (req, res) => {
   try {
     

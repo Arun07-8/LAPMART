@@ -1,5 +1,9 @@
 const Order = require("../../models/orderSchema")
 const User = require("../../models/userSchema")
+const razorpay = require("../../config/razorpay");
+const Wallet=require("../../models/walletSchema")
+const crypto = require('crypto');
+
 
 function getmainOrderStatus(orderedItems) {
   if (!orderedItems || orderedItems.length === 0) return 'Pending';
@@ -14,7 +18,7 @@ function getmainOrderStatus(orderedItems) {
 
 const getOrderManagementPage = async (req, res) => {
     try {
-        console.log("Received search query:", req.query);
+ 
 
         const page = Math.max(1, parseInt(req.query.page) || 1);
         const limit = 4;
@@ -42,7 +46,6 @@ const getOrderManagementPage = async (req, res) => {
                 ];
             } catch (error) {
                 console.error("Search regex error:", error);
-                // If regex fails, fall back to simple string matching
                 query.$or = [
                     { orderId: searchTerm },
                     { 'shippingAddress.name': searchTerm }
@@ -91,13 +94,13 @@ const getOrderManagementPage = async (req, res) => {
             })
             .populate({
                 path: "orderedItems.product",
-                select: "name images"
+                select: "name"
             })
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
 
-        console.log("Found orders:", orders.length);
+
 
         // Add main status to each order
         orders.forEach(order => {
@@ -176,6 +179,7 @@ const updateStatus = async (req, res) => {
     });
 
     await order.save();
+
     res.status(200).json({
       success: true,
       message: `Order status updated to "${newStatus}"`,
@@ -186,26 +190,80 @@ const updateStatus = async (req, res) => {
   }
 };
 
- const acceptReturn = async (req, res) => {
+
+const acceptReturn = async (req, res) => {
   try {
     const { orderId, productId } = req.params;
-
     const order = await Order.findById(orderId);
-    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
 
-    const item = order.orderedItems.find(i => i.product.toString() === productId);
-    if (!item) return res.status(404).json({ success: false, message: 'Product not found in order' });
 
+    const item = order.orderedItems.find(
+      (item) => item.product.toString() === productId
+    );
+    if (!item) {
+      return res.status(404).json({ success: false, message: 'Product not found in order.' });
+    }
+
+    if (item.status === 'Returned') {
+      return res.status(400).json({ success: false, message: 'Item already returned.' });
+    }
+
+    const refundAmount = item.price * item.quantity;
+
+    const transactionId = `TXN_${Date.now()}_${Math.floor(100000 + Math.random() * 700000)}`;
+    let wallet = await Wallet.findOne({ user: order.userId });
+
+    if (!wallet) {
+      wallet = new Wallet({
+        user: order.userId,
+        balance: refundAmount,
+        transactions: [
+          {
+            amount: refundAmount,
+            type: 'credit',
+            description: `Refund for returned product ID in ${order.orderId}`,
+            transactionId,
+            status: 'success',
+          },
+        ],
+      });
+    } else {
+      wallet.balance += refundAmount;
+      wallet.transactions.push({
+        amount: refundAmount,
+        type: 'credit',
+        description: 'Refund for returned product',
+        transactionId,
+        status: 'success',
+      });
+    }
+
+    try {
+      await wallet.save();
+    } catch (err) {
+      console.error('Wallet save error:', err.message);
+      return res.status(500).json({ success: false, message: 'Could not process wallet refund.' });
+    }
     item.status = 'Returned';
     item.isReturned = true;
 
+    if (order.orderedItems.every((i) => i.status === 'Returned')) {
+      order.status = 'Returned';
+    }
+
     await order.save();
 
-    res.status(200).json({ success: true, message: 'Return accepted and updated in order' });
+    return res.status(200).json({
+      success: true,
+      message: 'Return accepted. Refund credited to wallet.',
+    });
 
-  } catch (err) {
-    console.error("Return Accept Error:", err);
-    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  } catch (error) {
+    console.error('Accept return error:', error.message);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
   }
 };
 

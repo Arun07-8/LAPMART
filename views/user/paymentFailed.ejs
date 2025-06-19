@@ -1,0 +1,541 @@
+<%- include("../../views/partials/user/header") %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Failed - Retry Payment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        /* Header/Navbar placeholder styles */
+        .navbar-placeholder {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #6b7280;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #1f2937;
+        }
+
+        /* Main content container */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .payment-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            max-width: 480px;
+            width: 100%;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            animation: fadeInUp 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .payment-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+
+        .error-icon {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 18px;
+            color: white;
+            font-size: 26px;
+            font-weight: bold;
+            animation: shake 0.6s ease-in-out infinite alternate;
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.25);
+        }
+
+        .payment-title {
+            font-size: clamp(22px, 5vw, 28px);
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .payment-message {
+            color: #6b7280;
+            font-size: clamp(13px, 3vw, 15px);
+            line-height: 1.6;
+            margin-bottom: 22px;
+            padding: 14px;
+            background: rgba(239, 68, 68, 0.08);
+            border-radius: 10px;
+            border-left: 4px solid #ef4444;
+        }
+
+        .order-details {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 18px 16px;
+            margin-bottom: 25px;
+            text-align: left;
+            border: 1px solid #f3f4f6;
+        }
+
+        .order-details h3 {
+            color: #1f2937;
+            font-size: clamp(16px, 4vw, 19px);
+            font-weight: 600;
+            margin-bottom: 16px;
+            text-align: center;
+            letter-spacing: -0.3px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+            min-height: 35px;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            color: #6b7280;
+            font-weight: 500;
+            font-size: 14px;
+            flex-shrink: 0;
+            margin-right: 15px;
+            min-width: 80px;
+        }
+
+        .detail-value {
+            color: #1f2937;
+            font-weight: 600;
+            font-size: 14px;
+            text-align: right;
+            word-break: break-word;
+            flex: 1;
+        }
+
+        .error-code {
+            color: #ef4444;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 13px;
+            font-weight: 700;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .amount {
+            color: #ef4444;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .status-failed {
+            color: #ef4444;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            width: 100%;
+            max-width: 280px;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+            border: 2px solid transparent;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #374151;
+            border: 2px solid #e5e7eb;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-icon {
+            font-size: 18px;
+        }
+
+        /* Footer placeholder styles */
+        .footer-placeholder {
+            background: #1f2937;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .navbar-placeholder {
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .payment-container {
+                padding: 20px;
+                border-radius: 14px;
+                max-width: 100%;
+            }
+            
+            .error-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+                margin-bottom: 15px;
+            }
+            
+            .payment-title {
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+            
+            .payment-message {
+                padding: 12px;
+                font-size: 14px;
+                margin-bottom: 18px;
+            }
+            
+            .order-details {
+                padding: 15px 12px;
+                margin-bottom: 20px;
+            }
+            
+            .detail-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+                padding: 8px 0;
+                min-height: auto;
+                margin-bottom: 8px;
+            }
+            
+            .detail-label {
+                font-size: 12px;
+                margin-right: 0;
+                min-width: auto;
+            }
+            
+            .detail-value {
+                font-size: 14px;
+                text-align: left;
+                font-weight: 700;
+            }
+            
+            .button-container {
+                flex-direction: column;
+                gap: 12px;
+                width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 100%;
+                padding: 16px 20px;
+                font-size: 16px;
+            }
+        }
+
+        /* Tablet and larger screens */
+        @media (min-width: 769px) {
+            .button-container {
+                flex-direction: row;
+                justify-content: center;
+                gap: 15px;
+            }
+            
+            .btn {
+                flex: 1;
+                max-width: 200px;
+            }
+        }
+
+        /* Animation Keyframes */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(2px); }
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInStagger {
+            0% {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Focus and Accessibility */
+        .btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .payment-container {
+                border: 2px solid #000;
+            }
+            
+            .btn-primary {
+                background: #000;
+                color: #fff;
+            }
+            
+            .btn-secondary {
+                background: #fff;
+                color: #000;
+                border: 2px solid #000;
+            }
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            .error-icon {
+                animation: none;
+            }
+            
+            .payment-container {
+                animation: none;
+            }
+            
+            .btn {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="payment-container">
+            <div class="error-icon">
+                ✕
+            </div>
+            
+            <h1 class="payment-title">Payment Failed</h1>
+            
+            <div class="payment-message">
+                Your payment could not be processed. Please try again or contact support for assistance.
+            </div>
+            
+            <div class="order-details">
+                <h3>Transaction Details</h3>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Error Code:</span>
+                    <span class="detail-value error-code"><%= errorCode %></span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Order ID:</span>
+                    <span class="detail-value"> <%= orderId %></span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Payment ID:</span>
+                    <span class="detail-value"> <%= paymentId %><</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Amount:</span>
+                    <span class="detail-value amount">₹<%= amount %></span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Status:</span>
+                    <span class="detail-value status-failed"><%= reason %></span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Reason:</span>
+                    <span class="detail-value"><%= status %></span>
+                </div>
+            </div>
+            
+            <div class="button-container">
+                <button class="btn btn-primary" onclick="location.href='/order-details/<%= orderId%>?retry=true'"  aria-label="Retry payment process">
+                    <span class="btn-icon">↻</span>
+                    Retry Payment
+                </button>
+                <button class="btn btn-secondary" onclick="contactSupport()" aria-label="Contact customer support">
+                    <span class="btn-icon">💬</span>
+                    Contact Support
+                </button>
+            </div>
+        </div>
+    </main>
+
+
+    <script>
+        function contactSupport() {
+            const btn = event.target.closest('.btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="btn-icon">📞</span>Connecting...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                alert('Opening support chat...');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 1000);
+        }
+
+        // Staggered animation for detail rows on page load
+        window.addEventListener('load', function() {
+            const details = document.querySelectorAll('.detail-row');
+            details.forEach((detail, index) => {
+                detail.style.opacity = '0';
+                detail.style.transform = 'translateY(15px)';
+                detail.style.animation = `fadeInStagger 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards`;
+                detail.style.animationDelay = `${index * 100 + 300}ms`;
+            });
+        });
+
+        // Touch feedback for mobile
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.98)';
+            });
+            
+            button.addEventListener('touchend', function() {
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 100);
+            });
+        });
+
+        // Keyboard navigation support
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.classList.contains('btn')) {
+                e.target.click();
+            }
+        });
+    </script>
+</body>
+</html>
+<%- include("../../views/partials/user/footer") %>

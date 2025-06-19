@@ -191,14 +191,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
 //checkout validation 
 document.getElementById("checkoutBtn").addEventListener("click", async () => {
+
     try {
         const res = await fetch("/checkout", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
-            }
+            },
         });
-
         const result = await res.json();
 
         if (res.ok && result.success) {

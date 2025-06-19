@@ -1,6 +1,5 @@
 <%- include("../../views/partials/admin/header") %>
-    <!-- Ensure SweetAlert2 and Font Awesome are included -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/admin-css/usermanagement.css" type="text/css">
     <section>
@@ -73,16 +72,14 @@
                                         <%= i + 1 %>
                                     </td>
                                     <td>
-                                        <div class="user-image">
-                                            <% if (data[i].profileImage) { %>
-                                                <img src="<%= data[i].profileImage[0] %>" alt="<%= data[i].name %>"
-                                                    class="user-thumbnail" loading="lazy">
-                                                <% } else { %>
-                                                    <img src="/img/register/download.png" alt="<%= data[i].name %>"
-                                                        class="user-thumbnail" loading="lazy">
-                                                    <% } %>
+                                <div class="user-image">
+                                       <% if (data[i].profileImage && data[i].profileImage.length > 0) { %>
+                              <img src="<%= data[i].profileImage[0] %>" alt="<%= data[i].name %>" class="user-thumbnail" loading="lazy">
+                          <% } else { %>
+                         <img src="/img/register/download.png" alt="<%= data[i].name %>" class="user-thumbnail" loading="lazy">
+                       <% } %>
+                         </div>
 
-                                        </div>
                                     </td>
                                     <td>
                                         <%= data[i].name %>
@@ -187,6 +184,6 @@
     </section>
 
     <script src="/Javascript/adminSide/userMangementvalidation.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <%- include("../../views/partials/admin/footer") %>

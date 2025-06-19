@@ -1,4 +1,4 @@
- const express=require("express")
+const express=require("express")
 const router=express.Router();
 const userController=require("../controllers/user/userController");
 const profileController=require("../controllers/user/profileController");
@@ -10,6 +10,7 @@ const addressController=require("../controllers/user/addressController")
 const checkOutController=require("../controllers/user/checkOutController")
 const whishlistController=require("../controllers/user/wishlistController")
 const OrderController=require("../controllers/user/orderController")
+const walletController=require("../controllers/user/walletController")
 const {userAuth}=require("../middlewares/userAuth")
 const {profileUpload}=require("../config/multer")
 
@@ -20,25 +21,17 @@ router.get("/signup",userController.loadsignup);
 router.post("/signup",userController.signup)
 router.post("/verify-Otp",userController.verifyOtp);
 router.post("/resendOtp",userController.resendOtp)
-router.get("/auth/google", passport.authenticate("google", {
-    scope: ["profile", "email"]
-  }));
-  router.get('/auth/google/callback', (req, res, next) => {
-  passport.authenticate('google', (err, user, info) => {
-      if (err || !user) {
-        const message = info?.message || 'Authentication failed';
-       
-        return res.redirect(`/signup?message=${encodeURIComponent(message)}`);
-      }
-      req.logIn(user, (loginErr) => {
-        if (loginErr) {
-          return res.redirect(`/signup?message=${encodeURIComponent('Login failed')}`);
-        }
-        req.session.user = user._id;
-        return res.redirect('/home');
+router.get("/auth/google", passport.authenticate("google", {scope: ["profile", "email"]}));
+router.get('/auth/google/callback', (req, res, next) => {
+      passport.authenticate('google', (err, user, info) => {
+      if (err || !user) {const message = info?.message || 'Authentication failed';
+           return res.redirect(`/signup?message=${encodeURIComponent(message)}`);}
+      req.logIn(user, (loginErr) => {if (loginErr) {
+           return res.redirect(`/signup?message=${encodeURIComponent('Login failed')}`);}
+      req.session.user = user._id;
+           return res.redirect('/home');
       });
-    })(req, res, next);
-  });
+    })(req, res, next);});
   
 //   Login management
 router.get("/login",userController.loadlogin)
@@ -97,9 +90,11 @@ router.post("/checkout",userAuth,checkOutController.checkoutHandler)
 
 //  Order Page
 router.get("/order/:orderId",userAuth,OrderController.getOrderPage)
-router.post("/place-order",userAuth,OrderController.placeOrder)
 router.get("/view-order",userAuth,OrderController.getViewOrderpage)
 router.get("/order-details/:orderId",userAuth,OrderController.getOrderViewPage)
 router.post("/order-details/cancel",userAuth,OrderController.cancelOrder)
 router.post("/order-details/return",userAuth,OrderController.orderReturn)
+
+//  Wallect
+router.get("/wallet",userAuth,walletController.getWalletPage)
 module.exports=router;                

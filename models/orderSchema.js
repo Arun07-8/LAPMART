@@ -87,9 +87,15 @@ const orderSchema = new Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ["Cash on Delivery","wallect"],
+    enum: ["Cash on Delivery","Razorpay","wallect"],
     required: true
   },
+  razorpayOrderId: {
+        type: String,
+    },
+    razorpayPaymentId: {
+        type: String,
+    },
   couponApplied: {
     type: Boolean,
     default: false,

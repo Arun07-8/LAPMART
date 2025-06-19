@@ -706,4 +706,124 @@
                 width: 100%;
             }
         }
-    
+    /* Payment Section */
+.payment-section {
+    padding: 30px;
+    background: #f8f9fa; /* Matches body background */
+}
+
+.payment-header {
+    margin-bottom: 30px;
+}
+
+.payment-options-box {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Matches table-container shadow */
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.payment-option {
+    border-bottom: 1px solid #e9ecef; /* Matches table row border */
+    padding: 20px;
+    transition: background-color 0.2s ease;
+}
+
+.payment-option:last-child {
+    border-bottom: none;
+}
+
+.payment-option:hover {
+    background-color: #f8f9fa; /* Matches table row hover */
+}
+
+.payment-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    width: 100%;
+}
+
+.payment-label input[type="radio"] {
+    margin-right: 15px;
+    width: 20px;
+    height: 20px;
+    accent-color: #3498db; /* Matches primary color */
+}
+
+.payment-content {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: 15px;
+}
+
+.payment-icon {
+    font-size: 2rem;
+    color: #3498db; /* Matches primary color */
+    width: 40px;
+    text-align: center;
+}
+
+.payment-details {
+    flex: 1;
+}
+
+.payment-details h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2c3e50; /* Matches coupon-name color */
+    margin: 0;
+}
+
+.payment-details p {
+    font-size: 0.95rem;
+    color: #6c757d; /* Matches filter-label color */
+    margin: 5px 0 0;
+}
+
+.payment-action {
+    text-align: right;
+}
+
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .payment-section {
+        padding: 15px;
+    }
+
+    .payment-option {
+        padding: 15px;
+    }
+
+    .payment-label input[type="radio"] {
+        width: 18px;
+        height: 18px;
+    }
+
+    .payment-icon {
+        font-size: 1.5rem;
+        width: 30px;
+    }
+
+    .payment-details h3 {
+        font-size: 1rem;
+    }
+
+    .payment-details p {
+        font-size: 0.85rem;
+    }
+
+    .proceed-btn {
+        width: 100%;
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .payment-action {
+        text-align: center;
+    }
+}

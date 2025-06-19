@@ -28,114 +28,174 @@ const getOrderPage = async (req, res) => {
     }
 };
 
- const placeOrder = async (req, res) => {
-    try {
-        const userId = req.session.user;
-        const { addressId, paymentMethod } = req.body;
+//  const placeOrder = async (req, res) => {
+//  try {
+//   const userId = req.session.user;
+//   const { addressId, paymentMethod } = req.body;
 
-        if (!addressId || !paymentMethod) {
-            return res.status(400).json({
-                success: false,
-                message: { title: "Invalid Input", text: "Please select an address and payment method.", icon: "warning" },
-            });
-        }
+//   const cart = await Cart.findOne({ userId }).populate({
+//     path: "items.productId",
+//     populate: [{ path: "category" }, { path: "brand" }],
+//   });
 
-        const validPaymentMethods = ["Cash on Delivery"];
-        if (!validPaymentMethods.includes(paymentMethod)) {
-            return res.status(400).json({
-                success: false,
-                message: { title: "Invalid Payment", text: "This payment method is not supported.", icon: "warning" },
-            });
-        }
-          const cart = await Cart.findOne({ userId }).populate("items.productId");
- 
-        if (!cart || cart.items.length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: { title: "Empty Cart", text: "Your cart is empty.", icon: "warning" },
-            });
-        }
+//   if (!addressId || !paymentMethod) {
+//     return res.status(400).json({
+//       success: false,
+//       message: {
+//         title: "Invalid Input",
+//         text: "Please select an address and payment method.",
+//         icon: "warning",
+//       },
+//     });
+//   }
 
-        const selectedAddress = await Address.findOne(
-            { userId, "address._id": addressId },
-            { "address.$": 1 }
-        );
+//   const validPaymentMethods = ["Cash on Delivery","Razorpay"];
+//   if (!validPaymentMethods.includes(paymentMethod)) {
+//     return res.status(400).json({
+//       success: false,
+//       message: {
+//         title: "Invalid Payment",
+//         text: "This payment method is not supported.",
+//         icon: "warning",
+//       },
+//     });
+//   }
 
-        if (!selectedAddress) {
-            return res.status(400).json({
-                success: false,
-                message: { title: "Invalid Address", text: "Selected address not found.", icon: "warning" },
-            });
-          }
-        const orderItems = [];
+//   if (!cart || cart.items.length === 0) {
+//     return res.status(400).json({
+//       success: false,
+//       message: {
+//         title: "Empty Cart",
+//         text: "Your cart is empty.",
+//         icon: "warning",
+//       },
+//     });
+//   }
 
-        for (const item of cart.items) {
-            const product = await Product.findById(item.productId._id);
-  
+//   const blockedItems = cart.items.filter((item) => {
+//     const p = item.productId;
+//     return (
+//       !p.isListed ||
+//       (p.category && !p.category.isListed) ||
+//       (p.brand && !p.brand.isListed)
+//     );
+//   });
 
-            if (product.quantity< item.quantity) {
-                return res.status(400).json({
-                    success: false,
-                    message: {
-                        title: "Out of Stock",
-                        text: `${product.name} has only ${product.stock} in stock.`,
-                        icon: "warning",
-                    },
-                });
-            }
+//   if (blockedItems.length > 0) {
+//     const names = blockedItems.map((i) => i.productId.name).join(", ");
+//     return res.status(403).json({
+//       success: false,
+//       message: {
+//         title: "Blocked Products",
+//         text: `You cannot order these products: ${names}`,
+//         icon: "warning",
+//       },
+//     });
+//   }
 
-            product.quantity -= item.quantity; 
-            await product.save(); 
+//   const selectedAddress = await Address.findOne(
+//     { userId, "address._id": addressId },
+//     { "address.$": 1 }
+//   );
 
-            orderItems.push({
-                product: product._id,
-                quantity: item.quantity,
-                price: product.salePrice,
-            });
-        }
+//   if (!selectedAddress) {
+//     return res.status(400).json({
+//       success: false,
+//       message: {
+//         title: "Invalid Address",
+//         text: "Selected address not found.",
+//         icon: "warning",
+//       },
+//     });
+//   }
 
-        const totalPrice = cart.items.reduce((sum, item) => sum + item.productId.salePrice * item.quantity, 0);
-        const discount = 0;
-        const finalAmount = totalPrice - discount;
-        const addr = selectedAddress.address[0];
+//   const orderItems = [];
 
-        const order = new Order({
-            userId,
-            orderedItems: orderItems,
-            totalPrice,
-            discount,
-            finalAmount,
-            shippingAddress: addr,
-            paymentMethod,
-            invoiceDate: new Date(),
-            status: "Pending",
-        });
+//   for (const item of cart.items) {
+//     const product = await Product.findById(item.productId._id);
 
-        const savedOrder = await order.save();
+//     if (product.quantity < item.quantity) {
+//       return res.status(400).json({
+//         success: false,
+//         message: {
+//           title: "Out of Stock",
+//           text: `${product.name} has only ${product.stock} in stock.`,
+//           icon: "warning",
+//         },
+//       });
+//     }
 
-        await Cart.updateOne({ userId }, { $set: { items: [] } });
+//     product.quantity -= item.quantity;
+//     await product.save();
 
-      const orderedProductIds = cart.items.map(item => item.productId._id.toString());
+//     orderItems.push({
+//       product: product._id,
+//       quantity: item.quantity,
+//       price: product.salePrice,
+//     });
+//   }
 
-await Wishlist.updateOne(
-  { userId },
-  { $pull: { products: { productId: { $in: orderedProductIds } } } }
-);
+//   const totalPrice = cart.items.reduce(
+//     (sum, item) => sum + item.productId.salePrice * item.quantity,
+//     0
+//   );
 
-        res.status(200).json({
-            success: true,
-            orderId: savedOrder._id,
-            message: { title: "Success", text: "Order placed successfully!", icon: "success" },
-        });
+//   const discount = 0;
+//   const finalAmount = totalPrice - discount;
+//   const addr = selectedAddress.address[0];
 
-    } catch (error) {
-        console.error("Place order error:", error.stack);
-        res.status(500).json({
-            success: false,
-            message: { title: "Error", text: "Failed to place order. Please try again.", icon: "error" },
-        });
-    }
-};
+//   const order = new Order({
+//     userId,
+//     orderedItems: orderItems,
+//     totalPrice,
+//     discount,
+//     finalAmount,
+//     shippingAddress: addr,
+//     paymentMethod,
+//     invoiceDate: new Date(),
+//     status: "Pending",
+//   });
+
+//   const savedOrder = await order.save();
+//   await User.findByIdAndUpdate(
+//   userId,
+//   { $push: { orderHistory: savedOrder._id } }
+// );
+
+
+//   await Cart.updateOne({ userId }, { $set: { items: [] } });
+
+//   const orderedProductIds = cart.items.map((item) =>
+//     item.productId._id.toString()
+//   );
+
+//   await Wishlist.updateOne(
+//     { userId },
+//     { $pull: { products: { productId: { $in: orderedProductIds } } } }
+//   );
+
+//   res.status(200).json({
+//     success: true,
+//     orderId: savedOrder._id,
+//     message: {
+//       title: "Success",
+//       text: "Order placed successfully!",
+//       icon: "success",
+//     },
+//   });
+// } catch (error) {
+//   console.error("Place order error:", error.stack);
+//   res.status(500).json({
+//     success: false,
+//     message: {
+//       title: "Error",
+//       text: "Failed to place order. Please try again.",
+//       icon: "error",
+//     },
+//   });
+// }
+
+//  }
 
 
     const getViewOrderpage = async (req, res) => {
@@ -174,8 +234,9 @@ const getOrderViewPage=async (req,res) => {
         const userId=req.session.user
         const ordersid = req.params.orderId.trim();
         const userData = await User.findById(userId);
+        const isRetry = req.query.retry === 'true';
         const order = await Order.findById(ordersid ).populate("orderedItems.product");
-        res.render("orderDetailpage",{user:userData,currentPage:"orderDetailpage",order})
+        res.render("orderDetailpage",{user:userData,currentPage:"orderDetailpage",order, isRetry})
     } catch (error) {
         console.error("page rendering error", error);
     res.redirect("/pageNotFound");
@@ -291,7 +352,7 @@ const orderReturn = async (req, res) => {
 
 module.exports={
     getOrderPage,
-    placeOrder,
+    // placeOrder,
     getViewOrderpage,
     getOrderViewPage,
     cancelOrder,
