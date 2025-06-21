@@ -360,12 +360,7 @@ function validateForm() {
         }},
         { id: 'brandId', validate: (value) => !value ? 'Please select a brand.' : '' }, // Corrected ID
         { id: 'categoryId', validate: (value) => !value ? 'Please select a category.' : '' }, // Corrected ID
-        { id: 'productAmount', validate: (value) => { // Corrected ID to match input
-            if (!value) return 'Regular price is required.';
-            const price = parseFloat(value);
-            if (isNaN(price) || price < 15000 || price > 150000) return 'Regular price must be between 15000 and 150,000.';
-            return '';
-        }},
+        
         { id: 'offerAmount', validate: (value) => { // Corrected ID to match input
             if (!value) return 'Offer price is required.';
             const price = parseFloat(value);

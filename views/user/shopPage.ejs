@@ -534,17 +534,25 @@
                         <h3 class="product-name">
                             <%= product.productName %>
                         </h3>
-                        <div class="product-price">
-                            <span class="current-price">₹<%=
-                                    product.salePrice.toLocaleString('en-IN') %></span>
-                            <span class="original-price">₹<%=
-                                    product.regularPrice.toLocaleString('en-IN') %></span>
-                            <span class="discount">
-                                <% let discount=Math.round(((product.regularPrice -
-                                    product.salePrice) / product.regularPrice) * 100); %>
-                                    <%= discount %>% OFF
-                            </span>
-                        </div>
+                       <div class="product-price">
+
+  <span class="current-price">₹<%= product.discountedPrice.toLocaleString('en-IN') %></span>
+
+
+  <% if (product.discountedPrice < product.salePrice) { %>
+    <span class="original-price text-muted text-decoration-line-through">
+      ₹<%= product.salePrice.toLocaleString('en-IN') %>
+    </span>
+
+    <% 
+      let discount = Math.round(((product.salePrice - product.discountedPrice) / product.salePrice) * 100); 
+    %>
+    <span class="discount badge bg-danger ms-2">
+      <%= discount %>% OFF
+    </span>
+  <% } %>
+</div>
+
                     </div>
                 </a>
 

@@ -20,54 +20,80 @@
   <!-- Product Section -->
   <div class="container mb-5">
     <div class="product-section">
-      <!-- Product Images Column -->
-      <div class="product-images">
-        <!-- Main Product Image with Full Cover -->
-        <div class="zoom-container" id="prod-image">
-          <% if (product.productImage && product.productImage.length > 0) { %>
-            <a href="<%= product.productImage[0] %>" class="image-popup">
-              <img 
-                src="<%= product.productImage[0] %>" 
-                class="zoom-image" 
-                alt="<%= product.productName %>" 
-                id="image-sec"
-              >
-            </a>
-            <div class="zoom-lens"></div>
-          <% } else { %>
-            <img 
-              src="/images/placeholder.jpg" 
-              class="zoom-image" 
-              alt="No Image Available"
-            >
-          <% } %>
+<!-- Product Images Column -->
+<div class="product-images">
+  <!-- Thumbnail Images - Left Side Vertical -->
+  <div class="product-thumbs-container">
+    <% if (product.productImage && product.productImage.length > 0) { %>
+      <% product.productImage.forEach((image, index) => { %>
+        <div class="product-thumb <%= index === 0 ? 'active' : '' %>" data-index="<%= index %>">
+          <img src="<%= image || '/images/placeholder.jpg' %>" alt="Product thumbnail <%= index + 1 %>">
         </div>
-        
-        <!-- Product Status Below Main Image -->
-        <div class="product-status 
-          <%= product.isLocked ? 'status-locked' : (product.quantity > 0 ? 'status-in-stock' : 'status-out-of-stock') %>">
-          <%= product.isLocked ? 'Locked' : (product.quantity > 0 ? 'In Stock' : 'Out of Stock') %>
-        </div>
-        
-        <!-- Thumbnail Images Below Status -->
-        <div class="product-thumbs-container">
-          <% if (product.productImage && product.productImage.length > 0) { %>
-            <% product.productImage.forEach((image, index) => { %>
-              <div class="product-thumb <%= index === 0 ? 'active' : '' %>" data-index="<%= index %>">
-                <img src="<%= image || '/images/placeholder.jpg' %>" alt="Product thumbnail <%= index + 1 %>">
-              </div>
-            <% }) %>
-          <% } else { %>
-            <div class="product-thumb active">
-              <img src="/images/placeholder.jpg" alt="No image available">
-            </div>
-          <% } %>
-        </div>
+      <% }) %>
+    <% } else { %>
+      <div class="product-thumb active">
+        <img src="/images/placeholder.jpg" alt="No image available">
       </div>
-      
-      <!-- Product Info Column -->
-      <div class="product-info">
-        <h1><%= product.productName %></h1>
+    <% } %>
+  </div>
+  
+  <!-- Main Image Section - Right Side -->
+  <div class="main-image-section">
+    <!-- Main Product Image with Full Cover -->
+    <div class="zoom-container" id="prod-image">
+      <% if (product.productImage && product.productImage.length > 0) { %>
+        <a href="<%= product.productImage[0] %>" class="image-popup">
+          <img 
+            src="<%= product.productImage[0] %>" 
+            class="zoom-image" 
+            alt="<%= product.productName %>" 
+            id="image-sec"
+          >
+        </a>
+        <div class="zoom-lens"></div>
+      <% } else { %>
+        <img 
+          src="/images/placeholder.jpg" 
+          class="zoom-image" 
+          alt="No Image Available"
+        >
+      <% } %>
+    </div>
+    
+    <!-- NEW: Offer Section Below Main Image -->
+    <% if (product.offerPercentage > 0 || product.offerName) { %>
+      <div class="offer-section">
+        <div class="offer-badge">SPECIAL</div>
+        <% if (product.offerName) { %>
+          <h4><%= product.offerName %></h4>
+        <% } else { %>
+          <h4>Limited Time Offer</h4>
+        <% } %>
+        <% if (product.offerPercentage > 0) { %>
+          <p>Save <%= product.offerPercentage %>% on this amazing product!</p>
+        <% } else { %>
+          <p>Don't miss out on this exclusive deal!</p>
+        <% } %>
+      </div>
+    <% } %>
+    
+    <!-- Product Status Below Offer Section -->
+ <% if (!product.isLocked && product.quantity === 0) { %>
+  <div class="product-status text-danger">
+    ✖ Out of Stock
+  </div>
+<% } %>
+
+  </div>
+</div>
+<div class="product-info">
+        <!-- Product Title with Wishlist Button -->
+        <div class="product-title-section">
+          <h1><%= product.productName %></h1>
+          <button class="wishlist-btn" id="wishlist-btn" data-product-id="<%= product._id %>">
+            <i class="far fa-heart"></i>
+          </button>
+        </div>
         
         <!-- Rating Section -->
         <div class="rating-section">
@@ -84,16 +110,22 @@
         
         <!-- Price Section -->
         <div class="price-section">
-          <h2>₹<%= product.salePrice.toLocaleString('en-IN') %></h2>
-          <div class="d-flex align-items-center">
-            <span class="old-price">₹<%= product.regularPrice.toLocaleString('en-IN') %></span>
-           <% 
-  const discount = Math.round(((product.regularPrice - product.salePrice) / product.regularPrice) * 100); 
-%>
-<span class="discount">-<%= discount %>%</span>
-          </div>
+          <h2>
+            ₹<%= product.discountedPrice ? product.discountedPrice.toLocaleString('en-IN') : product.salePrice.toLocaleString('en-IN') %>
+          </h2>
+
+          <% if (product.offerPercentage > 0) { %>
+            <div class="d-flex align-items-center">
+              <span class="old-price">₹<%= product.salePrice.toLocaleString('en-IN') %></span>
+              <span class="discount">-<%= product.offerPercentage %>% OFF</span>
+            </div>
+          <% } else { %>
+            <div class="text-muted small">
+              No current offers
+            </div>
+          <% } %>
         </div>
-        
+
         <!-- Product Description -->
         <div class="product-description">
           <p>This high-performance laptop is perfect for any task. Crafted with premium materials and cutting-edge technology, it offers superior performance and reliability.</p>
@@ -109,29 +141,28 @@
         <input type="hidden" id="product-id" value="<%= product._id %>">
         <input type="hidden" id="price" value="<%= product.salePrice %>">
         
-    <div class="quantity-section">
-  <div class="quantity-controls">
-    <button onclick="decreaseQty()" class="btn-quantity" <%= product.isLocked || product.quantity === 0 ? 'disabled' : '' %>>
-      <i class="fas fa-minus"></i>
-    </button>
-    <input 
-      type="number" 
-      id="quantity" 
-      min="1" 
-      max="<%= product.quantity %>" 
-      value="1" 
-      class="quantity-input" 
-      <%= product.isLocked || product.quantity === 0 ? 'disabled' : '' %>
-    >
-    <button onclick="increaseQty()" class="btn-quantity" <%= product.isLocked || product.quantity === 0 ? 'disabled' : '' %>>
-      <i class="fas fa-plus"></i>
-    </button>
-  </div>
-</div>
+        <div class="quantity-section">
+          <div class="quantity-controls">
+            <button onclick="decreaseQty()" class="btn-quantity" <%= product.isLocked || product.quantity === 0 ? 'disabled' : '' %>>
+              <i class="fas fa-minus"></i>
+            </button>
+            <input 
+              type="number" 
+              id="quantity" 
+              min="1" 
+              max="<%= product.quantity %>" 
+              value="1" 
+              class="quantity-input" 
+              <%= product.isLocked || product.quantity === 0 ? 'disabled' : '' %>
+            >
+            <button onclick="increaseQty()" class="btn-quantity" <%= product.isLocked || product.quantity === 0 ? 'disabled' : '' %>>
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        </div>
         
         <!-- Action Buttons -->
         <div class="action-buttons">
-     
           <button id="addToCartBtn" data-product-id="<%= product._id %>" class="btn-cart" <%= product.isLocked || product.quantity === 0 ? 'disabled' : '' %>>Add to Cart</button>
         </div>
       </div>
@@ -333,7 +364,7 @@
   <div class="container mb-5">
     <h2 class="text-center fw-bold mb-3">YOU MIGHT ALSO LIKE</h2>
     <div class="row">
-        <% similerProducts.forEach(item => { %>
+        <% applyoffsimilerProducts.forEach(item => { %>
             <div class="col-lg-3 col-md-6 mb-4">
                 <a href="/productView?id=<%= item._id %>" class="text-decoration-none text-dark">
                     <div class="product-card">
@@ -380,6 +411,17 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script>
+      document.addEventListener('DOMContentLoaded', function () {
+                
+                initAddToWishlistButton();
+
+                    let resizeTimeout;
+                    window.addEventListener('resize', () => {
+                        clearTimeout(resizeTimeout);
+                        resizeTimeout = setTimeout(checkMobileView, 100);
+                    });
+                });
+    
 document.addEventListener('DOMContentLoaded', () => {
   const thumbnails = document.querySelectorAll('.product-thumb');
   const mainImage = document.querySelector('.zoom-image');
@@ -665,6 +707,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
   console.log('Product view JavaScript initialized successfully');
 });
+         // Updated Wishlist Function
+    function initAddToWishlistButton() {
+        const buttons = document.querySelectorAll('.wishlist-btn'); // Corrected variable name
+        buttons.forEach(button => {
+            button.addEventListener('click', async function (e) {
+                e.preventDefault(); // Prevent default navigation
+                e.stopPropagation();
+
+                const productId = this.dataset.productId;
+                const productName = this.dataset.productName; // Now defined in HTML
+
+                // Disable button and show loading state
+                const originalContent = this.innerHTML;
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+
+                try {
+                    const res = await fetch('/wishlist/add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ productId }),
+                    });
+
+                    const data = await res.json();
+
+                    if (data.success) {
+                        // Toggle active class to show the product is in the wishlist
+                        this.classList.add('active');
+
+                        // Success message with centered SweetAlert
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Added to Wishlist!',
+                            position: 'center',
+                            showConfirmButton: true,
+                            confirmButtonText: 'OK',
+                            timer: 3000,
+                            timerProgressBar: true
+                        });
+                    } else {
+                        // Error message with centered SweetAlert
+                        await Swal.fire({
+                            icon: 'error',
+                            title: 'Failed to Add',
+                            text: data.message || 'Something went wrong while adding to wishlist.',
+                            position: 'center',
+                            showConfirmButton: true,
+                            confirmButtonText: 'OK',
+                            timer: 4000,
+                            timerProgressBar: true
+                        });
+                    }
+                } catch (err) {
+                    console.error('Add to wishlist error:', err);
+                    // Network error message with centered SweetAlert
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Network Error',
+                        text: 'Server error. Please try again later.',
+                        position: 'center',
+                        showConfirmButton: true,
+                        confirmButtonText: 'OK',
+                        timer: 4000,
+                        timerProgressBar: true
+                    });
+                } finally {
+                    // Re-enable button and restore original content
+                    this.disabled = false;
+                    this.innerHTML = originalContent;
+                }
+            });
+        });
+      }
   </script>
   <%- include("../../views/partials/user/footer") %>
 </body>

@@ -79,7 +79,7 @@
     
 
                       <!-- Quantity Input -->
-                       <input type="number" class="cart-qty-input" id="quantity-<%= item.productId._id %>" value="<%= item.quantity %>"
+                       <input type="number" class="cart-qty-input" id="quantity-<%= item.productId._id %>"   data-price="<%= item.product.finalPrice %>"   value="<%= item.quantity %>"
                          min="1"max="<%= item.productId.stock %>"  onchange="updateQuantity('<%= item.productId._id %>')">
 
                       <!-- Increase Button -->
@@ -99,13 +99,18 @@
                                             <div class="cart-info-label">Discount</div>
                                             <div class="cart-no-discount">No offers available</div>
                                         </div>
-                                        <!-- Subtotal -->
-                                        <div class="cart-info-item">
-                                            <div class="cart-info-label">Subtotal</div>
-                                            <div class="cart-item-subtotal" id="subtotal-<%= item.productId._id %>">
-                                                ₹<%= (item.salePrice * item.quantity).toLocaleString() %>
-                                            </div>
-                                        </div>
+                                      <div class="cart-info-item">
+  <div class="cart-info-label">Subtotal</div>
+  <div class="cart-item-subtotal" id="subtotal-<%= item.productId._id %>">
+   <% if (item.product.offerLabel) { %>
+  ₹<%= (item.product.finalPrice * item.quantity).toLocaleString() %>
+<% } else { %>
+  N/A
+<% } %>
+
+  </div>
+</div>
+
                                         <!-- Remove Button -->
                                         <div class="cart-info-item">
                                             <div class="cart-info-label">Remove</div>

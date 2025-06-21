@@ -29,10 +29,16 @@ const orderSchema = new Schema({
     },
     status: {
       type: String,
-      enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Return Request", "Returned" ,"Return Rejected"  ],
+      enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Return Request", "Returned" ,"Return Rejected"],
       default: "Pending",
       required: true
+
     },
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'success', 'failed'],
+    default: 'pending'
+  },
     isCancelled: {
     type: Boolean,
     default: false,
@@ -87,7 +93,7 @@ const orderSchema = new Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ["Cash on Delivery","Razorpay","wallect"],
+    enum: ["Cash on Delivery","Razorpay","Wallet"],
     required: true
   },
   razorpayOrderId: {

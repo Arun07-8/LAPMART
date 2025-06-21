@@ -161,20 +161,32 @@
                                         </div>
                                     </label>
                                 </div>
-                                <div class="payment-option">
-                                    <label class="payment-label">
-                                        <input type="radio" name="paymentMethod" value="wallet">
-                                        <div class="payment-content">
-                                            <div class="payment-icon">
-                                                <i class="fas fa-wallet"></i>
-                                            </div>
-                                            <div class="payment-details">
-                                                <h3>Wallet</h3>
-                                                <p>Pay using your wallet balance.</p>
-                                            </div>
-                                        </div>
-                                    </label>
-                                </div>
+                             <div class="payment-option">
+  <label class="payment-label">
+    <input 
+      type="radio" 
+      name="paymentMethod" 
+      value="Wallet"
+      <%= wallet.balance < Cart.totalAmount ? "disabled" : "" %>
+    >
+
+    <!-- Wrap all visual content in a span to make input clickable -->
+    <span class="payment-content">
+      <div class="payment-icon">
+        <i class="fas fa-wallet"></i>
+      </div>
+      <div class="payment-details">
+        <h3>Wallet</h3>
+        <p>Pay using your wallet balance.</p>
+        <small class="text-muted">Available: ₹<%= wallet.balance.toLocaleString() %></small>
+        <% if (wallet.balance <Cart.totalAmount) { %>
+          <small class="text-danger">Insufficient balance</small>
+        <% } %>
+      </div>
+    </span>
+  </label>
+</div>
+
                             </div>
                         </div>
                     </div>
@@ -188,12 +200,12 @@
                     </div>
 
                     <% if (Cart && Cart.items && Cart.items.length> 0) { %>
-
-                        <!-- Dynamic Product Items -->
+                        
                         <% let subtotal=0; %>
-                            <% let totalSavings=0; %>
-                                <% Cart.items.forEach((item, index)=> { %>
-
+                        <% let totalSavings=0; %>
+                        <% Cart.items.forEach((item, index)=> { %>
+                            
+                            <input type="hidden" value="<%=item.productId._id%>" id="productId">
                                     <% const regularPrice=item.productId?.regularPrice || item.salePrice; const
                                         salePrice=item.salePrice; const itemTotal=item.totalPrice || salePrice *
                                         item.quantity; const itemSavings=(regularPrice - salePrice) * item.quantity;
@@ -224,6 +236,8 @@
                                                             <div class="checkout-current-price">₹<%=
                                                                     itemTotal.toFixed(2) %>
                                                             </div>
+                                                            <input type="hidden" id="cart-items" value='<%= JSON.stringify(Cart.items || []) %>' />
+
                                                 </div>
                                             </div>
                                         </div>

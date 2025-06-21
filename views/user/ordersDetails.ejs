@@ -542,50 +542,87 @@
                                                 <th>View Details</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
-                                            <% orders.forEach(order => { %>
-                                                <% 
-                                                    // Derive overall order status from orderedItems
-                                                    let orderStatus = 'Unknown';
-                                                    if (order.orderedItems && order.orderedItems.length > 0) {
-                                                        const statuses = order.orderedItems.map(item => item.status);
-                                                        if (statuses.includes('Cancelled')) {
-                                                            orderStatus = 'Cancelled';
-                                                        } else if (statuses.includes('Returned')) {
-                                                            orderStatus = 'Returned';
-                                                        } else if (statuses.includes('Return Request')) {
-                                                            orderStatus = 'Return Request';
-                                                        } else if (statuses.every(s => s === 'Delivered')) {
-                                                            orderStatus = 'Delivered';
-                                                        } else if (statuses.includes('Shipped')) {
-                                                            orderStatus = 'Shipped';
-                                                        } else if (statuses.includes('Processing')) {
-                                                            orderStatus = 'Processing';
-                                                        } else if (statuses.includes('Pending')) {
-                                                            orderStatus = 'Pending';
-                                                        } else if (statuses.includes('Return Rejected')) {
-                                                            orderStatus = 'Return Rejected';
-                                                        }
-                                                    }
-                                                %>
-                                                <tr>
-                                                    <td>#<%= order.orderId || 'Unknown' %></td>
-                                                    <td><%= order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-GB') : 'Unknown' %></td>
-                                                    <td>
-                                                        <span class="status-badge status-<%= orderStatus.toLowerCase().replace(' ', '-') %>">
-                                                            <%= orderStatus %>
-                                                        </span>
-                                                    </td>
-                                                    <td><%= order.paymentMethod || 'Unknown' %></td>
-                                                    <td>₹<%= order.finalAmount != null ? order.finalAmount.toFixed(2) : '0.00' %></td>
-                                                    <td>
-                                                        <a href="/order-details/<%= order._id|| '#' %>" class="details-btn">
-                                                            <i class="fas fa-eye"></i> Details
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            <% }) %>
-                                        </tbody>
+<tbody>
+<% orders.forEach(function(order) { 
+  let orderStatus = 'Unknown';
+  let isPaymentFailed = false;
+
+  // Check Razorpay payment status
+  if (order.paymentMethod === 'Razorpay') {
+    isPaymentFailed = order.orderedItems.some(function(item) {
+      return item.paymentStatus === 'failed';
+    });
+  }
+
+  // ✅ Only evaluate order status if payment is NOT failed
+  if (
+    order.orderedItems &&
+    order.orderedItems.length > 0 &&
+    !isPaymentFailed
+  ) {
+    const statuses = order.orderedItems.map(function(item) {
+      return item.status;
+    });
+
+    if (statuses.includes('Cancelled')) {
+      orderStatus = 'Cancelled';
+    } else if (statuses.includes('Returned')) {
+      orderStatus = 'Returned';
+    } else if (statuses.includes('Return Request')) {
+      orderStatus = 'Return Request';
+    } else if (statuses.every(function(s) { return s === 'Delivered'; })) {
+      orderStatus = 'Delivered';
+    } else if (statuses.includes('Shipped')) {
+      orderStatus = 'Shipped';
+    } else if (statuses.includes('Processing')) {
+      orderStatus = 'Processing';
+    } else if (statuses.includes('Pending')) {
+      orderStatus = 'Pending';
+    } else if (statuses.includes('Return Rejected')) {
+      orderStatus = 'Return Rejected';
+    }
+  } else if (isPaymentFailed) {
+    // If Razorpay payment failed, show that clearly
+    orderStatus = 'Payment Failed';
+  }
+
+  // Set Payment Method Label
+  let paymentLabel = 'N/A';
+  if (order.paymentMethod === 'Razorpay') {
+    paymentLabel = isPaymentFailed ? 'Payment Failed' : 'Paid via Razorpay';
+  } else if (order.paymentMethod === 'Cash on Delivery') {
+    paymentLabel = 'Cash on Delivery';
+  } else if (order.paymentMethod === 'wallect') {
+    paymentLabel = 'Wallet Paid';
+  }
+%>
+<tr>
+  <td>#<%= order.orderId || 'Unknown' %></td>
+  <td><%= order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-GB') : 'Unknown' %></td>
+  <td>
+    <span class="status-badge status-<%= orderStatus.toLowerCase().replace(' ', '-') %>">
+      <%= orderStatus %>
+    </span>
+  </td>
+  <td><%= order.paymentMethod %></td>
+  <td>₹<%= order.finalAmount != null ? order.finalAmount.toFixed(2) : '0.00' %></td>
+  <td>
+    <% if (isPaymentFailed) { %>
+      <a href="/order-review/<%= order.razorpayOrderId %>?retry=true" class="details-btn">
+        <i class="fas fa-undo"></i> Retry Payment
+      </a>
+    <% } else { %>
+      <a href="/order-details/<%= order._id || '#' %>" class="details-btn">
+        <i class="fas fa-eye"></i> Details
+      </a>
+    <% } %>
+  </td>
+</tr>
+<% }); %>
+
+
+</tbody>
+
                                     </table>
                                 </div>
 

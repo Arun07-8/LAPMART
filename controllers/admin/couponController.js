@@ -12,9 +12,8 @@ const couponManagementpage = async (req, res) => {
       .lean();
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Remove time part
+    today.setHours(0, 0, 0, 0); 
 
-    // Add isExpired flag to each coupon
     coupons.forEach(coupon => {
       const endDate = new Date(coupon.endDate);
       endDate.setHours(0, 0, 0, 0); // Remove time part
@@ -125,7 +124,6 @@ const activeCoupon=async (req,res) => {
 const inactiveCoupon=async (req,res) => {
     try {
         const id=req.params.id
-        console.log("id",id)
         await Coupon.findByIdAndUpdate({_id:id},{$set:{isActive:false}})
         res.status(200).json({success:false,message:"Coupon inActive Successfully"})
     } catch (error) {
@@ -216,7 +214,6 @@ const editpageCoupon = async (req, res) => {
 const deleteCoupon=async (req,res) => {
     try {
         const id=req.params.id
-        console.log("id",id)
         const deleteCoupon= await Coupon.findByIdAndUpdate(id,{isDeleted:true},{new:true})
         if(!deleteCoupon){
               return res.status(404).json({error:"Coupon Not found"});
@@ -224,7 +221,7 @@ const deleteCoupon=async (req,res) => {
        return res.status(200).json({message:"Coupon deleted"});
     } catch (error) {
              console.error("Error deleting coupon:", error);
-        return res.status(500).json({
+            return res.status(500).json({
             success: false,
             message: "Server error while deleting coupon",
             error: error

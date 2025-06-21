@@ -1,4 +1,3 @@
-
 async function updateQuantity(productId) {
     const quantityInput = document.getElementById(`quantity-${productId}`);
     const newQuantity = parseInt(quantityInput?.value || 1);
@@ -44,14 +43,17 @@ async function updateQuantity(productId) {
             quantityInput.value = data.newQuantity;
             quantityInput.dataset.previousValue = data.newQuantity;
 
-            // Update subtotal
+            // ✅ SUBTOTAL update using data-price (offer price)
             const subtotalElement = document.getElementById(`subtotal-${productId}`);
-            if (subtotalElement && data.productTotal != null) {
-                subtotalElement.textContent = `₹${data.productTotal.toLocaleString('en-IN')}`;
+            const finalPrice = parseFloat(quantityInput.dataset.price);  // ✅ Get offer price
+            if (subtotalElement && !isNaN(finalPrice)) {
+                const subtotal = finalPrice * data.newQuantity;
+                subtotalElement.textContent = `₹${subtotal.toLocaleString('en-IN')}`;
             }
 
-            // Update order summary
+            // ✅ Update order summary (from backend total)
             updateOrderSummary({ totalPrice: data.newTotalPrice });
+
         } else {
             // Revert quantity input
             quantityInput.value = quantityInput.dataset.previousValue || 1;
@@ -73,6 +75,7 @@ async function updateQuantity(productId) {
         if (decreaseButton) decreaseButton.disabled = false;
     }
 }
+
 
 async function increaseQuantity(productId) {
     const quantityInput = document.getElementById(`quantity-${productId}`);

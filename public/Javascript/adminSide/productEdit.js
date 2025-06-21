@@ -407,7 +407,6 @@ function validateForm() {
     clearErrorMessages();
     const productName = document.getElementById('productName').value;
     const description = document.getElementById('description').value;
-    const regularPrice = document.getElementById('productAmount').value;
     const salePrice = document.getElementById('offerAmount').value;
     const quantity = document.getElementById('stockCount').value;
     const brand = document.getElementById('brandId').value;
@@ -431,11 +430,6 @@ function validateForm() {
 
     if (description.trim() === "") {
         displayErrorMessage('description-error', 'Description is required.');
-        isValid = false;
-    }
-
-    if (regularPrice.trim() === "") {
-        displayErrorMessage('regularPrice-error', 'Regular price is required.');
         isValid = false;
     }
 

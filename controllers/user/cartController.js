@@ -1,6 +1,7 @@
 const Cart = require("../../models/cartSchema")
 const Product = require("../../models/productSchema")
 const User = require("../../models/userSchema")
+const {applyBestOffer}=require("../../helpers/offerHelper")
 
 const renderCartPage = async (req, res) => {
   try {
@@ -33,9 +34,20 @@ const renderCartPage = async (req, res) => {
     if (updated) {
       await cart.save();
     }
+const cartWithOffers = await Promise.all(
+  cart.items.map(async (item) => {
+    const offerAppliedProduct = await applyBestOffer(item.productId);
+    return {
+      ...item.toObject(),
+      product: offerAppliedProduct,         // offer-enhanced product
+      productId: item.productId             // retain original product ref
+    };
+  })
+);
+
 
     res.render("cartPage", {
-      cart: cart.items,
+      cart:cartWithOffers,
       message: null,
       user: userData
     });

@@ -2,6 +2,7 @@ const User = require("../../models/userSchema");
 const Category=require("../../models/categorySchema");
 const Product = require("../../models/productSchema");
 const Brand=require("../../models/BrandSchema")
+const {applyBestOffer}=require("../../helpers/offerHelper")
 const env = require("dotenv").config();
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
@@ -237,16 +238,19 @@ const LoadHomepage = async (req, res) => {
             brand: { $in: brand.map((brand) => brand._id) },
             quantity: { $gt: 0 }
         });
-        productData.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
+        const updatedProduct=await Promise.all(
+            productData.map(product=>applyBestOffer(product))
+        ) 
+        updatedProduct.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
         if (user) {
             const userData = await User.findById(user);
-            return res.render("home", { user: userData, product: productData });
+            return res.render("home", { user: userData, product: updatedProduct });
         } else {
-            return res.render("home", { product: productData });
+            return res.render("home", { product: updatedProduct});
         }
     } catch (error) {
         console.error("Home page is not working", error);
-        res.status(500).send("Server error");
+        res.redirect("pageNotFound")
     }
     
 };
@@ -320,12 +324,13 @@ const loadShoppingPage = async (req, res) => {
     const limit = 5;
     const skip = (parseInt(page) - 1) * limit;
     const totalProducts = await Product.countDocuments(query);
-    const products = await Product.find(query)
+    let products = await Product.find(query)
       .sort(sortOption)
       .skip(skip)
       .limit(limit)
       .lean();
-
+    
+    const updateproducts=await Promise.all(products.map(product=>applyBestOffer(product)));
     const totalPages = Math.ceil(totalProducts / limit);
 
     let categoryName = 'Laptops';
@@ -355,9 +360,10 @@ const loadShoppingPage = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(4)
       .lean();
-
-    relatedProducts.forEach(product => {
-      const discount = ((product.regularPrice - product.salePrice) / product.regularPrice) * 100;
+ 
+    const updateRelatedProducts=await Promise.all(relatedProducts.map(p=>applyBestOffer(p)))
+     updateRelatedProducts.forEach(product => {
+      const discount = ((product.salePrice - product.discountedPrice) / product.salePrice) * 100;
       product.isNew = product.createdAt > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       product.isSale = discount >= 20;
       product.isBestseller = (product.ratingCount || 0) > 150;
@@ -366,7 +372,7 @@ const loadShoppingPage = async (req, res) => {
     const filters = {
       category: category,
       brand: brand,
-      priceMin: parseInt(priceMin) || 20000,
+      priceMin: parseInt(priceMin) || 10000,
       priceMax: parseInt(priceMax) || 150000,
       sort: sort,
       search: search,
@@ -374,7 +380,7 @@ const loadShoppingPage = async (req, res) => {
 
     res.render('shopPage', {
       user: userData,
-      product: products,
+      product: updateproducts,
       category: categories,
       brand: brands,
       categoryName: categoryName,
@@ -383,7 +389,7 @@ const loadShoppingPage = async (req, res) => {
       totalProducts: totalProducts,
       limit: limit,
       filters: filters,
-      relatedProducts: relatedProducts,
+      relatedProducts: updateRelatedProducts,
       errorMessage: null,
     });
   } catch (error) {

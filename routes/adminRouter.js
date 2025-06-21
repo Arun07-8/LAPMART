@@ -7,7 +7,8 @@ const brandController=require("../controllers/admin/brandController");
 const productController=require("../controllers/admin/productController")
 const orderMangementController=require("../controllers/admin/orderMangementController")
 const couponController=require("../controllers/admin/couponController")
-const  {adminAuth}=require("../middlewares/adminAuth");
+const offersController=require("../controllers/admin/offersController")
+const {adminAuth}=require("../middlewares/adminAuth");
 const {productUpload}=require("../config/multer")
 
 
@@ -68,5 +69,18 @@ router.patch("/inactive-coupon/:id",adminAuth,couponController.inactiveCoupon)
 router.get("/edit-coupon/:couponId",adminAuth,couponController.editCoupon)
 router.post("/edit-coupon/:couponId",adminAuth,couponController.editpageCoupon)
 router.patch("/coupondelete/:id",adminAuth,couponController.deleteCoupon)
+
+//  OffersManagement
+router.get("/offers",adminAuth,offersController.OffersManagement)
+router.get("/add-offers",adminAuth,offersController.offerAdd)
+router.post("/add-offers",adminAuth,offersController.createOffer)
+router.get('/offer-products', offersController.listAvailableProducts);
+router.get('/offer-categories', offersController.listAvailableCategories);
+router.get('/offer-brands', offersController.listAvailableBrands);
+router.patch("/active-offers/:id",adminAuth,offersController.activeOffer)
+router.patch("/inactive-offers/:id",adminAuth,offersController.inActiveOffer)
+router.get("/edit-offer/:id",adminAuth,offersController.editOffer)
+router.post("/edit-offer/:id",adminAuth,offersController.editOfferPage)
+router.patch("/offerdelete/:id",adminAuth,offersController.deleteOffer)
 
 module.exports=router;

@@ -1,10 +1,11 @@
 const Product=require("../../models/productSchema");
 const Category=require("../../models/categorySchema");
 const Brand=require("../../models/BrandSchema");
-const {uploads}=require("../../config/multer")
-const fs=require("fs");
-const path = require('path');
+// const {uploads}=require("../../config/multer")
+// const fs=require("fs");
+// const path = require('path');
 const cloudinary = require('../../config/cloudinary');
+
 
 
 const productInfo = async (req, res) => {
@@ -83,6 +84,19 @@ const loadaddProduct = async (req, res) => {
 };
 
 
+const listAvailableProducts = async (req, res) => {
+  try {
+    const products = await Product.find(
+      { isDeleted: false, isListed: true }, // only listed, active products
+      '_id productName' // only return _id and productName
+    );
+
+    res.status(200).json({ products }); // send in JSON format for dropdown
+  } catch (error) {
+    console.error("Error fetching product list for offer:", error);
+    res.status(500).json({ error: "Failed to load products" });
+  }
+};
 
 const addProducts = async (req, res) => {
     try {
@@ -92,7 +106,6 @@ const addProducts = async (req, res) => {
             description,
             brand,
             category,
-            regularPrice,
             salePrice,
             quantity,
             processor,
@@ -136,7 +149,6 @@ const addProducts = async (req, res) => {
             description,
             brand,
             category,
-            regularPrice: parseFloat(regularPrice),
             salePrice: parseFloat(salePrice),
             createdOn: new Date(),
             quantity: parseInt(quantity),
@@ -245,7 +257,6 @@ const editProduct = async (req, res) => {
             description: data.description || '',
             brand: data.brand || '',
             category: data.category || '',
-            regularPrice: parseFloat(data.regularPrice) || 0,
             salePrice: parseFloat(data.salePrice) || 0,
             quantity: parseInt(data.quantity) || 0,
             processor: data.processor || '',
@@ -263,7 +274,7 @@ const editProduct = async (req, res) => {
         };
 
         const requiredFields = [
-            'productName', 'description', 'brand', 'category', 'regularPrice',
+            'productName', 'description', 'brand', 'category',
             'salePrice', 'processor', 'graphicsCard', 'ram',
             'Storage', 'display', 'operatingSystem', 'Battery', 'Weight', 'Warranty'
         ];

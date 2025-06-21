@@ -54,19 +54,24 @@
                                 </span>
                                 <span class="review-count">(<%= product.reviewCount || 45 %>)</span>
                             </div>
-                            <div class="product-price-container">
-                                <span class="product-price">
-                                    ₹<%= product.salePrice ? product.salePrice.toLocaleString('en-IN') : 'Price not available' %>
-                                </span>
-                                <% if (product.regularPrice && product.regularPrice > product.salePrice) { %>
-                                    <span class="product-regular-price">
-                                        ₹<%= product.regularPrice.toLocaleString('en-IN') %>
-                                    </span>
-                                    <span class="product-discount">
-                                        <%= Math.round((product.regularPrice - product.salePrice) / product.regularPrice * 100) %>% off
-                                    </span>
-                                <% } %>
-                            </div>
+                           <div class="product-price-container">
+  <% if (product.offerPercentage > 0) { %>
+    <span class="product-price text-danger fw-bold">
+      ₹<%= product.discountedPrice.toLocaleString('en-IN') %>
+    </span>
+    <span class="product-regular-price text-muted text-decoration-line-through ms-2">
+      ₹<%= product.salePrice.toLocaleString('en-IN') %>
+    </span>
+    <span class="product-discount text-success ms-2">
+      <%= product.offerPercentage %>% OFF
+    </span>
+  <% } else { %>
+    <span class="product-price fw-bold">
+      ₹<%= product.salePrice.toLocaleString('en-IN') %>
+    </span>
+  <% } %>
+</div>
+
                         </div>
                     </a>
                 </article>

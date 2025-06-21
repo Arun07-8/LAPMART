@@ -11,6 +11,7 @@ const passport=require("./config/passport");
 const nocache = require('nocache');
 const morgan=require('morgan');
 const cloudinary=require('cloudinary').v2;
+const errorHandler = require('./middlewares/errorHandler');
 require('dotenv').config();
 
 db()
@@ -44,6 +45,8 @@ app.set("views",[path.join(__dirname,"views/user"),path.join(__dirname,"views/ad
 app.use("/admin",adminRouter);
 app.use('/',userRouter);
 app.use("/payment", paymentRouter); 
+app.use(errorHandler)
+
 
 app.use(morgan('dev'));
 app.listen(process.env.PORT,()=>{

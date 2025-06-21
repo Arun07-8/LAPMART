@@ -1,6 +1,7 @@
 const Address = require("../../models/addressSchema");
 const Cart = require("../../models/cartSchema");
 const User=require("../../models/userSchema")
+const Wallet=require("../../models/walletSchema")
 
 //  checkout page getting
 const checkOutpage = async (req, res) => {
@@ -20,11 +21,14 @@ const checkOutpage = async (req, res) => {
     }
 
     const addresses = existingAddress ? existingAddress.address : [];
+ const wallet = await Wallet.findOne({ user: userId });
 
+    console.log(wallet,'fe')
     res.render("checkOut", {
       key_id: process.env.RAZORPAY_KEY_ID,
       user: userData,
       Address: addresses,
+      wallet:wallet,
       Cart: {
         ...existingCart?.toObject(),
         totalPrice,
