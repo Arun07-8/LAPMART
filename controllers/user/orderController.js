@@ -1,62 +1,117 @@
-const Order=require("../../models/orderSchema")
-const User=require("../../models/userSchema")
-const Wallet=require("../../models/walletSchema")
-
+const Order = require("../../models/orderSchema")
+const User = require("../../models/userSchema")
+const Wallet = require("../../models/walletSchema")
+const { applyBestOffer } = require("../../helpers/offerHelper")
 const getOrderPage = async (req, res) => {
-    try {
-        const userId = req.session.user;
-        const orderid=req.params.orderId
-        if (!userId) {
-            return res.redirect("/login");
-        }
+  try {
+    const userId = req.session.user;
+    const orderId = req.params.orderId;
 
-        const userData = await User.findById(userId);
-        if (!userData) {
-            return res.redirect("/login");
-        }
-        const order = await Order.findById(orderid).populate("orderedItems.product")
-        res.render("Orderpage", {
-            userData,
-            order
-        });
-    } catch (error) {
-        console.error("Order page error:", error);
-        res.redirect("/pageNotFound");
-    }
+    if (!userId) return res.redirect("/login");
+
+    const userData = await User.findById(userId);
+    if (!userData) return res.redirect("/login");
+
+    const order = await Order.findById(orderId).populate("orderedItems.product");
+    if (!order) return res.redirect("/pageNotFound");
+
+    let totalOriginal = 0;
+    let totalFinal = 0;
+
+    const orderedItemsWithOffers = await Promise.all(
+      order.orderedItems.map(async (item) => {
+        const updatedProduct = await applyBestOffer(item.product);
+        const quantity = item.quantity;
+
+        const originalPrice = item.product.salePrice;
+        const offerPrice = updatedProduct.finalPrice || originalPrice;
+
+        const hasOffer = updatedProduct.offerLabel && offerPrice < originalPrice;
+
+        const itemTotal = offerPrice * quantity;
+        const savings = hasOffer ? (originalPrice - offerPrice) * quantity : 0;
+
+        totalOriginal += originalPrice * quantity;
+        totalFinal += itemTotal;
+
+        return {
+          product: updatedProduct,
+          quantity,
+          originalPrice,
+          finalPrice: offerPrice,
+          totalPrice: itemTotal,
+          offerApplied: hasOffer ? updatedProduct.offerLabel : null,
+          discountPercentage: hasOffer ? updatedProduct.offerPercentage : 0,
+          displayPrice: offerPrice,
+          displayTotal: itemTotal,
+          displaySavings: hasOffer ? savings : "N/A",
+          savings,
+          hasOffer
+        };
+      })
+    );
+
+    const hasAnyOffer = orderedItemsWithOffers.some(item => item.hasOffer);
+
+    const couponCode = order.couponCode || null;
+    const discountAmount = order.discount || 0;
+
+    // ✅ Fallback: if no coupon, grandTotal = totalFinal
+    const grandTotal = Math.max(totalFinal - discountAmount, 0);
+
+    const totalSavings = totalOriginal - totalFinal;
+
+    res.render("Orderpage", {
+      user: userData,
+      order,
+      orderedItems: orderedItemsWithOffers,
+      totalOriginal,      // Before offers
+      totalFinal,         // After offers
+      totalSavings,       // Offer savings
+      hasAnyOffer,
+      discountAmount,     // Coupon savings
+      couponCode,
+      grandTotal          // After both discounts
+    });
+
+  } catch (error) {
+    console.error("Order page error:", error);
+    res.redirect("/pageNotFound");
+  }
 };
 
 
 
-    const getViewOrderpage = async (req, res) => {
-    try {
-        const userId = req.session.user;
+const getViewOrderpage = async (req, res) => {
+  try {
+    const userId = req.session.user;
 
-        const page = parseInt(req.query.page) || 1; 
-        const limit = 5; 
-        const skip = (page - 1) * limit;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const skip = (page - 1) * limit;
 
-        const totalOrders = await Order.countDocuments({ userId });
-        const totalPages = Math.ceil(totalOrders / limit);
+    const totalOrders = await Order.countDocuments({ userId });
+    const totalPages = Math.ceil(totalOrders / limit);
 
-        const orders = await Order.find({ userId })
-        .populate("orderedItems.product")
-        .sort({ createdAt: -1 }) 
-        .skip(skip)
-        .limit(limit);
-    
-        const user = await User.findById(userId);
+    const orders = await Order.find({ userId })
+      .populate("orderedItems.product")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-        res.render("ordersDetails", {
-        user,
-        orders,
-        currentPage:page,
-        totalPages,
-        });
-    } catch (error) {
-        console.error("page rendering error", error);
-        res.redirect("/pageNotFound");
-    }
-    };
+    const user = await User.findById(userId);
+
+    res.render("ordersDetails", {
+      user,
+      orders,
+      currentPage: page,
+      totalPages,
+    });
+  } catch (error) {
+    console.error("page rendering error", error);
+    res.redirect("/pageNotFound");
+  }
+};
 const getOrderViewPage = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -127,7 +182,7 @@ const cancelOrder = async (req, res) => {
       // Refund to wallet for Razorpay or Wallet payments
       if (["Razorpay", "Wallet"].includes(order.paymentMethod)) {
         const CancelAmount = order.totalPrice;
-        console.log(CancelAmount,"a")
+        console.log(CancelAmount, "a")
         const transactionId = `TXN_${Date.now()}_${Math.floor(100000 + Math.random() * 700000)}`;
 
         let wallet = await Wallet.findOne({ user: order.userId });
@@ -203,7 +258,7 @@ const orderReturn = async (req, res) => {
             "orderedItems.$.returnNote": note
           }
         }
-        
+
       );
     } else {
       await Order.findByIdAndUpdate(orderId, {
@@ -225,11 +280,11 @@ const orderReturn = async (req, res) => {
 
 
 
-module.exports={
-    getOrderPage,
-    // placeOrder,
-    getViewOrderpage,
-    getOrderViewPage,
-    cancelOrder,
-    orderReturn
+module.exports = {
+  getOrderPage,
+  // placeOrder,
+  getViewOrderpage,
+  getOrderViewPage,
+  cancelOrder,
+  orderReturn
 }

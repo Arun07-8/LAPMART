@@ -7,59 +7,72 @@ const renderCartPage = async (req, res) => {
   try {
     const userId = req.session.user;
     const userData = await User.findById(userId);
-    const cart = await Cart.findOne({ userId }).populate('items.productId');
+    const cart = await Cart.findOne({ userId }).populate("items.productId");
 
     if (!cart || cart.items.length === 0) {
       return res.render("cartPage", {
         cart: [],
-        message: "Cart is empty",
-        user: userData
+        user: userData,
+        totalDiscount: 0,
+        message: "Cart is empty"
       });
     }
 
     let updated = false;
     cart.items = cart.items.filter(item => {
       const product = item.productId;
-
       if (!product || product.quantity === 0) {
         updated = true;
         return false;
       }
-
-
       return true;
     });
-
 
     if (updated) {
       await cart.save();
     }
-const cartWithOffers = await Promise.all(
-  cart.items.map(async (item) => {
-    const offerAppliedProduct = await applyBestOffer(item.productId);
-    return {
-      ...item.toObject(),
-      product: offerAppliedProduct,         // offer-enhanced product
-      productId: item.productId             // retain original product ref
-    };
-  })
-);
 
+    // Apply offers
+    let originalTotal = 0;
+    let discountedTotal = 0;
 
-    res.render("cartPage", {
-      cart:cartWithOffers,
+    const cartWithOffers = await Promise.all(
+      cart.items.map(async (item) => {
+        const offerProduct = await applyBestOffer(item.productId);
+        const salePrice = offerProduct.salePrice;
+        const offerPrice = offerProduct.finalPrice || salePrice;
+
+        originalTotal += salePrice * item.quantity;
+        discountedTotal += offerPrice * item.quantity;
+
+        return {
+          ...item.toObject(),
+          product: offerProduct,        // product with offer applied
+          productId: item.productId     // maintain original ref
+        };
+      })
+    );
+
+    const totalDiscount = originalTotal - discountedTotal;
+
+    return res.render("cartPage", {
+      cart: cartWithOffers,
+      user: userData,
       message: null,
-      user: userData
+      totalDiscount
     });
 
   } catch (error) {
-    console.error("cart page can't available", error);
-    res.status(500).render("cartPage", {
-      cartItems: [],
-      message: "Something went wrong while loading your cart"
+    console.error("Cart page can't be loaded:", error);
+    return res.status(500).render("cartPage", {
+      cart: [],
+      message: "Something went wrong while loading your cart",
+      totalDiscount: 0,
+      user: null
     });
   }
 };
+
 
 const addTocart = async (req, res) => {
   try {

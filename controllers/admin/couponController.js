@@ -1,8 +1,9 @@
 const Coupon=require("../../models/couponSchema")
+
 const couponManagementpage = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 4;
+    const limit = 3;
     const skip = (page - 1) * limit;
 
     const coupons = await Coupon.find({isDeleted:false})
@@ -16,11 +17,11 @@ const couponManagementpage = async (req, res) => {
 
     coupons.forEach(coupon => {
       const endDate = new Date(coupon.endDate);
-      endDate.setHours(0, 0, 0, 0); // Remove time part
+      endDate.setHours(0, 0, 0, 0); 
       coupon.isExpired = endDate < today;
     });
 
-    const totalCoupons = await Coupon.countDocuments();
+    const totalCoupons = await Coupon.countDocuments({isDeleted:false});
     const totalPages = Math.ceil(totalCoupons / limit);
 
     res.render("couponManagement", {

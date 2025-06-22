@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Report - Admin Dashboard</title>
+    <style>
+        /* Existing styles unchanged, except for button colors */
+        .btn-export-pdf {
+            background: #000000; /* Black for PDF button */
+            color: white;
+        }
+        
+        .btn-export-pdf:hover {
+            background: #333333; /* Darker black on hover */
+        }
+        
+        .btn-export-excel {
+            background: #e74c3c; /* Red for Excel button */
+            color: white;
+        }
+        
+        .btn-export-excel:hover {
+            background: #c0392b; /* Darker red on hover */
+        }
+        /* Rest of the styles remain unchanged */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #3498db;
+        }
+        
+        .search-section {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .search-section h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .search-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .filter-select {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            min-width: 150px;
+        }
+        
+        .date-range-custom {
+            display: none;
+            gap: 10px;
+        }
+        
+        .date-range-custom input {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            width: 150px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #6c5ce7;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5f3dc4;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .sales-summary {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .sales-summary h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+        }
+        
+        .summary-item {
+            text-align: left;
+        }
+        
+        .summary-label {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+        
+        .summary-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table thead {
+            background: #2c3e50;
+            color: white;
+        }
+        
+        .data-table th {
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .data-table tbody tr {
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s;
+        }
+        
+        .data-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .data-table td {
+            padding: 15px 12px;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+        
+        .data-table .order-id {
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .data-table .amount {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .data-table .discount {
+            color: #e74c3c;
+        }
+        
+        .data-table .coupon {
+            color: #f39c12;
+        }
+        
+        .data-table .final-amount {
+            font-weight: 700;
+            color: #27ae60;
+            font-size: 15px;
+        }
+        
+        .payment-method {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: lowercase;
+        }
+        
+        .method-razorpay {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .method-cod {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .method-wallet {
+            background: #e8f5e8;
+            color: #388e3c;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+        
+        .status-processing {
+            background: #e1f5fe;
+            color: #0288d1;
+        }
+        
+        .status-shipped {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-delivered {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            gap: 5px;
+        }
+        
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .pagination button:hover {
+            background: #f8f9fa;
+        }
+        
+        .pagination button.active {
+            background: #6c5ce7;
+            color: white;
+            border-color: #6c5ce7;
+        }
+        
+        .export-section {
+            padding: 20px 30px;
+            background: white;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c5ce7;
+        }
+        
+        .spinner {
+            display: inline-block;
+            border: 3px solid #6c5ce7;
+            border-top: 3px solid transparent;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .search-input:disabled,
+        .filter-select:disabled,
+        .date-range-custom input:disabled,
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                padding: 70px 15px 20px;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+            
+            .search-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-input {
+                min-width: auto;
+            }
+            
+            .filter-select {
+                width: 100%;
+            }
+            
+            .date-range-custom input {
+                width: 100%;
+            }
+            
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .data-table {
+                font-size: 12px;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 8px 6px;
+            }
+            
+            .export-section {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include("../../views/partials/admin/header") %>
+    <div class="dashboard-container">
+        <button class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
+        <div id="sidebar-container"></div>
+
+        <main class="main-content">
+            <header class="header">
+                <h1>Admin Dashboard</h1>
+                <div class="user-profile">
+                    <div class="user-avatar"></div>
+                    <span>Admin</span>
+                </div>
+            </header>
+
+            <section class="search-section">
+                <h2>Sales Report</h2>
+                <div class="search-controls">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search by Order ID...">
+                    <input type="text" id="userSearchInput" class="search-input" placeholder="Search by Name/Address...">
+                    <select id="paymentMethodSelect" class="filter-select">
+                        <option value="">All Payment Methods</option>
+                        <option value="Razorpay">Razorpay</option>
+                        <option value="COD">Cash on Delivery</option>
+                        <option value="Wallet">Wallet</option>
+                    </select>
+                    <select id="orderStatusSelect" class="filter-select">
+                        <option value="">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Processing">Processing</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                        <option value="Return Request">Return Request</option>
+                        <option value="Returned">Returned</option>
+                        <option value="Return Rejected">Return Rejected</option>
+                    </select>
+                    <select id="dateRangeSelect" class="filter-select">
+                        <option value="">Select Range</option>
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="last7days">Last 7 days</option>
+                        <option value="last30days">Last 30 days</option>
+                        <option value="thismonth">This month</option>
+                        <option value="lastmonth">Last month</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                    <div class="date-range-custom" id="customDateRange">
+                        <input type="date" id="startDate" placeholder="Start Date">
+                        <input type="date" id="endDate" placeholder="End Date">
+                    </div>
+                    <button class="btn btn-primary" onclick="filterSales()">Search</button>
+                    <button class="btn btn-secondary" onclick="clearFilters()">Clear</button>
+                </div>
+            </section>
+
+            <section class="sales-summary">
+                <h3>Sales Summary</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">Gross Sales</div>
+                        <div class="summary-value">₹<%= summary.grossSales || '0.00' %></div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Coupons Redeemed</div>
+                        <div class="summary-value">₹<%= summary.totalCoupons || '0.00' %></div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Discounts</div>
+                        <div class="summary-value">₹<%= summary.totalDiscount || '0.00' %></div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Net Sales</div>
+                        <div class="summary-value">₹<%= summary.netSales || '0.00' %></div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Total Orders</div>
+                        <div class="summary-value"><%= summary.totalOrders || 0 %></div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ORDER ID</th>
+                            <th>CUSTOMER</th>
+                            <th>AMOUNT</th>
+                            <th>DISCOUNT</th>
+                            <th>COUPON</th>
+                            <th>FINAL AMOUNT</th>
+                            <th>PAYMENT METHOD</th>
+                            <th>DATE</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderTableBody">
+                        <% if (orders && orders.length > 0) { %>
+                            <% orders.forEach(order => { %>
+                                <tr>
+                                    <td class="order-id"><%= order.orderId || 'N/A' %></td>
+                                    <td><%= order.shippingAddress?.name || 'N/A' %></td>
+                                    <td class="amount">₹<%= (order.totalPrice || 0).toFixed(2) %></td>
+                                    <td class="discount">₹<%= (order.discount || 0).toFixed(2) %></td>
+                                    <td class="coupon">₹<%= (order.couponApplied ? (order.discount || 0) : 0).toFixed(2) %></td>
+                                    <td class="final-amount">₹<%= (order.finalAmount || 0).toFixed(2) %></td>
+                                    <td><span class="payment-method method-<%= (order.paymentMethod || '').toLowerCase().replace(/\s/g, '') %>">
+                                        <%= order.paymentMethod || 'N/A' %>
+                                    </span></td>
+                                    <td><%= order.createdAt ? new Date(order.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : 'N/A' %></td>
+                                    <td><span class="status-badge status-<%= (order.orderedItems[0]?.status || '').toLowerCase().replace(/\s/g, '') %>">
+                                        <%= order.orderedItems[0]?.status || 'N/A' %>
+                                    </span></td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="9" style="text-align: center;">No orders found</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+
+                <div class="pagination" id="pagination"></div>
+
+                <div class="export-section">
+                    <button class="btn btn-export-pdf" onclick="exportPDF()">Export PDF</button>
+                    <button class="btn btn-export-excel" onclick="exportExcel()">Export Excel</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let currentOrders = <%- JSON.stringify(orders || []) %>;
+        let currentSummary = <%- JSON.stringify(summary || { grossSales: 0, totalDiscount: 0, totalCoupons: 0, netSales: 0, totalOrders: 0 }) %>;
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let totalPages = Math.ceil(currentOrders.length / itemsPerPage);
+        let isFetching = false;
+        let loadingTimeout;
+
+        // Initialize custom date range display
+        document.getElementById("customDateRange").style.display = "none";
+
+        // Toggle inputs during fetch
+        function toggleInputs(disabled) {
+            document.getElementById("searchInput").disabled = disabled;
+            document.getElementById("userSearchInput").disabled = disabled;
+            document.getElementById("paymentMethodSelect").disabled = disabled;
+            document.getElementById("orderStatusSelect").disabled = disabled;
+            document.getElementById("dateRangeSelect").disabled = disabled;
+            document.getElementById("startDate").disabled = disabled;
+            document.getElementById("endDate").disabled = disabled;
+            document.querySelectorAll(".btn").forEach(btn => btn.disabled = disabled);
+        }
+
+        // Show/hide custom date range
+        document.getElementById("dateRangeSelect").addEventListener("change", function () {
+            const customDateRange = document.getElementById("customDateRange");
+            customDateRange.style.display = this.value === "custom" ? "flex" : "none";
+            if (this.value !== "custom" && this.value !== "") {
+                currentPage = 1;
+                filterSales();
+            }
+        });
+
+        // Debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // Live search for text inputs
+        const textInputs = [document.getElementById("searchInput"), document.getElementById("userSearchInput")];
+        textInputs.forEach(input => {
+            input.addEventListener("input", debounce(function () {
+                const value = this.value.trim();
+                console.log(`Text input changed: ${input.id} = ${value}`);
+                if (value.length >= 2 || value.length === 0) {
+                    currentPage = 1;
+                    filterSales();
+                }
+            }, 300));
+        });
+
+        // Live search for dropdowns
+        const dropdowns = [document.getElementById("paymentMethodSelect"), document.getElementById("orderStatusSelect"), document.getElementById("dateRangeSelect")];
+        dropdowns.forEach(dropdown => {
+            dropdown.addEventListener("change", function () {
+                console.log(`Dropdown changed: ${dropdown.id} = ${dropdown.value}`);
+                if (dropdown.id !== "dateRangeSelect" || (dropdown.value !== "custom" && dropdown.value !== "")) {
+                    currentPage = 1;
+                    filterSales();
+                }
+            });
+        });
+
+        // Live search for custom date inputs
+        const dateInputs = [document.getElementById("startDate"), document.getElementById("endDate")];
+        dateInputs.forEach(input => {
+            input.addEventListener("input", debounce(function () {
+                console.log(`Date input changed: ${input.id} = ${input.value}`);
+                currentPage = 1;
+                filterSales();
+            }, 300));
+        });
+
+        // Filter sales report
+        async function filterSales() {
+            if (isFetching) {
+                console.log("Fetch already in progress, skipping...");
+                return;
+            }
+            isFetching = true;
+            toggleInputs(true);
+
+            const search = document.getElementById("searchInput").value.trim();
+            const userSearch = document.getElementById("userSearchInput").value.trim();
+            const paymentMethod = document.getElementById("paymentMethodSelect").value;
+            const orderStatus = document.getElementById("orderStatusSelect").value;
+            const dateRange = document.getElementById("dateRangeSelect").value;
+            const startDate = document.getElementById("startDate").value;
+            const endDate = document.getElementById("endDate").value;
+
+            console.log("Filter params:", { search, userSearch, paymentMethod, orderStatus, dateRange, startDate, endDate, page: currentPage });
+
+            // Validate custom date range
+            if (dateRange === "custom" && (!startDate || !endDate)) {
+                showError("Please select both start and end dates for custom range.");
+                isFetching = false;
+                toggleInputs(false);
+                return;
+            }
+            if (dateRange === "custom" && new Date(startDate) > new Date(endDate)) {
+                showError("Start date cannot be after end date.");
+                isFetching = false;
+                toggleInputs(false);
+                return;
+            }
+
+            try {
+                const tableBody = document.getElementById("orderTableBody");
+                tableBody.innerHTML = '<tr><td colspan="9" class="loading"><span class="spinner"></span>Loading...</td></tr>';
+
+                // Set timeout to detect stuck loading state
+                loadingTimeout = setTimeout(() => {
+                    if (isFetching) {
+                        showError("Request taking too long. Please check your connection or try again later.");
+                        isFetching = false;
+                        toggleInputs(false);
+                    }
+                }, 10000);
+
+                const response = await fetch("/admin/filter-sales-report", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        search,
+                        userSearch,
+                        paymentMethod,
+                        orderStatus,
+                        dateRange,
+                        startDate,
+                        endDate,
+                        page: currentPage,
+                        limit: itemsPerPage
+                    })
+                });
+
+                clearTimeout(loadingTimeout);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log("Server response:", data);
+
+                if (!data.success) {
+                    throw new Error(data.error || "Failed to fetch sales data");
+                }
+
+                currentOrders = data.orders || [];
+                currentSummary = data.summary || {
+                    grossSales: 0,
+                    totalDiscount: 0,
+                    totalCoupons: 0,
+                    netSales: 0,
+                    totalOrders: 0
+                };
+                totalPages = data.totalPages || 1;
+
+                renderTable();
+                renderSummary();
+                renderPagination();
+            } catch (error) {
+                console.error("Error filtering sales:", error);
+                showError(`Failed to load data: ${error.message}. <button onclick="filterSales()">Retry</button>`);
+            } finally {
+                isFetching = false;
+                toggleInputs(false);
+            }
+        }
+
+        // Show error message
+        function showError(message) {
+            console.warn("Error displayed:", message);
+            const tableBody = document.getElementById("orderTableBody");
+            tableBody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #e74c3c;">${message}</td></tr>`;
+        }
+
+        // Render table
+        function renderTable() {
+            console.log("Rendering table with orders:", currentOrders);
+            const tbody = document.getElementById("orderTableBody");
+            tbody.innerHTML = "";
+            if (!currentOrders || currentOrders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align: center;">No orders found. Try adjusting your filters.</td></tr>`;
+                return;
+            }
+            currentOrders.forEach(order => {
+                const status = order.orderedItems && order.orderedItems[0]?.status || "N/A";
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="order-id">${order.orderId || "N/A"}</td>
+                        <td>${order.shippingAddress?.name || "N/A"}</td>
+                        <td class="amount">₹${(order.totalPrice || 0).toFixed(2)}</td>
+                        <td class="discount">₹${(order.discount || 0).toFixed(2)}</td>
+                        <td class="coupon">₹${(order.couponApplied ? (order.discount || 0) : 0).toFixed(2)}</td>
+                        <td class="final-amount">₹${(order.finalAmount || 0).toFixed(2)}</td>
+                        <td><span class="payment-method method-${(order.paymentMethod || "").toLowerCase().replace(/\s/g, '')}">
+                            ${order.paymentMethod || "N/A"}
+                        </span></td>
+                        <td>${order.createdAt ? new Date(order.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "N/A"}</td>
+                        <td><span class="status-badge status-${status.toLowerCase().replace(/\s/g, '')}">
+                            ${status}
+                        </span></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Render summary
+        function renderSummary() {
+            console.log("Rendering summary:", currentSummary);
+            const summaryGrid = document.querySelector(".summary-grid");
+            summaryGrid.innerHTML = `
+                <div class="summary-item">
+                    <div class="summary-label">Gross Sales</div>
+                    <div class="summary-value">₹${(currentSummary.grossSales || 0).toFixed(2)}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Coupons Redeemed</div>
+                    <div class="summary-value">₹${(currentSummary.totalCoupons || 0).toFixed(2)}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Discounts</div>
+                    <div class="summary-value">₹${(currentSummary.totalDiscount || 0).toFixed(2)}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Net Sales</div>
+                    <div class="summary-value">₹${(currentSummary.netSales || 0).toFixed(2)}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Total Orders</div>
+                    <div class="summary-value">${currentSummary.totalOrders || 0}</div>
+                </div>
+            `;
+        }
+
+        // Render pagination
+        function renderPagination() {
+            console.log("Rendering pagination: page", currentPage, "of", totalPages);
+            const pagination = document.getElementById("pagination");
+            pagination.innerHTML = "";
+            if (totalPages <= 1) return;
+
+            const prevButton = document.createElement("button");
+            prevButton.textContent = "←";
+            prevButton.disabled = currentPage === 1 || isFetching;
+            prevButton.addEventListener("click", () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    filterSales();
+                }
+            });
+            pagination.appendChild(prevButton);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement("button");
+                pageButton.textContent = i;
+                pageButton.classList.toggle("active", i === currentPage);
+                pageButton.disabled = isFetching;
+                pageButton.addEventListener("click", () => {
+                    currentPage = i;
+                    filterSales();
+                });
+                pagination.appendChild(pageButton);
+            }
+
+            const nextButton = document.createElement("button");
+            nextButton.textContent = "→";
+            nextButton.disabled = currentPage === totalPages || isFetching;
+            nextButton.addEventListener("click", () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    filterSales();
+                }
+            });
+            pagination.appendChild(nextButton);
+        }
+
+        // Clear filters
+        function clearFilters() {
+            console.log("Clearing filters");
+            document.getElementById("searchInput").value = "";
+            document.getElementById("userSearchInput").value = "";
+            document.getElementById("paymentMethodSelect").value = "";
+            document.getElementById("orderStatusSelect").value = "";
+            document.getElementById("dateRangeSelect").value = "";
+            document.getElementById("startDate").value = "";
+            document.getElementById("endDate").value = "";
+            document.getElementById("customDateRange").style.display = "none";
+            currentPage = 1;
+            filterSales();
+        }
+
+        // Export PDF
+        async function exportPDF() {
+            if (isFetching) return;
+            isFetching = true;
+            toggleInputs(true);
+
+            const search = document.getElementById("searchInput").value.trim();
+            const userSearch = document.getElementById("userSearchInput").value.trim();
+            const paymentMethod = document.getElementById("paymentMethodSelect").value;
+            const orderStatus = document.getElementById("orderStatusSelect").value;
+            const dateRange = document.getElementById("dateRangeSelect").value;
+            const startDate = document.getElementById("startDate").value;
+            const endDate = document.getElementById("endDate").value;
+
+            if (dateRange === "custom" && (!startDate || !endDate)) {
+                showError("Please select both start and end dates for custom range.");
+                isFetching = false;
+                toggleInputs(false);
+                return;
+            }
+
+            try {
+                const response = await fetch("/admin/export-sales-report-pdf", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ search, userSearch, paymentMethod, orderStatus, dateRange, startDate, endDate })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "sales_report.pdf";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error("Error exporting PDF:", error);
+                showError(`Failed to export PDF: ${error.message}. <button onclick="exportPDF()">Retry</button>`);
+            } finally {
+                isFetching = false;
+                toggleInputs(false);
+            }
+        }
+
+        // Export Excel
+        async function exportExcel() {
+            if (isFetching) return;
+            isFetching = true;
+            toggleInputs(true);
+
+            const search = document.getElementById("searchInput").value.trim();
+            const userSearch = document.getElementById("userSearchInput").value.trim();
+            const paymentMethod = document.getElementById("paymentMethodSelect").value;
+            const orderStatus = document.getElementById("orderStatusSelect").value;
+            const dateRange = document.getElementById("dateRangeSelect").value;
+            const startDate = document.getElementById("startDate").value;
+            const endDate = document.getElementById("endDate").value;
+
+            if (dateRange === "custom" && (!startDate || !endDate)) {
+                showError("Please select both start and end dates for custom range.");
+                isFetching = false;
+                toggleInputs(false);
+                return;
+            }
+
+            try {
+                const response = await fetch("/admin/export-sales-report-excel", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ search, userSearch, paymentMethod, orderStatus, dateRange, startDate, endDate })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "sales_report.xlsx";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error("Error exporting Excel:", error);
+                showError(`Failed to export Excel: ${error.message}. <button onclick="exportExcel()">Retry</button>`);
+            } finally {
+                isFetching = false;
+                toggleInputs(false);
+            }
+        }
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById("sidebar-container");
+            sidebar.style.display = sidebar.style.display === "block" ? "none" : "block";
+        }
+
+        // Initial render of pagination
+        renderPagination();
+    </script>
+</body>
+</html>

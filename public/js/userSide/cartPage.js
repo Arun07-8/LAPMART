@@ -4,7 +4,6 @@ async function updateQuantity(productId) {
     const increaseButton = document.querySelector(`.cart-qty-button[onclick="increaseQuantity('${productId}')"]`);
     const decreaseButton = document.querySelector(`.cart-qty-button[onclick="decreaseQuantity('${productId}')"]`);
 
-    // Validate input
     if (isNaN(newQuantity) || newQuantity < 1) {
         quantityInput.value = quantityInput.dataset.previousValue || 1;
         Swal.fire({
@@ -17,7 +16,6 @@ async function updateQuantity(productId) {
         return;
     }
 
-    // Disable buttons during request
     quantityInput.disabled = true;
     if (increaseButton) increaseButton.disabled = true;
     if (decreaseButton) decreaseButton.disabled = true;
@@ -43,19 +41,22 @@ async function updateQuantity(productId) {
             quantityInput.value = data.newQuantity;
             quantityInput.dataset.previousValue = data.newQuantity;
 
-            // ✅ SUBTOTAL update using data-price (offer price)
+            const price = parseFloat(quantityInput.dataset.price);
+            const salePrice = parseFloat(quantityInput.dataset.salePrice);
+            const hasOffer = quantityInput.dataset.hasOffer === 'true';
+
+            const subtotal = price * data.newQuantity;
+            const originalSubtotal = salePrice * data.newQuantity;
+
             const subtotalElement = document.getElementById(`subtotal-${productId}`);
-            const finalPrice = parseFloat(quantityInput.dataset.price);  // ✅ Get offer price
-            if (subtotalElement && !isNaN(finalPrice)) {
-                const subtotal = finalPrice * data.newQuantity;
-                subtotalElement.textContent = `₹${subtotal.toLocaleString('en-IN')}`;
+            if (subtotalElement) {
+                subtotalElement.innerHTML = hasOffer
+                    ? `₹${subtotal.toLocaleString('en-IN')} <span class="text-muted" style="text-decoration: line-through; font-size: 0.85em;">₹${originalSubtotal.toLocaleString('en-IN')}</span>`
+                    : `₹${originalSubtotal.toLocaleString('en-IN')}`;
             }
 
-            // ✅ Update order summary (from backend total)
-            updateOrderSummary({ totalPrice: data.newTotalPrice });
-
+            recalculateCartTotals(); // Recalculate total, discount, grand total
         } else {
-            // Revert quantity input
             quantityInput.value = quantityInput.dataset.previousValue || 1;
         }
     } catch (err) {
@@ -69,13 +70,11 @@ async function updateQuantity(productId) {
         });
         quantityInput.value = quantityInput.dataset.previousValue || 1;
     } finally {
-        // Re-enable buttons
         quantityInput.disabled = false;
         if (increaseButton) increaseButton.disabled = false;
         if (decreaseButton) decreaseButton.disabled = false;
     }
 }
-
 
 async function increaseQuantity(productId) {
     const quantityInput = document.getElementById(`quantity-${productId}`);
@@ -96,6 +95,26 @@ async function decreaseQuantity(productId) {
     }
 }
 
+function recalculateCartTotals() {
+    const items = document.querySelectorAll('[data-product-id]');
+    let total = 0;
+    let discount = 0;
+
+    items.forEach(item => {
+        const productId = item.getAttribute('data-product-id');
+        const qty = parseInt(document.getElementById(`quantity-${productId}`).value || 1);
+        const price = parseFloat(document.getElementById(`quantity-${productId}`).dataset.price);
+        const salePrice = parseFloat(document.getElementById(`quantity-${productId}`).dataset.salePrice);
+        const hasOffer = document.getElementById(`quantity-${productId}`).dataset.hasOffer === 'true';
+
+        total += price * qty;
+        if (hasOffer) discount += (salePrice - price) * qty;
+    });
+
+    document.getElementById('orderTotal').textContent = `₹${(total + discount).toLocaleString('en-IN')}`;
+    document.getElementById('totalDiscount').textContent = `-₹${discount.toLocaleString('en-IN')}`;
+    document.getElementById('grandTotal').textContent = `₹${total.toLocaleString('en-IN')}`;
+}
 
 async function removeItem(productId) {
     const result = await Swal.fire({
@@ -111,33 +130,27 @@ async function removeItem(productId) {
 
     if (result.isConfirmed) {
         try {
-            // Send AJAX request to remove item
             const response = await fetch('/cart/remove', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ productId }),
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                // Remove the specific item from DOM
                 const itemElement = document.querySelector(`.cart-product-item[data-product-id="${productId}"]`);
-                if (itemElement) {
-                    itemElement.remove();
-                }
+                if (itemElement) itemElement.remove();
 
-                // Check if cart is empty and update product list container
                 const productContainer = document.querySelector('.cart-items-container');
                 const remainingItems = document.querySelectorAll('.cart-product-item');
+
                 if (!remainingItems.length) {
                     productContainer.innerHTML = '<div class="cart-empty-message">Your cart is empty.</div>';
+                    updateOrderSummary({ newTotalPrice: 0, totalDiscount: 0 });
+                } else {
+                    recalculateCartTotals();
                 }
-
-                // Update order summary with server data
-                updateOrderSummary(data.cart);
 
                 Swal.fire({
                     icon: 'success',
@@ -150,7 +163,6 @@ async function removeItem(productId) {
                     icon: 'error',
                     title: 'Removal Failed',
                     text: data.message || 'Failed to remove item.',
-                    confirmButtonText: 'OK'
                 });
             }
         } catch (error) {
@@ -159,28 +171,9 @@ async function removeItem(productId) {
                 icon: 'error',
                 title: 'Error',
                 text: 'An error occurred while removing the item.',
-                confirmButtonText: 'OK'
             });
         }
     }
-}
-
-function updateOrderSummary(cart) {
-    const orderTotalElement = document.getElementById('orderTotal');
-    const grandTotalElement = document.getElementById('grandTotal');
-
-    if (cart && cart.totalPrice) {
-        const total = cart.totalPrice.toLocaleString();
-        orderTotalElement.textContent = `₹${total}`;
-        grandTotalElement.textContent = `₹${total}`;
-    } else {
-        orderTotalElement.textContent = '₹0';
-        grandTotalElement.textContent = '₹0';
-    }
-}
-
-function proceedToCheckout() {
-    window.location.href = '/checkout';
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -190,37 +183,31 @@ document.addEventListener('DOMContentLoaded', function () {
             updateQuantity(productId);
         });
     });
-});
 
-//checkout validation 
-document.getElementById("checkoutBtn").addEventListener("click", async () => {
+    document.getElementById("checkoutBtn").addEventListener("click", async () => {
+        try {
+            const res = await fetch("/checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            });
 
-    try {
-        const res = await fetch("/checkout", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-        });
-        const result = await res.json();
+            const result = await res.json();
 
-        if (res.ok && result.success) {
-            window.location.href = "/checkout";
-        } else {
+            if (res.ok && result.success) {
+                window.location.href = "/checkout";
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Checkout Blocked',
+                    text: result.message || "Some products are unavailable",
+                });
+            }
+        } catch (err) {
             Swal.fire({
                 icon: 'error',
-                title: 'Checkout Blocked',
-                text: result.message || "Some products are unavailable",
+                title: 'Error',
+                text: "Something went wrong!",
             });
         }
-
-    } catch (err) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: "Something went wrong!",
-        });
-    }
+    });
 });
-
-

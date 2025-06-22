@@ -11,6 +11,7 @@ const checkOutController=require("../controllers/user/checkOutController")
 const whishlistController=require("../controllers/user/wishlistController")
 const OrderController=require("../controllers/user/orderController")
 const walletController=require("../controllers/user/walletController")
+const couponController=require("../controllers/user/couponController")
 const {userAuth}=require("../middlewares/userAuth")
 const {profileUpload}=require("../config/multer")
 
@@ -98,5 +99,9 @@ router.post("/order-details/return",userAuth,OrderController.orderReturn)
 //  Wallect
 router.get("/wallet",userAuth,walletController.getWalletPage)
 
+// coupon controller
+router.get('/coupons/available',userAuth,couponController.availableCoupon)
+router.post("/coupons/apply",userAuth,couponController.applyCoupon)
+router.post("/coupons/remove",userAuth,couponController.removeCoupon)
 
 module.exports=router;                

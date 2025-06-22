@@ -809,7 +809,7 @@
                 <div class="confetti"></div>
                 <div class="success-checkmark">✓</div>
                 <h1 class="success-title">Order Successful!</h1>
-                <p class="success-subtitle">Thank you for your purchase, <%= userData?.name || 'Customer' %>.</p>
+                <p class="success-subtitle">Thank you for your purchase, <%= user   ?.name || 'Customer' %>.</p>
             </div>
             
             <div class="order-details">
@@ -886,27 +886,55 @@
                     </div>
                 </div>
                 
-                <div class="total-section">
-                    <div class="total-row">
-                        <span>Subtotal:</span>
-                        <span>
-                            ₹<%= order?.orderedItems?.reduce((total, item) => total + item.price * item.quantity, 0).toLocaleString() %>
-                        </span>
-                    </div>
-                    <div class="total-row">
-                        <span>Shipping Charge:</span>
-                        <span>₹0.00</span>
-                    </div>
-                    <div class="total-row">
-                        <span>Discount:</span>
-                        <span>₹<%= order?.discount?.toFixed(2) || '0.00' %></span>
-                    </div>
-                    <div class="total-row total-final">
-                        <span>Total:</span>
-                        <span>₹<%= order?.finalAmount?.toLocaleString() || '0.00' %></span>
-                    </div>
-                </div>
-                
+      <div class="total-section">
+  <div class="total-row">
+    <span>Subtotal:</span>
+    <span>₹<%= totalOriginal.toLocaleString() %></span>
+  </div>
+
+  <div class="total-row">
+    <span>Shipping Charge:</span>
+    <span>₹0.00</span>
+  </div>
+
+  <% if (totalSavings > 0) { %>
+    <div class="total-row">
+      <span>Offer Discount:</span>
+      <span>-₹<%= totalSavings.toLocaleString() %></span>
+    </div>
+  <% } %>
+
+  <% if (discountAmount && discountAmount > 0) { %>
+    <div class="total-row">
+      <span>Coupon <%= couponCode ? `(${couponCode})` : '' %>:</span>
+      <span>-₹<%= discountAmount.toLocaleString() %></span>
+    </div>
+  <% } %>
+
+  <div class="total-row total-final">
+    <span>Grand Total:</span>
+    <span>₹<%= grandTotal.toLocaleString() %></span>
+  </div>
+
+  <% if (totalSavings > 0 || discountAmount > 0) { %>
+    <div class="offer-note">
+      <p>
+        <strong>Note:</strong>
+        You saved 
+        ₹<%= (totalSavings + discountAmount).toLocaleString() %> 
+        in total.
+        <% if (couponCode) { %>
+          (₹<%= discountAmount.toLocaleString() %> from coupon "<%= couponCode %>")
+        <% } %>
+      </p>
+    </div>
+  <% } else { %>
+    <div class="offer-note">
+      <p><strong>Note:</strong> No discounts applied. You are paying the full price.</p>
+    </div>
+  <% } %>
+</div>
+               
                 <div class="action-buttons">
                     <button id="downloadInvoiceBtn" class="btn-custom btn-primary-custom">📄 Download Invoice</button>
                     <a href="/home" class="btn-custom btn-secondary-custom">🛒 Continue Shopping</a>
@@ -940,8 +968,8 @@
                     <div class="invoice-details-grid">
                         <div class="invoice-detail-card">
                             <h4>Bill To:</h4>
-                            <p class="customer-name"><%= userData?.name || 'Customer' %></p>
-                            <p><%= userData?.email || 'N/A' %></p>
+                            <p class="customer-name"><%= user?.name || 'Customer' %></p>
+                            <p><%= user?.email || 'N/A' %></p>
                             <p><%= order.shippingAddress?.phone || 'N/A' %></p>
                             <% if (order.shippingAddress) { %>
                                 <p><%= order.shippingAddress.address || '' %></p>

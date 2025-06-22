@@ -1,20 +1,65 @@
+
 let cropper = null;
 let currentImageIndex = -1;
 let isRecropping = false;
 let originalImages = [];
 let croppedImages = [];
-let existingImages = [];
-const minImages = 2; 
-const maxImages = 5; 
+let existingImages = window.existingImages || [];
+const minImages = 2;
+const maxImages = 5;
 const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
+existingImages.forEach((imageUrl, index) => {
+    croppedImages[index] = { dataUrl: imageUrl, file: null };
+});
 
-<% if (product && product.productImage && product.productImage.length > 0) { %>
-    existingImages = <%- JSON.stringify(product.productImage) %>;
-    existingImages.forEach((imageUrl, index) => {
-        croppedImages[index] = { dataUrl: imageUrl };
+document.addEventListener('DOMContentLoaded', function () {
+    const dropZone = document.getElementById('dropZone');
+    const imageInput = document.getElementById('images');
+
+    dropZone.addEventListener('click', () => imageInput.click());
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
     });
-<% } %>
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+    });
+
+    imageInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+    document.getElementById('editProductForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
+        if (!validateForm()) {
+            Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Please correct the form.' });
+            return;
+        }
+
+        Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+        const productId = document.getElementById('proID').value;
+        const form = document.getElementById('editProductForm');
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(`/admin/editProduct/${productId}`, { method: 'POST', body: formData });
+            const result = await response.json();
+            if (response.ok) {
+                Swal.fire({ icon: 'success', title: 'Updated', text: result.message || 'Product updated!', timer: 1500 });
+                setTimeout(() => (window.location.href = '/admin/products'), 1500);
+            } else {
+                throw new Error(result.message || 'Update failed');
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: error.message });
+        }
+    });
+
+    updatePreview();
+});
 
 function sanitizeInput(input) {
     const div = document.createElement('div');
@@ -22,53 +67,25 @@ function sanitizeInput(input) {
     return div.innerHTML.replace(/[<>&"]/g, '');
 }
 
-// Drag and Drop
-const dropZone = document.getElementById('dropZone');
-const imageInput = document.getElementById('images');
-dropZone.addEventListener('click', () => imageInput.click());
-dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropZone.classList.add('dragover');
-});
-dropZone.addEventListener('dragleave', () => {
-    dropZone.classList.remove('dragover');
-});
-dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropZone.classList.remove('dragover');
-    handleFiles(e.dataTransfer.files);
-});
-
-// File Input Change
-imageInput.addEventListener('change', (e) => {
-    handleFiles(e.target.files);
-});
-
 function handleFiles(files) {
     clearErrorMessage('images');
-    const newFiles = Array.from(files).filter(file => {
-        if (!allowedTypes.includes(file.type)) {
-            Swal.fire({ icon: 'error', title: 'Invalid File', text: `${file.name} is not a supported image type.` });
-            return false;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-            Swal.fire({ icon: 'error', title: 'File Too Large', text: `${file.name} exceeds 5MB.` });
-            return false;
-        }
-        return true;
-    });
-}
+    const newFiles = Array.from(files).filter(file => allowedTypes.includes(file.type) && file.size <= 5 * 1024 * 1024);
+    const totalImages = existingImages.length + newFiles.length;
+    if (totalImages > maxImages) {
+        Swal.fire({ icon: 'error', title: 'Too Many Images', text: `Max ${maxImages} images allowed.` });
+        imageInput.value = '';
+        return;
+    }
     originalImages = [];
     newFiles.forEach(file => {
         const reader = new FileReader();
         reader.onload = (e) => {
             originalImages.push({ file, dataUrl: e.target.result });
-            if (originalImages.length === newFiles.length) {
-                startCrop(0);
-            }
+            if (originalImages.length === newFiles.length) startCrop(0);
         };
         reader.readAsDataURL(file);
     });
+}
 
 
     function updatePreview() {

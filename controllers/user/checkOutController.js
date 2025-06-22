@@ -2,8 +2,9 @@ const Address = require("../../models/addressSchema");
 const Cart = require("../../models/cartSchema");
 const User=require("../../models/userSchema")
 const Wallet=require("../../models/walletSchema")
+const {applyBestOffer}=require("../../helpers/offerHelper")
+const Coupon=require("../../models/couponSchema")
 
-//  checkout page getting
 const checkOutpage = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -14,31 +15,84 @@ const checkOutpage = async (req, res) => {
     const existingCart = await Cart.findOne({ userId }).populate('items.productId');
     const existingAddress = await Address.findOne({ userId });
     const userData = await User.findById(userId);
+    const wallet = await Wallet.findOne({ user: userId });
+    const addresses = existingAddress ? existingAddress.address : [];
 
     let totalPrice = 0;
+    let totalSavings = 0;
+
     if (existingCart && existingCart.items) {
-      totalPrice = existingCart.items.reduce((sum, item) => sum + item.totalPrice, 0);
+      for (const item of existingCart.items) {
+        const product = item.productId;
+        const quantity = item.quantity;
+        const salePrice = item.salePrice;
+        const updatedProduct = await applyBestOffer(product);
+        const finalPrice = updatedProduct.finalPrice || updatedProduct.salePrice;
+
+        item.finalPrice = finalPrice;
+
+        const subtotal = finalPrice * quantity;
+        const savings = (salePrice - finalPrice) * quantity;
+
+        item.subtotal = subtotal;
+        item.savings = savings;
+
+        totalPrice += subtotal;
+        totalSavings += savings;
+      }
     }
 
-    const addresses = existingAddress ? existingAddress.address : [];
- const wallet = await Wallet.findOne({ user: userId });
 
-    console.log(wallet,'fe')
+    const appliedCouponCode = req.session.couponCode; // store in session or query
+    console.log(appliedCouponCode,"hhhh")
+    let coupon = null;
+    let discountAmount = 0;
+
+    if (appliedCouponCode) {
+      coupon = await Coupon.findOne({ code: appliedCouponCode, isListed: true });
+      if (coupon) {
+        if (coupon.type === 'percentage') {
+          discountAmount = Math.floor((totalPrice * coupon.value) / 100);
+        } else if (coupon.type === 'fixed') {
+          discountAmount = coupon.value;
+        }
+
+        if (discountAmount > totalPrice) {
+          discountAmount = totalPrice;
+        }
+      }
+    }
+
+    const grandTotal = totalPrice - discountAmount;
+
     res.render("checkOut", {
       key_id: process.env.RAZORPAY_KEY_ID,
       user: userData,
       Address: addresses,
-      wallet:wallet,
+      wallet: wallet,
       Cart: {
         ...existingCart?.toObject(),
+        items: existingCart.items.map(item => ({
+          ...item.toObject(),
+          finalPrice: item.finalPrice,
+          subtotal: item.subtotal,
+          savings: item.savings,
+        })),
         totalPrice,
+        totalSavings,
+        discountAmount,
+        grandTotal,
       },
+      coupon: coupon,
     });
+
   } catch (error) {
     console.error("Checkout page error:", error);
     res.redirect("/pageNotFound");
   }
 };
+
+
 const checkoutHandler = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -90,5 +144,4 @@ const checkoutHandler = async (req, res) => {
 module.exports={
     checkOutpage,
    checkoutHandler,
-
 }

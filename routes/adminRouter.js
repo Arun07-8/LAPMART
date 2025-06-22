@@ -8,6 +8,7 @@ const productController=require("../controllers/admin/productController")
 const orderMangementController=require("../controllers/admin/orderMangementController")
 const couponController=require("../controllers/admin/couponController")
 const offersController=require("../controllers/admin/offersController")
+const salesReportContreller=require("../controllers/admin/salesReporterController")
 const {adminAuth}=require("../middlewares/adminAuth");
 const {productUpload}=require("../config/multer")
 
@@ -83,4 +84,10 @@ router.get("/edit-offer/:id",adminAuth,offersController.editOffer)
 router.post("/edit-offer/:id",adminAuth,offersController.editOfferPage)
 router.patch("/offerdelete/:id",adminAuth,offersController.deleteOffer)
 
+
+//  SalesReport
+router.get("/sales-report",adminAuth, salesReportContreller.getSalesReport);
+router.post("/filter-sales-report",adminAuth,  salesReportContreller.filterSalesReport);
+router.post("/export-sales-report-pdf",adminAuth,  salesReportContreller.exportSalesReportPDF);
+router.post("/export-sales-report-excel",adminAuth,  salesReportContreller.exportSalesReportExcel);
 module.exports=router;
