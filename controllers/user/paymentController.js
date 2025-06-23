@@ -18,8 +18,6 @@ const createOrder = async (req, res) => {
     if (!amount || isNaN(amount) || amount <= 0) {
       return res.status(400).json({ success: false, message: 'Invalid amount.' });
     }
-
-    // Just create Razorpay order (no DB save here)
     const razorpayOrder = await razorpay.orders.create({
       amount: Math.round(amount * 100),
       currency: 'INR',
@@ -42,6 +40,7 @@ const createOrder = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error while creating Razorpay order.' });
   }
 };
+
 const verifyPayment = async (req, res) => {
   try {
     const {

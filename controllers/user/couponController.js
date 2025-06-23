@@ -25,6 +25,7 @@ const availableCoupon= async (req, res) => {
   }
 }
 
+
 const applyCoupon = async (req, res) => {
   try {
     const { code, totalAmount } = req.body;
@@ -34,7 +35,7 @@ const applyCoupon = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Please login to apply a coupon.' });
     }
 
-    // Block if already applied
+
     if (req.session.appliedCoupon) {
       return res.status(400).json({ success: false, message: 'A coupon is already applied. Remove it to apply a new one.' });
     }
@@ -66,16 +67,14 @@ const applyCoupon = async (req, res) => {
       });
     }
 
-    // Save coupon to session
     req.session.appliedCoupon = {
       code: coupon.couponCode,
-      type: coupon.type, // 'percentage' or 'fixed'
+      type: coupon.type, 
       value: coupon.offerPrice,
       minPurchase: coupon.minPurchase,
       couponId: coupon._id
     };
 
-    // Calculate discount for UI
     const discount = coupon.type === 'percentage'
       ? Math.floor((totalAmount * coupon.offerPrice) / 100)
       : coupon.offerPrice;

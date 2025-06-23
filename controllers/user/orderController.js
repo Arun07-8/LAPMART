@@ -2,6 +2,7 @@ const Order = require("../../models/orderSchema")
 const User = require("../../models/userSchema")
 const Wallet = require("../../models/walletSchema")
 const { applyBestOffer } = require("../../helpers/offerHelper")
+
 const getOrderPage = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -56,7 +57,7 @@ const getOrderPage = async (req, res) => {
     const couponCode = order.couponCode || null;
     const discountAmount = order.discount || 0;
 
-    // ✅ Fallback: if no coupon, grandTotal = totalFinal
+
     const grandTotal = Math.max(totalFinal - discountAmount, 0);
 
     const totalSavings = totalOriginal - totalFinal;
@@ -65,13 +66,13 @@ const getOrderPage = async (req, res) => {
       user: userData,
       order,
       orderedItems: orderedItemsWithOffers,
-      totalOriginal,      // Before offers
-      totalFinal,         // After offers
-      totalSavings,       // Offer savings
+      totalOriginal,      
+      totalFinal,         
+      totalSavings,       
       hasAnyOffer,
-      discountAmount,     // Coupon savings
+      discountAmount,    
       couponCode,
-      grandTotal          // After both discounts
+      grandTotal          
     });
 
   } catch (error) {

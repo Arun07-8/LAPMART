@@ -247,7 +247,6 @@ const editProduct = async (req, res) => {
     try {
         const { id } = req.params;
         const data = req.body;
- console.log(data,"hp")
         if (!id.match(/^[0-9a-fA-F]{24}$/)) {
             return res.status(400).json({ success: false, message: 'Invalid product ID' });
         }
