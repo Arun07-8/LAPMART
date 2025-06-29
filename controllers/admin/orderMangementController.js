@@ -1,8 +1,9 @@
 const Order = require("../../models/orderSchema")
 const User = require("../../models/userSchema")
-const razorpay = require("../../config/razorpay");
+const Product=require("../../models/productSchema")
+const { applyBestOffer } = require("../../helpers/offerHelper")
 const Wallet=require("../../models/walletSchema")
-const crypto = require('crypto');
+
 
 
 function getmainOrderStatus(orderedItems) {
@@ -10,6 +11,7 @@ function getmainOrderStatus(orderedItems) {
   const statuses = orderedItems.map((item) => item.status);
   if (statuses.includes('Cancelled')) return 'Cancelled';
   if (statuses.includes('Pending')) return 'Pending';
+  if (statuses.includes('Shipped')) return 'Shipped';
   if (statuses.includes('Return Request')) return 'Return Request';
   if (statuses.includes('Returned')) return 'Returned';
   if (statuses.every((status) => status === 'Delivered')) return 'Delivered';
@@ -18,25 +20,16 @@ function getmainOrderStatus(orderedItems) {
 
 const getOrderManagementPage = async (req, res) => {
     try {
- 
-
         const page = Math.max(1, parseInt(req.query.page) || 1);
         const limit = 4;
         const skip = (page - 1) * limit;
-
-        // Build search query
         let query = {};
-        
-        // Search by multiple fields
+
+      
         if (req.query.search && req.query.search.trim() !== '') {
             const searchTerm = req.query.search.trim();
-            console.log("Search term:", searchTerm);
-
             try {
-                // Create a regex that matches the term anywhere in the string
                 const searchRegex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-                
-                // Build the search query for multiple fields
                 query.$or = [
                     { orderId: searchRegex },
                     { 'shippingAddress.name': searchRegex },
@@ -53,12 +46,12 @@ const getOrderManagementPage = async (req, res) => {
             }
         }
 
-        // Filter by payment method
+
         if (req.query.paymentMethod && req.query.paymentMethod !== 'All') {
             query.paymentMethod = req.query.paymentMethod.toUpperCase();
         }
 
-        // Filter by date range
+ 
         if (req.query.fromDate || req.query.toDate) {
             query.createdAt = {};
             if (req.query.fromDate) {
@@ -75,18 +68,14 @@ const getOrderManagementPage = async (req, res) => {
             }
         }
 
-        // Filter by status
         if (req.query.status && req.query.status !== 'All Orders') {
             query['orderedItems.status'] = req.query.status;
         }
 
-        console.log("Final query:", JSON.stringify(query, null, 2));
-
-        // Get total count for pagination
         const totalOrders = await Order.countDocuments(query);
         const totalPages = Math.ceil(totalOrders / limit);
 
-        // Fetch orders with pagination
+
         const orders = await Order.find(query)
             .populate({
                 path: "userId",
@@ -94,23 +83,57 @@ const getOrderManagementPage = async (req, res) => {
             })
             .populate({
                 path: "orderedItems.product",
-                select: "name"
+                select: "name salePrice"
             })
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
 
+     const enrichedOrders = [];
 
+for (const order of orders) {
+  order.mainStatus = getmainOrderStatus(order.orderedItems);
+  let totalOriginal = 0;
+  let totalFinal = 0;
+  const orderedItemsWithOffers = [];
+  
+  for (const item of order.orderedItems) {
+    const updatedProduct = await applyBestOffer(item.product);
+    const quantity = item.quantity;
+    const originalPrice = item.product.salePrice;
+    const offerPrice = updatedProduct.finalPrice || originalPrice;
+    
+    const itemTotal = offerPrice * quantity;
+    totalOriginal += originalPrice * quantity;
+    totalFinal += itemTotal;
+    
+    orderedItemsWithOffers.push({
+      ...item.toObject(),
+      product: updatedProduct,
+      finalPrice: offerPrice,
+      totalPrice: itemTotal
+    });
+  }
+  
+  const discountAmount = order.discount || 0;
+  const grandTotal = Math.max(totalFinal - discountAmount, 0);
+  const totalSavings = totalOriginal - totalFinal;
+  const orderObj = order.toObject();
+  orderObj._id = order._id; 
+  orderObj.mainStatus = order.mainStatus; 
+  orderObj.orderedItems = orderedItemsWithOffers;
+  orderObj.totalOriginal = totalOriginal;
+  orderObj.totalFinal = totalFinal;
+  orderObj.totalSavings = totalSavings;
+  orderObj.discountAmount = discountAmount;
+  orderObj.grandTotal = grandTotal;
 
-        // Add main status to each order
-        orders.forEach(order => {
-            order.mainStatus = getmainOrderStatus(order.orderedItems);
-        });
+  enrichedOrders.push(orderObj);
+}
 
-        // If it's an AJAX request, send JSON response
         if (req.xhr || req.headers.accept?.includes('json') || req.headers['x-requested-with'] === 'XMLHttpRequest') {
             return res.json({
-                orders,
+                orders:enrichedOrders,
                 currentPage: page,
                 totalPages,
                 totalOrders,
@@ -119,9 +142,9 @@ const getOrderManagementPage = async (req, res) => {
             });
         }
 
-        // For regular page load, render the view
+        
         res.render("orderMangement", {
-            orders,
+            orders: enrichedOrders,
             currentPage: page,
             totalPages,
             search: req.query.search || '',
@@ -134,7 +157,7 @@ const getOrderManagementPage = async (req, res) => {
     } catch (error) {
         console.error("Error loading orders:", error);
         if (req.xhr || req.headers.accept?.includes('json') || req.headers['x-requested-with'] === 'XMLHttpRequest') {
-            return res.status(500).json({ 
+            return res.status(500).json({
                 error: 'Internal server error',
                 message: 'Failed to load orders. Please try again.',
                 details: error.message
@@ -142,22 +165,90 @@ const getOrderManagementPage = async (req, res) => {
         }
         res.redirect("/admin/pagenotFounderror");
     }
-}
+};
 
-const getOrderDetailspage=async (req,res) => {
-    try {
-        const orderId=req.params.orderId
-        const order=await Order.findById(orderId).populate("userId", "name").populate("orderedItems.product");
-        if (!order) {
-        return res.status(404).send("Order not found");
-        }
+const getOrderDetailspage = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const order = await Order.findById(orderId)
+      .populate('orderedItems.product')
+      .populate('userId');
 
-        res.render("orderViewpage",{order})
-    } catch (error) {
-         console.error("Order detail load error:", error);
-         res.redirect("/admin/pagenotFounderror");
+    if (!order) return res.redirect('/admin/order-management');
+
+    let totalOriginal = 0;
+    let totalFinal = 0;
+    const orderedItemsWithOffers = [];
+    const returnRequestProduct = [];
+
+    for (const item of order.orderedItems) {
+      const updatedProduct = await applyBestOffer(item.product);
+      const quantity = item.quantity;
+      const originalPrice = item.product.salePrice;
+      const offerPrice = updatedProduct.finalPrice || originalPrice;
+      const itemTotal = offerPrice * quantity;
+
+      totalOriginal += originalPrice * quantity;
+      totalFinal += itemTotal;
+
+      orderedItemsWithOffers.push({
+        ...item.toObject(),
+        product: updatedProduct,
+        finalPrice: offerPrice,
+        totalPrice: itemTotal
+      });
     }
-}
+
+    const discountAmount = order.discount || 0;
+    const totalOfferDiscount = totalOriginal - totalFinal;
+    const grandTotal = Math.max(totalFinal - discountAmount, 0);
+
+
+    for (const item of order.orderedItems) {
+      if (item.status?.trim().toLowerCase() === 'return request') {
+        const updatedProduct = await applyBestOffer(item.product); 
+        const quantity = item.quantity;
+        const offerPrice = updatedProduct.finalPrice || item.product.salePrice;
+        const itemTotal = offerPrice * quantity;
+
+        const proportionalDiscount = totalFinal > 0
+          ? (itemTotal / totalFinal) * discountAmount
+          : 0;
+
+        const refundAmount = Math.max(itemTotal - proportionalDiscount, 0);
+
+        returnRequestProduct.push({
+          name: updatedProduct.productName,
+          productImage: updatedProduct.productImage?.[0],
+          productId: updatedProduct._id,
+          quantity,
+          refundAmount,
+          returnReason: item.returnReason
+        });
+      }
+    }
+
+    const mainStatus = getmainOrderStatus(order.orderedItems);
+
+    const orderData = order.toObject();
+    orderData.orderedItems = orderedItemsWithOffers;
+    orderData.totalOriginal = totalOriginal;
+    orderData.totalOfferDiscount = totalOfferDiscount;
+    orderData.discountAmount = discountAmount;
+    orderData.grandTotal = grandTotal;
+    orderData.mainStatus = mainStatus;
+
+    res.render('orderViewpage', {
+      order: orderData,
+      returnRequestProduct: returnRequestProduct.length > 0 ? returnRequestProduct : null
+    });
+
+  } catch (error) {
+    console.error('Error loading admin order details:', error);
+    res.redirect('/admin/pagenotFounderror');
+  }
+};
+
 
 const updateStatus = async (req, res) => {
   try {
@@ -177,7 +268,9 @@ const updateStatus = async (req, res) => {
     order.orderedItems.forEach(item => {
       item.status = newStatus;
     });
-
+if (newStatus === 'Delivered' && order.paymentMethod === 'Cash on Delivery') {
+      order.paymentStatus = 'success';
+    }
     await order.save();
 
     res.status(200).json({
@@ -189,16 +282,15 @@ const updateStatus = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
-
-
 const acceptReturn = async (req, res) => {
   try {
     const { orderId, productId } = req.params;
+    const userId = req.session.user;
+
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found.' });
     }
-
 
     const item = order.orderedItems.find(
       (item) => item.product.toString() === productId
@@ -211,9 +303,25 @@ const acceptReturn = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Item already returned.' });
     }
 
-    const refundAmount = item.price * item.quantity;
+    const product = await Product.findById(item.product);
+    const offerAppliedProduct = await applyBestOffer(product);
+    const finalPrice = offerAppliedProduct.finalPrice
+
+    const quantity = item.quantity || 1;
+    const itemTotal = finalPrice * quantity;
+
+    const orderLevelDiscount = order.discount || 0;
+    const refundAmount = Number(Math.max(itemTotal - orderLevelDiscount, 0).toFixed(2));
+
+
+    if (isNaN(refundAmount)) {
+      console.error("refundAmount is NaN", { itemTotal, totalFinal, discount, finalPrice, quantity });
+      return res.status(500).json({ success: false, message: 'Refund calculation failed.' });
+    }
 
     const transactionId = `TXN_${Date.now()}_${Math.floor(100000 + Math.random() * 700000)}`;
+
+    // Wallet handling
     let wallet = await Wallet.findOne({ user: order.userId });
 
     if (!wallet) {
@@ -224,18 +332,18 @@ const acceptReturn = async (req, res) => {
           {
             amount: refundAmount,
             type: 'credit',
-            description: `Refund for returned product ID in ${order.orderId}`,
+            description: `Refund for returned product in order ${order.orderId}`,
             transactionId,
             status: 'success',
           },
         ],
       });
     } else {
-      wallet.balance += refundAmount;
+      wallet.balance = Number(wallet.balance || 0) + refundAmount;
       wallet.transactions.push({
         amount: refundAmount,
         type: 'credit',
-        description: 'Refund for returned product',
+        description: `Refund for returned product in order ${order.orderId}`,
         transactionId,
         status: 'success',
       });
@@ -243,13 +351,22 @@ const acceptReturn = async (req, res) => {
 
     try {
       await wallet.save();
+      await User.findByIdAndUpdate(userId, { wallet: wallet._id });
     } catch (err) {
-      console.error('Wallet save error:', err.message);
+      console.error(' Wallet save error:', err.message);
       return res.status(500).json({ success: false, message: 'Could not process wallet refund.' });
     }
+
+
     item.status = 'Returned';
     item.isReturned = true;
 
+
+    await Product.findByIdAndUpdate(item.product, {
+      $inc: { quantity: item.quantity },
+    });
+
+   
     if (order.orderedItems.every((i) => i.status === 'Returned')) {
       order.status = 'Returned';
     }
@@ -258,14 +375,16 @@ const acceptReturn = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: 'Return accepted. Refund credited to wallet.',
+      message: 'Return accepted. Refund credited to wallet and product restocked.',
     });
 
   } catch (error) {
-    console.error('Accept return error:', error.message);
+    console.error(' Accept return error:', error.message);
     return res.status(500).json({ success: false, message: 'Internal server error.' });
   }
 };
+
+
 
 
 const rejectReturn = async (req, res) => {

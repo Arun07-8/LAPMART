@@ -12,7 +12,7 @@
     <div class="container">
         <h2>Email Verification</h2>
         <p class="description">Enter the 6-digit code sent to your email</p>
-        <form id="otpForm" action="/verify-Otp" method="post" onsubmit="return validateOtpForm()">
+        <form id="otpForm" action="/Otp-verify" method="post" onsubmit="return validateOtpForm()">
             <div class="otp-inputs">
                 <input type="text" id="otp1" maxlength="1" class="otp-input" oninput="handleInput(this, 0)" onkeydown="handleKeyDown(event, 0)">
                 <input type="text" id="otp2" maxlength="1" class="otp-input" oninput="handleInput(this, 1)" onkeydown="handleKeyDown(event, 1)">
@@ -230,7 +230,7 @@
                         const isExpired = response.message && response.message.toLowerCase().includes('expired');
                         Swal.fire({
                             icon: 'error',
-                            title: isExpired ? 'OTP Expired' : 'Invalid OTP',
+                            title: isExpired ? 'OTP Expired' : '',
                             text: response.message || (isExpired ? 'Please resend a new OTP.' : 'Please try again.'),
                             showConfirmButton: false,
                             timer: 2000,

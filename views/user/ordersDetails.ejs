@@ -547,19 +547,13 @@
   let orderStatus = 'Unknown';
   let isPaymentFailed = false;
 
-  // Check Razorpay payment status
   if (order.paymentMethod === 'Razorpay') {
     isPaymentFailed = order.orderedItems.some(function(item) {
       return item.paymentStatus === 'failed';
     });
   }
 
-  // ✅ Only evaluate order status if payment is NOT failed
-  if (
-    order.orderedItems &&
-    order.orderedItems.length > 0 &&
-    !isPaymentFailed
-  ) {
+  if (order.orderedItems && order.orderedItems.length > 0 && !isPaymentFailed) {
     const statuses = order.orderedItems.map(function(item) {
       return item.status;
     });
@@ -582,11 +576,9 @@
       orderStatus = 'Return Rejected';
     }
   } else if (isPaymentFailed) {
-    // If Razorpay payment failed, show that clearly
     orderStatus = 'Payment Failed';
   }
 
-  // Set Payment Method Label
   let paymentLabel = 'N/A';
   if (order.paymentMethod === 'Razorpay') {
     paymentLabel = isPaymentFailed ? 'Payment Failed' : 'Paid via Razorpay';
@@ -596,6 +588,7 @@
     paymentLabel = 'Wallet Paid';
   }
 %>
+
 <tr>
   <td>#<%= order.orderId || 'Unknown' %></td>
   <td><%= order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-GB') : 'Unknown' %></td>
@@ -605,7 +598,8 @@
     </span>
   </td>
   <td><%= order.paymentMethod %></td>
-  <td>₹<%= order.finalAmount != null ? order.finalAmount.toFixed(2) : '0.00' %></td>
+  <td>₹<%= order.grandTotal != null ? order.grandTotal.toFixed(2) : '0.00' %>
+</td>
   <td>
     <% if (isPaymentFailed) { %>
       <a href="/order-review/<%= order.razorpayOrderId %>?retry=true" class="details-btn">

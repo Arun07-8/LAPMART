@@ -15,7 +15,13 @@ const checkOutpage = async (req, res) => {
     const existingCart = await Cart.findOne({ userId }).populate('items.productId');
     const existingAddress = await Address.findOne({ userId });
     const userData = await User.findById(userId);
-    const wallet = await Wallet.findOne({ user: userId });
+    let wallet = await Wallet.findOne({ user: userId });
+
+    if (!wallet) {
+      await Wallet.create({ user: userId, balance: 0, transactions: [] });
+      wallet = await Wallet.findOne({ user: userId }); // <--- re-fetch
+    }
+
     const addresses = existingAddress ? existingAddress.address : [];
 
     let totalPrice = 0;
@@ -43,18 +49,24 @@ const checkOutpage = async (req, res) => {
     }
 
 
-    const appliedCouponCode = req.session.couponCode; // store in session or query
-    console.log(appliedCouponCode,"hhhh")
+    const appliedCoupon = req.session.appliedCoupon;
     let coupon = null;
     let discountAmount = 0;
 
-    if (appliedCouponCode) {
-      coupon = await Coupon.findOne({ code: appliedCouponCode, isListed: true });
-      if (coupon) {
+    if (appliedCoupon?.code) {
+      coupon = await Coupon.findOne({
+        couponCode: appliedCoupon.code,
+        isActive: true,
+        isDeleted: false,
+        validFrom: { $lte: new Date() },
+        validUpto: { $gte: new Date() }
+      });
+
+      if (coupon && totalPrice >= coupon.minPurchase) {
         if (coupon.type === 'percentage') {
-          discountAmount = Math.floor((totalPrice * coupon.value) / 100);
+          discountAmount = Math.floor((totalPrice * coupon.offerPrice) / 100);
         } else if (coupon.type === 'fixed') {
-          discountAmount = coupon.value;
+          discountAmount = coupon.offerPrice;
         }
 
         if (discountAmount > totalPrice) {
@@ -91,6 +103,7 @@ const checkOutpage = async (req, res) => {
     res.redirect("/pageNotFound");
   }
 };
+
 
 
 const checkoutHandler = async (req, res) => {

@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration Form</title>
     <link rel="stylesheet" href="/css/userside-css/userside-css/register.css" type="text/css">
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
 </head>
 <body>
     <div class="container">
@@ -33,31 +32,33 @@
                     <div class="input-group password-group">
                         <input type="password" placeholder="Create a strong password" id="password" name="password">
                         <div class="error4 error-message" aria-live="polite"></div>
-                        <button type="button" class="toggle-password" aria-label="Toggle password visibility">
-                            <img src="/img/register/Vector.png" alt="">
-                        </button>
+                        <span class="toggle-password" onclick="togglePassword()">
+                        <i class="fas fa-eye" id="toggleIcon"></i>
+                    </span>
                     </div>
                     <div class="input-group password-group">
                         <input type="password" placeholder="Confirm your password" id="confirm-password" name="confirmpassword">
                         <div class="error5 error-message" aria-live="polite"></div>
-                        <button type="button" class="toggle-password" aria-label="Toggle password visibility">
-                            <img src="/img/register/Vector.png" alt="">
-                        </button>
+                         <span class="toggle-password" onclick="togglePassword()">
+                        <i class="fas fa-eye" id="toggleIcon"></i>
                     </div>
                     <div class="input-group">
-                        <input type="text" placeholder="Enter referral code if you have one" name="referralCode" id="referralCode" class="referral-code-input">
+                        <input type="text" placeholder="Enter referral code if you have one" name="referralCode" id="referralCode" class="referral-code-input" value="<%= referralCode || '' %>">
+                        <div class="error6 error-message" aria-live="polite"></div>
                     </div>
                     <% if (message) { %>
                         <input type="hidden" id="msg" value="<%= message || '' %>">
                     <% } %>
-                    <button type="submit" class="submit-btn">Create Account</button>
+                    <button type="submit" class="submit-btn" id="signup-btn">
+                        <span id="signup-btn-text">Create Account</span>
+                        <span id="signup-spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    </button>
                     <div class="divider">
                         <span>OR</span>
                     </div>
                     <button type="button" class="google-btn">
                         <a href="/auth/google/" style="text-decoration: none;">
                             <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png" alt="Google">
-                           
                         </a>
                     </button>
                     <p class="signin-link">
@@ -70,184 +71,253 @@
             </div>
         </div>
     </div>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // Message display code
-            const msgElement = document.getElementById('msg');
-            if (msgElement && msgElement.value && msgElement.value !== "none" && msgElement.value !== "") {
-                Swal.fire({
-                    title: "Error",
-                    text: msgElement.value,
-                    icon: 'warning',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Message display
+        const msgElement = document.getElementById('msg');
+        if (msgElement && msgElement.value && msgElement.value !== "none" && msgElement.value !== "") {
+            Swal.fire({
+                title: "Error",
+                text: msgElement.value,
+                icon: 'warning',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        }
+
+        // Form elements
+        const name = document.getElementById("name");
+        const email = document.getElementById("email");
+        const phoneNumber = document.getElementById("phoneNumber");
+        const password = document.getElementById("password");
+        const confirmPassword = document.getElementById("confirm-password");
+        const referralCode = document.getElementById("referralCode");
+        const error1 = document.querySelector(".error1");
+        const error2 = document.querySelector(".error2");
+        const error3 = document.querySelector(".error3");
+        const error4 = document.querySelector(".error4");
+        const error5 = document.querySelector(".error5");
+        const error6 = document.querySelector(".error6");
+        const signupForm = document.getElementById("signup-form");
+        const signupBtn = document.getElementById("signup-btn");
+        const signupBtnText = document.getElementById("signup-btn-text");
+        const signupSpinner = document.getElementById("signup-spinner");
+        const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+
+        // Prefill referral code from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const referralFromUrl = urlParams.get('referral');
+        if (referralFromUrl && !referralCode.value) {
+            referralCode.value = referralFromUrl;
+        }
+
+        // Error handling functions
+        function showError(errorElement, message) {
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+        }
+
+        function hideError(errorElement) {
+            errorElement.textContent = '';
+            errorElement.classList.remove('show');
+        }
+
+        // Validation functions
+        function nameValidateChecking() {
+            const nameVal = name.value.trim();
+            const namePattern = /^[A-Za-z ]{3,}$/;
+            if (!nameVal) {
+                showError(error1, "Please enter a name with at least 3 letters");
+                return false;
+            } else if (!namePattern.test(nameVal)) {
+                showError(error1, "Name can only contain letters and spaces");
+                return false;
+            }
+            hideError(error1);
+            return true;
+        }
+
+        function emailValidateChecking() {
+            const emailVal = email.value.trim();
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailVal) {
+                showError(error2, "Email cannot be empty");
+                return false;
+            } else if (!emailPattern.test(emailVal)) {
+                showError(error2, "Invalid email format");
+                return false;
+            }
+            hideError(error2);
+            return true;
+        }
+
+        function phoneValidateChecking() {
+            const phoneVal = phoneNumber.value.trim();
+            if (!phoneVal) {
+                showError(error3, "Phone number cannot be empty");
+                return false;
+            } else if (phoneVal.length !== 10 || isNaN(phoneVal)) {
+                showError(error3, "Enter a valid 10-digit number");
+                return false;
+            } else if (phoneVal[0] === '0') {
+                showError(error3, "Phone number cannot start with 0");
+                return false;
+            } else if (parseInt(phoneVal[0]) <= 6) {
+                showError(error3, "Phone number must start with a digit greater than 6");
+                return false;
+            }
+            hideError(error3);
+            return true;
+        }
+
+        function passwordValidateChecking() {
+            const passwordVal = password.value.trim();
+            const cpasswordVal = confirmPassword.value.trim();
+            const strongPass = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            let isValid = true;
+
+            if (!passwordVal) {
+                showError(error4, "Password cannot be empty");
+                isValid = false;
+            } else if (passwordVal.length < 8) {
+                showError(error4, "Password must be at least 8 characters");
+                isValid = false;
+            } else if (!strongPass.test(passwordVal)) {
+                showError(error4, "Password must include a number and a special character (@$!%*?&)");
+                isValid = false;
+            } else {
+                hideError(error4);
             }
 
-            // Form elements
-            const name = document.getElementById("name");
-            const email = document.getElementById("email");
-            const phoneNumber = document.getElementById("phoneNumber");
-            const password = document.getElementById("password");
-            const confirmPassword = document.getElementById('confirm-password');
-            const error1 = document.querySelector(".error1");
-            const error2 = document.querySelector(".error2");
-            const error3 = document.querySelector(".error3");
-            const error4 = document.querySelector(".error4");
-            const error5 = document.querySelector(".error5");
-            const signupForm = document.getElementById("signup-form");
-            const togglePasswordButtons = document.querySelectorAll('.toggle-password');
-
-            // Error handling functions
-            function showError(errorElement, message) {
-                errorElement.textContent = message;
-                errorElement.classList.add('show');
+            if (!cpasswordVal) {
+                showError(error5, "Confirm password cannot be empty");
+                isValid = false;
+            } else if (passwordVal !== cpasswordVal) {
+                showError(error5, "Passwords do not match");
+                isValid = false;
+            } else {
+                hideError(error5);
             }
 
-            function hideError(errorElement) {
-                errorElement.textContent = '';
-                errorElement.classList.remove('show');
+            return isValid;
+        }
+
+        function referralCodeValidateChecking() {
+            const referralVal = referralCode.value.trim();
+            if (referralVal && referralVal.length < 5) {
+                showError(error6, "Referral code must be at least 5 characters");
+                return false;
             }
+            hideError(error6);
+            return true;
+        }
 
-            // Validation functions
-            function nameValidateChecking() {
-                const nameVal = name.value.trim();
-                const namePattern = /^[A-Za-z ]{3,}$/;
-                if (!nameVal) {
-                    showError(error1, "Please enter a name with at least 3 letters");
-                    return false;
-                } else if (!namePattern.test(nameVal)) {
-                    showError(error1, "Name can only contain letters and spaces");
-                    return false;
-                }
-                hideError(error1);
-                return true;
-            }
-
-            function emailValidateChecking() {
-                const emailVal = email.value.trim();
-                const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-                if (!emailVal) {
-                    showError(error2, "Email cannot be empty");
-                    return false;
-                } else if (!emailPattern.test(emailVal)) {
-                    showError(error2, "Invalid email format");
-                    return false;
-                }
-                hideError(error2);
-                return true;
-            }
-
-            function phoneValidateChecking() {
-                const phoneVal = phoneNumber.value.trim();
-                if (!phoneVal) {
-                    showError(error3, "Phone number cannot be empty");
-                    return false;
-                } else if (phoneVal.length !== 10 || isNaN(phoneVal)) {
-                    showError(error3, "Enter a valid 10-digit number");
-                    return false;
-                } else if (phoneVal[0] === '0') {
-                    showError(error3, "Phone number cannot start with 0");
-                    return false;
-                }if (parseInt(phoneVal[0]) <= 6) {
-                    showError(error3, "Phone number must start with a digit greater than 6");
-                    return false;
-                }
-                hideError(error3);
-                return true;
-            }
-
-            function passwordValidateChecking() {
-                const passwordVal = password.value.trim();
-                const cpasswordVal = confirmPassword.value.trim();
-                const strongPass = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-                let isValid = true;
-
-                if (!passwordVal) {
-                    showError(error4, "Password cannot be empty");
-                    isValid = false;
-                } else if (passwordVal.length < 8) {
-                    showError(error4, "Password must be at least 8 characters");
-                    isValid = false;
-                } else if (!strongPass.test(passwordVal)) {
-                    showError(error4, "Password must include a number and a special character (@$!%*?&)");
-                    isValid = false;
+        // Toggle password visibility
+        togglePasswordButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const input = this.closest('.password-group').querySelector('input');
+                const icon = this.querySelector('i');
+                if (input.type === "password") {
+                    input.type = "text";
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
                 } else {
-                    hideError(error4);
+                    input.type = "password";
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
                 }
+            });
+        });
 
-                if (!cpasswordVal) {
-                    showError(error5, "Confirm password cannot be empty");
-                    isValid = false;
-                } else if (passwordVal !== cpasswordVal) {
-                    showError(error5, "Passwords do not match");
-                    isValid = false;
-                } else {
-                    hideError(error5);
-                }
+        // Input validation event listeners
+        name.addEventListener("input", nameValidateChecking);
+        email.addEventListener("input", emailValidateChecking);
+        phoneNumber.addEventListener("input", phoneValidateChecking);
+        password.addEventListener("input", passwordValidateChecking);
+        confirmPassword.addEventListener("input", passwordValidateChecking);
+        referralCode.addEventListener("input", referralCodeValidateChecking);
 
-                return isValid;
-            }
+        // Form submission with Fetch API
+        signupForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const isNameValid = nameValidateChecking();
+            const isEmailValid = emailValidateChecking();
+            const isPhoneValid = phoneValidateChecking();
+            const isPasswordValid = passwordValidateChecking();
+            const isReferralValid = referralCodeValidateChecking();
 
-            // Toggle password visibility
-            togglePasswordButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const input = this.closest('.password-group').querySelector('input');
-                    const img = this.querySelector('img');
-                    
-                    if (input.type === "password") {
-                        input.type = "text";
-                        img.src = "/img/register/eye-open.png";
+            if (isNameValid && isEmailValid && isPhoneValid && isPasswordValid && isReferralValid) {
+                signupBtn.disabled = true;
+                signupBtnText.textContent = 'Creating...';
+                signupSpinner.classList.remove('d-none');
+
+                // Prepare form data
+                const formData = {
+                    name: name.value.trim(),
+                    email: email.value.trim(),
+                    phoneNumber: phoneNumber.value.trim(),
+                    password: password.value.trim(),
+                    confirmpassword: confirmPassword.value.trim(),
+                    referralCode: referralCode.value.trim()
+                };
+
+                try {
+                    const response = await fetch('/signup', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success === true) {
+                        // Success case with checkmark
+                        Swal.fire({
+                            title: "Success!",
+                            text: result.message,
+                            icon: "success", // Displays a checkmark
+                            showConfirmButton: false,
+                            timer: 1500
+                        }).then(() => {
+                            // Redirect to login page after success
+                            window.location.href = '/verify-Otp';
+                        });
                     } else {
-                        input.type = "password";
-                        img.src = "/img/register/Vector.png";
+                        // Failure case
+                        Swal.fire({
+                            title: "Error!",
+                            text: result.message || "Something went wrong. Please try again.",
+                            icon: "error",
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
                     }
-                });
-            });
-
-            // Input validation event listeners
-            name.addEventListener("input", nameValidateChecking);
-            email.addEventListener("input", emailValidateChecking);
-            phoneNumber.addEventListener("input", phoneValidateChecking);
-            password.addEventListener("input", passwordValidateChecking);
-            confirmPassword.addEventListener("input", passwordValidateChecking);
-
-            // Form submission
-            signupForm.addEventListener("submit", function (e) {
-                e.preventDefault();
-                const isNameValid = nameValidateChecking();
-                const isEmailValid = emailValidateChecking();
-                const isPhoneValid = phoneValidateChecking();
-                const isPasswordValid = passwordValidateChecking();
-
-                if (isNameValid && isEmailValid && isPhoneValid && isPasswordValid) {
-                    this.submit();
+                } catch (error) {
+                    // Network or unexpected error
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Network error. Please check your connection and try again.",
+                        icon: "error",
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                } finally {
+                    signupBtn.disabled = false;
+                    signupBtnText.textContent = 'Create Account';
+                    signupSpinner.classList.add('d-none');
                 }
-            });
-        }); 
-        signupForm.addEventListener("submit", function (e) {
-        e.preventDefault();
-         const isNameValid = nameValidateChecking();
-         const isEmailValid = emailValidateChecking();
-         const isPhoneValid = phoneValidateChecking();
-         const isPasswordValid = passwordValidateChecking();
-
-      if (isNameValid && isEmailValid && isPhoneValid && isPasswordValid) {
-        // Show loading spinner
-        signupBtn.disabled = true;
-        signupBtnText.textContent = 'Creating...';
-        signupSpinner.classList.remove('d-none');
-
-        // Submit after short delay to let spinner show
-        setTimeout(() => {
-          signupForm.submit();
-        }, 300);
-      }
+            }
+        });
     });
+</script>
 
-    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
 </body>
 </html>

@@ -20,6 +20,7 @@ const applyBestOffer=async (product) => {
                 {offerType:"Brand",applicableId:product.brand}
             ]
         })
+
     if (!offers.length) {
       product.discountedPrice = product.salePrice;
       product.offerPercentage = 0;

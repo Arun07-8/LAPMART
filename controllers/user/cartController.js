@@ -47,8 +47,8 @@ const renderCartPage = async (req, res) => {
 
         return {
           ...item.toObject(),
-          product: offerProduct,        // product with offer applied
-          productId: item.productId     // maintain original ref
+          product: offerProduct,       
+          productId: item.productId     
         };
       })
     );

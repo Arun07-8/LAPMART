@@ -359,7 +359,6 @@ window.addEventListener('DOMContentLoaded', () => {
   const totalElement = document.querySelector('.checkout-grand-total span:last-child');
   if (totalElement) {
     originalTotal = parseFloat(totalElement.textContent.replace(/[₹,]/g, '')) || 0;
-    console.log('Original Total:', originalTotal);
   } else {
     console.error('Total element not found');
   }

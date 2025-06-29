@@ -448,17 +448,17 @@
                 
                 <div class="detail-row">
                     <span class="detail-label">Error Code:</span>
-                    <span class="detail-value error-code"></span>
+                    <span class="detail-value error-code"><%= errorCode %></span>
                 </div>
                 
                 <div class="detail-row">
                     <span class="detail-label">Order ID:</span>
-                    <span class="detail-value"> </span>
+                    <span class="detail-value"><%= paymentId %> </span>
                 </div>
                 
                 <div class="detail-row">
                     <span class="detail-label">Payment ID:</span>
-                    <span class="detail-value"> </span>
+                    <span class="detail-value"><%= reason %> </span>
                 </div>
                 
                 <div class="detail-row">
@@ -478,7 +478,7 @@
             </div>
             
             <div class="button-container">
-                <button class="btn btn-primary"    aria-label="Retry payment process" onclick="location.href='/order-details/<%= order._id%>?retry=true'">
+                <button class="btn btn-primary"    aria-label="Retry payment process" onclick="location.href=''">
                     <span class="btn-icon">↻</span>
              Retry Payment</a>
 

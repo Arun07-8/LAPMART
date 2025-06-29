@@ -1,9 +1,7 @@
 const Product=require("../../models/productSchema");
 const Category=require("../../models/categorySchema");
 const Brand=require("../../models/BrandSchema");
-// const {uploads}=require("../../config/multer")
-// const fs=require("fs");
-// const path = require('path');
+const {uploads}=require("../../config/multer")
 const cloudinary = require('../../config/cloudinary');
 
 

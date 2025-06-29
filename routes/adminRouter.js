@@ -9,6 +9,7 @@ const orderMangementController=require("../controllers/admin/orderMangementContr
 const couponController=require("../controllers/admin/couponController")
 const offersController=require("../controllers/admin/offersController")
 const salesReportContreller=require("../controllers/admin/salesReporterController")
+const dashboardController=require("../controllers/admin/dasboardController")
 const {adminAuth}=require("../middlewares/adminAuth");
 const {productUpload}=require("../config/multer")
 
@@ -19,7 +20,6 @@ router.get("/pagenotFounderror",adminController.pagenotFounderror);
 //  Admin Login
 router.get("/login",adminController.loadLogin);
 router.post("/login",adminController.login);
-router.get("/dashBoard",adminAuth,adminController.loadDashbard);
 router.get("/logout",adminController.logout);
 
 //  Customer Management 
@@ -56,7 +56,7 @@ router.patch("/deleteProducts/:id",adminAuth,productController.deleteProduct)
 
 //  OrderManagement
 router.get("/order-management", adminAuth, orderMangementController.getOrderManagementPage);
-router.get("/order-view/:orderId", adminAuth, orderMangementController.getOrderDetailspage);
+router.get("/order-view/:id", adminAuth, orderMangementController.getOrderDetailspage);
 router.patch("/orders-status/:orderId", adminAuth, orderMangementController.updateStatus);
 router.patch("/orders/:orderId/accept/:productId", adminAuth, orderMangementController.acceptReturn);
 router.patch("/orders/:orderId/reject/:productId", adminAuth, orderMangementController.rejectReturn);
@@ -90,4 +90,7 @@ router.get("/sales-report",adminAuth, salesReportContreller.getSalesReport);
 router.post("/filter-sales-report",adminAuth,  salesReportContreller.filterSalesReport);
 router.post("/export-sales-report-pdf",adminAuth,  salesReportContreller.exportSalesReportPDF);
 router.post("/export-sales-report-excel",adminAuth,  salesReportContreller.exportSalesReportExcel);
+
+//  Dashboard
+router.get("/dashBoard",adminAuth,dashboardController.loadDashbard);
 module.exports=router;

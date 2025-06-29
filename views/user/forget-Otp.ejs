@@ -226,7 +226,7 @@
                         const isExpired = response.message && response.message.toLowerCase().includes('expired');
                         Swal.fire({
                             icon: 'error',
-                            title: isExpired ? 'OTP Expired' : 'Invalid OTP',
+                            title: isExpired ? 'OTP Expired' : '',
                             text: response.message || (isExpired ? 'Please resend a new OTP.' : 'Please try again.'),
                             showConfirmButton: false,
                             timer: 2000

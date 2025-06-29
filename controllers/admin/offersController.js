@@ -82,13 +82,13 @@ const createOffer = async (req, res) => {
       return res.status(400).json({ success: false, message: 'All fields are required.' });
     }
 
-    // Validate allowed offer types
+
     const validTypes = ['Product', 'Category', 'Brand'];
     if (!validTypes.includes(formattedType)) {
       return res.status(400).json({ success: false, message: 'Invalid offer type.' });
     }
 
-    // Validate discount type
+
     if (discountType !== 'percentage') {
       return res.status(400).json({ success: false, message: 'Only percentage discount allowed.' });
     }
@@ -239,12 +239,9 @@ const listAvailableBrands = async (req, res) => {
   }
 };
 
-
-//  isActive
 const activeOffer=async (req,res) => {
     try{
         const id=req.params.id
-           console.log("hello,","liid1",id)
         await Offer.findByIdAndUpdate({_id:id},{$set:{isActive:true}})
         res.status(200).json({success:true,message:"Offer is Acive Succefully"})
     } catch (error) {
@@ -257,7 +254,6 @@ const activeOffer=async (req,res) => {
 const inActiveOffer=async (req,res) => {
     try {
         const id=req.params.id
-        console.log("hello,","unid2",id)
         await Offer.findByIdAndUpdate({_id:id},{$set:{isActive:false}})
         res.status(200).json({success:true,message:"Offer is  inAcive Succefully"})
     } catch (error) {
@@ -274,7 +270,7 @@ const deleteOffer=async (req,res) => {
          if(!deleteOffer){
               return res.status(404).json({error:"Offer Not found"});
         }
-       return res.status(200).json({message:"Offer deleted"});
+       return res.json({success:true});
       } catch (error) {
           console.error("Error deleting coupon:", error);
         return res.status(500).json({
@@ -382,12 +378,11 @@ const editOfferPage = async (req, res) => {
       return res.status(400).json({ success: false, message: "Valid Upto must be after Valid From." });
     }
 
-    // Normalize offer type
     const normalizedOfferType = offerType.charAt(0).toUpperCase() + offerType.slice(1).toLowerCase();
 
     let applicableId = null;
 
-    // Validate applicable ID only if not Sitewide
+
     if (normalizedOfferType !== 'Sitewide') {
       if (!mongoose.Types.ObjectId.isValid(applicable)) {
         return res.status(400).json({
@@ -398,7 +393,6 @@ const editOfferPage = async (req, res) => {
 
       applicableId = new mongoose.Types.ObjectId(applicable);
 
-      // Check for duplicate active offer
       const existingActiveOffer = await Offer.findOne({
         _id: { $ne: offerId },
         offerType: normalizedOfferType,
@@ -414,7 +408,7 @@ const editOfferPage = async (req, res) => {
         });
       }
 
-      // Check for duplicate offer name on same applicableId
+
       const sameNameUsed = await Offer.findOne({
         _id: { $ne: offerId },
         offerName,
@@ -431,7 +425,6 @@ const editOfferPage = async (req, res) => {
       }
     }
 
-    // Build update data
     const updateData = {
       offerName,
       offerType: normalizedOfferType,
@@ -441,7 +434,7 @@ const editOfferPage = async (req, res) => {
       validUpto: parsedUpto,
       description,
       updatedAt: new Date(),
-      applicableId: applicableId  // Will be null for Sitewide
+      applicableId: applicableId  
     };
 
     // Update offer

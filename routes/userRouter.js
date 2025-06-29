@@ -20,6 +20,7 @@ router.get("/pageNotFound",userController.pageNotFound)
        //   Register Management
 router.get("/signup",userController.loadsignup);
 router.post("/signup",userController.signup)
+router.get("/verify-Otp",userController.renderOtpPge)
 router.post("/verify-Otp",userController.verifyOtp);
 router.post("/resendOtp",userController.resendOtp)
 router.get("/auth/google", passport.authenticate("google", {scope: ["profile", "email"]}));
@@ -62,6 +63,7 @@ router.post("/change-email", userAuth, userProfile.editemail);
 router.get("/email-otp", userAuth, userProfile.getOtpPage);
 router.post("/email-otp", userAuth, userProfile.verifyOtp);
 router.post("/resend-Otp", userAuth, userProfile.resendOtp);
+router.get("/referral",userAuth,userProfile.getreferralPage)
 router.get("/logout",userController.logout)
 
 //   Cart page
@@ -93,6 +95,7 @@ router.post("/checkout",userAuth,checkOutController.checkoutHandler)
 router.get("/order/:orderId",userAuth,OrderController.getOrderPage)
 router.get("/view-order",userAuth,OrderController.getViewOrderpage)
 router.get("/order-details/:orderId",userAuth,OrderController.getOrderViewPage)
+router.get("/order/invoice/:orderId", userAuth, OrderController.downloadInvoice);
 router.post("/order-details/cancel",userAuth,OrderController.cancelOrder)
 router.post("/order-details/return",userAuth,OrderController.orderReturn)
 

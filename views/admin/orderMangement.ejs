@@ -513,9 +513,9 @@
                     <select id="statusFilter" class="dropdown">
                         <option value="All Orders">All Orders</option>
                         <option value="Pending">Pending</option>
-                        <option value="Delivered">Delivered</option>
                         <option value="Cancelled">Cancelled</option>
-                        <option value="Processing">Processing</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
                         <option value="Return Request">Return Request</option>
                         <option value="Returned">Returned</option>
                     </select>
@@ -568,7 +568,7 @@
                                 </td>
                                 <td class="table-cell"><%= order.createdAt.toDateString() %></td>
                                 <td class="table-cell">
-                                    <span class="amount">₹<%= order.totalPrice %></span>
+                                    <span class="amount">₹<%= order.finalAmount %></span>
                                 </td>
                                 <td class="table-cell">
                                     <span class="payment-method <%= order.paymentMethod.toLowerCase() %>"><%= order.paymentMethod %></span>
@@ -579,7 +579,6 @@
       <span class="d-block fw-bold"><%= item.product.name %></span> 
     </div>
   <% }) %>
-
   <span class="status badge 
     <% if(order.mainStatus === 'Pending'){ %> bg-warning
     <% } else if(order.mainStatus === 'Delivered'){ %> bg-success
@@ -588,7 +587,10 @@
     <%= order.mainStatus %>
   </span>
 </td>
+
+
                                 <td class="table-cell">
+                                
                                     <button class="view-btn" onclick="viewOrderDetails('<%= order._id %>')">VIEW</button>
                                 </td>
                             </tr>
@@ -705,7 +707,6 @@
     const status = document.getElementById('statusFilter').value;
     const paymentMethod = document.getElementById('paymentMethodFilter').value;
 
-    console.log('Search params:', { searchInput, fromDate, toDate, status, paymentMethod });
 
     return {
       search: searchInput,
@@ -822,17 +823,17 @@
         const statuses = order.orderedItems.map(item => item.status);
         if (statuses.includes('Cancelled')) mainStatus = 'Cancelled';
         else if (statuses.includes('Pending')) mainStatus = 'Pending';
+        else if(statuses.includes('Shipped')) mainStatus = 'Shipped'
         else if (statuses.includes('Return Request')) mainStatus = 'Return Request';
         else if (statuses.includes('Returned')) mainStatus = 'Returned';
         else if (statuses.every(status => status === 'Delivered')) mainStatus = 'Delivered';
-        else mainStatus = 'Processing';
       }
 
       const statusClass = 
         mainStatus === 'Pending' ? 'bg-warning' : 
-        mainStatus === 'Delivered' ? 'bg-success' : 
         mainStatus === 'Cancelled' ? 'bg-danger' : 
-        mainStatus === 'Processing' ? 'bg-info' :
+        mainStatus === 'Shipped'  ? 'bg-info':
+        mainStatus === 'Delivered' ? 'bg-success' : 
         mainStatus === 'Return Request' ? 'bg-warning' :
         mainStatus === 'Returned' ? 'bg-secondary' :
         'bg-info';

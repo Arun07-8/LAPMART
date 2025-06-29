@@ -896,6 +896,10 @@
     <span>Shipping Charge:</span>
     <span>₹0.00</span>
   </div>
+    <div class="total-row">
+    <span>Delivery Charge:</span>
+    <span>₹0.00</span>
+  </div>
 
   <% if (totalSavings > 0) { %>
     <div class="total-row">
@@ -936,123 +940,15 @@
 </div>
                
                 <div class="action-buttons">
-                    <button id="downloadInvoiceBtn" class="btn-custom btn-primary-custom">📄 Download Invoice</button>
-                    <a href="/home" class="btn-custom btn-secondary-custom">🛒 Continue Shopping</a>
+                    <a href="/home" class="btn-custom btn-primary-custom">Continue Home</a>
+                    <a href="/shop" class="btn-custom btn-secondary-custom">🛒 Continue Shopping</a>
                     <a href="/view-order" class="btn-custom btn-outline-custom">👁️ View Order Details</a>
                 </div>
             </div>
         </div>
 
-        <!-- Invoice Modal (Initially Hidden) -->
-        <div id="invoiceModal" class="invoice-modal">
-            <div class="invoice-modal-content">
-                <div class="invoice-header">
-                    <button class="close-modal" id="closeModal">&times;</button>
-                    <div class="invoice-header-content">
-                        <div class="company-info">
-                            <h1 class="company-name">LapKart Ltd.</h1>
-                            <p class="company-details">123 Business Street, techno District</p>
-                            <p class="company-details">malappuram, Kerala 672397</p>
-                            <p class="company-details">Phone: +91 7306205956 | Email: lapkart@yourcompany.com</p>
-                            <p class="company-details">GST: 27XXXXX1234X1ZX | PAN: ABCDE1234F</p>
-                        </div>
-                        <div class="invoice-info">
-                            <h2 class="invoice-title">INVOICE</h2>
-                            <p class="invoice-number">#INV-<%=order.orderId || 'N/A' %></p>
-                            <p class="invoice-date">Date: <%= order?.createdAt ? new Date(order.createdAt).toLocaleDateString("en-IN", {year: "numeric",month: "short",day: "numeric" }): 'N/A' %></p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="invoice-body">
-                    <div class="invoice-details-grid">
-                        <div class="invoice-detail-card">
-                            <h4>Bill To:</h4>
-                            <p class="customer-name"><%= user?.name || 'Customer' %></p>
-                            <p><%= user?.email || 'N/A' %></p>
-                            <p><%= order.shippingAddress?.phone || 'N/A' %></p>
-                            <% if (order.shippingAddress) { %>
-                                <p><%= order.shippingAddress.address || '' %></p>
-                                <p><%= order.shippingAddress.city || '' %>, <%= order.shippingAddress.state || '' %></p>
-                                <p><%= order.shippingAddress.pincode || '' %></p>
-                            <% } %>
-                        </div>
-                        
-                        <div class="invoice-detail-card">
-                            <h4>Invoice Details:</h4>
-                            <p><strong>Invoice Number:</strong> #INV-<%=order.orderId || 'N/A' %></p>
-                            <p><strong>Order Date:</strong> <%= order?.createdAt ? new Date(order.createdAt).toLocaleDateString("en-IN", {year: "numeric",month: "long",day: "numeric" }): 'N/A' %></p>
-                            <p><strong>Payment Method:</strong> <%= order.paymentMethod || 'None' %></p>
-                            <p><strong>Order Status:</strong> <%= order?.status || 'Pending' %></p>
-                            <p><strong>Due Date:</strong> <%= order?.createdAt ? new Date(new Date(order.createdAt).getTime() + 30*24*60*60*1000).toLocaleDateString("en-IN", {year: "numeric",month: "short",day: "numeric" }): 'N/A' %></p>
-                        </div>
-                    </div>
-                    
-                    <div class="invoice-section">
-                        <h3 class="invoice-section-title">Order Items</h3>
-                        <table class="invoice-items-table">
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Quantity</th>
-                                    <th>Price</th>
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% if (order.orderedItems?.length) { %>
-                                    <% order.orderedItems.forEach(item => { %>
-                                        <tr>
-                                            <td><%= item?.product?.productName || 'Unknown Product' %></td>
-                                            <td><%= item?.quantity || 1 %></td>
-                                            <td>₹<%= item?.price?.toFixed(2) || '0.00' %></td>
-                                            <td>₹<%= ((item?.price || 0) * (item?.quantity || 1)).toFixed(2) %></td>
-                                        </tr>
-                                    <% }) %>
-                                <% } else { %>
-                                    <tr>
-                                        <td colspan="4">No items found in this order.</td>
-                                    </tr>
-                                <% } %>
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="invoice-totals">
-                        <div class="invoice-total-row">
-                            <span>Subtotal:</span>
-                            <span>₹<%= order?.orderedItems?.reduce((total, item) => total + item.price * item.quantity, 0).toLocaleString() %></span>
-                        </div>
-                        <div class="invoice-total-row">
-                            <span>Shipping & Handling:</span>
-                            <span>₹0.00</span>
-                        </div>
-                        <div class="invoice-total-row">
-                            <span>Discount Applied:</span>
-                            <span>-₹<%= order?.discount?.toFixed(2) || '0.00' %></span>
-                        </div>
-                        <div class="invoice-total-row">
-                            <span>GST (18%):</span>
-                            <span>₹<%= (order?.finalAmount * 0.18 / 1.18).toFixed(2) || '0.00' %></span>
-                        </div>
-                        <div class="invoice-total-row invoice-total-final">
-                            <span>Total Amount Due:</span>
-                            <span>₹<%= order?.finalAmount?.toLocaleString() || '0.00' %></span>
-                        </div>
-                    </div>
-                    
-                    <div class="invoice-footer-note">
-                        <p><strong>Payment Terms:</strong> Payment due within 30 days from invoice date.</p>
-                        <p><strong>Note:</strong> Thank you for your business! For any queries, contact us at support@yourcompany.com</p>
-                    </div>
-                </div>
-                
-                <div class="invoice-actions">
-                    <button id="downloadPdfBtn" class="invoice-btn invoice-btn-download">💾 Download PDF</button>
-                    <button id="printInvoiceBtn" class="invoice-btn invoice-btn-print">🖨️ Print Invoice</button>
-                </div>
-            </div>
-        </div>
+      
+               
 
         <script src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js'></script>
         <script>

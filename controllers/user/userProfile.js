@@ -1,6 +1,7 @@
 const User = require("../../models/userSchema")
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
+const cloudinary = require('../../config/cloudinary');
 const saltround = 10;
 
 const userProfile = async (req, res) => {
@@ -60,86 +61,87 @@ const profileUpdate = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error while updating profile' });
     }
 };
-
 const removeUserImage = async (req, res) => {
-    try {
-        const userId = req.session.user;
-        const { index } = req.params;
+  try {
+    const userId = req.session.user;
+    const { index } = req.params;
 
+    const imageIndex = parseInt(index);
+    const actualUserId = typeof userId === 'object' ? userId._id || userId.id : userId;
 
-        const imageIndex = parseInt(index);
-        const actualUserId = typeof userId === 'object' ? userId._id || userId.id : userId;
-
-        if (!actualUserId || !actualUserId.toString().match(/^[0-9a-fA-F]{24}$/)) {
-            return res.status(400).json({ success: false, message: 'Invalid user ID' });
-        }
-
-        if (isNaN(imageIndex) || imageIndex < 0) {
-
-            return res.status(400).json({ success: false, message: `Invalid image index. Received: ${index}, Parsed: ${imageIndex}` });
-        }
-
-        const user = await User.findById(actualUserId);
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
-
-        if (!user.profileImage || user.profileImage.length === 0) {
-            return res.status(400).json({ success: false, message: 'No profile images found' });
-        }
-
-        if (imageIndex >= user.profileImage.length) {
-            return res.status(400).json({ success: false, message: 'Image index out of bounds' });
-        }
-
-        const imageUrl = user.profileImage[imageIndex];
-
-        const getPublicIdFromUrl = (url) => {
-            if (!url) return null;
-            try {
-                const regex = /\/ProfilePictures\/(.+?)\.(?:jpg|jpeg|png|webp)$/i;
-                const match = url.match(regex);
-                return match ? `ProfilePictures/${match[1]}` : null;
-            } catch (error) {
-                console.error('Error parsing public_id from URL:', url, error);
-                return null;
-            }
-        };
-
-        const publicId = getPublicIdFromUrl(imageUrl);
-        if (publicId) {
-            try {
-                await cloudinary.uploader.destroy(publicId);
-            } catch (deleteError) {
-                console.error(`Failed to delete image with public_id: ${publicId}`, deleteError);
-
-            }
-        }
-
-
-        user.profileImage.splice(imageIndex, 1);
-
-        const updatedUser = await user.save();
-
-        return res.status(200).json({
-            success: true,
-            message: 'Profile image removed successfully',
-            user: {
-                _id: updatedUser._id,
-                name: updatedUser.name,
-                profileImage: updatedUser.profileImage
-            }
-        });
-
-    } catch (error) {
-        console.error('Error removing user profile image:', error);
-        return res.status(500).json({
-            success: false,
-            message: 'Server error during image removal',
-            error: error.message
-        });
+    if (!actualUserId || !actualUserId.toString().match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ success: false, message: 'Invalid user ID' });
     }
+
+    if (isNaN(imageIndex) || imageIndex < 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid image index. Received: ${index}, Parsed: ${imageIndex}`,
+      });
+    }
+
+    let rawUser = await User.findById(actualUserId).lean();
+    if (!rawUser) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (typeof rawUser.wallet === 'number') {
+      rawUser.wallet = undefined; 
+    }
+
+    const user = User.hydrate(rawUser);
+
+    if (!user.profileImage || user.profileImage.length === 0) {
+      return res.status(400).json({ success: false, message: 'No profile images found' });
+    }
+
+    if (imageIndex >= user.profileImage.length) {
+      return res.status(400).json({ success: false, message: 'Image index out of bounds' });
+    }
+
+    const imageUrl = user.profileImage[imageIndex];
+
+    const getPublicIdFromUrl = (url) => {
+      if (!url) return null;
+      const regex = /\/ProfilePictures\/(.+?)\.(?:jpg|jpeg|png|webp)$/i;
+      const match = url.match(regex);
+      return match ? `ProfilePictures/${match[1]}` : null;
+    };
+
+    const publicId = getPublicIdFromUrl(imageUrl);
+    if (publicId) {
+      try {
+        await cloudinary.uploader.destroy(publicId);
+      } catch (deleteError) {
+        console.error(`Failed to delete image with public_id: ${publicId}`, deleteError);
+      }
+    }
+
+    user.profileImage.splice(imageIndex, 1);
+
+    const updatedUser = await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Profile image removed successfully',
+      user: {
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        profileImage: updatedUser.profileImage,
+      },
+    });
+
+  } catch (error) {
+    console.error('Error removing user profile image:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error during image removal',
+      error: error.message,
+    });
+  }
 };
+
+
 function generateOtp() {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
@@ -375,6 +377,39 @@ const changepassword = async (req, res) => {
 };
 
 
+//  referralcode
+const getreferralPage = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    const userData = await User.findById(userId)
+      .populate('redeemedUsers', 'name email createdAt') // include createdAt for history
+      .lean();
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 4;
+    const skip = (page - 1) * limit;
+
+    const redeemedUsers = userData.redeemedUsers || [];
+    const paginatedRedeemedUsers = redeemedUsers.slice(skip, skip + limit);
+    const totalReferrals = redeemedUsers.length;
+    const totalPages = Math.ceil(totalReferrals / limit);
+
+    res.render("referral", {
+      user: userData,
+      referralCode: userData.referralCode, // ✅ Pass this to EJS
+      redeemedUsers: paginatedRedeemedUsers,
+      currentPage: page,
+      totalPages: totalPages,
+      limit: limit,
+      totalReferrals: totalReferrals
+    });
+  } catch (error) {
+    console.error("Referral page error:", error);
+    res.redirect("/pageNotFound");
+  }
+};
+
+
 module.exports = {
     userProfile,
     userEditprofile,
@@ -384,5 +419,6 @@ module.exports = {
     changepassword,
     getOtpPage,
     verifyOtp,
-    resendOtp
+    resendOtp,
+    getreferralPage
 }

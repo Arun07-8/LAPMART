@@ -1007,4 +1007,13 @@ input[type="range"]::-webkit-slider-thumb:hover {
         width: 36px;
         height: 36px;
     }
-} 
+} /* Default heart color */
+.wishlist-btn i {
+  color: gray;
+  transition: color 0.3s ease;
+}
+
+/* Red heart when active */
+.wishlist-btn.active i {
+  color: red;
+}

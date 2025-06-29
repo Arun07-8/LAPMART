@@ -18,7 +18,6 @@ const availableCoupon= async (req, res) => {
     }).select('couponCode couponName description offerPrice minPurchase validUpto');
 
     res.json({ success: true, coupons });
-
   } catch (error) {
     console.error('Error fetching coupons:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch coupons.' });

@@ -1057,10 +1057,10 @@
                         <div class="product-item <%= item.status === 'Cancelled' ? 'cancelled' : orderStatus === 'Payment Failed' ? 'payment-failed' : '' %>">
                             <img src="<%= item.product && item.product.productImage && item.product.productImage[0] || 'https://via.placeholder.com/200' %>" alt="<%= item.product && item.product.productName || 'Product' %>" class="product-image">
                             <div class="product-details">
-                                <div class="product-name"><%= item.product && item.product.productName || 'Unknown Product' %></div>
-                                <div class="product-meta">₹<%= order.totalPrice || '0.00' %> | Qty: <%= item.quantity || 1 %></div>
+                                <div class="producPricee"><%= item.product && item.product.productName || 'Unknown Product' %></div>
+                                <div class="product-meta">₹<%= order.grandTotal || '0.00' %> | Qty: <%= item.quantity || 1 %></div>
                                 <div class="product-status <%= orderStatus === 'Payment Failed' ? 'payment-failed' : '' %>"><%= orderStatus === 'Payment Failed' ? 'Payment Failed' : item.status || 'Pending' %></div>
-                                <div class="price-tag">₹<%= order.totalPrice || '0.00' %></div>
+                                <div class="price-tag">₹<%= order.grandTotal || '0.00' %></div>
                                 <div class="product-actions">
                                     <% if (orderStatus !== 'Payment Failed' && ['Pending', 'Processing', 'Shipped'].includes(item.status)) { %>
                                         <button class="cancel-btn-product <%= item.status === 'Cancelled' ? 'cancelled' : '' %>" data-order-id="<%= order._id %>" data-product-id="<%= item.product._id %>" onclick="openCancelModal('item', '<%= order._id %>', '<%= item.product._id %>')">
@@ -1093,30 +1093,60 @@
             </div>
 
             <!-- Order Summary -->
-            <div class="info-card <%= orderStatus === 'Payment Failed' ? 'payment-failed' : '' %>">
-                <div class="summary-section">
-                    <h6><i class="fas fa-receipt"></i> Order Summary</h6>
-                    <div class="summary-row">
-                        <span>Subtotal</span>
-                        <span>₹<%= order.totalPrice || '0.00' %></span>
-                    </div>
-                    <div class="summary-row">
-                        <span>Shipping</span>
-                        <span class="discount">₹0.00</span>
-                    </div>
-                    <div class="summary-row">
-                        <span>Discount</span>
-                        <span class="discount">-₹<%= order.discount || '0.00' %></span>
-                    </div>
-                    <div class="summary-row total">
-                        <span>Total</span>
-                        <span>₹<%= order.finalAmount || '0.00' %></span>
-                    </div>
-                    <% if (orderStatus === 'Payment Failed') { %>
-                        <p class="text-danger fw-bold mt-3"><i class="fas fa-exclamation-circle"></i> Payment Failed: Please retry payment to proceed.</p>
-                    <% } %>
-                </div>
-            </div>
+<div class="info-card <%= orderStatus === 'Payment Failed' ? 'payment-failed' : '' %>">
+  <div class="summary-section">
+    <h6><i class="fas fa-receipt"></i> Order Summary</h6>
+
+    <!-- 1. Original Price (before any discounts) -->
+    <div class="summary-row">
+      <span>Original Price</span>
+      <span >₹<%= order.totalOriginal.toFixed(2) %> </span>
+    </div>
+
+    <!-- 2. Offer Discount -->
+    <div class="summary-row">
+      <span>Offer Discount</span>
+      <span class="discount">-₹<%= order.totalSavings.toFixed(2) %></span>
+    </div>
+
+    <!-- 3. Shipping -->
+    <div class="summary-row">
+      <span>Shipping</span>
+      <span>₹0.00</span>
+    </div>
+      <div class="summary-row">
+      <span>Delivery Charge</span>
+      <span>₹0.00</span>
+    </div>
+
+    <!-- 4. Coupon Discount -->
+    <div class="summary-row">
+      <span>
+        Coupon Discount 
+        <% if (order.couponCode) { %>
+          (<strong><%= order.couponCode %></strong>)
+        <% } %>
+      </span>
+      <span class="discount">-₹<%= order.discount ? order.discount.toFixed(2) : '0.00' %></span>
+    </div>
+
+    <!-- 5. Grand Total -->
+    <div class="summary-row total">
+      <span>Grand Total</span>
+      <span>₹<%= order.grandTotal.toFixed(2) %></span>
+    </div>
+
+    <!-- Optional: Payment failed message -->
+    <% if (orderStatus === 'Payment Failed') { %>
+      <p class="text-danger fw-bold mt-3">
+        <i class="fas fa-exclamation-circle"></i> Payment Failed: Please retry payment to proceed.
+      </p>
+    <% } %>
+  </div>
+</div>
+
+
+
         </div>
     </div>
 
@@ -1215,6 +1245,8 @@
         </div>
     </div>
 
+    
+
     <%- include("../../views/partials/user/footer") %>
 
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -1236,7 +1268,6 @@
         }
 async function retryPayment(orderId) {
   try {
-    // Fetch new Razorpay order
     const response = await fetch('/payment/retry-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1248,11 +1279,11 @@ async function retryPayment(orderId) {
     if (response.ok) {
       const options = {
         key: '<%= process.env.RAZORPAY_KEY_ID %>',
-        amount: result.order.amount, // Use amount from retry response
+        amount: result.order.amount,
         currency: 'INR',
         name: 'Lapkart',
         description: `Retry Payment for Order #${order.orderId || 'Unknown'}`,
-        order_id: result.order.id, // Use Razorpay order ID from response
+        order_id: result.order.id,
         handler: async function (response) {
           try {
             const verifyResponse = await fetch('/payment/verify', {
@@ -1276,7 +1307,7 @@ async function retryPayment(orderId) {
                 confirmButtonColor: '#ff0000',
                 confirmButtonText: 'OK'
               }).then(() => {
-                window.location.href = `/order/${verifyResult.orderId}`; // Redirect to order details
+                window.location.href = `/order/${verifyResult.orderId}`;
               });
             } else {
               Swal.fire({
@@ -1303,7 +1334,7 @@ async function retryPayment(orderId) {
           email: order.shippingAddress.email || '',
           contact: order.shippingAddress.phone || ''
         },
-        theme: { color: '#1a73e8'  }
+        theme: { color: '#1a73e8' }
       };
 
       const rzp = new Razorpay(options);
@@ -1545,46 +1576,174 @@ async function retryPayment(orderId) {
                 });
             }
         });
+async function downloadInvoice(orderId) {
+  try {
+    if (!orderId) {
+      throw new Error('Order ID is required');
+    }
 
-        // Download Invoice Function
-        async function downloadInvoice(orderId) {
-            try {
-                const response = await fetch(`/api/invoice/${orderId}`, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
-                });
+    showLoadingMessage('Generating Invoice...');
 
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `Invoice_${orderId}.pdf`;
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    window.URL.revokeObjectURL(url);
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Failed to download invoice. Please try again.',
-                        confirmButtonColor: '#ff0000',
-                        confirmButtonText: 'OK'
-                    });
-                }
-            } catch (error) {
-                console.error('Error downloading invoice:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'An error occurred. Please try again later.',
-                    confirmButtonColor: '#ff0000',
-                    confirmButtonText: 'OK'
-                });
-            }
-        }
+    // Try multiple token retrieval methods
+    let token = localStorage.getItem('token') || 
+                localStorage.getItem('authToken') ||
+                sessionStorage.getItem('token') ||
+                getCookie('token');
 
+    const headers = {
+      'Accept': 'application/pdf',
+      'Content-Type': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`/order/invoice/${orderId}`, {
+      method: 'GET',
+      headers: headers,
+      credentials: 'include',
+    });
+
+    hideLoadingMessage();
+
+    if (!response.ok) {
+      let errorMessage = 'Failed to download invoice';
+      
+      if (response.status === 401 || response.status === 403) {
+        errorMessage = 'Session expired. Please login again.';
+        showErrorMessage(errorMessage);
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
+        return;
+      }
+
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch (e) {
+        errorMessage = response.statusText || errorMessage;
+      }
+      
+      throw new Error(errorMessage);
+    }
+
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/pdf')) {
+      throw new Error('Invalid response format. Expected PDF file.');
+    }
+
+    const blob = await response.blob();
+    
+    if (blob.size === 0) {
+      throw new Error('Received empty file');
+    }
+
+    // Create download
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Invoice_${orderId}.pdf`;
+    a.style.display = 'none';
+    
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    showSuccessMessage('Invoice downloaded successfully!');
+
+  } catch (error) {
+    hideLoadingMessage();
+    console.error('Error downloading invoice:', error.message);
+    showErrorMessage(error.message || 'An error occurred while downloading the invoice.');
+  }
+}
+
+// Alternative simple method
+function downloadInvoiceSimple(orderId) {
+  if (!orderId) {
+    showErrorMessage('Order ID is required');
+    return;
+  }
+
+  const form = document.createElement('form');
+  form.method = 'GET';
+  form.action = `/order/invoice/${orderId}`;
+  form.target = '_blank';
+  
+  document.body.appendChild(form);
+  form.submit();
+  document.body.removeChild(form);
+}
+
+// Helper functions
+function showLoadingMessage(message) {
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      title: message,
+      text: 'Please wait...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  } else {
+    console.log(message);
+    // Create simple loading indicator
+    const loadingDiv = document.createElement('div');
+    loadingDiv.id = 'loading-indicator';
+    loadingDiv.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;color:#fff;padding:20px;border-radius:5px;z-index:9999;';
+    loadingDiv.textContent = message;
+    document.body.appendChild(loadingDiv);
+  }
+}
+
+function hideLoadingMessage() {
+  if (typeof Swal !== 'undefined') {
+    Swal.close();
+  } else {
+    const loadingDiv = document.getElementById('loading-indicator');
+    if (loadingDiv) {
+      document.body.removeChild(loadingDiv);
+    }
+  }
+}
+
+function showSuccessMessage(message) {
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      icon: 'success',
+      title: 'Success!',
+      text: message,
+      timer: 2000,
+      showConfirmButton: false
+    });
+  } else {
+    alert(message);
+  }
+}
+
+function showErrorMessage(message) {
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: message,
+      confirmButtonText: 'OK'
+    });
+  } else {
+    alert(message);
+  }
+}
+
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+}
         // Close modals when clicking overlay
         document.getElementById('retryPaymentModal').addEventListener('click', function(e) {
             if (e.target === this) {

@@ -587,7 +587,11 @@
                             </div>
                             <div class="info-row">
                                 <p class="info-label">Customer Name</p>
+                                <%if(order.userId){%>
                                 <p class="info-value"><%= order.userId.name || 'N/A' %></p>
+                                <%}else{%>
+                                <p class="info-value">user not found</p>
+                                    <%}%>
                             </div>
                             <div class="info-row">
                                 <p class="info-label">Order Date</p>
@@ -634,45 +638,71 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <% order.orderedItems.forEach(item => { %>
-                                        <tr>
-                                            <td>
-                                                <div class="product-icon">
-                                                <img src="<%= item.product.productImage && item.product.productImage[0] ? item.product.productImage[0] : '/images/placeholder.png' %>" alt="<%= item.product.productName %>" class="product-img">
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <p class="product-name"><%= item.product.productName %></p>
-                                            </td>
-                                            <td>
-                                                <span class="quantity-badge"><%= item.quantity %></span>
-                                            </td>
-                                            <td>
-                                                <span class="price-text">₹<%= item.price.toFixed(2) %></span>
-                                            </td>
-                                            <td>
-                                                <span class="price-text">₹<%= (item.quantity * item.price).toFixed(2) %></span>
-                                            </td>
-                                            <td>
-                                                <span class="status-badge status-<%= item.status.toLowerCase() %>">
-                                                    <i class="fas fa-circle" style="font-size: 0.5rem;"></i>
-                                                    <%= item.status %>
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    <% }) %>
-                                    <tr class="total-row">
-                                        <td colspan="4" class="text-end">
-                                            <strong>
-                                                <i class="fas fa-calculator me-2"></i>
-                                                Grand Total
-                                            </strong>
-                                        </td>
-                                        <td colspan="2">
-                                            <strong class="price-text">₹<%= order.finalAmount.toFixed(2) %></strong>
-                                        </td>
-                                    </tr>
-                                </tbody>
+ <tbody>
+  <% order.orderedItems.forEach(item => { %>
+    <tr>
+      <!-- Product Image -->
+      <td>
+        <div class="product-icon">
+          <img src="<%= item.product.productImage?.[0] || '/images/placeholder.png' %>" 
+               alt="<%= item.product.productName %>" 
+               class="product-img">
+        </div>
+      </td>
+
+      <!-- Product Name -->
+      <td>
+        <p class="product-name"><%= item.product.productName %></p>
+      </td>
+
+      <!-- Quantity -->
+      <td>
+        <span class="quantity-badge"><%= item.quantity %></span>
+      </td>
+
+      <!-- Unit Price -->
+      <td>
+
+          <span class="text-success fw-bold ms-1">₹<%= item.product.salePrice.toFixed(2) %></span>
+      </td>
+
+      <!-- Total Price (unit × quantity) -->
+      <td>
+        <span class="price-text">₹<%= item.product.salePrice.toFixed(2) %></span>
+      </td>
+
+      <!-- Status -->
+      <td>
+        <span class="status-badge status-<%= item.status.toLowerCase() %>">
+          <i class="fas fa-circle" style="font-size: 0.5rem;"></i>
+          <%= item.status %>
+        </span>
+      </td>
+    </tr>
+  <% }) %>
+
+  <!-- Offer Discount -->
+  <tr>
+    <td colspan="4" class="text-end"><strong>Offer Discount</strong></td>
+    <td colspan="2">- ₹<%= order.totalOfferDiscount.toFixed(2) %></td>
+  </tr>
+
+  <!-- Coupon Discount -->
+  <tr>
+    <td colspan="4" class="text-end"><strong>Coupon Discount</strong></td>
+    <td colspan="2">- ₹<%= order.discountAmount.toFixed(2) %></td>
+  </tr>
+
+  <!-- Grand Total -->
+  <tr class="total-row">
+    <td colspan="4" class="text-end fw-bold">
+      <i class="fas fa-calculator me-2"></i> Grand Total
+    </td>
+    <td colspan="2" class="fw-bold text-success">₹<%= order.grandTotal.toFixed(2) %></td>
+  </tr>
+</tbody>
+
+
                             </table>
                         </div>
                     </div>
@@ -699,49 +729,53 @@
                                         <th>Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <% const returnItems = order.orderedItems.filter(item => item.status === "Return Request"); %>
+<tbody>
+  <% if (returnRequestProduct && returnRequestProduct.length > 0) { %>
+    <% returnRequestProduct.forEach(item => { %>
+      <tr>
+        <td>
+          <div class="product-icon">
+            <img 
+              src="<%= item.productImage || '/images/placeholder.png' %>" 
+              alt="<%= item.name || 'Product' %>" 
+              class="product-img">
+          </div>
+        </td>
+        <td>
+          <p class="product-name"><%= item.name || 'Unnamed Product' %></p>
+        </td>
+        <td>
+          <span class="quantity-badge"><%= item.quantity || 0 %></span>
+        </td>
+        <td>
+          <span class="price-text">
+            ₹<%= (item.refundAmount || 0).toFixed(2) %>
+          </span>
+        </td>
+        <td><%= item.returnReason || 'N/A' %></td>
+        <td>
+          <button class="btn process-btn" 
+                  onclick="confirmAcceptReturn('<%= order._id %>', '<%= item.productId %>')">
+            <i class="fas fa-check me-1"></i> Accept
+          </button>
+          <button class="btn btn-danger" 
+                  onclick="showRejectModal('<%= order._id %>', '<%= item.productId %>', 'reject')">
+            <i class="fas fa-times me-1"></i> Reject
+          </button>
+        </td>
+      </tr>
+    <% }) %>
+  <% } else { %>
+    <tr>
+      <td colspan="6" class="empty-state">
+        <i class="fas fa-box-open"></i>
+        <p>No return items found for this order</p>
+      </td>
+    </tr>
+  <% } %>
+</tbody>
 
-                                    <% if (returnItems.length > 0) { %>
-                                        <% returnItems.forEach(returnItem => { %>
-                                            <tr>
-                                                <td>
-                                                    <div class="product-icon">
-                                                        <img src="<%= returnItem.product.productImage && returnItem.product.productImage[0] ? returnItem.product.productImage[0] : '/images/placeholder.png' %>" alt="<%= returnItem.product.productName %>" class="product-img">
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <p class="product-name"><%= returnItem.product.productName %></p>
-                                                </td>
-                                                <td>
-                                                    <span class="quantity-badge"><%= returnItem.quantity %></span>
-                                                </td>
-                                                <td>
-                                                    <span class="price-text">₹<%= returnItem.price.toFixed(2) %></span>
-                                                </td>
-                                                <td><%= returnItem.returnReason || 'N/A' %></td>
-                                               <td>
-                    <button class="btn process-btn" onclick=" confirmAcceptReturn('<%= order._id %>', '<%= returnItem.product._id %>')">
-                        <i class="fas fa-check me-1"></i>
-                        Accept
-                    </button>
-                    <button class="btn btn-danger" onclick="showRejectModal('<%= order._id %>', '<%= returnItem.product._id %>', 'reject')">
-                        <i class="fas fa-times me-1"></i>
-                        Reject
-                    </button>
-                </td>
-                
-                                            </tr>
-                                        <% }) %>
-                                    <% } else { %>
-                                        <tr>
-                                            <td colspan="6" class="empty-state">
-                                                <i class="fas fa-box-open"></i>
-                                                <p>No return items found for this order</p>
-                                            </td>
-                                        </tr>
-                                    <% } %>
-                                </tbody>
+
                             </table>
                         </div>
                     </div>

@@ -107,6 +107,15 @@
                 resendBtn.style.opacity = '0.5';
                 resendBtn.style.pointerEvents = 'none';
                 resendBtn.style.cursor = 'not-allowed';
+                
+                 Swal.fire({
+                title: 'Verifying OTP...',
+                text: 'Please wait while we verify your OTP.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
 
                 $.ajax({
                     type: 'POST',
@@ -170,6 +179,7 @@
             let otp = '';
             inputs.forEach(input => otp += input.value);
 
+
             $.ajax({
                 type: 'POST',
                 url: '/verify-Otp',
@@ -178,7 +188,7 @@
                     if (response.success) {
                         Swal.fire({
                             icon: 'success',
-                            title: 'OTP Verified Successfully',
+                            title: 'OTP Verified Successfully  Welcome to Lapkart',
                             showConfirmButton: false,
                             timer: 1500
                         }).then(() => {
@@ -189,7 +199,7 @@
                         const isExpired = response.message && response.message.toLowerCase().includes('expired');
                         Swal.fire({
                             icon: 'error',
-                            title: isExpired ? 'OTP Expired' : 'Invalid OTP',
+                            title: isExpired ? 'OTP Expired' : '',
                             text: response.message || (isExpired ? 'Please resend a new OTP.' : 'Please try again.'),
                             showConfirmButton: false,
                             timer: 2000

@@ -19,7 +19,7 @@ const transactionSchema = new Schema({
   transactionId: {
     type: String,
     required: true,
-    unique: true, // prevent duplicate entries
+  
   },
   status: {
     type: String,

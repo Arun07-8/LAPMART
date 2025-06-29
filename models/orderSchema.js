@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-
 const orderSchema = new Schema({
   userId: {                        
     type: Schema.Types.ObjectId,
@@ -23,85 +22,99 @@ const orderSchema = new Schema({
       type: Number,
       required: true,
     },
-    price: {
+    originalPrice: {           
       type: Number,
-      default: 0,
+      required: true,
+    },
+    finalPrice: {              
+      type: Number,
+      required: true,
+    },
+    offerDiscount: {           
+      type: Number,
+      default: 0
+    },
+    subtotal: {                
+      type: Number,
+      required: true
     },
     status: {
       type: String,
-      enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Return Request", "Returned" ,"Return Rejected"],
+      enum: [
+        "Pending", "Shipped", "Delivered",
+        "Cancelled", "Return Requested", "Returned", "Return Rejected"
+      ],
       default: "Pending",
       required: true
-
     },
-  paymentStatus: {
-    type: String,
-    enum: ['pending', 'success', 'failed'],
-    default: 'pending'
-  },
     isCancelled: {
-    type: Boolean,
-    default: false,
+      type: Boolean,
+      default: false,
     },
     cancelReason: {
-    type: String,
-    default: '',
+      type: String,
+      default: '',
     },
     additionalNote: {
-    type: String,
-    default: '', 
+      type: String,
+      default: '', 
     },
-     isReturned: {
-       type: Boolean,
-       default: false,
-   },returnReason: {
-    type: String,
-    default: '', 
-   },
-   returnNote: {
-    type: String,
-    default: '',
-  },
-    
+    isReturned: {
+      type: Boolean,
+      default: false,
+    },
+    returnReason: {
+      type: String,
+      default: '', 
+    },
   }],
   totalPrice: {
     type: Number,
     required: true,
   },
-  discount: {
+  offerPrice: {                // sum of all item-level offerDiscounts
     type: Number,
     default: 0,
   },
-  finalAmount: {
+  discount: {                  // coupon discount
+    type: Number,
+    default: 0,
+  },
+  finalAmount: {               // totalPrice - offerPrice - discount
     type: Number,
     required: true,
   },
-  shippingAddress:{
-   addressType: {type: String,required: true},
-   name: {type: String,required: true},
-   phone:{type: String,required: true},
-   altPhone:{type: String,required: false},
-   city:{type: String,required: true},
-   state:{type: String,required: true},
-   landmark:{type: String,required: true},
-   pincode:{type: String,required: true},
-   fullAddress:{type:String,required:true},
-   isDefault:{type: Boolean,default: false} 
-},
+  paymentStatus: {                   
+    type: String,
+    enum: ['pending', 'success', 'failed'],
+    default: 'pending'
+  },
+  shippingAddress: {
+    addressType: { type: String, required: true },
+    name: { type: String, required: true },
+    phone: { type: String, required: true },
+    altPhone: { type: String },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    landmark: { type: String, required: true },
+    pincode: { type: String, required: true },
+    fullAddress: { type: String, required: true },
+    isDefault: { type: Boolean, default: false } 
+  },
   invoiceDate: {
     type: Date,
   },
   paymentMethod: {
     type: String,
-    enum: ["Cash on Delivery","Razorpay","Wallet"],
+    enum: ["Cash on Delivery", "Razorpay", "Wallet"],
     required: true
   },
   razorpayOrderId: {
-        type: String,
-    },
-    razorpayPaymentId: {
-        type: String,
-    },
+    type: String,
+  },
+  razorpayPaymentId: {
+    type: String,
+  },
   couponApplied: {
     type: Boolean,
     default: false,

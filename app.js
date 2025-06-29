@@ -14,6 +14,9 @@ const cloudinary=require('cloudinary').v2;
 const errorHandler = require('./middlewares/errorHandler');
 require('dotenv').config();
 
+const MongoStore = require('connect-mongo')
+
+
 db()
 
 app.use(nocache())
@@ -25,6 +28,10 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({  
+    mongoUrl: process.env.MONGODB_URI,
+    collectionName: 'sessions'
+  }),
     cookie: {
         secure: false,       
         httpOnly: true,

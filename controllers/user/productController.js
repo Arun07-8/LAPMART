@@ -1,4 +1,5 @@
 const Product=require('../../models/productSchema');
+const Wishlist=require("../../models/wishlistSchema")
 const Category=require('../../models/categorySchema');
 const User=require('../../models/userSchema');
 const {applyBestOffer}=require("../../helpers/offerHelper")
@@ -6,6 +7,17 @@ const {applyBestOffer}=require("../../helpers/offerHelper")
 const productViewPage=async(req,res)=>{
     try{
         const userId=req.session.user;
+
+        let wishlistProductIds = [];
+        
+            if (userId) {
+              userData = await User.findOne({ _id: userId }).lean();
+        
+              const wishlist = await Wishlist.findOne({ userId: userId})
+              if (wishlist) {
+                wishlistProductIds = wishlist.products.map(item => item.productId.toString());
+              }
+            }
         const productId=req.query.id;
         const product=await Product.findById({_id:productId}).populate('category').lean();
         const findCategory=product.category;

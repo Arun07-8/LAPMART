@@ -12,7 +12,7 @@ const adminAuth = (req, res, next) => {
       })
       .catch((error) => {
         console.error("Error in admin auth middleware:", error);
-        next(error); 
+         
       });
   } else {
     res.redirect("/admin/login");
