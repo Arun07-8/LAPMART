@@ -394,13 +394,12 @@ const orderReturn = async (req, res) => {
 const downloadInvoice = async (req, res) => {
   try {
     const orderId = req.params.orderId;
-    // Validate orderId
     if (!orderId) {
       console.error('No orderId provided');
       return res.status(400).json({ message: 'Order ID is required' });
     }
 
-    // Fetch order with populated fields
+
     const order = await Order.findById(orderId)
       .populate('orderedItems.product')
       .populate('userId');
@@ -416,7 +415,7 @@ const downloadInvoice = async (req, res) => {
     }
 
     // Create invoices directory
-    const invoiceDir = path.join(__dirname, '../../public/invoices'); // Adjust path as needed
+    // const invoiceDir = path.join(__dirname, '../../public/invoices'); // Adjust path as needed
     await fs.promises.mkdir(invoiceDir, { recursive: true });
 
     const outputPath = path.join(invoiceDir, `invoice_${orderId}.pdf`);
@@ -459,15 +458,13 @@ const downloadInvoice = async (req, res) => {
     });
 
     readStream.on('end', async () => {
-      // Clean up the file after streaming
+      
       try {
         await fs.promises.unlink(outputPath);
       } catch (deleteErr) {
         console.error('Invoice auto-delete failed:', deleteErr.message);
       }
     });
-
-    // Pipe the file to response
     readStream.pipe(res);
 
   } catch (err) {

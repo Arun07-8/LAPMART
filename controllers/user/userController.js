@@ -133,6 +133,7 @@ const securePassword = async (password) => {
         return null;
     }
 };
+
 async function generateUniqueReferralCode(name) {
   const prefix = name.split(" ")[0].toUpperCase();
   let code, exists;
@@ -145,6 +146,8 @@ async function generateUniqueReferralCode(name) {
 
   return code;
 }
+
+
 
 const verifyOtp = async (req, res) => {
   try {
@@ -161,7 +164,6 @@ const verifyOtp = async (req, res) => {
 
 if (otp === stored.otp) {
     const user = req.session.userData;
-
     const hashedPassword = await securePassword(user.password);
     const referralCode = await generateUniqueReferralCode(user.name);
 

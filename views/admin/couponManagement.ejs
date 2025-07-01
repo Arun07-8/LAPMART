@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,675 +6,8 @@
     <title>Admin Dashboard - Coupon Management</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f8f9fa;
-            font-size: 16px;
-        }
-
-        /* Sidebar Styles */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 260px;
-            background: linear-gradient(135deg, #2c3e50, #34495e);
-            color: white;
-            transition: all 0.3s ease;
-            z-index: 1000;
-            overflow-y: auto;
-        }
-
-        .sidebar.collapsed {
-            width: 80px;
-        }
-
-        .sidebar-header {
-            padding: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .sidebar-toggle {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 18px;
-            cursor: pointer;
-        }
-
-        .sidebar-title {
-            font-size: 20px;
-            font-weight: 600;
-            transition: opacity 0.3s ease;
-        }
-
-        .sidebar.collapsed .sidebar-title {
-            opacity: 0;
-        }
-
-        .sidebar-menu {
-            padding: 20px 0;
-        }
-
-        .menu-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            color: rgba(255,255,255,0.8);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            gap: 15px;
-            font-size: 16px;
-        }
-
-        .menu-item:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
-        }
-
-        .menu-item.active {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border-right: 3px solid #3498db;
-        }
-
-        .menu-item i {
-            width: 20px;
-            font-size: 18px;
-        }
-
-        .menu-text {
-            transition: opacity 0.3s ease;
-        }
-
-        .sidebar.collapsed .menu-text {
-            opacity: 0;
-        }
-
-        /* Main Content Area */
-        .main-content {
-            margin-left: 260px;
-            transition: margin-left 0.3s ease;
-            min-height: 100vh;
-        }
-
-        .main-content.expanded {
-            margin-left: 80px;
-        }
-
-        /* Top Header */
-        .top-header {
-            background-color: #ffffff;
-            padding: 20px 30px;
-            border-bottom: 1px solid #e9ecef;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-        }
-
-        .admin-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .admin-title {
-            font-size: 28px;
-            font-weight: 600;
-            color: #333;
-            margin: 0;
-        }
-
-        .admin-profile {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .admin-avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #3498db, #2ecc71);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        /* Coupon Section */
-        .coupon-section {
-            padding: 30px;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .section-title {
-            font-size: 32px;
-            font-weight: 600;
-            color: #333;
-            margin: 0;
-        }
-
-        .add-btn {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            border: none;
-            color: white;
-            padding: 14px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 16px;
-            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .add-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
-        }
-
-        /* Search and Filter Section - UPDATED */
-        .search-filter-section {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            margin-bottom: 25px;
-        }
-
-        .filter-grid {
-            display: grid;
-            grid-template-columns: 3fr 1fr 1fr 2fr auto;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .search-input {
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 14px 18px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-            width: 100%;
-        }
-
-        .search-input:focus {
-            border-color: #3498db;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-        }
-
-        .filter-select,
-        .date-input {
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 14px 12px;
-            background: white;
-            font-size: 15px;
-            transition: border-color 0.3s ease;
-            width: 100%;
-        }
-
-        .filter-select:focus,
-        .date-input:focus {
-            border-color: #3498db;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-        }
-
-        .date-input {
-            position: relative;
-        }
-
-        .date-input::-webkit-calendar-picker-indicator {
-            cursor: pointer;
-        }
-
-        .clear-btn {
-            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
-            border: none;
-            color: white;
-            padding: 14px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
-
-        .clear-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(149, 165, 166, 0.3);
-        }
-
-        /* Input labels for better UX */
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .filter-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #6c757d;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 5px;
-        }
-
-        /* Table Container - IMPROVED */
-        .table-container {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-            overflow-y: visible;
-        }
-
-        .coupon-table {
-            width: 100%;
-            min-width: 1000px;
-            border-collapse: collapse;
-            margin: 0;
-            table-layout: fixed;
-        }
-
-        /* Column widths - Better distributed */
-        .coupon-table th:nth-child(1) { width: 60px; } /* # */
-        .coupon-table th:nth-child(2) { width: 180px; } /* Coupon Name */
-        .coupon-table th:nth-child(3) { width: 150px; } /* Coupon Code */
-        .coupon-table th:nth-child(4) { width: 130px; } /* Start Date */
-        .coupon-table th:nth-child(5) { width: 130px; } /* End Date */
-        .coupon-table th:nth-child(6) { width: 120px; } /* Offer Price */
-        .coupon-table th:nth-child(7) { width: 130px; } /* Min Purchase */
-        .coupon-table th:nth-child(8) { width: 100px; } /* Status */
-        .coupon-table th:nth-child(9) { width: 110px; } /* List/Unlist - REDUCED WIDTH */
-        .coupon-table th:nth-child(10) { width: 170px; } /* Actions */
-
-        .table-header {
-            background: linear-gradient(135deg, #34495e, #2c3e50);
-            color: white;
-        }
-
-        .table-header th {
-            padding: 20px 12px;
-            font-weight: 600;
-            border: none;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            text-align: center; /* CENTERED HEADERS */
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .table tbody tr {
-            border-bottom: 1px solid #f0f0f0;
-            transition: all 0.2s ease;
-        }
-
-        .table tbody tr:hover {
-            background-color: #f8f9fa;
-        }
-
-        /* UPDATED: Increased font size for table content */
-        .table tbody td {
-            padding: 18px 12px; /* Increased padding */
-            vertical-align: middle;
-            font-size: 16px; /* INCREASED from 15px to 16px */
-            color: #495057;
-            font-weight: 500;
-            border: none;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            line-height: 1.5; /* Better readability */
-            text-align: center; /* CENTERED CONTENT */
-        }
-
-        .coupon-name {
-            font-weight: 600;
-            color: #2c3e50;
-            font-size: 16px; /* Increased size */
-            text-align: center; /* CENTER ALIGN */
-        }
-
-        .coupon-code {
-            background: #e3f2fd;
-            color: #1976d2;
-            padding: 8px 12px; /* Increased padding */
-            border-radius: 15px;
-            font-weight: 600;
-            font-size: 14px; /* Increased from 13px */
-            display: inline-block;
-        }
-
-        .currency {
-            font-weight: 600;
-            color: #27ae60;
-            font-size: 16px; /* Increased size */
-            text-align: center; /* CENTER ALIGN */
-        }
-
-        .status-badge {
-            padding: 10px 16px; /* Increased padding */
-            border-radius: 15px;
-            font-size: 14px; /* Increased size */
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: inline-block;
-        }
-
-        .status-expired {
-            background: #ffebee;
-            color: #c62828;
-        }
-
-        .status-active {
-            background: #e8f5e8;
-            color: #2e7d32;
-        }
-
-        /* Action Buttons - IMPROVED */
-        .action-btn {
-            padding: 12px 16px; /* Increased padding */
-            border-radius: 6px;
-            font-size: 14px; /* Increased size */
-            font-weight: 600;
-            border: none;
-            margin: 2px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-block;
-        }
-
-        .edit-btn {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-        }
-
-        .delete-btn {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-        }
-
-        .action-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        /* Action buttons container */
-        .actions-container {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            align-items: center; /* CENTER ALIGN */
-        }
-
-        /* Dropdown Styles - IMPROVED WIDTH AND ALIGNMENT */
-        .list-unlist-dropdown {
-            position: relative;
-            display: inline-block;
-            width: 100%;
-            text-align: center; /* CENTER ALIGN */
-        }
-
-        .dropdown-btn {
-            background: linear-gradient(135deg, #27ae60, #229954);
-            color: white;
-            border: none;
-            padding: 10px 12px; /* Increased padding */
-            border-radius: 6px;
-            font-size: 13px; /* Increased size */
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center; /* CENTER CONTENT */
-            gap: 4px;
-            transition: all 0.3s ease;
-            width: 95px; /* Slightly increased width */
-            margin: 0 auto; /* CENTER THE BUTTON */
-        }
-
-        .dropdown-btn:hover {
-            transform: translateY(-1px);
-        }
-
-        .dropdown-menu-custom {
-            position: absolute;
-            top: 100%;
-            left: 50%; /* CENTER POSITION */
-            transform: translateX(-50%); /* CENTER ALIGN */
-            width: 95px; /* MATCH BUTTON WIDTH */
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            z-index: 1000;
-            display: none;
-        }
-
-        .dropdown-menu-custom.show {
-            display: block;
-        }
-
-        .dropdown-item-custom {
-            padding: 10px 12px; /* Increased padding */
-            font-size: 13px; /* Increased size */
-            color: #333;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-            text-align: center; /* CENTER TEXT */
-        }
-
-        .dropdown-item-custom:hover {
-            background-color: #f8f9fa;
-        }
-
-        /* Pagination */
-        .pagination-container {
-            display: flex;
-            justify-content: center;
-            padding: 25px;
-            background: white;
-        }
-
-        .pagination-custom {
-            display: flex;
-            gap: 10px;
-        }
-
-        .page-btn {
-            width: 45px;
-            height: 45px;
-            border: 2px solid #e9ecef;
-            background: white;
-            color: #6c757d;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            font-size: 16px;
-            text-decoration: none;
-        }
-
-        .page-btn:hover {
-            border-color: #3498db;
-            color: #3498db;
-            text-decoration: none;
-        }
-
-        .page-btn.active {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            border-color: #3498db;
-            color: white;
-        }
-
-        /* Mobile Responsiveness */
-        @media (max-width: 1400px) {
-            .filter-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .filter-grid > div {
-                width: 100%;
-            }
-        }
-
-        @media (max-width: 1200px) {
-            .coupon-table {
-                min-width: 800px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-
-            .sidebar.show {
-                transform: translateX(0);
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .coupon-section {
-                padding: 15px;
-            }
-
-            .section-header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
-            }
-
-            .section-title {
-                font-size: 24px;
-            }
-
-            .admin-title {
-                font-size: 20px;
-            }
-
-            /* Stack action buttons vertically on mobile */
-            .actions-container {
-                min-width: 120px;
-            }
-
-            /* Mobile dropdown adjustments */
-            .dropdown-btn {
-                width: 85px;
-                font-size: 12px;
-            }
-
-            .dropdown-menu-custom {
-                width: 85px;
-            }
-
-            /* Table font size adjustments for mobile */
-            .table tbody td {
-                font-size: 14px;
-                padding: 14px 8px;
-            }
-
-            .coupon-name {
-                font-size: 14px;
-            }
-
-            .currency {
-                font-size: 14px;
-            }
-
-            .coupon-code {
-                font-size: 12px;
-                padding: 6px 10px;
-            }
-
-            .status-badge {
-                font-size: 12px;
-                padding: 8px 12px;
-            }
-
-            .action-btn {
-                font-size: 12px;
-                padding: 10px 12px;
-            }
-        }
-
-        /* Scrollbar styling */
-        .table-wrapper::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        .table-wrapper::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        .table-wrapper::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 4px;
-        }
-
-        .table-wrapper::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
-        }
-        .status-badge {
-  padding: 4px 10px;
-  border-radius: 12px;
-  color: white;
-  font-weight: bold;
-  font-size: 0.85rem;
-}
-
-/* Active = Green */
-.status-active {
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
-}
-
-/* Inactive = Red */
-.status-inactive {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
-}
-
-/* Expired = Gray */
-.status-expired {
-  background: linear-gradient(135deg, #7f8c8d, #95a5a6);
-}
-
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="/css/admin-css/couponMangment.css">
 </head>
 <body>
 <%- include("../../views/partials/admin/header") %>
@@ -706,48 +38,46 @@
 
             <!-- Search and Filter Section -->
             <div class="search-filter-section">
-                <div class="filter-grid">
-                    <div class="filter-group">
-                        <label class="filter-label">Search</label>
-                        <input type="text" class="search-input" placeholder="Search by coupon name or code...">
+                <form id="searchForm" action="/admin/coupon" method="GET">
+                    <div class="filter-grid">
+                        <div class="filter-group">
+                            <label class="filter-label">Search</label>
+                            <input type="text" name="search" class="search-input" placeholder="Search by coupon name or code..." value="<%= searchQuery %>">
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">From Date</label>
+                            <input type="text" name="fromDate" class="date-input flatpickr-input" placeholder="DD/MM/YY" value="<%= fromDate %>">
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">To Date</label>
+                            <input type="text" name="toDate" class="date-input flatpickr-input" placeholder="DD/MM/YY" value="<%= toDate %>">
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Sort By</label>
+                            <select class="filter-select" id="sortSelect" name="sort">
+                                <option value="" <%= sortType === '' ? 'selected' : '' %>>Select Sort Option...</option>
+                                <optgroup label="Sort by Date">
+                                    <option value="date-old-to-new" <%= sortType === 'date-old-to-new' ? 'selected' : '' %>>Date: Old to New</option>
+                                    <option value="date-new-to-old" <%= sortType === 'date-new-to-old' ? 'selected' : '' %>>Date: New to Old</option>
+                                </optgroup>
+                                <optgroup label="Sort by Name">
+                                    <option value="name-a-to-z" <%= sortType === 'name-a-to-z' ? 'selected' : '' %>>Name: A to Z</option>
+                                    <option value="name-z-to-a" <%= sortType === 'name-z-to-a' ? 'selected' : '' %>>Name: Z to A</option>
+                                </optgroup>
+                                <optgroup label="Sort by Price">
+                                    <option value="price-high-to-low" <%= sortType === 'price-high-to-low' ? 'selected' : '' %>>Price: High to Low</option>
+                                    <option value="price-low-to-high" <%= sortType === 'price-low-to-high' ? 'selected' : '' %>>Price: Low to High</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label"> </label>
+                            <button type="button" class="clear-btn" onclick="window.location.href='/admin/coupon'">
+                                <i class="fas fa-times me-1"></i> Clear
+                            </button>
+                        </div>
                     </div>
-                    
-                    <div class="filter-group">
-                        <label class="filter-label">From Date</label>
-                        <input type="date" class="date-input" placeholder="dd/mm/yyyy">
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label class="filter-label">To Date</label>
-                        <input type="date" class="date-input" placeholder="dd/mm/yyyy">
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label class="filter-label">Sort By</label>
-                        <select class="filter-select" id="sortSelect">
-                            <option value="">Select Sort Option...</option>
-                            <optgroup label="Sort by Date">
-                                <option value="date-old-to-new">Date: Old to New</option>
-                                <option value="date-new-to-old">Date: New to Old</option>
-                            </optgroup>
-                            <optgroup label="Sort by Name">
-                                <option value="name-a-to-z">Name: A to Z</option>
-                                <option value="name-z-to-a">Name: Z to A</option>
-                            </optgroup>
-                            <optgroup label="Sort by Price">
-                                <option value="price-high-to-low">Price: High to Low</option>
-                                <option value="price-low-to-high">Price: Low to High</option>
-                            </optgroup>
-                        </select>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label class="filter-label">&nbsp;</label>
-                        <button class="clear-btn">
-                            <i class="fas fa-times me-1"></i> Clear
-                        </button>
-                    </div>
-                </div>
+                </form>
             </div>
 
             <!-- Table Container -->
@@ -769,46 +99,43 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <% coupons.forEach((coupon, index) => { %>
+                            eradicate  <% coupons.forEach((coupon, index) => { %>
                             <tr>
                                 <td><%= index + 1 %></td>
                                 <td class="coupon-name"><%= coupon.couponName %></td>
                                 <td><span class="coupon-code"><%= coupon.couponCode %></span></td>
-                                <td><%= coupon.validFrom ? new Date(coupon.validFrom).toLocaleDateString("en-GB") : 'N/A' %></td>
-                                <td><%= coupon.validUpto ? new Date(coupon.validUpto).toLocaleDateString("en-GB") : 'N/A' %></td>
+                                <td><%= coupon.validFrom ? new Date(coupon.validFrom).toLocaleDateString("en-US") : 'N/A' %></td>
+                                <td><%= coupon.validUpto ? new Date(coupon.validUpto).toLocaleDateString("en-US") : 'N/A' %></td>
                                 <td class="currency">₹<%= coupon.offerPrice ? coupon.offerPrice.toLocaleString() : '0.00' %></td>
                                 <td class="currency">₹<%= coupon.minPurchase ? coupon.minPurchase.toLocaleString() : '0.00' %></td>
-<td>
-  <span class="status-badge 
-    <%= (new Date(coupon.endDate) < new Date()) 
-        ? 'status-expired' 
-        : (coupon.isActive ? 'status-active' : 'status-inactive') %>">
-    
-    <%= (new Date(coupon.endDate) < new Date()) 
-        ? 'Expired' 
-        : (coupon.isActive ? 'Active' : 'Inactive') %>
-  </span>
-</td>
-
-
-<td>
-  <% if (!coupon.isExpired) { %>
-    <div class="list-unlist-dropdown">
-      <% if (coupon.isActive) { %>
-        <button class="dropdown-btn" style="background:linear-gradient(135deg, #e74c3c, #c0392b);" onclick="handleinActiveCoupon('<%= coupon._id %>')">
-          Unlist <i class="fas fa-chevron-up"></i>
-        </button>
-      <% } else { %>
-        <button class="dropdown-btn" style="background:linear-gradient(135deg, #2ecc71, #27ae60);" onclick="handleActiveCoupon('<%= coupon._id %>')">
-          List <i class="fas fa-chevron-down"></i>
-        </button>
-      <% } %>
-    </div>
-  <% } else { %>
-    <span class="text-danger">Expired</span>
-  <% } %>
-</td>
-                      <td>
+                                <td>
+                                    <span class="status-badge 
+                                        <%= (new Date(coupon.validUpto) < new Date()) 
+                                            ? 'status-expired' 
+                                            : (coupon.isActive ? 'status-active' : 'status-inactive') %>">
+                                        <%= (new Date(coupon.validUpto) < new Date()) 
+                                            ? 'Expired' 
+                                            : (coupon.isActive ? 'Active' : 'Inactive') %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <% if (!(new Date(coupon.validUpto) < new Date())) { %>
+                                    <div class="list-unlist-dropdown">
+                                        <% if (coupon.isActive) { %>
+                                        <button class="dropdown-btn" style="background:linear-gradient(135deg, #e74c3c, #c0392b);" onclick="handleinActiveCoupon('<%= coupon._id %>')">
+                                            Unlist <i class="fas fa-chevron-up"></i>
+                                        </button>
+                                        <% } else { %>
+                                        <button class="dropdown-btn" style="background:linear-gradient(135deg, #2ecc71, #27ae60);" onclick="handleActiveCoupon('<%= coupon._id %>')">
+                                            List <i class="fas fa-chevron-down"></i>
+                                        </button>
+                                        <% } %>
+                                    </div>
+                                    <% } else { %>
+                                    <span class="text-danger">Expired</span>
+                                    <% } %>
+                                </td>
+                                <td>
                                     <div class="actions-container">
                                         <button class="action-btn edit-btn" onclick="editCoupon('<%= coupon._id %>')">
                                             <i class="fas fa-edit me-1"></i> Edit
@@ -828,17 +155,17 @@
                 <div class="pagination-container">
                     <div class="pagination-custom">
                         <% if (currentPage > 1) { %>
-                        <a href="?page=<%= currentPage - 1 %>" class="page-btn">
+                        <a plurip="page=<%= currentPage - 1 %>&search=<%= encodeURIComponent(searchQuery) %>&fromDate=<%= encodeURIComponent(fromDate) %>&toDate=<%= encodeURIComponent(toDate) %>&sort=<%= encodeURIComponent(sortType) %>" class="page-btn">
                             <i class="fas fa-chevron-left"></i>
                         </a>
                         <% } %>
 
                         <% for (let i = 1; i <= totalPages; i++) { %>
-                        <a href="?page=<%= i %>" class="page-btn <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+                        <a href="?page=<%= i %>&search=<%= encodeURIComponent(searchQuery) %>&fromDate=<%= encodeURIComponent(fromDate) %>&toDate=<%= encodeURIComponent(toDate) %>&sort=<%= encodeURIComponent(sortType) %>" class="page-btn <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
                         <% } %>
 
                         <% if (currentPage < totalPages) { %>
-                        <a href="?page=<%= currentPage + 1 %>" class="page-btn">
+                        <a href="?page=<%= currentPage + 1 %>&search=<%= encodeURIComponent(searchQuery) %>&fromDate=<%= encodeURIComponent(fromDate) %>&toDate=<%= encodeURIComponent(toDate) %>&sort=<%= encodeURIComponent(sortType) %>" class="page-btn">
                             <i class="fas fa-chevron-right"></i>
                         </a>
                         <% } %>
@@ -847,226 +174,10 @@
             </div>
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    <script>
-
-        function editCoupon(couponId) {
-            console.log(couponId,"couponiD")
-       window.location.href = `/admin/edit-coupon/${couponId}`;
-     }
-
-        // Sidebar toggle functionality
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('mainContent');
-            
-            sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('expanded');
-        }
-
-        // Mobile sidebar toggle
-        function toggleMobileSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('show');
-        }
-
-   
-        // Delete coupon function
-        async function  deleteCoupon(couponId) {
-          const result = await Swal.fire({
-                title: 'Are you sure?',
-                text: 'This will mark the   Coupon as deleted. You can restore it later.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'Cancel'
-            });
-            if(result.isConfirmed)
-            try{
-                const response=await  fetch(`/admin/coupondelete/${couponId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                })
-                   const data=await response.json()
-                   console.log("data",data)
-                 if (!response.ok) throw new Error(data.error || ' Failed to soft delete  coupon');
-                     Swal.fire({
-                        icon: 'success',
-                        title: 'Deleted',
-                        text: data.message || 'Coupon has been soft deleted',
-                        timer: 1500,
-                        showConfirmButton: false
-                    }).then(() => window.location.href="/admin/coupon");
-                }catch(error) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops',
-                        text: error.message || 'An error occurred while deleting the brand'
-                    });
-                }
-            }
-        
-
-        // Sorting functionality
-        function sortTable(sortType) {
-            const tbody = document.querySelector('.coupon-table tbody');
-            const rows = Array.from(tbody.querySelectorAll('tr'));
-            
-            rows.sort((a, b) => {
-                switch(sortType) {
-                    case 'date-old-to-new':
-                        return new Date(a.cells[4].textContent) - new Date(b.cells[4].textContent);
-                    case 'date-new-to-old':
-                        return new Date(b.cells[4].textContent) - new Date(a.cells[4].textContent);
-                    case 'name-a-to-z':
-                        return a.cells[1].textContent.localeCompare(b.cells[1].textContent);
-                    case 'name-z-to-a':
-                        return b.cells[1].textContent.localeCompare(a.cells[1].textContent);
-                    case 'price-high-to-low':
-                        const priceA = parseFloat(a.cells[5].textContent.replace(/[₹,]/g, ''));
-                        const priceB = parseFloat(b.cells[5].textContent.replace(/[₹,]/g, ''));
-                        return priceB - priceA;
-                    case 'price-low-to-high':
-                        const priceA2 = parseFloat(a.cells[5].textContent.replace(/[₹,]/g, ''));
-                        const priceB2 = parseFloat(b.cells[5].textContent.replace(/[₹,]/g, ''));
-                        return priceA2 - priceB2;
-                    default:
-                        return 0;
-                }
-            });
-            
-            rows.forEach(row => tbody.appendChild(row));
-        }
-
-        // Add interactivity
-        document.addEventListener('DOMContentLoaded', function() {
-            // Clear functionality
-            const clearBtn = document.querySelector('.clear-btn');
-            
-            clearBtn.addEventListener('click', function() {
-                // Clear search input
-                document.querySelector('.search-input').value = '';
-                
-                // Clear date inputs
-                document.querySelectorAll('.date-input').forEach(input => input.value = '');
-                
-                // Reset all select dropdowns
-                document.querySelectorAll('.filter-select').forEach(select => select.selectedIndex = 0);
-                
-                // Show all table rows
-                document.querySelectorAll('tbody tr').forEach(row => row.style.display = '');
-            });
-
-            // Dropdown functionality
-            window.toggleDropdown = function(button) {
-                const dropdown = button.nextElementSibling;
-                const isOpen = dropdown.classList.contains('show');
-                
-                // Close all dropdowns
-                document.querySelectorAll('.dropdown-menu-custom').forEach(menu => {
-                    menu.classList.remove('show');
-                });
-                
-                // Toggle current dropdown
-                if (!isOpen) {
-                    dropdown.classList.add('show');
-                }
-            };
-
-            window.selectOption = function(item, value) {
-                const button = item.closest('.list-unlist-dropdown').querySelector('.dropdown-btn');
-                const dropdown = item.closest('.dropdown-menu-custom');
-                
-                // Update button text
-                button.innerHTML = `${value} <i class="fas fa-chevron-down"></i>`;
-                
-                // Close dropdown
-                dropdown.classList.remove('show');
-                
-                console.log(`Selected: ${value}`);
-            };
-
-            // Close dropdowns when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.list-unlist-dropdown')) {
-                    document.querySelectorAll('.dropdown-menu-custom').forEach(menu => {
-                        menu.classList.remove('show');
-                    });
-                }
-            });
-        });
-
-
- async function handleActiveCoupon(couponId) {
-            const result = await Swal.fire({
-                title: 'Are you sure?',
-                text: 'This will Active the coupon, making it visible and add cart products.',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, Active it!',
-                cancelButtonText: 'Cancel'
-            });
-            if (result.isConfirmed) {
-                try {
-                    const response = await fetch(`/admin/active-coupon/${couponId}`, {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                    const data = await response.json();
-                    if (!response.ok) throw new Error(data.error || 'Failed to Active coupon');
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Coupon  is Active',
-                        text: data.message || 'Coupon  has been Active successfully',
-                        timer: 1500,
-                        showConfirmButton: false
-                    }).then(() => window.location.href="/admin/coupon")
-                } catch (error) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: error.message || 'An error occurred while active the coupon'
-                    });
-                }
-            }
-        }
-
-         async function handleinActiveCoupon(couponId) {
-            const result = await Swal.fire({
-                title: 'Are you sure?',
-                text: 'This will is inActive the coupon  , making it hidden. can not apply',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, is inaActive it!',
-                cancelButtonText: 'Cancel'
-            });
-            if (result.isConfirmed) {
-                try {
-                    const response = await fetch(`/admin/inactive-coupon/${couponId}`, {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                    const data = await response.json();
-                    if (!response.ok) throw new Error(data.error || 'Failed to inActive coupon');
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Coupon inActive',
-                        text: data.message || 'Coupon has been inActive successfully',
-                        timer: 1500,
-                        showConfirmButton: false
-                    }).then(() => location.reload());
-                } catch (error) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: error.message || 'An error occurred while inactive the coupon'
-                    });
-                }
-            }
-        }
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="/js/adminSide/couponMangment.js"></script>
 </body>
 </html>

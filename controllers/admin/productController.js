@@ -24,7 +24,6 @@ const productInfo = async (req, res) => {
                 }
             ];
         }
-
         const products = await Product.find(query)
             .populate('category', 'name')
             .populate('brand', 'name')
@@ -32,7 +31,7 @@ const productInfo = async (req, res) => {
             .limit(limit)
             .skip((page - 1) * limit)
             .lean();
-
+        
         const count = await Product.countDocuments(query);
         const totalPages = Math.ceil(count / limit);
         if (req.headers.accept.includes('application/json')) {

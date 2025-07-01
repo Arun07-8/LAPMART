@@ -1,4 +1,6 @@
 const Coupon=require("../../models/couponSchema")
+const moment = require('moment');
+
 
 const couponManagementpage = async (req, res) => {
   try {
@@ -6,36 +8,126 @@ const couponManagementpage = async (req, res) => {
     const limit = 3;
     const skip = (page - 1) * limit;
 
-    const coupons = await Coupon.find({isDeleted:false})
-      .sort({ createdAt: -1 })
+    const searchQuery = req.query.search ? req.query.search.trim() : '';
+    const fromDate = req.query.fromDate ? moment(req.query.fromDate, 'DD/MM/YY', true) : null;
+    const toDate = req.query.toDate ? moment(req.query.toDate, 'DD/MM/YY', true) : null;
+
+    // Validate date format
+    if (fromDate && !fromDate.isValid()) {
+      return res.render('couponManagement', {
+        coupons: [],
+        currentPage: page,
+        totalPages: 0,
+        searchQuery,
+        fromDate: req.query.fromDate || '',
+        toDate: req.query.toDate || '',
+        sortType: req.query.sort || 'date-new-to-old',
+        errorMessage: 'Invalid From Date format. Please use DD/MM/YY.',
+      });
+    }
+    if (toDate && !toDate.isValid()) {
+      return res.render('couponManagement', {
+        coupons: [],
+        currentPage: page,
+        totalPages: 0,
+        searchQuery,
+        fromDate: req.query.fromDate || '',
+        toDate: req.query.toDate || '',
+        sortType: req.query.sort || 'date-new-to-old',
+        errorMessage: 'Invalid To Date format. Please use DD/MM/YY.',
+      });
+    }
+
+    let query = { isDeleted: false };
+
+    if (searchQuery) {
+      query.$or = [
+        { couponName: { $regex: searchQuery, $options: 'i' } },
+        { couponCode: { $regex: searchQuery, $options: 'i' } },
+      ];
+    }
+
+    if (fromDate && fromDate.isValid()) {
+      query.validFrom = { $gte: fromDate.toDate() };
+    }
+    if (toDate && toDate.isValid()) {
+      const endOfDay = toDate.clone().endOf('day').toDate();
+      query.validUpto = { $lte: endOfDay };
+    }
+
+    if (fromDate && toDate && fromDate.isValid() && toDate.isValid() && fromDate > toDate) {
+      return res.render('couponManagement', {
+        coupons: [],
+        currentPage: page,
+        totalPages: 0,
+        searchQuery,
+        fromDate: req.query.fromDate || '',
+        toDate: req.query.toDate || '',
+        sortType: req.query.sort || 'date-new-to-old',
+        errorMessage: 'From Date cannot be after To Date',
+      });
+    }
+
+    let sortQuery = {};
+    switch (req.query.sort) {
+      case 'date-old-to-new':
+        sortQuery = { validFrom: 1 };
+        break;
+      case 'date-new-to-old':
+        sortQuery = { validFrom: -1 };
+        break;
+      case 'name-a-to-z':
+        sortQuery = { couponName: 1 };
+        break;
+      case 'name-z-to-a':
+        sortQuery = { couponName: -1 };
+        break;
+      case 'price-high-to-low':
+        sortQuery = { offerPrice: -1 };
+        break;
+      case 'price-low-to-high':
+        sortQuery = { offerPrice: 1 };
+        break;
+      default:
+        sortQuery = { validFrom: -1 }; // Default to date-new-to-old
+    }
+
+    const coupons = await Coupon.find(query)
+      .sort(sortQuery)
       .skip(skip)
       .limit(limit)
       .lean();
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0); 
+    today.setHours(0, 0, 0, 0);
 
     coupons.forEach(coupon => {
-      const endDate = new Date(coupon.endDate);
-      endDate.setHours(0, 0, 0, 0); 
+      const endDate = new Date(coupon.validUpto);
+      endDate.setHours(0, 0, 0, 0);
       coupon.isExpired = endDate < today;
     });
 
-    const totalCoupons = await Coupon.countDocuments({isDeleted:false});
+    const totalCoupons = await Coupon.countDocuments(query);
     const totalPages = Math.ceil(totalCoupons / limit);
 
-    res.render("couponManagement", {
+    res.render('couponManagement', {
       coupons,
       currentPage: page,
-      totalPages
+      totalPages,
+      searchQuery: searchQuery || '',
+      fromDate: req.query.fromDate || '',
+      toDate: req.query.toDate || '',
+      sortType: req.query.sort || 'date-new-to-old',
+      errorMessage:
+        totalCoupons === 0 && (searchQuery || fromDate || toDate)
+          ? 'No coupons found for the selected filters'
+          : null,
     });
-
   } catch (err) {
-    console.error("Pagination Error:", err);
-    res.status(500).json({ success: false, message: "Failed to fetch coupons" });
+    console.error('Coupon Management Error:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch coupons' });
   }
 };
-
 const addCouponpage=async (req,res) => {
     try {
         res.render("addCoupon")

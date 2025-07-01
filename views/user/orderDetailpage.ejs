@@ -968,7 +968,7 @@
                         </div>
                     </div>
                     <div class="order-actions">
-                        <% if (orderStatus === 'Payment Failed') { %>
+                        <% if (order.paymentStatus=== 'failed') { %>
                             <button class="retry-payment-btn" onclick="openRetryPaymentModal('<%= order._id %>')">
                                 <i class="fas fa-redo"></i>
                                 Retry Payment
@@ -1062,7 +1062,7 @@
                                 <div class="product-status <%= orderStatus === 'Payment Failed' ? 'payment-failed' : '' %>"><%= orderStatus === 'Payment Failed' ? 'Payment Failed' : item.status || 'Pending' %></div>
                                 <div class="price-tag">₹<%= order.grandTotal || '0.00' %></div>
                                 <div class="product-actions">
-                                    <% if (orderStatus !== 'Payment Failed' && ['Pending', 'Processing', 'Shipped'].includes(item.status)) { %>
+                                    <% if (item.status !== 'Payment Failed' && ['Pending', 'Processing', 'Shipped'].includes(item.status)) { %>
                                         <button class="cancel-btn-product <%= item.status === 'Cancelled' ? 'cancelled' : '' %>" data-order-id="<%= order._id %>" data-product-id="<%= item.product._id %>" onclick="openCancelModal('item', '<%= order._id %>', '<%= item.product._id %>')">
                                             <%= item.status === 'Cancelled' ? 'Cancelled' : 'Cancel Item' %>
                                         </button>

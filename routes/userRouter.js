@@ -26,7 +26,9 @@ router.post("/resendOtp",userController.resendOtp)
 router.get("/auth/google", passport.authenticate("google", {scope: ["profile", "email"]}));
 router.get('/auth/google/callback', (req, res, next) => {
       passport.authenticate('google', (err, user, info) => {
+          console.log()
       if (err || !user) {const message = info?.message || 'Authentication failed';
+          console.log(message)
            return res.redirect(`/signup?message=${encodeURIComponent(message)}`);}
       req.logIn(user, (loginErr) => {if (loginErr) {
            return res.redirect(`/signup?message=${encodeURIComponent('Login failed')}`);}

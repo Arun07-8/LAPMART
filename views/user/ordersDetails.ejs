@@ -602,7 +602,7 @@
 </td>
   <td>
     <% if (isPaymentFailed) { %>
-      <a href="/order-review/<%= order.razorpayOrderId %>?retry=true" class="details-btn">
+      <a href="/order-details/<%=order._id%>" class="details-btn">
         <i class="fas fa-undo"></i> Retry Payment
       </a>
     <% } else { %>

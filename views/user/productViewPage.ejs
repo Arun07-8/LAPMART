@@ -90,7 +90,8 @@
         <!-- Product Title with Wishlist Button -->
         <div class="product-title-section">
           <h1><%= product.productName %></h1>
-          <button class="wishlist-btn" id="wishlist-btn" data-product-id="<%= product._id %>">
+          <button class="wishlist-btn <%= wishlistProductIds.includes(product._id.toString()) ? 'active' : ''%>" id="wishlist-btn"data-product-id="<%= product._id %>"
+        data-product-name="<%= product.productName %>">
             <i class="far fa-heart"></i>
           </button>
         </div>

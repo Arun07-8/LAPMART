@@ -1,4 +1,4 @@
-   // Debounce function to limit search requests
+  // Debounce function to limit search requests
         function debounce(func, wait) {
             let timeout;
             return function (...args) {
@@ -57,30 +57,30 @@
             }
         });
 
-        // Existing form submission handlers
+        // Form submission handlers
         function handleFormSubmit(event) {
             event.preventDefault();
             if (!validateForm()) return false;
 
-            const name = document.getElementById("brandName").value.trim();
-            const description = document.getElementById("brandDescription").value.trim();
+            const name = document.getElementById("categoryName").value.trim();
+            const description = document.getElementById("categoryDescription").value.trim();
 
-            fetch("/admin/addbrand", {
+            fetch("/admin/addCategory", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, description })
             })
             .then(response => response.json().then(data => ({ ok: response.ok, status: response.status, data })))
             .then(({ ok, status, data }) => {
-                if (!ok) throw new Error(data.error || `Failed to add brand (Status: ${status})`);
+                if (!ok) throw new Error(data.error || `Failed to add category (Status: ${status})`);
                 Swal.fire({
                     icon: 'success',
-                    title: 'Brand Added',
-                    text: data.message || 'Brand added successfully!',
+                    title: 'Category Added',
+                    text: data.message || 'Category added successfully!',
                     timer: 1500,
                     showConfirmButton: false
                 }).then(() => {
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('addBrandModal'));
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addCategoryModal'));
                     if (modal) modal.hide();
                     location.reload();
                 });
@@ -89,7 +89,7 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: error.message || 'An error occurred while adding the brand.'
+                    text: error.message || 'An error occurred while adding the category.'
                 });
             });
 
@@ -100,26 +100,26 @@
             event.preventDefault();
             if (!validateEditForm()) return;
 
-            const brandId = document.getElementById('editBrandId').value;
-            const name = document.getElementById('editBrandName').value.trim();
-            const description = document.getElementById('editBrandDescription').value.trim();
+            const categoryId = document.getElementById('editCategoryId').value;
+            const name = document.getElementById('editCategoryName').value.trim();
+            const description = document.getElementById('editCategoryDescription').value.trim();
 
-            fetch(`/admin/editBrand/${brandId}`, {
+            fetch(`/admin/editCategory/${categoryId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, description })
+                body: JSON.stringify({ categoryname: name, description })
             })
             .then(response => response.json().then(data => ({ ok: response.ok, status: response.status, data })))
             .then(({ ok, status, data }) => {
-                if (!ok) throw new Error(data.error || `Failed to update brand (Status: ${status})`);
+                if (!ok) throw new Error(data.error || `Failed to update category (Status: ${status})`);
                 Swal.fire({
                     icon: 'success',
-                    title: 'Brand Updated',
-                    text: data.message || 'Brand updated successfully!',
+                    title: 'Category Updated',
+                    text: data.message || 'Category updated successfully!',
                     timer: 1500,
                     showConfirmButton: false
                 }).then(() => {
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('editBrandModal'));
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editCategoryModal'));
                     if (modal) modal.hide();
                     location.reload();
                 });
@@ -128,7 +128,7 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: error.message || 'An error occurred while updating the brand.'
+                    text: error.message || 'An error occurred while updating the category.'
                 });
             });
         }
@@ -136,15 +136,15 @@
         // Validation functions
         function validateForm() {
             clearErrorMessages();
-            const name = document.getElementById("brandName").value.trim();
-            const description = document.getElementById("brandDescription").value.trim();
+            const name = document.getElementById("categoryName").value.trim();
+            const description = document.getElementById("categoryDescription").value.trim();
             let isValid = true;
 
             if (name === "") {
-                displayErrorMessage("name-error", "Please enter a brand name");
+                displayErrorMessage("name-error", "Please enter a category name");
                 isValid = false;
             } else if (!/^[a-zA-Z\s]+$/.test(name)) {
-                displayErrorMessage("name-error", "Brand name should contain only alphabetic characters");
+                displayErrorMessage("name-error", "Category name should contain only alphabetic characters");
                 isValid = false;
             }
 
@@ -158,15 +158,15 @@
 
         function validateEditForm() {
             clearErrorMessages();
-            const name = document.getElementById('editBrandName').value.trim();
-            const description = document.getElementById('editBrandDescription').value.trim();
+            const name = document.getElementById('editCategoryName').value.trim();
+            const description = document.getElementById('editCategoryDescription').value.trim();
             let isValid = true;
 
             if (name === "") {
-                displayErrorMessage("edit-name-error", "Please enter a brand name");
+                displayErrorMessage("edit-name-error", "Please enter a category name");
                 isValid = false;
             } else if (!/^[a-zA-Z\s]+$/.test(name)) {
-                displayErrorMessage("edit-name-error", "Brand name should contain only alphabetic characters");
+                displayErrorMessage("edit-name-error", "Category name should contain only alphabetic characters");
                 isValid = false;
             }
 
@@ -178,17 +178,127 @@
             return isValid;
         }
 
-        // Other existing functions
-        function handleEditClick(brandId, brandName, brandDescription) {
-            document.getElementById('editBrandId').value = brandId;
-            document.getElementById('editBrandName').value = brandName;
-            document.getElementById('editBrandDescription').value = brandDescription;
+        // Other functions
+        function handleEditClick(categoryId, categoryName, categoryDescription) {
+            document.getElementById('editCategoryId').value = categoryId;
+            document.getElementById('editCategoryName').value = categoryName;
+            document.getElementById('editCategoryDescription').value = categoryDescription;
         }
 
-        async function handleSoftDeleteClick(brandId) {
+        async function handleListedCatClick(categoryId) {
+            const button = document.querySelector(`button[onclick="handleListedCatClick('${categoryId}')"]`);
+            button.setAttribute('aria-busy', 'true');
+            button.disabled = true;
+
             const result = await Swal.fire({
                 title: 'Are you sure?',
-                text: 'This will mark the brand as deleted. You can restore it later.',
+                text: 'This will unlist the category, making it hidden.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, unlist it!',
+                cancelButtonText: 'Cancel'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/admin/unlistedCategory/${categoryId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        const text = await response.text();
+                        console.error('Non-JSON response:', text);
+                        throw new Error('Server returned non-JSON response');
+                    }
+
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Failed to unlist category');
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Category Unlisted',
+                        text: data.message || 'Category has been unlisted successfully',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
+                } catch (error) {
+                    console.error('Error unlisting category:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.message || 'An error occurred while unlisting the category'
+                    });
+                } finally {
+                    button.setAttribute('aria-busy', 'false');
+                    button.disabled = false;
+                }
+            } else {
+                button.setAttribute('aria-busy', 'false');
+                button.disabled = false;
+            }
+        }
+
+        async function handleUnlistedCatClick(categoryId) {
+            const button = document.querySelector(`button[onclick="handleUnlistedCatClick('${categoryId}')"]`);
+            button.setAttribute('aria-busy', 'true');
+            button.disabled = true;
+
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: 'This will list the category, making it visible.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, list it!',
+                cancelButtonText: 'Cancel'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/admin/listedCategory/${categoryId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        const text = await response.text();
+                        console.error('Non-JSON response:', text);
+                        throw new Error('Server returned non-JSON response');
+                    }
+
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Failed to list category');
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Category Listed',
+                        text: data.message || 'Category has been listed successfully',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
+                } catch (error) {
+                    console.error('Error listing category:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.message || 'An error occurred while listing the category'
+                    });
+                } finally {
+                    button.setAttribute('aria-busy', 'false');
+                    button.disabled = false;
+                }
+            } else {
+                button.setAttribute('aria-busy', 'false');
+                button.disabled = false;
+            }
+        }
+
+        async function handleSoftDeleteClick(categoryId) {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: 'This will mark the category as deleted. You can restore it later.',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, delete it!',
@@ -197,16 +307,18 @@
 
             if (result.isConfirmed) {
                 try {
-                    const response = await fetch(`/admin/deleteBrand/${brandId}`, {
+                    const response = await fetch(`/admin/categoryDelete/${categoryId}`, {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' }
                     });
+
                     const data = await response.json();
-                    if (!response.ok) throw new Error(data.error || 'Failed to soft delete brand');
+                    if (!response.ok) throw new Error(data.error || 'Failed to soft delete category');
+
                     Swal.fire({
                         icon: 'success',
                         title: 'Deleted',
-                        text: data.message || 'Brand has been soft deleted',
+                        text: data.message || 'Category has been soft deleted',
                         timer: 1500,
                         showConfirmButton: false
                     }).then(() => location.reload());
@@ -214,75 +326,7 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Oops',
-                        text: error.message || 'An error occurred while deleting the brand'
-                    });
-                }
-            }
-        }
-
-        async function handleListBrand(brandId) {
-            const result = await Swal.fire({
-                title: 'Are you sure?',
-                text: 'This will list the brand, making it visible.',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, list it!',
-                cancelButtonText: 'Cancel'
-            });
-            if (result.isConfirmed) {
-                try {
-                    const response = await fetch(`/admin/listedBrand/${brandId}`, {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                    const data = await response.json();
-                    if (!response.ok) throw new Error(data.error || 'Failed to list brand');
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Brand Listed',
-                        text: data.message || 'Brand has been listed successfully',
-                        timer: 1500,
-                        showConfirmButton: false
-                    }).then(() => location.reload());
-                } catch (error) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: error.message || 'An error occurred while listing the brand'
-                    });
-                }
-            }
-        }
-
-        async function handleUnlistBrand(brandId) {
-            const result = await Swal.fire({
-                title: 'Are you sure?',
-                text: 'This will unlist the brand, making it hidden.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, unlist it!',
-                cancelButtonText: 'Cancel'
-            });
-            if (result.isConfirmed) {
-                try {
-                    const response = await fetch(`/admin/unlistedBrand/${brandId}`, {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                    const data = await response.json();
-                    if (!response.ok) throw new Error(data.error || 'Failed to unlist brand');
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Brand Unlisted',
-                        text: data.message || 'Brand has been unlisted successfully',
-                        timer: 1500,
-                        showConfirmButton: false
-                    }).then(() => location.reload());
-                } catch (error) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: error.message || 'An error occurred while unlisting the brand'
+                        text: error.message || 'An error occurred while deleting the category'
                     });
                 }
             }

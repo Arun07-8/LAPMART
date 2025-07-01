@@ -1,4 +1,4 @@
-    let cropper = null;
+            let cropper = null;
     let currentImageIndex = -1;
     let isRecropping = false;
     let originalImages = [];
@@ -275,8 +275,7 @@
         isRecropping = false;
     }
 
-    // Form Submission
-    // Form Submission
+
 document.getElementById('editProductForm').addEventListener('submit', async function (event) {
     event.preventDefault();
     if (validateForm()) {
@@ -460,14 +459,8 @@ function validateForm() {
         }
     });
 
-    const regularPrice = parseFloat(document.getElementById('productAmount').value);
+
     const salePrice = parseFloat(document.getElementById('offerAmount').value);
-    if (!isNaN(regularPrice) && !isNaN(salePrice) && salePrice > regularPrice) {
-        displayErrorMessage('offerAmount', 'Offer price must be less than or equal to regular price.');
-        document.getElementById('offerAmount').classList.add('is-invalid');
-        if (!firstInvalidField) firstInvalidField = document.getElementById('offerAmount');
-        isValid = false;
-    }
 
     if (croppedImages.length < minImages) {
         Swal.fire({

@@ -4,18 +4,60 @@ const Category=require("../../models/categorySchema")
 const Brand=require("../../models/BrandSchema")
 const mongoose=require("mongoose")
 
-
 const OffersManagement = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 4;
     const skip = (page - 1) * limit;
+    const search = req.query.search ? req.query.search.trim() : '';
+    const sort = req.query.sort || 'Newest First';
 
-    const offers = await Offer.find({ isDeleted: false })
-      .sort({ createdAt: -1 })
+    // Build query object
+    let query = { isDeleted: false };
+    if (search) {
+      query.offerName = { $regex: search, $options: 'i' }; // Case-insensitive search
+    }
+
+    // Define sort options
+    let sortOption = { createdAt: -1 }; // Default: Newest First
+    switch (sort) {
+      case 'Oldest First':
+        sortOption = { createdAt: 1 };
+        break;
+      case 'A-Z':
+        sortOption = { offerName: 1 };
+        break;
+      case 'Z-A':
+        sortOption = { offerName: -1 };
+        break;
+      case 'Category A-Z':
+        sortOption = { 'applicableId.name': 1 };
+        break;
+      case 'Category Z-A':
+        sortOption = { 'applicableId.name': -1 };
+        break;
+      case 'Product A-Z':
+        sortOption = { 'applicableId.productName': 1 };
+        break;
+      case 'Product Z-A':
+        sortOption = { 'applicableId.productName': -1 };
+        break;
+      case 'High to Low':
+        sortOption = { offerAmount: -1 };
+        break;
+      case 'Low to High':
+        sortOption = { offerAmount: 1 };
+        break;
+      default:
+        sortOption = { createdAt: -1 };
+    }
+
+    // Fetch offers with search and sort
+    const offers = await Offer.find(query)
+      .sort(sortOption)
       .skip(skip)
       .limit(limit)
-      .populate('applicableId') 
+      .populate('applicableId')
       .lean();
 
     const today = new Date();
@@ -27,19 +69,20 @@ const OffersManagement = async (req, res) => {
       offer.isExpired = endDate < today;
     });
 
-    const totalOffers = await Offer.countDocuments({ isDeleted: false });
+    const totalOffers = await Offer.countDocuments(query);
     const totalPages = Math.ceil(totalOffers / limit);
 
-    res.render("offresMangment", { 
+    res.render('offresMangment', {
       offers,
-      currentPage:page,
+      currentPage: page,
       totalPages,
-      limit
-    })
-
+      limit,
+      search, // Pass search term to prefill input
+      sort // Pass sort option to preselect dropdown
+    });
   } catch (error) {
-    console.error("Offer management page rendering issue:", error);
-    res.redirect("/admin/pagenotFounderror");
+    console.error('Offer management page rendering issue:', error);
+    res.redirect('/admin/pagenotFounderror');
   }
 };
 

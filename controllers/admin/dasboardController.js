@@ -1,3 +1,4 @@
+// File: controllers/adminController.js (or wherever loadDashbard is defined)
 const Order = require("../../models/orderSchema");
 const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
@@ -8,15 +9,13 @@ const loadDashbard = async (req, res) => {
         const limit = 4;
         const skip = (page - 1) * limit;
         const { timePeriod = "today", status = "all", startDate = "", endDate = "" } = req.query;
-        let query={}
 
-        let dateFilter = {};
 
         const IST_OFFSET = 5.5 * 60 * 60 * 1000;
         const now = new Date();
         const nowUTC = new Date(now.getTime() - IST_OFFSET);
+        let dateFilter = {};
 
-  
         if (timePeriod) {
             if (timePeriod === "yesterday") {
                 const yesterday = new Date(nowUTC);
@@ -72,44 +71,37 @@ const loadDashbard = async (req, res) => {
             }
         }
 
-        
+
         let statusFilter = {};
         if (status && status !== "all") {
             statusFilter = { "orderedItems.status": { $regex: `^${status}$`, $options: "i" } };
         }
 
-       query = { ...query, ...dateFilter, ...statusFilter };
+        const query = { ...dateFilter, ...statusFilter };
 
-
-
-    
-        const orderdata = await Order.find(query)
+      
+        const orderData = await Order.find(query)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
             .populate("userId", "name")
             .lean();
 
-        const  orderCount = await Order.countDocuments();
+        const orderCount = await Order.countDocuments(query);
         const totalPages = Math.ceil(orderCount / limit);
 
-     
+        
         const userCount = await User.countDocuments();
         const productCount = await Product.countDocuments({ isDeleted: false });
 
-        console.log("User Count:", userCount);
-        console.log("Order Count:", orderCount);
-        console.log("Product Count:", productCount);
-
        
-const totalRevenue = await Order.aggregate([
-    { $match: query },
-    { $unwind: "$orderedItems" },
-    {
-        $match: {
-            $and: [
-                status && status !== "all" ? statusFilter : {},
-                {
+        const totalRevenueResult = await Order.aggregate([
+            { $match: query },
+            { $unwind: "$orderedItems" },
+            {
+                $match: {
+                    "orderedItems.isCancelled": false,
+                    "orderedItems.isReturned": false,
                     $or: [
                         { paymentStatus: "success" },
                         {
@@ -118,54 +110,78 @@ const totalRevenue = await Order.aggregate([
                         },
                     ],
                 },
-                { "orderedItems.isCancelled": false },
-                { "orderedItems.isReturned": false },
-            ],
+            },
+            {
+                $group: {
+                    _id: null,
+                    revenue: {
+                        $sum: {
+                            $multiply: [
+                                { $ifNull: ["$orderedItems.finalPrice", 0] },
+                                { $ifNull: ["$orderedItems.quantity", 0] },
+                            ],
+                        },
+                    },
+                },
+            },
+        ]);
+
+        const totalRevenue = totalRevenueResult[0]?.revenue || 0;
+
+       
+const dateFormat = timePeriod === "today" || timePeriod === "yesterday" ? "%Y-%m-%d" : "%B";
+const revenueData = await Order.aggregate([
+    { $match: query },
+    { $unwind: "$orderedItems" },
+    {
+        $match: {
+            "orderedItems.isCancelled": false,
+            "orderedItems.isReturned": false,
         },
     },
     {
         $group: {
-            _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
-            revenue: { $sum: "$orderedItems.total" },
-            orderCount: { $sum: 1 }
-        }
+            _id: {
+                $dateToString: { format: dateFormat, date: "$createdAt" },
+            },
+            revenue: {
+                $sum: {
+                    $multiply: [
+                        { $ifNull: ["$orderedItems.finalPrice", 0] },
+                        { $ifNull: ["$orderedItems.quantity", 0] },
+                    ],
+                },
+            },
+            orderCount: { $sum: 1 },
+        },
     },
+   
     {
-        $match: {
-            _id: timePeriod || currentMonth
-        }
-    }
+        $addFields: {
+            monthIndex: {
+                $cond: {
+                    if: { $eq: [dateFormat, "%Y-%m-%d"] },
+                    then: "$_id", 
+                    else: {
+                        $indexOfArray: [
+                            [
+                                "January", "February", "March", "April", "May", "June",
+                                "July", "August", "September", "October", "November", "December"
+                            ],
+                            "$_id",
+                        ],
+                    },
+                },
+            },
+        },
+    },
+    { $sort: { monthIndex: 1 } }, 
+    { $project: { _id: 1, revenue: 1, orderCount: 1 } }, 
+    { $limit: 12 }, 
 ]);
-
-        const revenueData = await Order.aggregate([
-            { $match: { ...dateFilter, ...statusFilter } },
-            { $unwind: "$orderedItems" },
-            {
-                $match: {
-                    "orderedItems.isCancelled": false,
-                    "orderedItems.isReturned": false,
-                },
-            },
-            {
-                $group: {
-                    _id: {
-                        $dateToString: { format: "%Y-%m", date: "$createdAt" },
-                    },
-                    revenue: {
-                        $sum: {
-                            $multiply: ["$orderedItems.finalPrice", "$orderedItems.quantity"],
-                        },
-                    },
-                    orderCount: { $sum: 1 },
-                },
-            },
-            { $sort: { "_id": 1 } },
-            { $limit: 6 },
-        ]);
-        
-        
+     
         const orderStatusData = await Order.aggregate([
-            { $match: { ...dateFilter, ...statusFilter } },
+            { $match: query },
             { $unwind: "$orderedItems" },
             {
                 $group: {
@@ -174,10 +190,10 @@ const totalRevenue = await Order.aggregate([
                 },
             },
         ]);
-        console.log("tot",totalRevenue)
-        console.log("reve",revenueData)       
+
+       
         const paymentMethodData = await Order.aggregate([
-            { $match: { ...dateFilter, ...statusFilter } },
+            { $match: query },
             {
                 $group: {
                     _id: "$paymentMethod",
@@ -185,95 +201,100 @@ const totalRevenue = await Order.aggregate([
                 },
             },
         ]);
+
         
-        
+        const topCategories = await Order.aggregate([
+            { $match: query },
+            { $unwind: "$orderedItems" },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "orderedItems.product",
+                    foreignField: "_id",
+                    as: "product",
+                },
+            },
+            { $unwind: "$product" },
+            {
+                $group: {
+                    _id: "$product.category",
+                    totalSales: {
+                        $sum: {
+                            $multiply: [
+                                { $ifNull: ["$orderedItems.finalPrice", 0] },
+                                { $ifNull: ["$orderedItems.quantity", 0] },
+                            ],
+                        },
+                    },
+                },
+            },
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "category",
+                },
+            },
+            { $unwind: "$category" },
+            {
+                $project: {
+                    categoryName: "$category.name",
+                    totalSales: 1,
+                },
+            },
+            { $sort: { totalSales: -1 } },
+            { $limit: 4 },
+        ]);
 
-const topCategories = await Order.aggregate([
-  { $match: { ...dateFilter, ...statusFilter } },
-  { $unwind: "$orderedItems" },
-  {
-    $lookup: {
-      from: "products",
-      localField: "orderedItems.product",
-      foreignField: "_id",
-      as: "product"
-    }
-  },
-  { $unwind: "$product" },
-  {
-    $group: {
-      _id: "$product.category", 
-      totalSales: {
-        $sum: {
-          $multiply: ["$orderedItems.finalPrice", "$orderedItems.quantity"]
-        }
-      }
-    }
-  },
-  {
-    $lookup: {
-      from: "categories",
-      localField: "_id",      
-      foreignField: "_id",     
-      as: "category"
-    }
-  },
-  { $unwind: "$category" },     
-  {
-    $project: {
-      categoryName: "$category.name", 
-      totalSales: 1
-    }
-  },
-  { $sort: { totalSales: -1 } },
-  { $limit: 4 }
-]);
+      
+        const topBrands = await Order.aggregate([
+            { $match: query },
+            { $unwind: "$orderedItems" },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "orderedItems.product",
+                    foreignField: "_id",
+                    as: "product",
+                },
+            },
+            { $unwind: "$product" },
+            {
+                $group: {
+                    _id: "$product.brand",
+                    totalSales: {
+                        $sum: {
+                            $multiply: [
+                                { $ifNull: ["$orderedItems.finalPrice", 0] },
+                                { $ifNull: ["$orderedItems.quantity", 0] },
+                            ],
+                        },
+                    },
+                },
+            },
+            {
+                $lookup: {
+                    from: "brands",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "brand",
+                },
+            },
+            { $unwind: "$brand" },
+            {
+                $project: {
+                    brandName: "$brand.name",
+                    totalSales: 1,
+                },
+            },
+            { $sort: { totalSales: -1 } },
+            { $limit: 4 },
+        ]);
 
-
-       const topBrands = await Order.aggregate([
-  { $match: { ...dateFilter, ...statusFilter } },
-  { $unwind: "$orderedItems" },
-  {
-    $lookup: {
-      from: "products",
-      localField: "orderedItems.product",
-      foreignField: "_id",
-      as: "product",
-    },
-  },
-  { $unwind: "$product" },
-  {
-    $group: {
-      _id: "$product.brand", // this is the brand ID
-      totalSales: {
-        $sum: {
-          $multiply: ["$orderedItems.finalPrice", "$orderedItems.quantity"],
-        },
-      },
-    },
-  },
-  {
-    $lookup: {
-      from: "brands",           
-      localField: "_id",        
-      foreignField: "_id",    
-      as: "brand"
-    }
-  },
-  { $unwind: "$brand" },         
-  {
-    $project: {
-      brandName: "$brand.name",  
-      totalSales: 1
-    }
-  },
-  { $sort: { totalSales: -1 } },
-  { $limit: 4 },
-]);
-
-
+       
         const topSellingProducts = await Order.aggregate([
-            { $match: { ...dateFilter, ...statusFilter } },
+            { $match: query },
             { $unwind: "$orderedItems" },
             {
                 $match: {
@@ -287,7 +308,10 @@ const topCategories = await Order.aggregate([
                     totalQuantity: { $sum: "$orderedItems.quantity" },
                     totalSales: {
                         $sum: {
-                            $multiply: ["$orderedItems.finalPrice", "$orderedItems.quantity"],
+                            $multiply: [
+                                { $ifNull: ["$orderedItems.finalPrice", 0] },
+                                { $ifNull: ["$orderedItems.quantity", 0] },
+                            ],
                         },
                     },
                 },
@@ -312,23 +336,23 @@ const topCategories = await Order.aggregate([
             { $limit: 5 },
         ]);
 
-       
-        const recentOrders = await Order.find({ ...dateFilter, ...statusFilter })
+        
+        const recentOrders = await Order.find(query)
             .populate("userId", "name")
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
             .lean();
 
-    
+       
         const responseData = {
             success: true,
-            order: orderdata,
+            order: orderData,
             currentPage: page,
             totalPages,
             count: userCount,
             orderCount,
-            totalRevenue: revenueData[0]?.revenue || 0,
+            totalRevenue,
             productCount,
             revenueData,
             orderStatusData,
@@ -343,8 +367,13 @@ const topCategories = await Order.aggregate([
             endDate,
         };
 
-    
-        if (!orderdata.length && !recentOrders.length && !revenueData.length && !orderStatusData.length) {
+       
+        if (
+            !orderData.length &&
+            !recentOrders.length &&
+            !revenueData.length &&
+            !orderStatusData.length
+        ) {
             responseData.message = "No data found for the selected filters";
             responseData.orderCount = 0;
             responseData.totalRevenue = 0;
@@ -357,6 +386,9 @@ const topCategories = await Order.aggregate([
             responseData.topSellingProducts = [];
             responseData.recentOrders = [];
         }
+
+        
+        console.log("Revenue Data:", JSON.stringify(revenueData, null, 2));
 
         if (req.xhr || req.headers.accept.includes("json")) {
             return res.json(responseData);

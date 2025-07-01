@@ -8,490 +8,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <style>
-        :root {
-            --primary-color: #2563eb;
-            --secondary-color: #64748b;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-            --info-color: #3b82f6;
-            --light-bg: #f8fafc;
-            --sidebar-width: 250px;
-            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
-            --chart-card-width: 100%;
-        }
-
-        body {
-            background-color: var(--light-bg);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-
-        .nav-item { margin-bottom: 0.25rem; }
-        .nav-link { 
-            color: rgba(255, 255, 255, 0.8); 
-            padding: 0.75rem 1.5rem; 
-            border-radius: 0; 
-            display: flex; 
-            align-items: center; 
-            gap: 0.75rem; 
-            text-decoration: none; 
-            transition: all 0.2s ease; 
-            font-weight: 500; 
-        }
-        .nav-link:hover { 
-            color: white; 
-            background-color: rgba(255, 255, 255, 0.1); 
-        }
-        .nav-link.active { 
-            color: white; 
-            background-color: rgba(255, 255, 255, 0.15); 
-            border-right: 3px solid white; 
-        }
-        .nav-link i { width: 20px; text-align: center; }
-        .main-content { 
-            margin-left: var(--sidebar-width); 
-            transition: margin-left 0.3s ease; 
-        }
-        .main-content.expanded { margin-left: 0; }
-        .navbar { 
-            background: white; 
-            box-shadow: var(--card-shadow); 
-            border-bottom: 1px solid #e2e8f0; 
-            margin-left: 0; 
-        }
-        .navbar-brand { 
-            font-weight: 700; 
-            color: #1e293b !important; 
-            font-size: 1.5rem; 
-        }
-        .sidebar-toggle { 
-            background: none; 
-            border: none; 
-            color: #64748b; 
-            font-size: 1.25rem; 
-            padding: 0.5rem; 
-            border-radius: 6px; 
-            transition: all 0.2s ease; 
-        }
-        .sidebar-toggle:hover { 
-            background-color: #f1f5f9; 
-            color: var(--primary-color); 
-        }
-        .user-avatar { 
-            width: 40px; 
-            height: 40px; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            color: white; 
-            font-weight: 600; 
-            font-size: 0.9rem; 
-        }
-        .card { 
-            border: none; 
-            box-shadow: var(--card-shadow); 
-            border-radius: 12px; 
-            transition: transform 0.2s ease, box-shadow 0.2s ease; 
-        }
-        .card:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1), 0 3px 6px rgba(0, 0, 0, 0.06); 
-        }
-        .stat-card { 
-            padding: 1.5rem; 
-            border-radius: 12px; 
-            background: white; 
-            border: none; 
-            box-shadow: var(--card-shadow); 
-        }
-        .stat-number { 
-            font-size: 2rem; 
-            font-weight: 700; 
-            margin: 0; 
-            color: #1e293b; 
-        }
-        .stat-label { 
-            color: #64748b; 
-            font-size: 0.875rem; 
-            font-weight: 500; 
-            margin-bottom: 0.5rem; 
-        }
-        .stat-icon { 
-            width: 60px; 
-            height: 60px; 
-            border-radius: 12px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 1.5rem; 
-        }
-        .icon-customers { 
-            background: rgba(249, 115, 22, 0.1); 
-            color: #ea580c; 
-        }
-        .icon-revenue { 
-            background: rgba(59, 130, 246, 0.1); 
-            color: #2563eb; 
-        }
-        .icon-orders { 
-            background: rgba(16, 185, 129, 0.1); 
-            color: #059669; 
-        }
-        .icon-products { 
-            background: rgba(147, 51, 234, 0.1); 
-            color: #9333ea; 
-        }
-        .form-control, .form-select {
-            border-radius: 8px;
-            border: 1px solid #d1d5db;
-            padding: 0.75rem 1rem;
-            font-size: 0.875rem;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        .form-control:focus, .form-select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            border-radius: 8px;
-            padding: 0.75rem 1.5rem;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-        .btn-primary:hover {
-            background-color: #1d4ed8;
-            border-color: #1d4ed8;
-            transform: translateY(-1px);
-        }
-        .chart-container { 
-            position: relative; 
-            height: 300px; 
-            margin-top: 1rem; 
-        }
-        .table { 
-            font-size: 0.95rem; 
-            background-color: #f9fafb; 
-        }
-        .table th { 
-            border-top: none; 
-            border-bottom: 2px solid #e2e8f0; 
-            font-weight: 600; 
-            color: #374151; 
-            text-transform: uppercase; 
-            font-size: 0.8rem; 
-            letter-spacing: 0.05em; 
-            padding: 1rem 0.75rem; 
-        }
-        .table td { 
-            border-color: #f1f5f9; 
-            padding: 1rem 0.75rem; 
-            vertical-align: middle; 
-            background-color: #ffffff; 
-            color: #374151; 
-        }
-        .table tbody tr:hover { 
-            background-color: #f8fafc; 
-        }
-        .badge { 
-            font-size: 0.75rem; 
-            font-weight: 500; 
-            padding: 0.35rem 0.75rem; 
-            border-radius: 6px; 
-            text-align: center; 
-        }
-        .badge-shipped { 
-            background-color: rgba(59, 130, 246, 0.1); 
-            color: #1e40af; 
-        }
-        .badge-returned { 
-            background-color: rgba(107, 114, 128, 0.1); 
-            color: #374151; 
-        }
-        .order-id { 
-            font-family: 'Monaco', 'Menlo', monospace; 
-            font-size: 0.85rem; 
-            color: #000000; 
-            word-break: break-all; 
-            display: block; 
-            width: 100%; 
-        }
-        .section-title { 
-            font-size: 1.5rem; 
-            font-weight: 700; 
-            color: #1e293b; 
-            margin-bottom: 1.5rem; 
-            display: flex; 
-            align-items: center; 
-            gap: 0.5rem; 
-        }
-        .chart-legend { 
-            display: flex; 
-            gap: 1.5rem; 
-            margin-bottom: 1rem; 
-            flex-wrap: wrap; 
-        }
-        .legend-item { 
-            display: flex; 
-            align-items: center; 
-            gap: 0.5rem; 
-            font-size: 0.875rem; 
-            color: #64748b; 
-        }
-        .legend-dot { 
-            width: 12px; 
-            height: 12px; 
-            border-radius: 50%; 
-        }
-        .btn-view { 
-            background-color: var(--primary-color); 
-            color: white; 
-            border: none; 
-            padding: 0.5rem 1rem; 
-            border-radius: 6px; 
-            font-size: 0.85rem; 
-            font-weight: 500; 
-            transition: all 0.2s ease; 
-            width: 80px; 
-        }
-        .btn-view:hover { 
-            background-color: #1d4ed8; 
-            transform: translateY(-1px); 
-        }
-        .filter-section {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--card-shadow);
-        }
-        .custom-date-fields {
-            display: none;
-            margin-top: 1rem;
-        }
-        .custom-date-fields.active {
-            display: flex;
-            gap: 1rem;
-        }
-        .required { 
-            color: var(--danger-color); 
-        }
-        .dropdown-toggle::after { 
-            margin-left: 0.5rem; 
-        }
-        .pagination-container { 
-            margin-top: 1rem; 
-            text-align: center; 
-        }
-        .pagination .page-link {
-            color: #2563eb;
-            background-color: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 0.5rem 1rem;
-        }
-        .pagination .page-link:hover {
-            background-color: #f1f5f9;
-            color: #1d4ed8;
-        }
-        .pagination .page-item.active .page-link {
-            background-color: #2563eb;
-            color: white;
-            border-color: #2563eb;
-        }
-        .recent-orders-card {
-            width: 100%;
-            max-width: 100%;
-            margin-right: 0;
-        }
-        .top-selling-card, .top-brands-card {
-            width: 100%;
-            max-width: var(--chart-card-width);
-        }
-        .table-container {
-            background: white;
-            border-radius: 12px;
-            overflow-x: auto;
-            box-shadow: var(--card-shadow);
-            border: 1px solid #e2e8f0;
-        }
-        .orders-table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-        }
-        .table-header {
-            background: #1e293b;
-            color: white;
-        }
-        .table-header th {
-            padding: 1.25rem;
-            text-align: left;
-            font-weight: 600;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            border-bottom: 1px solid #334155;
-        }
-        .table-header th:nth-child(1) { width: 15%; }
-        .table-header th:nth-child(2) { width: 25%; }
-        .table-header th:nth-child(3) { width: 15%; }
-        .table-header th:nth-child(4) { width: 15%; }
-        .table-header th:nth-child(5) { width: 15%; }
-        .table-header th:nth-child(6) { width: 15%; }
-        .table-header th:nth-child(7) { width: 10%; }
-        .table-row {
-            border-bottom: 1px solid #e2e8f0;
-            transition: background-color 0.2s;
-        }
-        .table-row:hover {
-            background-color: #f8fafc;
-        }
-        .table-cell {
-            padding: 1rem;
-            vertical-align: middle;
-            font-size: 0.9rem;
-            text-align: left;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .table-cell.text-center {
-            text-align: center;
-        }
-        .customer-name {
-            font-weight: 600;
-            color: #1e293b;
-        }
-        .amount {
-            font-weight: 600;
-            color: #059669;
-        }
-        .payment-method {
-            padding: 0.35rem 0.75rem;
-            border-radius: 15px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            display: inline-block;
-            text-align: center;
-            min-width: 70px;
-        }
-        .payment-method.card {
-            background: #dbeafe;
-            color: #1d4ed8;
-        }
-        .payment-method.razorpay {
-            background: #dbeafe;
-            color: #1d4ed8;
-        }
-        .payment-method.cash-on-delivery {
-            background: #fef3c7;
-            color: #d97706;
-        }
-        .payment-method.wallet {
-            background: #f3e8ff;
-            color: #7c3aed;
-        }
-        .status {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            display: inline-block;
-            text-align: center;
-            min-width: 80px;
-        }
-        .status.delivered {
-            background: #dcfce7;
-            color: #166534;
-        }
-        .status.cancelled {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-        .status.pending {
-            background: #fef3c7;
-            color: #d97706;
-        }
-        .status.processing {
-            background: #dbeafe;
-            color: #1d4ed8;
-        }
-        .status.shipped {
-            background: #e0f2fe;
-            color: #1e40af;
-        }
-        .status.return-requested {
-            background: #fef3c7;
-            color: #d97706;
-        }
-        .status.returned {
-            background: #f1f5f9;
-            color: #374151;
-        }
-        .status.return-rejected {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-        .view-btn {
-            background: #6366f1;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            width: 80px;
-        }
-        .view-btn:hover {
-            background: #5046e5;
-        }
-        .error-message {
-            color: var(--danger-color);
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
-            display: none;
-        }
-        @media (max-width: 1200px) {
-            .sidebar { width: 220px; }
-            .main-content { margin-left: 220px; }
-            .container { max-width: 100%; padding: 20px; }
-            .orders-table { table-layout: fixed; }
-        }
-        @media (max-width: 768px) {
-            .mobile-menu-toggle { 
-                display: block; 
-                position: fixed; 
-                top: 20px; 
-                left: 20px; 
-                z-index: 1001; 
-                background: #1e293b; 
-                color: white; 
-                border: none; 
-                padding: 12px; 
-                border-radius: 8px; 
-                cursor: pointer; 
-            }
-            .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
-            .sidebar.open { transform: translateX(0); }
-            .main-content { margin-left: 0; padding-top: 70px; }
-            .search-row { flex-direction: column; align-items: stretch; }
-            .search-input { min-width: auto; }
-            .table-container { overflow-x: auto; }
-            .orders-table { min-width: 800px; }
-            .table-header th, .table-cell { padding: 0.75rem; font-size: 0.85rem; }
-            .page-title { font-size: 1.75rem; }
-            .recent-orders-card { max-width: 100%; margin-right: 0; }
-            .top-selling-card, .top-brands-card { max-width: 100%; }
-        }
-    </style>
+    <link  rel="stylesheet" href="/css/admin-css/dashboard.css">
 </head>
 <body>
     <div class="main-content" id="mainContent">
@@ -867,54 +384,118 @@
             document.getElementById('totalOrders').textContent = data.orderCount || 0;
             document.getElementById('totalProducts').textContent = data.productCount || 0;
 
-            // Update Revenue Chart
-            if (revenueChartInstance) revenueChartInstance.destroy();
-            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-            revenueChartInstance = new Chart(revenueCtx, {
-                type: 'line',
-                data: {
-                    labels: data.revenueData.map(item => item._id),
-                    datasets: [
-                        {
-                            label: 'Revenue',
-                            data: data.revenueData.map(item => item.revenue),
-                            borderColor: chartColors.primary,
-                            backgroundColor: chartColors.primary + '20',
-                            tension: 0.4,
-                            fill: true,
-                            borderWidth: 3,
-                            pointBackgroundColor: chartColors.primary,
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2,
-                            pointRadius: 5,
-                        },
-                        {
-                            label: 'Orders',
-                            data: data.revenueData.map(item => item.orderCount),
-                            borderColor: chartColors.success,
-                            backgroundColor: chartColors.success + '20',
-                            tension: 0.4,
-                            fill: true,
-                            borderWidth: 3,
-                            pointBackgroundColor: chartColors.success,
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2,
-                            pointRadius: 5,
-                        },
-                    ],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { color: '#64748b' } },
-                        y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } },
-                    },
-                    elements: { point: { hoverRadius: 8 } },
-                },
-            });
+           // Update Revenue Chart
+/// Update Revenue Chart
+if (revenueChartInstance) revenueChartInstance.destroy();
+const revenueCtx = document.getElementById('revenueChart').getContext('2d');
 
+// Define month order for sorting and display
+const monthOrder = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+// Sort and format revenueData
+const sortedRevenueData = [...data.revenueData]
+    .filter(item => item._id) // Remove items with missing _id
+    .map(item => {
+        let label, sortKey;
+        if (item._id.includes('-')) {
+            // Handle daily data (YYYY-MM-DD)
+            label = new Date(item._id).toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            }); // Format as DD/MM/YYYY
+            sortKey = item._id; // Use _id for sorting daily data
+        } else {
+            // Handle monthly data (full month names)
+            label = item._id;
+            sortKey = monthOrder.indexOf(item._id);
+        }
+        return { ...item, label, sortKey };
+    })
+    .sort((a, b) => {
+        if (a._id.includes('-')) {
+            // Sort daily data chronologically
+            return a.sortKey.localeCompare(b.sortKey);
+        }
+        // Sort monthly data by monthOrder index
+        return a.sortKey - b.sortKey;
+    });
+
+revenueChartInstance = new Chart(revenueCtx, {
+    type: 'line',
+    data: {
+        labels: sortedRevenueData.map(item => item.label),
+        datasets: [
+            {
+                label: 'Revenue',
+                data: sortedRevenueData.map(item => item.revenue || 0),
+                borderColor: chartColors.primary,
+                backgroundColor: chartColors.primary + '20',
+                tension: 0,
+                stepped: 'before', // Step graph for revenue
+                fill: true,
+                borderWidth: 3,
+                pointBackgroundColor: chartColors.primary,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+            },
+            {
+                label: 'Orders',
+                data: sortedRevenueData.map(item => item.orderCount || 0),
+                borderColor: chartColors.success,
+                backgroundColor: chartColors.success + '20',
+                tension: 0.4, // Smooth line for orders
+                fill: true,
+                borderWidth: 3,
+                pointBackgroundColor: chartColors.success,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+            },
+        ],
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: function (context) {
+                        const label = context.dataset.label || '';
+                        const value = context.parsed.y;
+                        return `${label}: ${label === 'Revenue' ? '₹' + value.toFixed(2) : value}`;
+                    },
+                },
+            },
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: {
+                    color: '#64748b',
+                    maxRotation: sortedRevenueData.length > 6 ? 45 : 0, // Rotate labels for >6 data points
+                    minRotation: sortedRevenueData.length > 6 ? 45 : 0,
+                    maxTicksLimit: 12, // Limit ticks to avoid clutter
+                },
+            },
+            y: {
+                grid: { color: '#f1f5f9' },
+                ticks: {
+                    color: '#64748b',
+                    callback: function (value) {
+                        return this.getLabelForValue(value).includes('Revenue') ? '₹' + value : value;
+                    },
+                },
+            },
+        },
+        elements: { point: { hoverRadius: 8 } },
+    },
+});
             // Update Order Status Chart
             if (orderStatusChartInstance) orderStatusChartInstance.destroy();
             const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
@@ -1340,6 +921,7 @@
                     'X-Requested-With': 'XMLHttpRequest',
                 },
             })
+            
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -1360,7 +942,7 @@
 
         // View Order Details function (placeholder)
         function viewOrderDetails(orderId) {
-            window.location.href = `/admin/orders/${orderId}`;
+            window.location.href = `/admin/order-view/${orderId}`;
         }
     </script>
 </body>

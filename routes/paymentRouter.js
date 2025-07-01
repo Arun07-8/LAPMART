@@ -4,6 +4,7 @@ const paymentController = require('../controllers/user/paymentController');
 const {userAuth}=require("../middlewares/userAuth")
 
 router.post('/create-order',userAuth,paymentController.createOrder);
+router.get('/payment-failed', userAuth, paymentController.getPaymentFailed);
 router.post("/verify", userAuth,paymentController.verifyPayment);
 router.post("/retry-payment",userAuth, paymentController.retryPayment);
 router.post("/verify-cod",userAuth,paymentController.createCODOrder)

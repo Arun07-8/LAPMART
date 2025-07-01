@@ -42,7 +42,7 @@ const orderSchema = new Schema({
       type: String,
       enum: [
         "Pending", "Shipped", "Delivered",
-        "Cancelled", "Return Requested", "Returned", "Return Rejected"
+        "Cancelled", "Return Requested", "Returned", "Return Rejected","Payment Failed"
       ],
       default: "Pending",
       required: true
@@ -72,15 +72,15 @@ const orderSchema = new Schema({
     type: Number,
     required: true,
   },
-  offerPrice: {                // sum of all item-level offerDiscounts
+  offerPrice: {               
     type: Number,
     default: 0,
   },
-  discount: {                  // coupon discount
+  discount: {                  
     type: Number,
     default: 0,
   },
-  finalAmount: {               // totalPrice - offerPrice - discount
+  finalAmount: {               
     type: Number,
     required: true,
   },

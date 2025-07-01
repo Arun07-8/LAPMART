@@ -139,117 +139,130 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-      if (selectedPaymentMethod === 'Razorpay') {
-        // Create Razorpay order
-        const response = await fetch('/payment/create-order', {
+ if (selectedPaymentMethod === 'Razorpay') {
+  const response = await fetch('/payment/create-order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      amount: totalAmount,
+      addressId: selectedAddressId,
+      cartItems,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  if (!data.success || !data.order?.id) {
+    throw new Error(data.message || 'Failed to create Razorpay order.');
+  }
+
+  const options = {
+    key: razorpayKey,
+    amount: data.order.amount,
+    currency: 'INR',
+    name: 'Lapkart',
+    description: 'Order Payment',
+    order_id: data.order.id,
+    handler: async (response) => {
+      try {
+        const verifyResponse = await fetch('/payment/verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: totalAmount, addressId: selectedAddressId, cartItems, productId }),
+          body: JSON.stringify({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+            orderId: data.order.dbOrderId,
+          }),
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        if (!data.success || !data.order?.id) {
-          throw new Error(data.message || 'Failed to create order.');
-        }
-
-        // Razorpay options setup
-        const options = {
-          key: razorpayKey,
-          amount: data.order.amount,
-          currency: 'INR',
-          name: 'Lapkart',
-          description: 'Order Payment',
-          order_id: data.order.id,
-          handler: async (response) => {
-            try {
-              // Verify payment and save order
-              const verifyResponse = await fetch('/payment/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature,
-                  cartItems,
-                  addressId: selectedAddressId,
-                  amount: totalAmount,
-                  productId,
-                }),
-              });
-
-              if (!verifyResponse.ok) {
-                throw new Error(`HTTP error: ${verifyResponse.status}`);
-              }
-
-              const verifyData = await verifyResponse.json();
-              if (verifyData.success) {
-                Swal?.fire({
-                  icon: 'success',
-                  title: 'Payment Successful',
-                  text: 'Your order has been placed successfully!',
-                  confirmButtonText: 'Go to Orders',
-                }).then(() => {
-                  window.location.href = `/order/${verifyData.orderId}`;
-                });
-              } else {
-                throw new Error(verifyData.message || 'Payment verification failed.');
-              }
-            } catch (error) {
-              Swal?.fire({
-                icon: 'error',
-                title: 'Payment Failed',
-                text: error.message || 'Something went wrong during verification.',
-              });
-            }
-          },
-          prefill: { name: '', email: '', contact: '' },
-          theme: { color: '#1a73e8' },
-          modal: {
-            ondismiss: () => {
-              Swal?.fire({
-                icon: 'info',
-                title: 'Payment Cancelled',
-                text: 'You cancelled the payment process. Please try again.',
-              });
-            },
-          },
-        };
-
-        const rzp = new window.Razorpay(options);
-
-        rzp.on('payment.failed', (error) => {
-          const errorDetails = error.error || {};
-          const metadata = errorDetails.metadata || {};
-          const errorCode = errorDetails.code || 'UNKNOWN_ERROR';
-          const paymentId = metadata.payment_id || 'N/A';
-          const reason = errorDetails.reason || 'Unknown reason';
-
-          Swal?.fire({
-            icon: 'error',
-            title: 'Payment Failed',
-            text: 'Redirecting to failure page...',
-            showConfirmButton: false,
-            timer: 1500,
+        const verifyData = await verifyResponse.json();
+        if (verifyData.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Payment Successful',
+            text: 'Your order has been placed successfully!',
+            confirmButtonText: 'Go to Orders',
+          }).then(() => {
+            window.location.href = `/order/${verifyData.orderId}`;
           });
-
-          setTimeout(() => {
-            const query = new URLSearchParams({
-              errorCode,
-              productId: productId || 'N/A',
-              paymentId,
-              reason,
-            }).toString();
-
-            window.location.href = `/payment/payment-failed?${query}`;
-          }, 1600);
+        } else {
+          throw new Error(verifyData.message || 'Payment verification failed.');
+        }
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Payment Failed',
+          text: error.message || 'Something went wrong.',
+        });
+      }
+    },
+    modal: {
+      ondismiss: () => {
+        Swal.fire({
+          icon: 'info',
+          title: 'Payment Cancelled',
+          text: 'You cancelled the payment process.',
+          showConfirmButton: false,
+          timer: 1500,
         });
 
-        rzp.open();
-      }
+        setTimeout(() => {
+          const query = new URLSearchParams({
+            reason: 'payment_cancelled',
+            orderId: data.order.dbOrderId || '',
+          }).toString();
+          window.location.href = `/payment/payment-failed?${query}`;
+        }, 1600);
+      },
+    },
+    prefill: {
+      name: '',
+      email: '',
+      contact: '',
+    },
+    theme: {
+      color: '#1a73e8',
+    },
+  };
+
+  const rzp = new Razorpay(options);
+
+  rzp.on('payment.failed', (error) => {
+    const errorDetails = error.error || {};
+    const metadata = errorDetails.metadata || {};
+    const errorCode = errorDetails.code || 'UNKNOWN_ERROR';
+    const paymentId = metadata.payment_id || 'N/A';
+    const reason = errorDetails.reason || 'input_validation_failed';
+    const amount=totalAmount
+
+    Swal.fire({
+      icon: 'error',
+      title: 'Payment Failed',
+      text: 'Redirecting to failure page...',
+      showConfirmButton: false,
+      timer: 1500,
+    });
+
+    setTimeout(() => {
+      const query = new URLSearchParams({
+        errorCode,
+        reason,
+        paymentId,
+        orderId: data.order.dbOrderId || '',
+        amount,
+      }).toString();
+      console.log()
+      window.location.href = `/payment/payment-failed?${query}`;
+    }, 1600);
+  });
+
+  rzp.open();
+}
+
 else if (selectedPaymentMethod === 'Wallet') {
   try {
     const response = await fetch('/payment/order/pay-with-wallet', {

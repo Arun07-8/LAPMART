@@ -264,6 +264,9 @@ const updateStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
+    if(order.paymentStatus !== 'success' && order.paymentMethod !== 'Cash on Delivery'){
+      return res.status(404).json({ success: false, message: 'Payment is not completed!' });
+    }
 
     order.orderedItems.forEach(item => {
       item.status = newStatus;
@@ -282,6 +285,7 @@ if (newStatus === 'Delivered' && order.paymentMethod === 'Cash on Delivery') {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
 const acceptReturn = async (req, res) => {
   try {
     const { orderId, productId } = req.params;

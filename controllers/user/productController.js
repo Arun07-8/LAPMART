@@ -8,14 +8,14 @@ const productViewPage=async(req,res)=>{
     try{
         const userId=req.session.user;
 
-        let wishlistProductIds = [];
+        let wishlistProductIds= [];
         
             if (userId) {
               userData = await User.findOne({ _id: userId }).lean();
         
               const wishlist = await Wishlist.findOne({ userId: userId})
               if (wishlist) {
-                wishlistProductIds = wishlist.products.map(item => item.productId.toString());
+             wishlistProductIds = wishlist.products.map(item => item.productId.toString());
               }
             }
         const productId=req.query.id;
@@ -31,7 +31,8 @@ const productViewPage=async(req,res)=>{
             product: upadtedProduct,
             quantity:product.quantity,
             category:findCategory,
-            applyoffsimilerProducts
+            applyoffsimilerProducts,
+            wishlistProductIds
         })
         }else{
             res.render("productViewPage",{

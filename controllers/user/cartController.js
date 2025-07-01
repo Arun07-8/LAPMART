@@ -2,6 +2,7 @@ const Cart = require("../../models/cartSchema")
 const Product = require("../../models/productSchema")
 const User = require("../../models/userSchema")
 const {applyBestOffer}=require("../../helpers/offerHelper")
+const Wishlist=require("../../models/wishlistSchema")
 
 const renderCartPage = async (req, res) => {
   try {
@@ -73,7 +74,6 @@ const renderCartPage = async (req, res) => {
   }
 };
 
-
 const addTocart = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -90,18 +90,17 @@ const addTocart = async (req, res) => {
 
     if (!product) return res.status(404).json({ success: false, message: "Product not found or unavailable" });
     if (!product.isListed || !product.category?.isListed || !product.brand?.isListed) {
-      return res.status(403).json({ success: false, message: "This product  is blocked." });
+      return res.status(403).json({ success: false, message: "This product is blocked." });
     }
-    if(!product.category?.isListed){
-       return res.status(403).json({ success: false, message: "This product  its category is blocked." });
+    if (!product.category?.isListed) {
+      return res.status(403).json({ success: false, message: "This product's category is blocked." });
     }
-    if(!product.brand?.isListed){
-       return res.status(403).json({ success: false, message: "This product   its brand is blocked." });
+    if (!product.brand?.isListed) {
+      return res.status(403).json({ success: false, message: "This product's brand is blocked." });
     }
 
     const maximumQuantity = 5;
-
-    let cart = await Cart.findOne({ userId: userId });
+    let cart = await Cart.findOne({ userId });
 
     if (cart) {
       const existingItemIndex = cart.items.findIndex(item => item.productId.toString() === productId);
@@ -145,12 +144,8 @@ const addTocart = async (req, res) => {
         return res.status(400).json({ success: false, message: `Maximum ${maximumQuantity} units per product allowed.` });
       }
 
-
-
-      
-
       cart = new Cart({
-        userId: userId,
+        userId,
         items: [{
           productId: product._id,
           price: product.regularPrice,
@@ -162,6 +157,12 @@ const addTocart = async (req, res) => {
     }
 
     await cart.save();
+
+    await Wishlist.updateOne(
+      { userId },
+      { $pull: { products: { productId: product._id } } }
+    );
+
     res.status(200).json({ success: true, message: "Product added to cart successfully!" });
 
   } catch (error) {
@@ -169,6 +170,7 @@ const addTocart = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error. Please try again." });
   }
 };
+
 
 const updateCartQuantity = async (req, res) => {
   try {

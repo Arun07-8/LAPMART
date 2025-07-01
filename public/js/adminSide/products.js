@@ -300,3 +300,105 @@ function clearErrorMessage(id) {
     el.style.display = 'none';
   }
 }
+  async function handleSoftDeleteClick(orderId) {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: 'This will mark the product as deleted. You can restore it later.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/admin/deleteProducts/${orderId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Failed to soft delete product');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Deleted',
+                        text: data.message || 'Product has been soft deleted',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops',
+                        text: error.message || 'An error occurred while deleting the brand'
+                    });
+                }
+            }
+        }
+
+             async function handleListProduct(orderId) {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: 'This will list the product, making it visible.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, list it!',
+                cancelButtonText: 'Cancel'
+            });
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/admin/listedProduct/${orderId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Failed to list product');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Product Listed',
+                        text: data.message || 'Product has been listed successfully',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.message || 'An error occurred while listing the product'
+                    });
+                }
+            }
+        }
+
+        async function handleUnlistProduct(orderId) {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: 'This will unlist the prooduct, making it hidden.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, unlist it!',
+                cancelButtonText: 'Cancel'
+            });
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/admin/unlistedProduct/${orderId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Failed to unlist product');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Product Unlisted',
+                        text: data.message || ' Product has been unlisted successfully',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.message || 'An error occurred while unlisting the product'
+                    });
+                }
+            }
+        }

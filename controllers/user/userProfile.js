@@ -382,7 +382,7 @@ const getreferralPage = async (req, res) => {
   try {
     const userId = req.session.user;
     const userData = await User.findById(userId)
-      .populate('redeemedUsers', 'name email createdAt') // include createdAt for history
+      .populate('redeemedUsers', 'name email createdAt')
       .lean();
 
     const page = parseInt(req.query.page) || 1;
@@ -396,7 +396,7 @@ const getreferralPage = async (req, res) => {
 
     res.render("referral", {
       user: userData,
-      referralCode: userData.referralCode, // ✅ Pass this to EJS
+      referralCode: userData.referralCode, 
       redeemedUsers: paginatedRedeemedUsers,
       currentPage: page,
       totalPages: totalPages,

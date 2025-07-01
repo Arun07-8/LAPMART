@@ -872,8 +872,8 @@
                                         <tr>
                                             <td><%= item?.product?.productName|| 'Unknown Product' %></td>
                                             <td><%= item?.quantity || 1 %></td>
-                                            <td>₹<%= item?.price?.toFixed(2) || '0.00' %></td>
-                                            <td>₹<%= ((item?.price || 0) * (item?.quantity || 1)).toFixed(2) %></td>
+                                            <td>₹<%= item?.originalPrice?.toFixed(2) || '0.00' %></td>
+                                            <td>₹<%= ((item?.originalPrice || 0) * (item?.quantity || 1)).toFixed(2) %></td>
                                         </tr>
                                     <% }) %>
                                 <% } else { %>
