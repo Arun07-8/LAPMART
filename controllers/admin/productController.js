@@ -31,7 +31,7 @@ const productInfo = async (req, res) => {
             .limit(limit)
             .skip((page - 1) * limit)
             .lean();
-        
+
         const count = await Product.countDocuments(query);
         const totalPages = Math.ceil(count / limit);
         if (req.headers.accept.includes('application/json')) {
@@ -88,7 +88,7 @@ const listAvailableProducts = async (req, res) => {
       '_id productName'
     );
 
-    res.status(200).json({ products }); // send in JSON format for dropdown
+    res.status(200).json({ products });
   } catch (error) {
     console.error("Error fetching product list for offer:", error);
     res.status(500).json({ error: "Failed to load products" });

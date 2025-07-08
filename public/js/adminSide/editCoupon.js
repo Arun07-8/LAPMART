@@ -461,25 +461,28 @@ document.getElementById('minPurchase').addEventListener('input', debounce(() => 
     validatePrices();
 }, 300));
 
-// Date input formatting (added from add coupon logic)
-['createdDate', 'expiryDate'].forEach(id => {
-    const input = document.getElementById(id);
-    input.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/[^0-9/]/g, '');
-        if (value.length === 2 || value.length === 5) {
-            value += '/';
-        }
-        e.target.value = value.slice(0, 10);
-        validateField(
-            id,
-            `${id}Error`,
-            value => validateDateFormat(value, id === 'createdDate'),
-            id === 'createdDate'
-                ? 'Please enter a valid date (DD/MM/YYYY) on or after today'
-                : 'Please enter a valid date (DD/MM/YYYY)'
-        );
-    });
-});
+  const createdDateValid = validateField(
+        'createdDate',
+        'createdDateError',
+        value => validateDateFormat(value, true), // Pass true for createdDate
+        'Please enter a valid date (DD/MM/YYYY) on or after today'
+    );
+    if (!createdDateValid) errors.push('Created date is invalid');
+
+    const expiryDateValid = validateField(
+        'expiryDate',
+        'expiryDateError',
+        value => {
+            if (!validateDateFormat(value)) return false;
+            const createdDateStr = document.getElementById('createdDate').value;
+            if (!validateDateFormat(createdDateStr, true)) return false;
+            const createdDate = parseDate(createdDateStr);
+            const expiryDate = parseDate(value);
+            return expiryDate > createdDate;
+        },
+        'Expiry date must be valid and after created date'
+    );
+    if (!expiryDateValid) errors.push('Expiry date is invalid');
 
 // Cancel button
 function goBack() {

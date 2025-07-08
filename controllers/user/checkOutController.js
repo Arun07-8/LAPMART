@@ -4,6 +4,8 @@ const User=require("../../models/userSchema")
 const Wallet=require("../../models/walletSchema")
 const {applyBestOffer}=require("../../helpers/offerHelper")
 const Coupon=require("../../models/couponSchema")
+
+
 const checkOutpage = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -13,6 +15,7 @@ const checkOutpage = async (req, res) => {
 
    
     const existingCart = await Cart.findOne({ userId }).populate('items.productId');
+
     const existingAddress = await Address.findOne({ userId });
     const userData = await User.findById(userId);
 

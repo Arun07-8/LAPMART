@@ -78,7 +78,6 @@ const loadDashbard = async (req, res) => {
 
         const query = { ...dateFilter, ...statusFilter };
 
-        // Fetch orders for the table
         const orderData = await Order.find(query)
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -89,11 +88,11 @@ const loadDashbard = async (req, res) => {
         const orderCount = await Order.countDocuments(query);
         const totalPages = Math.ceil(orderCount / limit);
 
-        // Count users and products
+ 
         const userCount = await User.countDocuments();
         const productCount = await Product.countDocuments({ isDeleted: false });
 
-        // Calculate total revenue
+ 
         const totalRevenueResult = await Order.aggregate([
             { $match: query },
             { $unwind: "$orderedItems" },
@@ -127,7 +126,7 @@ const loadDashbard = async (req, res) => {
 
         const totalRevenue = totalRevenueResult[0]?.revenue || 0;
 
-        // Determine date format and generate all dates in the range
+    
         let dateFormat = (timePeriod === "today" || timePeriod === "yesterday" || timePeriod === "last7days" || timePeriod === "last30days" || timePeriod === "custom") ? "%Y-%m-%d" : "%B %Y";
         let datesInRange = [];
 
@@ -182,7 +181,6 @@ const loadDashbard = async (req, res) => {
             }
         }
 
-        // Aggregate revenue data
         const revenueDataRaw = await Order.aggregate([
             { $match: query },
             { $unwind: "$orderedItems" },
@@ -211,7 +209,6 @@ const loadDashbard = async (req, res) => {
             { $sort: { _id: 1 } },
         ]);
 
-        // Fill in missing dates with zero values
         const revenueData = datesInRange.map(date => {
             const found = revenueDataRaw.find(item => item._id === date);
             return {
@@ -221,7 +218,7 @@ const loadDashbard = async (req, res) => {
             };
         });
 
-        // Other aggregations
+   
         const orderStatusData = await Order.aggregate([
             { $match: query },
             { $unwind: "$orderedItems" },
