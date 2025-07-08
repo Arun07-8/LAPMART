@@ -4,6 +4,19 @@ const User=require("../models/userSchema");
 const env=require("dotenv").config();
 
 
+async function generateUniqueReferralCode(name) {
+  const prefix = name.split(" ")[0].toUpperCase();
+  let code, exists;
+
+  do {
+    const random = Math.floor(1000 + Math.random() * 9000);
+    code = `${prefix}${random}`;
+    exists = await User.findOne({ referralCode: code });
+  } while (exists);
+
+  return code;
+}
+
 
 passport.use(new GoogleStrategy({
     clientID:process.env.GOOGLE_CLIENT_ID,
@@ -21,17 +34,22 @@ async(accessToken,refreshToken,profile,done)=>{
                return done (null,false,{message:"User is Blocked by the admin"})
            }
         }else{
-        }
+
+         const referrerCode = await generateUniqueReferralCode(profile.displayName);
 
           const newUser =new User({
                 name:profile.displayName,
                 email:profile.emails[0].value,
-                googleid:profile.id 
+                googleid:profile.id ,
+                referralCode:referrerCode
             });
 
             await newUser.save();
 
             return done(null,newUser);
+        }
+
+        
     } catch (error) {
           return  done(error,null)
     }

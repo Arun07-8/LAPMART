@@ -1,4 +1,5 @@
 const Brand = require("../../models/BrandSchema");
+const { distance } = require('fastest-levenshtein');
 
 const brandInfo = async (req, res) => {
     try {
@@ -37,29 +38,46 @@ const brandInfo = async (req, res) => {
 
 
 
-//  add Brand
-const addbrand=async (req,res) => {
-    try {
-        const {name,description}=req.body;
+const normalizeName = (str) => {
+  return str.trim().toLowerCase().replace(/\s+/g, ' ');
+};
 
-        const existingBrand=await Brand.findOne({name,isDeleted:true});
-        if(existingBrand){
-            return res.status(400).json({error:"Brand already exists"})
-        }
-        const newCategory=new Brand({
-            name,
-            description,
-        })
-        
-        await newCategory.save();
+const addbrand = async (req, res) => {
+  try {
+    const { name, description } = req.body;
+    const normalizedInput = normalizeName(name);
 
-        return res.json({message:"Brand added successfully"});
-        
-    } catch (error) {
-        return res.status(500).json({error:"internal Server"})
-        
+    const existingBrands = await Brand.find({ isDeleted: false });
+
+    const duplicate = existingBrands.find((brand) => {
+      const existingName = normalizeName(brand.name);
+      const dist = distance(normalizedInput, existingName);
+      const maxLen = Math.max(normalizedInput.length, existingName.length);
+      const similarity = 1 - dist / maxLen;
+
+      return similarity >= 0.8; 
+    });
+
+    if (duplicate) {
+      return res.status(400).json({
+        error: `Brand is too similar to existing brand: "${duplicate.name}"`,
+      });
     }
-}
+
+    const newBrand = new Brand({
+      name: name.trim(),
+      description,
+    });
+
+    await newBrand.save();
+
+    return res.json({ message: 'Brand added successfully' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 
 
 // listed Brand

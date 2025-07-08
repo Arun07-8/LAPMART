@@ -531,6 +531,7 @@
                         <div class="table-container d-none d-md-block">
                             <% if (orders && orders.length > 0) { %>
                                 <div class="table-responsive">
+                                    
                                     <table class="orders-table">
                                         <thead>
                                             <tr>
@@ -589,7 +590,8 @@
   }
 %>
 
-<tr>
+<tr>  
+  
   <td>#<%= order.orderId || 'Unknown' %></td>
   <td><%= order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-GB') : 'Unknown' %></td>
   <td>

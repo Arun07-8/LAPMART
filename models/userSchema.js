@@ -47,7 +47,7 @@
             type: Schema.Types.ObjectId,
             ref: "Wishlist"
         }],
-        referralCode: { // Fixed typo from 'referalCode'
+        referralCode: { 
             type: String,
             
         },

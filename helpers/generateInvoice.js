@@ -1,4 +1,3 @@
-
 const fs = require('fs');
 const path = require('path');
 const PDFDocument = require('pdfkit');
@@ -6,23 +5,31 @@ const PDFDocument = require('pdfkit');
 const generateInvoice = async (order, user, outputPath) => {
   return new Promise((resolve, reject) => {
     try {
-    
-      
-      // Validation
+      // Enhanced validation
       const missingFields = [];
       if (!order) missingFields.push('order');
       if (!order?.orderedItems?.length) missingFields.push('orderedItems');
       if (!user?.name) missingFields.push('user.name');
       if (!order?.shippingAddress) missingFields.push('shippingAddress');
+      if (!order?.finalAmount) missingFields.push('finalAmount');
+      if (!order?.paymentMethod) missingFields.push('paymentMethod');
 
       if (missingFields.length) {
         throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
       }
 
+      // Validate output path
+      const outputDir = path.dirname(outputPath);
+      if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+      }
+
+      // Create PDF document
       const doc = new PDFDocument({ 
-        margin: 50,
+        margin: 40,
         size: 'A4'
       });
+      
       const writeStream = fs.createWriteStream(outputPath);
       
       writeStream.on('error', (err) => {
@@ -31,292 +38,312 @@ const generateInvoice = async (order, user, outputPath) => {
       });
 
       writeStream.on('finish', () => {
-      
+        console.log('Invoice generated successfully:', outputPath);
         resolve();
       });
 
       doc.pipe(writeStream);
 
-      // PAGE CONSTANTS
-      const pageWidth = 598.280; 
-      const pageHeight = 841.89; 
-      const margin = 50;
+      // Constants and colors (unchanged)
+      const pageWidth = doc.page.width;
+      const pageHeight = doc.page.height;
+      const margin = 40;
       const contentWidth = pageWidth - (margin * 2);
+      const maxPageY = pageHeight - 80;
       
-      // COLORS
-      const primaryColor = '#2563eb';
-      const textDark = '#1f2937';
-      const textMedium = '#4b5563';
-      const textLight = '#6b7280';
-      const bgLight = '#f8fafc';
-      const borderColor = '#e5e7eb';
+      const colors = {
+        primary: '#1e40af',
+        secondary: '#3b82f6',
+        accent: '#10b981',
+        danger: '#ef4444',
+        dark: '#111827',
+        medium: '#4b5563',
+        light: '#6b7280',
+        lighter: '#9ca3af',
+        background: '#f8fafc',
+        border: '#e5e7eb',
+        white: '#ffffff'
+      };
 
-  
-      let currentY = 60;
-      
+      let currentY = 50;
 
+      // HEADER SECTION (unchanged)
       doc
-        .fontSize(32)
-        .fillColor(primaryColor)
+        .fontSize(28)
+        .fillColor(colors.primary)
         .font('Helvetica-Bold')
         .text('LapKart Ltd.', margin, currentY);
 
-
-      const invoiceDate = order.createdAt || new Date();
-      doc
-        .fontSize(24)
-        .fillColor(textDark)
-        .font('Helvetica-Bold')
-        .text('INVOICE', pageWidth - margin - 120, currentY, { 
-          width: 120, 
-          align: 'right' 
-        });
-
-      currentY += 45;
-
-      // Company Details - Left side
       doc
         .fontSize(10)
-        .fillColor(textMedium)
+        .fillColor(colors.medium)
         .font('Helvetica')
-        .text('123 Business Street, Techno District', margin, currentY)
-        .text('Malappuram, Kerala 672397', margin, currentY + 12)
-        .text('Phone: +91 7306205956', margin, currentY + 24)
-        .text('Email: lapkart@yourcompany.com', margin, currentY + 36)
-        .text('GST: 27XXXXX1234X1ZX | PAN: ABCDE1234F', margin, currentY + 48);
+        .text('Your Trusted Technology Partner', margin, currentY + 32);
 
-      // Invoice Details - Right side
-      const rightColX = pageWidth - margin - 180;
       doc
-        .fontSize(11)
-        .fillColor(textDark)
+        .fontSize(32)
+        .fillColor(colors.dark)
         .font('Helvetica-Bold')
-        .text('Invoice Number:', rightColX, currentY, { width: 90 })
-        .font('Helvetica')
-        .text(`#INV-${order.orderId || 'N/A'}`, rightColX + 49, currentY, { 
-          width: 200, 
+        .text('INVOICE', pageWidth - margin - 140, currentY, { 
+          width: 140, 
           align: 'right' 
         });
 
+      currentY += 70;
+
+      // COMPANY & INVOICE INFO SECTION (unchanged)
+      const companyDetailsY = currentY;
       doc
+        .fontSize(12)
+        .fillColor(colors.primary)
         .font('Helvetica-Bold')
-        .text('Invoice Date:', rightColX, currentY + 15, { width: 100 })
-        .font('Helvetica')
-        .text(new Date(invoiceDate).toLocaleDateString("en-IN", {
-          year: "numeric",
-          month: "short", 
-          day: "numeric"
-        }), rightColX + 100, currentY + 15, { 
-          width: 80, 
-          align: 'right' 
-        });
+        .text('COMPANY INFORMATION', margin, companyDetailsY);
 
-      const dueDate = new Date(new Date(invoiceDate).getTime() + 30*24*60*60*1000);
+      currentY += 20;
+
+      const companyDetails = [
+        '123 Business Street, Techno District',
+        'Malappuram, Kerala 672397, India',
+        'Phone: +91 7306205956',
+        'Email: support@lapkart.com',
+        'Website: www.lapkart.com',
+        'GST: 32XXXXX1234X1ZX | PAN: ABCDE1234F'
+      ];
+
+      companyDetails.forEach(detail => {
+        doc
+          .fontSize(10)
+          .fillColor(colors.medium)
+          .font('Helvetica')
+          .text(detail, margin, currentY);
+        currentY += 12;
+      });
+
+      const invoiceDetailsY = companyDetailsY;
+      const rightColX = pageWidth - margin - 200;
+      
       doc
+        .fontSize(12)
+        .fillColor(colors.primary)
         .font('Helvetica-Bold')
-        .text('Due Date:', rightColX, currentY + 30, { width: 100 })
-        .font('Helvetica')
-        .text(dueDate.toLocaleDateString("en-IN", {
-          year: "numeric",
-          month: "short",
-          day: "numeric"
-        }), rightColX + 100, currentY + 30, { 
-          width: 80, 
-          align: 'right' 
-        });
+        .text('INVOICE DETAILS', rightColX, invoiceDetailsY);
 
-      currentY += 90;
+      let invoiceDetailY = invoiceDetailsY + 20;
 
-      // Divider line
+      const invoiceDate = order.invoiceDate || order.createdAt || new Date();
+      const invoiceDetails = [
+        { label: 'Invoice Number:', value: `#INV-${order.orderId || Math.random().toString(36).substr(2, 9).toUpperCase()}` },
+        { label: 'Invoice Date:', value: invoiceDate.toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" }) },
+        { label: 'Due Date:', value: new Date(invoiceDate.getTime() + 30*24*60*60*1000).toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" }) },
+        { label: 'Terms:', value: 'Net 30 Days' }
+      ];
+
+      invoiceDetails.forEach(detail => {
+        doc
+          .fontSize(10)
+          .fillColor(colors.medium)
+          .font('Helvetica-Bold')
+          .text(detail.label, rightColX, invoiceDetailY, { width: 80 });
+        
+        doc
+          .font('Helvetica')
+          .fillColor(colors.dark)
+          .text(detail.value, rightColX + 85, invoiceDetailY, { width: 115, align: 'right' });
+        
+        invoiceDetailY += 14;
+      });
+
+      currentY = Math.max(currentY, invoiceDetailY) + 30;
+
       doc
-        .strokeColor(borderColor)
-        .lineWidth(1)
+        .strokeColor(colors.border)
+        .lineWidth(2)
         .moveTo(margin, currentY)
         .lineTo(pageWidth - margin, currentY)
         .stroke();
 
       currentY += 30;
 
+      // BILLING SECTION (unchanged)
+      const sectionY = currentY;
       const leftColWidth = (contentWidth - 40) / 2;
       const rightColStart = margin + leftColWidth + 40;
 
       doc
+        .rect(margin - 10, sectionY - 5, leftColWidth + 20, 5)
+        .fillAndStroke(colors.primary, colors.primary);
+
+      doc
         .fontSize(14)
         .font('Helvetica-Bold')
-        .fillColor(primaryColor)
-        .text('BILL TO', margin, currentY);
+        .fillColor(colors.primary)
+        .text('BILL TO', margin, sectionY + 10);
 
-      currentY += 20;
+      let billToY = sectionY + 35;
 
       doc
-        .fontSize(12)
+        .fontSize(13)
         .font('Helvetica-Bold')
-        .fillColor(textDark)
-        .text(user?.name || 'Customer', margin, currentY);
+        .fillColor(colors.dark)
+        .text(user?.name || 'Customer', margin, billToY);
 
-      currentY += 15;
+      billToY += 18;
 
-      doc
-        .fontSize(10)
-        .font('Helvetica')
-        .fillColor(textMedium)
-        .text(user?.email || 'N/A', margin, currentY);
-
-      currentY += 12;
+      if (user?.email) {
+        doc
+          .fontSize(10)
+          .font('Helvetica')
+          .fillColor(colors.medium)
+          .text(`Email: ${user.email}`, margin, billToY);
+        billToY += 12;
+      }
 
       if (order.shippingAddress?.phone) {
-        doc.text(order.shippingAddress.phone, margin, currentY);
-        currentY += 12;
+        doc
+          .text(`Phone: ${order.shippingAddress.phone}`, margin, billToY);
+        billToY += 12;
       }
 
-      // Shipping Address
       if (order.shippingAddress) {
-        if (order.shippingAddress.address) {
-          doc.text(order.shippingAddress.address, margin, currentY, { 
-            width: leftColWidth - 20 
-          });
-          currentY += 15;
-        }
-        
-        const cityStateText = [
-          order.shippingAddress.city,
-          order.shippingAddress.state
-        ].filter(Boolean).join(', ');
-        
-        if (cityStateText) {
-          doc.text(cityStateText, margin, currentY);
-          currentY += 12;
-        }
-        
-        if (order.shippingAddress.pincode) {
-          doc.text(`PIN: ${order.shippingAddress.pincode}`, margin, currentY);
-        }
+        billToY += 5;
+        doc
+          .fontSize(10)
+          .font('Helvetica-Bold')
+          .fillColor(colors.medium)
+          .text('SHIPPING ADDRESS:', margin, billToY);
+        billToY += 15;
+
+        const addressLines = [];
+        if (order.shippingAddress.fullAddress) addressLines.push(order.shippingAddress.fullAddress);
+        const cityState = [order.shippingAddress.city, order.shippingAddress.state].filter(Boolean).join(', ');
+        if (cityState) addressLines.push(cityState);
+        if (order.shippingAddress.pincode) addressLines.push(`PIN: ${order.shippingAddress.pincode}`);
+
+        addressLines.forEach(line => {
+          doc
+            .fontSize(10)
+            .font('Helvetica')
+            .fillColor(colors.dark)
+            .text(line, margin, billToY, { width: leftColWidth - 20 });
+          billToY += 12;
+        });
       }
 
+      doc
+        .rect(rightColStart - 10, sectionY - 5, leftColWidth + 20, 5)
+        .fillAndStroke(colors.accent, colors.accent);
 
-      const detailsStartY = currentY - 80; 
-      
       doc
         .fontSize(14)
         .font('Helvetica-Bold')
-        .fillColor(primaryColor)
-        .text('ORDER DETAILS', rightColStart, detailsStartY);
+        .fillColor(colors.accent)
+        .text('ORDER DETAILS', rightColStart, sectionY + 10);
 
-      let detailY = detailsStartY + 25;
+      let orderDetailY = sectionY + 35;
 
       const orderDetails = [
         { label: 'Order ID:', value: order.orderId || 'N/A' },
-        { label: 'Order Date:', value: new Date(invoiceDate).toLocaleDateString("en-IN") },
+        { label: 'Order Date:', value: invoiceDate.toLocaleDateString("en-IN") },
         { label: 'Payment Method:', value: order.paymentMethod || 'Not Specified' },
-        { label: 'Order Status:', value: 'DELIVERED', isStatus: true }
+        { label: 'Status:', value: order.status || 'DELIVERED', isStatus: true }
       ];
 
       orderDetails.forEach(detail => {
         doc
           .fontSize(10)
           .font('Helvetica-Bold')
-          .fillColor(textMedium)
-          .text(detail.label, rightColStart, detailY, { width: 100 });
+          .fillColor(colors.medium)
+          .text(detail.label, rightColStart, orderDetailY, { width: 90 });
         
-        // Special styling for status
         if (detail.isStatus) {
-          // Add status badge background
-          const statusWidth = 80;
+          const statusColor = detail.value === 'DELIVERED' ? colors.accent : colors.primary;
           doc
-            .rect(rightColStart + 100, detailY - 3, statusWidth, 16)
-            .fillAndStroke('#dcfce7', '#16a34a');
+            .rect(rightColStart + 95, orderDetailY - 2, 75, 14)
+            .fillAndStroke(statusColor, statusColor);
           
           doc
-            .fontSize(9)
+            .fontSize(8)
             .font('Helvetica-Bold')
-            .fillColor('#16a34a')
-            .text(detail.value, rightColStart + 100, detailY + 2, { 
-              width: statusWidth,
+            .fillColor(colors.white)
+            .text(detail.value, rightColStart + 95, orderDetailY + 2, { 
+              width: 75,
               align: 'center'
             });
         } else {
           doc
             .font('Helvetica')
-            .fillColor(textDark)
-            .text(detail.value, rightColStart + 100, detailY, { 
-              width: leftColWidth - 100 
-            });
+            .fillColor(colors.dark)
+            .text(detail.value, rightColStart + 95, orderDetailY, { width: 105, align: 'right' });
         }
         
-        detailY += 18;
+        orderDetailY += 18;
       });
 
-      currentY = Math.max(currentY, detailY) + 40;
+      currentY = Math.max(billToY, orderDetailY) + 40;
 
-
+      // ITEMS TABLE SECTION
       doc
-        .fontSize(18)
+        .fontSize(16)
         .font('Helvetica-Bold')
-        .fillColor(textDark)
+        .fillColor(colors.dark)
         .text('ORDER ITEMS', margin, currentY);
 
-      currentY += 30;
+      currentY += 25;
 
-      const tableStartY = currentY;
-      const minRowHeight = 50;
-      const headerHeight = 50;
+      const tableY = currentY;
+      const rowHeight = 45;
+      const headerHeight = 40;
       
-
-      const tableMargin = margin + 10;
-      const availableWidth = contentWidth - 20;
-      
-      const col1X = tableMargin;                           
-      const col1Width = Math.floor(availableWidth * 0.50); 
-      const col2X = col1X + col1Width;                     
-      const col2Width = Math.floor(availableWidth * 0.15);
-      const col3X = col2X + col2Width;                     
-      const col3Width = Math.floor(availableWidth * 0.175);
-      const col4X = col3X + col3Width;                    
-      const col4Width = availableWidth - col1Width - col2Width - col3Width; 
-
+      const columns = [
+        { x: margin + 5, width: Math.floor(contentWidth * 0.45), align: 'left', label: 'PRODUCT DESCRIPTION' },
+        { x: margin + Math.floor(contentWidth * 0.45) + 10, width: Math.floor(contentWidth * 0.12), align: 'center', label: 'QTY' },
+        { x: margin + Math.floor(contentWidth * 0.57) + 15, width: Math.floor(contentWidth * 0.21), align: 'right', label: 'UNIT PRICE' },
+        { x: margin + Math.floor(contentWidth * 0.78) + 20, width: Math.floor(contentWidth * 0.22), align: 'right', label: 'TOTAL' }
+      ];
 
       doc
         .rect(margin, currentY, contentWidth, headerHeight)
-        .fillAndStroke(primaryColor, primaryColor);
-
-    
-      doc
-        .rect(margin + 2, currentY + 2, contentWidth, headerHeight)
-        .fillAndStroke('#1e40af', '#1e40af');
-      
-      doc
-        .rect(margin, currentY, contentWidth, headerHeight)
-        .fillAndStroke(primaryColor, primaryColor);
+        .fillAndStroke(colors.primary, colors.primary);
 
       doc
-        .fontSize(13)
+        .fontSize(11)
         .font('Helvetica-Bold')
-        .fillColor('white');
+        .fillColor(colors.white);
 
-     
-      doc.text('PRODUCT DESCRIPTION', col1X + 8, currentY + 18, { 
-        width: col1Width - 16, 
-        align: 'left' 
-      });
-      
-      doc.text('QTY', col2X + 8, currentY + 18, { 
-        width: col2Width - 16, 
-        align: 'center' 
-      });
-      
-      doc.text('UNIT PRICE', col3X + 8, currentY + 18, { 
-        width: col3Width - 16, 
-        align: 'center' 
-      });
-      
-      doc.text('TOTAL AMOUNT', col4X + 8, currentY + 18, { 
-        width: col4Width - 16, 
-        align: 'center' 
+      columns.forEach(col => {
+        doc.text(col.label, col.x + 8, currentY + 15, { 
+          width: col.width - 16, 
+          align: col.align 
+        });
       });
 
       currentY += headerHeight;
 
-    
+      const checkNewPage = () => {
+        if (currentY > maxPageY) {
+          doc.addPage();
+          currentY = 50;
+          
+          doc
+            .rect(margin, currentY, contentWidth, headerHeight)
+            .fillAndStroke(colors.primary, colors.primary);
+
+          doc
+            .fontSize(11)
+            .font('Helvetica-Bold')
+            .fillColor(colors.white);
+
+          columns.forEach(col => {
+            doc.text(col.label, col.x + 8, currentY + 15, { 
+              width: col.width - 16, 
+              align: col.align 
+            });
+          });
+
+          currentY += headerHeight;
+        }
+      };
+
       let subtotal = 0;
       const items = order.orderedItems || [];
 
@@ -325,258 +352,228 @@ const generateInvoice = async (order, user, outputPath) => {
         const name = product.productName || `Product Item ${index + 1}`;
         const description = product.description || '';
         const quantity = item.quantity || 1;
-        const price = item.price || 0;
+        const price = item.finalPrice || 0; // Use finalPrice instead of price
         const total = price * quantity;
         subtotal += total;
 
-        const maxNameLength = Math.floor(col1Width / 6); 
-        const nameLines = Math.ceil(name.length / maxNameLength);
-        const dynamicRowHeight = Math.max(minRowHeight, nameLines * 15 + 20);
+        checkNewPage();
 
-  
-        const rowColor = index % 2 === 0 ? '#ffffff' : '#f8fafc';
-        const borderColor2 = index % 2 === 0 ? '#e5e7eb' : '#d1d5db';
-        
+        const rowColor = index % 2 === 0 ? colors.white : colors.background;
         doc
-          .rect(margin, currentY, contentWidth, dynamicRowHeight)
-          .fillAndStroke(rowColor, borderColor2);
+          .rect(margin, currentY, contentWidth, rowHeight)
+          .fillAndStroke(rowColor, colors.border);
 
-      
-        doc
-          .strokeColor('#d1d5db')
-          .lineWidth(1)
-          .moveTo(col2X, currentY)
-          .lineTo(col2X, currentY + dynamicRowHeight)
-          .stroke()
-          .moveTo(col3X, currentY)
-          .lineTo(col3X, currentY + dynamicRowHeight)
-          .stroke()
-          .moveTo(col4X, currentY)
-          .lineTo(col4X, currentY + dynamicRowHeight)
-          .stroke();
-
+        columns.slice(1).forEach(col => {
+          doc
+            .strokeColor(colors.border)
+            .lineWidth(1)
+            .moveTo(col.x, currentY)
+            .lineTo(col.x, currentY + rowHeight)
+            .stroke();
+        });
 
         doc
           .fontSize(11)
           .font('Helvetica-Bold')
-          .fillColor(textDark);
+          .fillColor(colors.dark)
+          .text(name, columns[0].x + 10, currentY + 10, { 
+            width: columns[0].width - 20,
+            lineBreak: true,
+            height: 15
+          });
 
-       
-        const productY = currentY + 10;
-        doc.text(name, col1X + 8, productY, { 
-          width: col1Width - 16,
-          align: 'left',
-          lineBreak: true,
-          height: dynamicRowHeight - 20
-        });
-
-        if (description && description.length > 0) {
+        if (description) {
           doc
             .fontSize(9)
             .font('Helvetica')
-            .fillColor(textLight)
-            .text(description.substring(0, 100) + (description.length > 100 ? '...' : ''), 
-                  col1X + 8, productY + 15, { 
-              width: col1Width - 16,
-              align: 'left'
-            });
+            .fillColor(colors.light)
+            .text(description.substring(0, 80) + (description.length > 80 ? '...' : ''), 
+                  columns[0].x + 10, currentY + 26, { 
+                width: columns[0].width - 20,
+                height: 12
+              });
         }
 
-        
         doc
-          .fontSize(12)
+          .fontSize(11)
           .font('Helvetica-Bold')
-          .fillColor(textDark)
-          .text(quantity.toString(), col2X + 8, currentY + Math.floor(dynamicRowHeight/2) - 6, { 
-            width: col2Width - 16, 
+          .fillColor(colors.dark)
+          .text(quantity.toString(), columns[1].x + 10, currentY + 18, { 
+            width: columns[1].width - 20, 
             align: 'center' 
+          });
+
+        doc
+          .fontSize(10)
+          .font('Helvetica')
+          .fillColor(colors.dark)
+          .text(`${price.toLocaleString('en-IN', { 
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2 
+          })}`, columns[2].x + 10, currentY + 18, { 
+            width: columns[2].width - 20, 
+            align: 'right' 
           });
 
         doc
           .fontSize(11)
-          .font('Helvetica')
-          .fillColor(textDark)
-          .text(`${price.toLocaleString('en-IN', { 
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2 
-          })}`, col3X + 8, currentY + Math.floor(dynamicRowHeight/2) - 6, { 
-            width: col3Width - 16, 
-            align: 'right' 
-          });
-
-        doc
-          .fontSize(12)
           .font('Helvetica-Bold')
-          .fillColor(primaryColor)
+          .fillColor(colors.primary)
           .text(`${total.toLocaleString('en-IN', { 
             minimumFractionDigits: 2,
             maximumFractionDigits: 2 
-          })}`, col4X + 8, currentY + Math.floor(dynamicRowHeight/2) - 6, { 
-            width: col4Width - 16, 
+          })}`, columns[3].x + 10, currentY + 18, { 
+            width: columns[3].width - 20, 
             align: 'right' 
           });
 
-        currentY += dynamicRowHeight;
+        currentY += rowHeight;
       });
 
-      // Enhanced empty state
-      if (items.length === 0) {
-        const emptyRowHeight = 60;
-        doc
-          .rect(margin, currentY, contentWidth, emptyRowHeight)
-          .fillAndStroke('#f9fafb', borderColor);
-        
-        doc
-          .fontSize(14)
-          .font('Helvetica')
-          .fillColor(textLight)
-          .text('📦 No items found in this order', margin, currentY + 20, { 
-            width: contentWidth, 
-            align: 'center' 
-          });
-        
-        currentY += emptyRowHeight;
-      }
-
-      // Professional table footer with summary
       doc
         .rect(margin, currentY, contentWidth, 35)
-        .fillAndStroke('#f1f5f9', primaryColor);
+        .fillAndStroke(colors.background, colors.border);
 
       doc
         .fontSize(12)
         .font('Helvetica-Bold')
-        .fillColor(primaryColor)
-        .text(`Total Items: ${items.length}`, col1X + 8, currentY + 12, { 
-          width: col1Width + col2Width - 16, 
-          align: 'left' 
-        })
+        .fillColor(colors.primary)
+        .text(`Total Items: ${items.length}`, margin + 15, currentY + 12)
         .text(`Subtotal: ${subtotal.toLocaleString('en-IN', { 
           minimumFractionDigits: 2 
-        })}`, col3X + 8, currentY + 12, { 
-          width: col3Width + col4Width - 16, 
+        })}`, margin + 15, currentY + 12, { 
+          width: contentWidth - 30, 
           align: 'right' 
         });
 
-      currentY += 35;
+      currentY += 65;
 
-      currentY += 30;
-
-      // =================
       // TOTALS SECTION
-      // =================
-      const totalsWidth = 280;
+      const totalsWidth = 300;
       const totalsX = pageWidth - margin - totalsWidth;
       
-      // Calculate totals
       const discount = order?.discount || 0;
-      const shipping = 0;
-      const finalAmount = order?.finalAmount || subtotal;
-      const gstRate = 0.18;
-      const gstAmount = (finalAmount * gstRate / (1 + gstRate));
+      const shipping = order?.shippingCharges || 0;
+      const taxableAmount = subtotal - discount + shipping;
+      const gstRate = 0.18; // Consider making this configurable
+      const gstAmount = taxableAmount * gstRate;
+      const finalAmount = order?.finalAmount || (taxableAmount + gstAmount);
 
-      // Totals background with border
       doc
-        .rect(totalsX - 20, currentY - 15, totalsWidth + 40, 160)
-        .fillAndStroke('#f8fafc', borderColor);
+        .rect(totalsX - 15, currentY - 15, totalsWidth + 30, 180)
+        .fillAndStroke(colors.background, colors.border);
+
+      doc
+        .fontSize(14)
+        .font('Helvetica-Bold')
+        .fillColor(colors.primary)
+        .text('INVOICE SUMMARY', totalsX, currentY);
+
+      currentY += 25;
 
       const totalsData = [
-        { label: 'Subtotal:', value: `${subtotal.toFixed(2)}`, bold: false },
-        { label: 'Shipping & Handling:', value: `${shipping.toFixed(2)}`, bold: false },
-        { label: 'Discount Applied:', value: `-${discount.toFixed(2)}`, bold: false },
-        { label: 'GST (18%):', value: `${gstAmount.toFixed(2)}`, bold: false }
+        { label: 'Subtotal:', value: subtotal, color: colors.dark },
+        { label: 'Discount:', value: -discount, color: colors.danger },
+        { label: 'Shipping & Handling:', value: shipping, color: colors.dark },
+        { label: 'Taxable Amount:', value: taxableAmount, color: colors.dark },
+        { label: 'GST (18%):', value: gstAmount, color: colors.medium }
       ];
 
-      let totalY = currentY;
-      
       totalsData.forEach(item => {
         doc
           .fontSize(11)
           .font('Helvetica')
-          .fillColor(textMedium)
-          .text(item.label, totalsX, totalY, { width: 180, align: 'left' });
+          .fillColor(colors.medium)
+          .text(item.label, totalsX + 5, currentY, { width: 170 });
         
         doc
-          .font(item.bold ? 'Helvetica-Bold' : 'Helvetica')
-          .fillColor(textDark)
-          .text(item.value, totalsX + 180, totalY, { 
-            width: 100, 
+          .font('Helvetica')
+          .fillColor(item.color)
+          .text(`${Math.abs(item.value).toLocaleString('en-IN', { 
+            minimumFractionDigits: 2 
+          })}`, totalsX + 180, currentY, { 
+            width: 115, 
             align: 'right' 
           });
         
-        totalY += 20;
+        currentY += 20;
       });
 
-      // Divider line
-      totalY += 10;
+      currentY += 10;
       doc
-        .strokeColor(borderColor)
+        .strokeColor(colors.border)
         .lineWidth(1)
-        .moveTo(totalsX, totalY)
-        .lineTo(totalsX + totalsWidth, totalY)
+        .moveTo(totalsX, currentY)
+        .lineTo(totalsX + totalsWidth, currentY)
         .stroke();
 
-      // Final total with emphasis
-      totalY += 15;
+      currentY += 15;
       doc
-        .rect(totalsX - 10, totalY - 8, totalsWidth + 20, 35)
-        .fillAndStroke('#e3f2fd', primaryColor);
+        .rect(totalsX - 5, currentY - 5, totalsWidth + 10, 35)
+        .fillAndStroke(colors.primary, colors.primary);
       
       doc
         .fontSize(14)
         .font('Helvetica-Bold')
-        .fillColor(primaryColor)
-        .text('TOTAL AMOUNT DUE:', totalsX, totalY + 5, { width: 180, align: 'left' });
-      
-      doc
-        .fontSize(16)
-        .fillColor(primaryColor)
-        .text(`${finalAmount.toFixed(2)}`, totalsX + 180, totalY + 5, { 
-          width: 100, 
+        .fillColor(colors.white)
+        .text('TOTAL AMOUNT:', totalsX + 10, currentY + 8, { width: 180 })
+        .text(`${finalAmount.toLocaleString('en-IN', { 
+          minimumFractionDigits: 2 
+        })}`, totalsX + 10, currentY + 8, { 
+          width: totalsWidth - 20, 
           align: 'right' 
         });
 
-      currentY = totalY + 60;
+      currentY += 60;
 
-      // =================
-      // FOOTER SECTION
-      // =================
+      // FOOTER SECTION (unchanged)
       doc
-        .rect(margin, currentY, contentWidth, 80)
-        .fillAndStroke(bgLight, borderColor);
-
-      currentY += 15;
+        .rect(margin, currentY, contentWidth, 100)
+        .fillAndStroke(colors.background, colors.border);
 
       doc
-        .fontSize(11)
+        .fontSize(12)
         .font('Helvetica-Bold')
-        .fillColor(textDark)
-        .text('PAYMENT TERMS:', margin + 15, currentY);
-      
-      doc
-        .font('Helvetica')
-        .fillColor(textMedium)
-        .text('Payment due within 30 days from invoice date. Late payments may incur additional charges.', 
-             margin + 15, currentY + 15, { 
-               width: contentWidth - 30 
-             });
+        .fillColor(colors.primary)
+        .text('TERMS & CONDITIONS', margin + 20, currentY + 15);
 
-      currentY += 35;
+      const terms = [
+        '• Payment is due within 30 days from the invoice date',
+        '• Late payments may incur additional charges of 2% per month',
+        '• All returns must be made within 7 days of delivery',
+        '• Goods remain the property of LapKart Ltd. until payment is received in full'
+      ];
 
+      let termY = currentY + 35;
+      terms.forEach(term => {
+        doc
+          .fontSize(9)
+          .font('Helvetica')
+          .fillColor(colors.medium)
+          .text(term, margin + 20, termY, { width: contentWidth - 40 });
+        termY += 14;
+      });
+
+      currentY += 110;
       doc
+        .fontSize(14)
         .font('Helvetica-Bold')
-        .fillColor(textDark)
-        .text('THANK YOU FOR YOUR BUSINESS!', margin + 15, currentY);
-      
+        .fillColor(colors.primary)
+        .text('THANK YOU FOR YOUR BUSINESS!', margin + 20, currentY, { 
+          width: contentWidth - 40, 
+          align: 'center' 
+        });
+
       doc
+        .fontSize(10)
         .font('Helvetica')
-        .fillColor(textMedium)
+        .fillColor(colors.medium)
         .text('For any queries, please contact us at support@lapkart.com or call +91 7306205956', 
-             margin + 15, currentY + 12, { 
-               width: contentWidth - 30 
+             margin + 20, currentY + 25, { 
+               width: contentWidth - 40, 
+               align: 'center' 
              });
 
-      // Finalize PDF
       doc.end();
 
     } catch (error) {

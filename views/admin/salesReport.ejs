@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Report - Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
         * {
             margin: 0;
@@ -77,6 +79,12 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: box-shadow 0.3s;
+        }
+        .search-input:focus {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            outline: none;
         }
         .filter-select {
             padding: 10px 15px;
@@ -84,6 +92,12 @@
             border-radius: 5px;
             font-size: 14px;
             min-width: 150px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: box-shadow 0.3s;
+        }
+        .filter-select:focus {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            outline: none;
         }
         .date-range-custom {
             display: none;
@@ -95,6 +109,12 @@
             border-radius: 5px;
             font-size: 14px;
             width: 150px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: box-shadow 0.3s;
+        }
+        .date-range-custom input:focus {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            outline: none;
         }
         .btn {
             padding: 10px 20px;
@@ -119,18 +139,18 @@
             background: #5a6268;
         }
         .btn-export-pdf {
-            background: #000000;
-            color: white;
-        }
-        .btn-export-pdf:hover {
-            background: #333333;
-        }
-        .btn-export-excel {
             background: #e74c3c;
             color: white;
         }
-        .btn-export-excel:hover {
+        .btn-export-pdf:hover {
             background: #c0392b;
+        }
+        .btn-export-excel {
+            background: #27ae60;
+            color: white;
+        }
+        .btn-export-excel:hover {
+            background: #219653;
         }
         .sales-summary {
             background: white;
@@ -345,6 +365,7 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-top: 20px;
+            flex-wrap: nowrap;
         }
         .mobile-menu-toggle {
             display: none;
@@ -421,7 +442,15 @@
                 font-size: 12px;
             }
             .export-section {
-                flex-direction: column;
+                flex-direction: row;
+                flex-wrap: nowrap;
+                justify-content: flex-end;
+                gap: 10px;
+            }
+            .btn-export-pdf,
+            .btn-export-excel {
+                flex: 0 1 auto;
+                min-width: 120px;
             }
         }
     </style>
@@ -445,7 +474,7 @@
                 <h2>Filters</h2>
                 <div class="search-controls">
                     <input type="text" id="searchInput" class="search-input" placeholder="Search by Order ID...">
-                    <input type="text" id="userSearchInput" class="search-input" placeholder="Search by Name/Address...">
+                    <input type="text" id="userSearchInput" class="search-input" placeholder="Search by Name">
                     <select id="paymentMethodSelect" class="filter-select">
                         <option value="">All Payment Methods</option>
                         <option value="Razorpay">Razorpay</option>
@@ -474,8 +503,8 @@
                         <option value="custom">Custom Range</option>
                     </select>
                     <div class="date-range-custom" id="customDateRange">
-                        <input type="date" id="startDate" placeholder="Start Date">
-                        <input type="date" id="endDate" placeholder="End Date">
+                        <input type="text" id="startDate" placeholder="DD/MM/YYYY">
+                        <input type="text" id="endDate" placeholder="DD/MM/YYYY">
                     </div>
                     <button class="btn btn-primary" onclick="filterSales()">Search</button>
                     <button class="btn btn-secondary" onclick="clearFilters()">Clear</button>
@@ -495,7 +524,7 @@
                     </div>
                     <div class="summary-item">
                         <div class="summary-label">Discounts</div>
-                        <div class="summary-value"> <%= summary?.totalDiscount || '0.00' %></div>
+                        <div class="summary-value">₹<%= summary?.totalDiscount || '0.00' %></div>
                     </div>
                     <div class="summary-item">
                         <div class="summary-label">Net Sales</div>
@@ -511,447 +540,385 @@
                     </div>
                 </div>
             </section>
-<div class="table-container">
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>ORDER ID</th>
-                <th>CUSTOMER</th>
-                <th>AMOUNT</th>
-                <th>DISCOUNT</th>
-                <th>COUPON</th>
-                <th>FINAL AMOUNT</th>
-                <th>PAYMENT METHOD</th>
-                <th>DATE</th>
-                <th>STATUS</th>
-            </tr>
-        </thead>
-        <tbody id="orderTableBody">
-            <% if (orders && orders.length > 0) { %>
-                <% orders.forEach(order => { %>
-                    <tr>
-                        <td class="order-id"><%= order.orderId || 'N/A' %></td>
-                        <td><%= order.shippingAddress?.name || 'N/A' %></td>
-                        <td class="amount">₹<%= (order.totalPrice || 0).toFixed(2) %></td>
-                        <td class="discount">₹<%= (order.discount || 0).toFixed(2) %></td>
-                        <td class="coupon">₹<%= (order.couponApplied ? (order.discount || 0) : 0).toFixed(2) %></td>
-                        <td class="final-amount">₹<%= (order.finalAmount || 0).toFixed(2) %></td>
-                        <td><span class="payment-method method-<%= (order.paymentMethod || '').toLowerCase().replace(/\s/g, '') || 'na' %>">
-                            <%= order.paymentMethod || 'N/A' %>
-                        </span></td>
-                        <td><%= order.createdAt ? new Date(order.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : 'N/A' %></td>
-                        <td><span class="status-badge status-<%= (order.orderedItems && order.orderedItems[0]?.status ? order.orderedItems[0].status.toLowerCase().replace(/\s/g, '') : 'na') %>">
-                            <%= order.orderedItems && order.orderedItems[0]?.status || 'N/A' %>
-                        </span></td>
-                    </tr>
-                <% }) %>
-            <% } else { %>
-                <tr><td colspan="9" style="text-align: center;">No orders found</td></tr>
-            <% } %>
-        </tbody>
-    </table>
 
-    <div class="pagination">
-        <button disabled>Page <%= currentPage || 1 %> of <%= totalPages || 1 %></button>
-        <% if (totalPages > 1) { %>
-            <button <%= currentPage === 1 ? 'disabled' : '' %> onclick="changePage(<%- currentPage - 1 %>)">←</button>
-            <% 
-                const maxButtons = 5;
-                let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
-                let endPage = Math.min(totalPages, startPage + maxButtons - 1);
-                if (endPage - startPage + 1 < maxButtons) {
-                    startPage = Math.max(1, endPage - maxButtons + 1);
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ORDER ID</th>
+                            <th>CUSTOMER</th>
+                            <th>AMOUNT</th>
+                            <th>DISCOUNT</th>
+                            <th>COUPON</th>
+                            <th>FINAL AMOUNT</th>
+                            <th>PAYMENT METHOD</th>
+                            <th>DATE</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderTableBody">
+                        <% if (orders && orders.length > 0) { %>
+                            <% orders.forEach(order => { %>
+                                <tr>
+                                    <td class="order-id"><%= order.orderId || 'N/A' %></td>
+                                    <td><%= order.shippingAddress?.name || 'N/A' %></td>
+                                    <td class="amount">₹<%= (order.totalPrice || 0).toFixed(2) %></td>
+                                    <td class="discount">₹<%= (order.discount || 0).toFixed(2) %></td>
+                                    <td class="coupon">₹<%= (order.couponApplied ? (order.discount || 0) : 0).toFixed(2) %></td>
+                                    <td class="final-amount">₹<%= (order.finalAmount || 0).toFixed(2) %></td>
+                                    <td><span class="payment-method method-<%= (order.paymentMethod || '').toLowerCase().replace(/\s/g, '') || 'na' %>">
+                                        <%= order.paymentMethod || 'N/A' %>
+                                    </span></td>
+                                    <td><%= order.createdAt ? new Date(order.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : 'N/A' %></td>
+                                    <td><span class="status-badge status-<%= (order.orderedItems && order.orderedItems[0]?.status ? order.orderedItems[0].status.toLowerCase().replace(/\s/g, '') : 'na') %>">
+                                        <%= order.orderedItems && order.orderedItems[0]?.status || 'N/A' %>
+                                    </span></td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="9" style="text-align: center;">No orders found</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+
+                <div class="pagination" id="pagination">
+                    <button disabled>Page <%= currentPage || 1 %> of <%= totalPages || 1 %></button>
+                    <% if (totalPages > 1) { %>
+                        <button <%= currentPage === 1 ? 'disabled' : '' %> onclick="changePage(<%- currentPage - 1 %>)">←</button>
+                        <% 
+                            const maxButtons = 5;
+                            let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+                            let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+                            if (endPage - startPage + 1 < maxButtons) {
+                                startPage = Math.max(1, endPage - maxButtons + 1);
+                            }
+                        %>
+                        <% if (startPage > 1) { %>
+                            <button onclick="changePage(1)">1</button>
+                            <% if (startPage > 2) { %>
+                                <button disabled>...</button>
+                            <% } %>
+                        <% } %>
+                        <% for (let i = startPage; i <= endPage; i++) { %>
+                            <button <%= i === currentPage ? 'class="active" disabled' : '' %> onclick="changePage(<%- i %>)"><%= i %></button>
+                        <% } %>
+                        <% if (endPage < totalPages) { %>
+                            <% if (endPage < totalPages - 1) { %>
+                                <button disabled>...</button>
+                            <% } %>
+                            <button onclick="changePage(<%- totalPages %>)"><%= totalPages %></button>
+                        <% } %>
+                        <button <%= currentPage === totalPages ? 'disabled' : '' %> onclick="changePage(<%- currentPage + 1 %>)">→</button>
+                    <% } %>
+                </div>
+
+                <div class="export-section">
+                    <button class="btn btn-export-pdf" onclick="exportPDF()">Export PDF</button>
+                    <button class="btn btn-export-excel" onclick="exportExcel()">Export Excel</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let currentOrders = <%- JSON.stringify(orders || []) %>;
+        let currentSummary = <%- JSON.stringify(summary || { grossSales: '0.00', totalDiscount: '0.00', totalCoupons: '0.00', netSales: '0.00', totalOrders: 0, totalReturns: 0 }) %>;
+        let currentPage = <%= currentPage || 1 %>;
+        let totalPages = <%= totalPages || 1 %>;
+        const itemsPerPage = 10;
+        let isFetching = false;
+        let loadingTimeout;
+        const searchCache = new Map();
+
+        // Hide custom date range by default
+        document.getElementById("customDateRange").style.display = "none";
+
+        // Initialize Flatpickr for date inputs
+        document.addEventListener("DOMContentLoaded", function () {
+            flatpickr("#startDate", {
+                dateFormat: "d/m/Y",
+                allowInput: true, // Allow typing
+                onChange: function (selectedDates, dateStr) {
+                    if (dateStr) {
+                        currentPage = 1;
+                        filterSales();
+                    }
                 }
-            %>
-            <% if (startPage > 1) { %>
-                <button onclick="changePage(1)">1</button>
-                <% if (startPage > 2) { %>
-                    <button disabled>...</button>
-                <% } %>
-            <% } %>
-            <% for (let i = startPage; i <= endPage; i++) { %>
-                <button <%= i === currentPage ? 'class="active" disabled' : '' %> onclick="changePage(<%- i %>)"><%= i %></button>
-            <% } %>
-            <% if (endPage < totalPages) { %>
-                <% if (endPage < totalPages - 1) { %>
-                    <button disabled>...</button>
-                <% } %>
-                <button onclick="changePage(<%- totalPages %>)"><%= totalPages %></button>
-            <% } %>
-            <button <%= currentPage === totalPages ? 'disabled' : '' %> onclick="changePage(<%- currentPage + 1 %>)">→</button>
-        <% } %>
-    </div>
+            });
+            flatpickr("#endDate", {
+                dateFormat: "d/m/Y",
+                allowInput: true, // Allow typing
+                onChange: function (selectedDates, dateStr) {
+                    if (dateStr) {
+                        currentPage = 1;
+                        filterSales();
+                    }
+                }
+            });
+        });
 
-    <div class="export-section">
-     <button class="btn btn-export-pdf" style="background-color: #e74c3c; color: white;" onclick="exportPDF()">Export PDF</button>
-<button class="btn btn-export-excel" style="background-color: #27ae60; color: white;" onclick="exportExcel()">Export Excel</button>
-
-    </div>
-</div>
-<script>
-    let currentOrders = <%- JSON.stringify(orders || []) %>;
-    let currentSummary = <%- JSON.stringify(summary || { grossSales: '0.00', totalDiscount: '0.00', totalCoupons: '0.00', netSales: '0.00', totalOrders: 0, totalReturns: 0 }) %>;
-    let currentPage = <%= currentPage || 1 %>;
-    let totalPages = <%= totalPages || 1 %>;
-    const itemsPerPage = 10;
-    let isFetching = false;
-    let loadingTimeout;
-    const searchCache = new Map();
-
-    document.getElementById("customDateRange").style.display = "none";
-
-    function toggleInputs(disabled) {
-        document.getElementById("searchInput").disabled = disabled;
-        document.getElementById("userSearchInput").disabled = disabled;
-        document.getElementById("paymentMethodSelect").disabled = disabled;
-        document.getElementById("orderStatusSelect").disabled = disabled;
-        document.getElementById("dateRangeSelect").disabled = disabled;
-        document.getElementById("startDate").disabled = disabled;
-        document.getElementById("endDate").disabled = disabled;
-        document.querySelectorAll(".btn").forEach(btn => btn.disabled = disabled);
-    }
-
-    document.getElementById("dateRangeSelect").addEventListener("change", function () {
-        const customDateRange = document.getElementById("customDateRange");
-        customDateRange.style.display = this.value === "custom" ? "flex" : "none";
-        if (this.value !== "custom" && this.value !== "") {
-            currentPage = 1;
-            filterSales();
+        // Toggle input disabled state
+        function toggleInputs(disabled) {
+            document.getElementById("searchInput").disabled = disabled;
+            document.getElementById("userSearchInput").disabled = disabled;
+            document.getElementById("paymentMethodSelect").disabled = disabled;
+            document.getElementById("orderStatusSelect").disabled = disabled;
+            document.getElementById("dateRangeSelect").disabled = disabled;
+            document.getElementById("startDate").disabled = disabled;
+            document.getElementById("endDate").disabled = disabled;
+            document.querySelectorAll(".btn").forEach(btn => btn.disabled = disabled);
         }
-    });
 
-    function debounce(func, wait) {
-        let timeout;
-        return function (...args) {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
-        };
-    }
-
-    const inputs = [
-        { id: "searchInput", element: document.getElementById("searchInput"), event: "input" },
-        { id: "userSearchInput", element: document.getElementById("userSearchInput"), event: "input" },
-        { id: "paymentMethodSelect", element: document.getElementById("paymentMethodSelect"), event: "change" },
-        { id: "orderStatusSelect", element: document.getElementById("orderStatusSelect"), event: "change" },
-        { id: "dateRangeSelect", element: document.getElementById("dateRangeSelect"), event: "change" },
-        { id: "startDate", element: document.getElementById("startDate"), event: "input" },
-        { id: "endDate", element: document.getElementById("endDate"), event: "input" }
-    ];
-
-    inputs.forEach(({ id, element, event }) => {
-        if (!element) return;
-        element.addEventListener(event, debounce(function () {
-            if (element.type === "text" && element.value.trim().length > 0 && element.value.trim().length < 2) return;
-            if (id === "startDate" || id === "endDate") {
-                const dateRange = document.getElementById("dateRangeSelect").value;
-                const startDate = document.getElementById("startDate").value;
-                const endDate = document.getElementById("endDate").value;
-                if (dateRange === "custom" && startDate && endDate) {
-                    currentPage = 1;
-                    filterSales();
-                }
-            } else if (id !== "dateRangeSelect" || (element.value !== "custom" && element.value !== "")) {
+        // Handle date range select change
+        document.getElementById("dateRangeSelect").addEventListener("change", function () {
+            const customDateRange = document.getElementById("customDateRange");
+            customDateRange.style.display = this.value === "custom" ? "flex" : "none";
+            if (this.value !== "custom" && this.value !== "") {
+                document.getElementById("startDate").value = "";
+                document.getElementById("endDate").value = "";
                 currentPage = 1;
                 filterSales();
             }
-        }, 300));
-    });
-
-    function changePage(page) {
-        if (currentPage !== page && !isFetching) {
-            currentPage = page;
-            const url = new URL(window.location);
-            url.searchParams.set("page", page);
-            window.location.href = url;
-            isFetching = true;
-            filterSales().finally(() => {
-                isFetching = false;
-            });
-        }
-    }
-
-    async function filterSales() {
-        if (isFetching) return;
-        isFetching = true;
-        toggleInputs(true);
-
-        const search = document.getElementById("searchInput").value.trim();
-        const userSearch = document.getElementById("userSearchInput").value.trim();
-        const paymentMethod = document.getElementById("paymentMethodSelect").value;
-        const orderStatus = document.getElementById("orderStatusSelect").value;
-        const dateRange = document.getElementById("dateRangeSelect").value;
-        const startDate = document.getElementById("startDate").value;
-        const endDate = document.getElementById("endDate").value;
-
-        const filterParams = { search, userSearch, paymentMethod, orderStatus, dateRange, startDate, endDate, page: currentPage, limit: itemsPerPage };
-        const cacheKey = JSON.stringify(filterParams);
-
-        if (searchCache.has(cacheKey)) {
-            const cached = searchCache.get(cacheKey);
-            currentOrders = cached.orders;
-            currentSummary = cached.summary;
-            totalPages = cached.totalPages;
-            currentPage = cached.currentPage;
-            renderTable();
-            renderSummary();
-            isFetching = false;
-            toggleInputs(false);
-            return;
-        }
-
-        if (dateRange === "custom" && (!startDate || !endDate)) {
-            showError("Please select both start and end dates for custom range.");
-            isFetching = false;
-            toggleInputs(false);
-            return;
-        }
-        if (dateRange === "custom" && startDate && endDate && new Date(startDate) > new Date(endDate)) {
-            showError("Start date cannot be after end date.");
-            isFetching = false;
-            toggleInputs(false);
-            return;
-        }
-
-        try {
-            const tableBody = document.getElementById("orderTableBody");
-            tableBody.innerHTML = '<tr><td colspan="9" class="loading"><span class="spinner"></span>Loading...</td></tr>';
-
-            loadingTimeout = setTimeout(() => {
-                if (isFetching) {
-                    showError("Request taking too long. Please check your connection or try again later.");
-                    isFetching = false;
-                    toggleInputs(false);
-                }
-            }, 5000);
-
-            const response = await fetch("/admin/filter-sales-report", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(filterParams)
-            });
-
-            clearTimeout(loadingTimeout);
-
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-            const data = await response.json();
-            if (!data.success) throw new Error(data.error || "Failed to fetch sales data");
-
-            currentOrders = Array.isArray(data.orders) ? data.orders : [];
-            currentSummary = data.summary && typeof data.summary === "object" ? {
-                grossSales: String(data.summary.grossSales || '0.00'),
-                totalDiscount: String(data.summary.totalDiscount || '0.00'),
-                totalCoupons: String(data.summary.totalCoupons || '0.00'),
-                netSales: String(data.summary.netSales || '0.00'),
-                totalOrders: parseInt(data.summary.totalOrders, 10) || 0,
-                totalReturns: parseInt(data.summary.totalReturns, 10) || 0
-            } : { grossSales: '0.00', totalDiscount: '0.00', totalCoupons: '0.00', netSales: '0.00', totalOrders: 0, totalReturns: 0 };
-            totalPages = Math.max(1, Number.isInteger(data.totalPages) ? data.totalPages : 1);
-            currentPage = Math.max(1, Number.isInteger(data.currentPage) ? data.currentPage : 1);
-
-            searchCache.set(cacheKey, { orders: currentOrders, summary: currentSummary, totalPages, currentPage });
-            if (searchCache.size > 10) searchCache.delete(searchCache.keys().next().value);
-
-            renderTable();
-            renderSummary();
-        } catch (error) {
-            console.error("Error filtering sales:", error);
-            showError(`Failed to load data: ${error.message}. <button onclick="filterSales()">Retry</button>`);
-            currentOrders = [];
-            totalPages = 1;
-            currentPage = 1;
-            renderTable();
-        } finally {
-            isFetching = false;
-            toggleInputs(false);
-        }
-    }
-
-    function showError(message) {
-        const tableBody = document.getElementById("orderTableBody");
-        tableBody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #e74c3c;">${message}</td></tr>`;
-    }
-
-    function renderTable() {
-        const tbody = document.getElementById("orderTableBody");
-        tbody.innerHTML = "";
-
-        if (!Array.isArray(currentOrders) || currentOrders.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="9" style="text-align: center;">No orders found. Try adjusting your filters.</td></tr>`;
-            return;
-        }
-
-        currentOrders.forEach(order => {
-            const orderId = order.orderId ? String(order.orderId).replace(/[<>]/g, '') : "N/A";
-            const customerName = order.shippingAddress?.name ? String(order.shippingAddress.name).replace(/[<>]/g, '') : "N/A";
-            const totalPrice = parseFloat(order.totalPrice) || 0;
-            const discount = parseFloat(order.discount) || 0;
-            const coupon = order.couponApplied ? discount : 0;
-            const finalAmount = parseFloat(order.finalAmount) || 0;
-            const paymentMethod = order.paymentMethod ? String(order.paymentMethod).replace(/[<>]/g, '') : "N/A";
-            const paymentMethodClass = paymentMethod.toLowerCase().replace(/\s/g, '') || "na";
-            const date = order.createdAt ? new Date(order.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "N/A";
-            const status = order.orderedItems && Array.isArray(order.orderedItems) && order.orderedItems[0]?.status ? String(order.orderedItems[0].status).replace(/[<>]/g, '') : "N/A";
-            const statusClass = status.toLowerCase().replace(/\s/g, '') || "na";
-
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td class="order-id">${orderId}</td>
-                <td>${customerName}</td>
-                <td class="amount">₹${totalPrice.toFixed(2)}</td>
-                <td class="discount">₹${discount.toFixed(2)}</td>
-                <td class="coupon">₹${coupon.toFixed(2)}</td>
-                <td class="final-amount">₹${finalAmount.toFixed(2)}</td>
-                <td><span class="payment-method method-${paymentMethodClass}">${paymentMethod}</span></td>
-                <td>${date}</td>
-                <td><span class="status-badge status-${statusClass}">${status}</span></td>
-            `;
-            tbody.appendChild(row);
         });
-    }
 
-    function renderSummary() {
-        const summaryGrid = document.querySelector(".summary-grid");
-        const grossSales = String(currentSummary.grossSales || '0.00');
-        const totalCoupons = String(currentSummary.totalCoupons || '0.00');
-        const totalDiscount = String(currentSummary.totalDiscount || '0.00');
-        const netSales = String(currentSummary.netSales || '0.00');
-        const totalOrders = parseInt(currentSummary.totalOrders, 10) || 0;
-        const totalReturns = parseInt(currentSummary.totalReturns, 10) || 0;
-
-        summaryGrid.innerHTML = `
-            <div class="summary-item">
-                <div class="summary-label">Gross Sales</div>
-                <div class="summary-value">₹${grossSales}</div>
-            </div>
-            <div class="summary-item">
-                <div class="summary-label">Coupons Redeemed</div>
-                <div class="summary-value">₹${totalCoupons}</div>
-            </div>
-            <div class="summary-item">
-                <div class="summary-label">Discounts</div>
-                <div class="summary-value">₹${totalDiscount}</div>
-            </div>
-            <div class="summary-item">
-                <div class="summary-label">Net Sales</div>
-                <div class="summary-value">₹${netSales}</div>
-            </div>
-            <div class="summary-item">
-                <div class="summary-label">Total Orders</div>
-                <div class="summary-value">${totalOrders}</div>
-            </div>
-            <div class="summary-item">
-                <div class="summary-label">Total Returns</div>
-                <div class="summary-value">${totalReturns}</div>
-            </div>
-        `;
-    }
-
-    async function exportPDF() {
-        if (isFetching) return;
-        isFetching = true;
-        toggleInputs(true);
-
-        const search = document.getElementById("searchInput").value.trim();
-        const userSearch = document.getElementById("userSearchInput").value.trim();
-        const paymentMethod = document.getElementById("paymentMethodSelect").value;
-        const orderStatus = document.getElementById("orderStatusSelect").value;
-        const dateRange = document.getElementById("dateRangeSelect").value;
-        const startDate = document.getElementById("startDate").value;
-        const endDate = document.getElementById("endDate").value;
-
-        const filterParams = { search, userSearch, paymentMethod, orderStatus, dateRange, startDate, endDate };
-
-        if (dateRange === "custom" && (!startDate || !endDate)) {
-            showError("Please select both start and end dates for custom range.");
-            isFetching = false;
-            toggleInputs(false);
-            return;
+        // Debounce function for input handling
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
         }
 
-        try {
-            const response = await fetch("/admin/export-sales-report-pdf", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(filterParams)
+        // Add event listeners with debouncing
+        const inputs = [
+            { id: "searchInput", element: document.getElementById("searchInput"), event: "input" },
+            { id: "userSearchInput", element: document.getElementById("userSearchInput"), event: "input" },
+            { id: "paymentMethodSelect", element: document.getElementById("paymentMethodSelect"), event: "change" },
+            { id: "orderStatusSelect", element: document.getElementById("orderStatusSelect"), event: "change" },
+            { id: "startDate", element: document.getElementById("startDate"), event: "input" },
+            { id: "endDate", element: document.getElementById("endDate"), event: "input" }
+        ];
+
+        inputs.forEach(({ id, element, event }) => {
+            if (!element) return;
+            element.addEventListener(event, debounce(function () {
+                if (element.type === "text" && element.value.trim().length > 0 && element.value.trim().length < 2 && id !== "startDate" && id !== "endDate") return;
+                currentPage = 1;
+                filterSales();
+            }, 300));
+        });
+
+        // Change page
+        function changePage(page) {
+            if (currentPage !== page && !isFetching) {
+                currentPage = page;
+                filterSales();
+            }
+        }
+
+        // Filter sales data
+        async function filterSales() {
+            if (isFetching) return;
+            isFetching = true;
+            toggleInputs(true);
+
+            const search = document.getElementById("searchInput").value.trim().replace(/[<>]/g, '');
+            const userSearch = document.getElementById("userSearchInput").value.trim().replace(/[<>]/g, '');
+            const paymentMethod = document.getElementById("paymentMethodSelect").value;
+            const orderStatus = document.getElementById("orderStatusSelect").value;
+            const dateRange = document.getElementById("dateRangeSelect").value;
+            let startDate = document.getElementById("startDate").value.trim();
+            let endDate = document.getElementById("endDate").value.trim();
+
+            // Allow single date input for custom range
+            if (dateRange === "custom") {
+                if (startDate && !endDate) {
+                    endDate = startDate; // Set endDate to startDate if only startDate is provided
+                } else if (endDate && !startDate) {
+                    startDate = endDate; // Set startDate to endDate if only endDate is provided
+                }
+            }
+
+            const filterParams = { search, userSearch, paymentMethod, orderStatus, dateRange, startDate, endDate, page: currentPage, limit: itemsPerPage };
+            const cacheKey = JSON.stringify(filterParams);
+
+            if (searchCache.has(cacheKey)) {
+                const cached = searchCache.get(cacheKey);
+                currentOrders = cached.orders;
+                currentSummary = cached.summary;
+                totalPages = cached.totalPages;
+                currentPage = cached.currentPage;
+                renderTable();
+                renderSummary();
+                renderPagination();
+                isFetching = false;
+                toggleInputs(false);
+                return;
+            }
+
+            try {
+                const tableBody = document.getElementById("orderTableBody");
+                tableBody.innerHTML = '<tr><td colspan="9" class="loading"><span class="spinner"></span>Loading...</td></tr>';
+
+                loadingTimeout = setTimeout(() => {
+                    if (isFetching) {
+                        showError("Request taking too long. Please check your connection or try again later.");
+                        isFetching = false;
+                        toggleInputs(false);
+                    }
+                }, 5000);
+
+                const response = await fetch("/admin/filter-sales-report", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(filterParams)
+                });
+
+                clearTimeout(loadingTimeout);
+
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error || "Failed to fetch sales data");
+
+                currentOrders = Array.isArray(data.orders) ? data.orders : [];
+                currentSummary = data.summary && typeof data.summary === "object" ? {
+                    grossSales: String(data.summary.grossSales || '0.00'),
+                    totalDiscount: String(data.summary.totalDiscount || '0.00'),
+                    totalCoupons: String(data.summary.totalCoupons || '0.00'),
+                    netSales: String(data.summary.netSales || '0.00'),
+                    totalOrders: parseInt(data.summary.totalOrders, 10) || 0,
+                    totalReturns: parseInt(data.summary.totalReturns, 10) || 0
+                } : { grossSales: '0.00', totalDiscount: '0.00', totalCoupons: '0.00', netSales: '0.00', totalOrders: 0, totalReturns: 0 };
+                totalPages = Math.max(1, Number.isInteger(data.totalPages) ? data.totalPages : 1);
+                currentPage = Math.max(1, Number.isInteger(data.currentPage) ? data.currentPage : 1);
+
+                searchCache.set(cacheKey, { orders: currentOrders, summary: currentSummary, totalPages, currentPage });
+                if (searchCache.size > 10) searchCache.delete(searchCache.keys().next().value);
+
+                renderTable();
+                renderSummary();
+                renderPagination();
+            } catch (error) {
+                console.error("Error filtering sales:", error);
+                showError(`Failed to load data: ${error.message}. <button onclick="filterSales()">Retry</button>`);
+                currentOrders = [];
+                totalPages = 1;
+                currentPage = 1;
+                renderTable();
+                renderPagination();
+            } finally {
+                isFetching = false;
+                toggleInputs(false);
+            }
+        }
+
+        // Render table data
+        function renderTable() {
+            const tbody = document.getElementById("orderTableBody");
+            tbody.innerHTML = "";
+
+            if (!Array.isArray(currentOrders) || currentOrders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align: center;">No orders found</td></tr>`;
+                return;
+            }
+
+            currentOrders.forEach(order => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td class="order-id">${order.orderId || 'N/A'}</td>
+                    <td>${order.shippingAddress?.name || 'N/A'}</td>
+                    <td class="amount">₹${(order.totalPrice || 0).toFixed(2)}</td>
+                    <td class="discount">₹${(order.discount || 0).toFixed(2)}</td>
+                    <td class="coupon">₹${(order.couponApplied ? (order.discount || 0) : 0).toFixed(2)}</td>
+                    <td class="final-amount">₹${(order.finalAmount || 0).toFixed(2)}</td>
+                    <td><span class="payment-method method-${(order.paymentMethod || '').toLowerCase().replace(/\s/g, '') || 'na'}">${order.paymentMethod || 'N/A'}</span></td>
+                    <td>${order.createdAt ? new Date(order.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : 'N/A'}</td>
+                    <td><span class="status-badge status-${(order.orderedItems && order.orderedItems[0]?.status ? order.orderedItems[0].status.toLowerCase().replace(/\s/g, '') : 'na')}">${order.orderedItems && order.orderedItems[0]?.status || 'N/A'}</span></td>
+                `;
+                tbody.appendChild(row);
             });
-
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "sales_report.pdf";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            showError(`Failed to export PDF: ${error.message}. <button onclick="exportPDF()">Retry</button>`);
-        } finally {
-            isFetching = false;
-            toggleInputs(false);
-        }
-    }
-
-    async function exportExcel() {
-        if (isFetching) return;
-        isFetching = true;
-        toggleInputs(true);
-
-        const search = document.getElementById("searchInput").value.trim();
-        const userSearch = document.getElementById("userSearchInput").value.trim();
-        const paymentMethod = document.getElementById("paymentMethodSelect").value;
-        const orderStatus = document.getElementById("orderStatusSelect").value;
-        const dateRange = document.getElementById("dateRangeSelect").value;
-        const startDate = document.getElementById("startDate").value;
-        const endDate = document.getElementById("endDate").value;
-
-        const filterParams = { search, userSearch, paymentMethod, orderStatus, dateRange, startDate, endDate };
-
-        if (dateRange === "custom" && (!startDate || !endDate)) {
-            showError("Please select both start and end dates for custom range.");
-            isFetching = false;
-            toggleInputs(false);
-            return;
         }
 
-        try {
-            const response = await fetch("/admin/export-sales-report-excel", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(filterParams)
-            });
-
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "sales_report.xlsx";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            showError(`Failed to export Excel: ${error.message}. <button onclick="exportExcel()">Retry</button>`);
-        } finally {
-            isFetching = false;
-            toggleInputs(false);
+        // Render summary data
+        function renderSummary() {
+            const summaryGrid = document.querySelector(".summary-grid");
+            summaryGrid.innerHTML = `
+                <div class="summary-item">
+                    <div class="summary-label">Gross Sales</div>
+                    <div class="summary-value">₹${currentSummary.grossSales || '0.00'}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Coupons Redeemed</div>
+                    <div class="summary-value">₹${currentSummary.totalCoupons || '0.00'}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Discounts</div>
+                    <div class="summary-value">₹${currentSummary.totalDiscount || '0.00'}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Net Sales</div>
+                    <div class="summary-value">₹${currentSummary.netSales || '0.00'}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Total Orders</div>
+                    <div class="summary-value">${currentSummary.totalOrders || 0}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Total Returns</div>
+                    <div class="summary-value">${currentSummary.totalReturns || 0}</div>
+                </div>
+            `;
         }
-    }
 
-    function toggleSidebar() {
-        const sidebar = document.getElementById("sidebar-container");
-        sidebar.style.display = sidebar.style.display === "block" ? "none" : "block";
-    }
+        // Render pagination
+        function renderPagination() {
+            const pagination = document.getElementById("pagination");
+            pagination.innerHTML = `<button disabled>Page ${currentPage} of ${totalPages}</button>`;
 
-    renderTable();
-    renderSummary();
-    
-       function clearFilters() {
+            if (totalPages <= 1) return;
+
+            const maxButtons = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+            let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+            if (endPage - startPage + 1 < maxButtons) {
+                startPage = Math.max(1, endPage - maxButtons + 1);
+            }
+
+            if (currentPage > 1) {
+                pagination.innerHTML += `<button onclick="changePage(${currentPage - 1})">←</button>`;
+            } else {
+                pagination.innerHTML += `<button disabled>←</button>`;
+            }
+
+            if (startPage > 1) {
+                pagination.innerHTML += `<button onclick="changePage(1)">1</button>`;
+                if (startPage > 2) {
+                    pagination.innerHTML += `<button disabled>...</button>`;
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                pagination.innerHTML += `<button ${i === currentPage ? 'class="active" disabled' : ''} onclick="changePage(${i})">${i}</button>`;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    pagination.innerHTML += `<button disabled>...</button>`;
+                }
+                pagination.innerHTML += `<button onclick="changePage(${totalPages})">${totalPages}</button>`;
+            }
+
+            if (currentPage < totalPages) {
+                pagination.innerHTML += `<button onclick="changePage(${currentPage + 1})">→</button>`;
+            } else {
+                pagination.innerHTML += `<button disabled>→</button>`;
+            }
+        }
+
+        // Clear filters
+        function clearFilters() {
             document.getElementById("searchInput").value = "";
             document.getElementById("userSearchInput").value = "";
             document.getElementById("paymentMethodSelect").value = "";
@@ -965,6 +932,103 @@
             filterSales();
         }
 
-</script>
+        // Export to PDF
+        async function exportPDF() {
+            if (isFetching) return;
+            isFetching = true;
+            toggleInputs(true);
+
+            const filterParams = {
+                search: document.getElementById("searchInput").value.trim().replace(/[<>]/g, ''),
+                userSearch: document.getElementById("userSearchInput").value.trim().replace(/[<>]/g, ''),
+                paymentMethod: document.getElementById("paymentMethodSelect").value,
+                orderStatus: document.getElementById("orderStatusSelect").value,
+                dateRange: document.getElementById("dateRangeSelect").value,
+                startDate: document.getElementById("startDate").value.trim(),
+                endDate: document.getElementById("endDate").value.trim()
+            };
+
+            try {
+                const response = await fetch("/admin/export-sales-report-pdf", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(filterParams)
+                });
+
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "sales_report.pdf";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error("Error exporting PDF:", error);
+                showError(`Failed to export PDF: ${error.message}`);
+            } finally {
+                isFetching = false;
+                toggleInputs(false);
+            }
+        }
+
+        // Export to Excel
+        async function exportExcel() {
+            if (isFetching) return;
+            isFetching = true;
+            toggleInputs(true);
+
+            const filterParams = {
+                search: document.getElementById("searchInput").value.trim().replace(/[<>]/g, ''),
+                userSearch: document.getElementById("userSearchInput").value.trim().replace(/[<>]/g, ''),
+                paymentMethod: document.getElementById("paymentMethodSelect").value,
+                orderStatus: document.getElementById("orderStatusSelect").value,
+                dateRange: document.getElementById("dateRangeSelect").value,
+                startDate: document.getElementById("startDate").value.trim(),
+                endDate: document.getElementById("endDate").value.trim()
+            };
+
+            try {
+                const response = await fetch("/admin/export-sales-report-excel", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(filterParams)
+                });
+
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "sales_report.xlsx";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error("Error exporting Excel:", error);
+                showError(`Failed to export Excel: ${error.message}`);
+            } finally {
+                isFetching = false;
+                toggleInputs(false);
+            }
+        }
+
+        // Show error message
+        function showError(message) {
+            const tableBody = document.getElementById("orderTableBody");
+            tableBody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #e74c3c;">${message}</td></tr>`;
+        }
+
+        // Toggle sidebar for mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById("sidebar-container");
+            sidebar.style.display = sidebar.style.display === "block" ? "none" : "block";
+        }
+    </script>
 </body>
 </html>

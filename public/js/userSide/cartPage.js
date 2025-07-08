@@ -117,63 +117,90 @@ function recalculateCartTotals() {
 }
 
 async function removeItem(productId) {
-    const result = await Swal.fire({
-        title: 'Remove Item',
-        text: 'Are you sure you want to remove this item from your cart?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, remove it!',
-        cancelButtonText: 'Cancel'
-    });
+  const result = await Swal.fire({
+    title: 'Remove Item',
+    text: 'Are you sure you want to remove this item from your cart?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Yes, remove it!',
+    cancelButtonText: 'Cancel'
+  });
 
-    if (result.isConfirmed) {
-        try {
-            const response = await fetch('/cart/remove', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productId }),
-            });
+  if (result.isConfirmed) {
+    try {
+      const response = await fetch('/cart/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId }),
+      });
 
-            const data = await response.json();
+      const data = await response.json();
 
-            if (response.ok) {
-                const itemElement = document.querySelector(`.cart-product-item[data-product-id="${productId}"]`);
-                if (itemElement) itemElement.remove();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to remove item from cart.');
+      }
 
-                const productContainer = document.querySelector('.cart-items-container');
-                const remainingItems = document.querySelectorAll('.cart-product-item');
+      // Remove the item from the DOM
+      const itemElement = document.querySelector(`.cart-product-item[data-product-id="${productId}"]`);
+      if (itemElement) {
+        itemElement.remove();
+      } else {
+        console.warn(`Item with productId ${productId} not found in DOM.`);
+      }
 
-                if (!remainingItems.length) {
-                    productContainer.innerHTML = '<div class="cart-empty-message">Your cart is empty.</div>';
-                    updateOrderSummary({ newTotalPrice: 0, totalDiscount: 0 });
-                } else {
-                    recalculateCartTotals();
-                }
+      const productContainer = document.querySelector('.cart-items-container');
+      const remainingItems = document.querySelectorAll('.cart-product-item');
 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Removed!',
-                    text: 'Item removed from cart!',
-                    timer: 2000
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Removal Failed',
-                    text: data.message || 'Failed to remove item.',
-                });
-            }
-        } catch (error) {
-            console.error('Error removing item:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'An error occurred while removing the item.',
-            });
+      if (!data.cart || data.cart.totalItems === 0) {
+        // Cart is empty
+        if (productContainer) {
+          productContainer.innerHTML = '<div class="cart-empty-message">Your cart is empty.</div>';
         }
+        updateOrderSummary({ newTotalPrice: 0, totalDiscount: 0 });
+      } else {
+        // Update cart totals with server-provided data
+        updateOrderSummary({
+          newTotalPrice: data.cart.totalPrice || 0,
+          totalDiscount: data.cart.totalDiscount || 0
+        });
+      }
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Removed!',
+        text: 'Item removed from cart!',
+        timer: 1500,
+        showConfirmButton: false
+      });
+
+    } catch (error) {
+      console.error('Error removing item:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Removal Failed',
+        text: error.message || 'An error occurred while removing the item.',
+        confirmButtonText: 'OK'
+      });
     }
+  }
+}
+
+function updateOrderSummary({ newTotalPrice, totalDiscount }) {
+  const subtotalElement = document.querySelector('.cart-price-subtotal');
+  const discountElement = document.querySelector('.cart-price-discount');
+  const totalElement = document.querySelector('.cart-grand-total');
+
+  if (subtotalElement) {
+    subtotalElement.textContent = `₹${newTotalPrice.toFixed(2)}`;
+  }
+  if (discountElement) {
+    discountElement.textContent = totalDiscount ? `-₹${totalDiscount.toFixed(2)}` : '₹0.00';
+  }
+  if (totalElement) {
+    totalElement.textContent = `₹${(newTotalPrice - (totalDiscount || 0)).toFixed(2)}`;
+  }
 }
 
 document.addEventListener('DOMContentLoaded', function () {

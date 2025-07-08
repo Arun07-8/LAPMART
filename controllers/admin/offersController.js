@@ -3,6 +3,7 @@ const Product=require("../../models/productSchema")
 const Category=require("../../models/categorySchema")
 const Brand=require("../../models/BrandSchema")
 const mongoose=require("mongoose")
+const { distance } = require('fastest-levenshtein');
 
 const OffersManagement = async (req, res) => {
   try {
@@ -77,8 +78,8 @@ const OffersManagement = async (req, res) => {
       currentPage: page,
       totalPages,
       limit,
-      search, // Pass search term to prefill input
-      sort // Pass sort option to preselect dropdown
+      search, 
+      sort 
     });
   } catch (error) {
     console.error('Offer management page rendering issue:', error);
@@ -95,6 +96,7 @@ const offerAdd=async (req,res) => {
     }
 }
 
+const normalize = (str) => str.trim().toLowerCase().replace(/\s+/g, ' ');
 const createOffer = async (req, res) => {
   try {
     const {
@@ -108,10 +110,8 @@ const createOffer = async (req, res) => {
       description,
     } = req.body;
 
-    // Capitalize offerType like: 'product' → 'Product'
     const formattedType = offerType.charAt(0).toUpperCase() + offerType.slice(1).toLowerCase();
 
-    // Basic required field check
     if (
       !offerName ||
       !formattedType ||
@@ -125,22 +125,18 @@ const createOffer = async (req, res) => {
       return res.status(400).json({ success: false, message: 'All fields are required.' });
     }
 
-
     const validTypes = ['Product', 'Category', 'Brand'];
     if (!validTypes.includes(formattedType)) {
       return res.status(400).json({ success: false, message: 'Invalid offer type.' });
     }
 
-
     if (discountType !== 'percentage') {
       return res.status(400).json({ success: false, message: 'Only percentage discount allowed.' });
     }
 
-    // Offer percentage must be between 1% and 50%
     if (offerAmount < 1 || offerAmount > 50) {
       return res.status(400).json({ success: false, message: 'Offer amount must be between 1% and 50%.' });
     }
-
 
     function parseDate(dateStr) {
       const [day, month, year] = dateStr.split('/').map(Number);
@@ -152,7 +148,6 @@ const createOffer = async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-
     if (!from || !upto || isNaN(from) || isNaN(upto)) {
       return res.status(400).json({ success: false, message: 'Invalid date format. Use dd/mm/yyyy.' });
     }
@@ -163,50 +158,69 @@ const createOffer = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Valid Upto must be after Valid From.' });
     }
 
-    const modelMap = {
-      Product: Product,
-      Category: Category,
-      Brand: Brand,
-    };
+    const modelMap = { Product, Category, Brand };
     const model = modelMap[formattedType];
     if (!model) {
       return res.status(400).json({ success: false, message: 'Invalid model for offer type.' });
     }
+
     const exists = await model.findById(applicable);
     if (!exists) {
       return res.status(400).json({ success: false, message: `No such ${formattedType} found.` });
     }
 
+  
+    const allOffers = await Offer.find({
+      offerType: formattedType,
+      applicableId: applicable,
+      isDeleted: false,
+    });
 
-const activeOfferForSameItem = await Offer.findOne({
-  offerType: formattedType,
-  applicableId: applicable,
-  status: 'active',
-  isDeleted: false
-});
+    const inputNormalized = normalize(offerName);
 
-if (activeOfferForSameItem) {
-  return res.status(400).json({
-    success: false,
-    message: `An active offer already exists for the selected ${formattedType}. Please deactivate or delete it before creating a new one.`
-  });
-}
+    const similarExists = allOffers.find(o => {
+      const existingNormalized = normalize(o.offerName);
+      const dist = distance(inputNormalized, existingNormalized);
+      const maxLen = Math.max(inputNormalized.length, existingNormalized.length);
+      const similarity = 1 - dist / maxLen;
+      return similarity >= 0.8; 
+    });
 
-const sameNameSameItemUsed = await Offer.findOne({
-  offerName,
-  offerType: formattedType,
-  applicableId: applicable,
-  status: { $ne: 'inactive' }, 
-  isDeleted: false             
-});
+    if (similarExists) {
+      return res.status(400).json({
+        success: false,
+        message: `A similar offer name already exists: "${similarExists.offerName}". Please choose a more distinct name.`,
+      });
+    }
 
-if (sameNameSameItemUsed) {
-  return res.status(400).json({
-    success: false,
-    message: `Offer name "${offerName}" has already been used for this ${formattedType}. Choose a different name.`
-  });
-}
+    const activeOfferForSameItem = await Offer.findOne({
+      offerType: formattedType,
+      applicableId: applicable,
+      status: 'active',
+      isDeleted: false
+    });
 
+    if (activeOfferForSameItem) {
+      return res.status(400).json({
+        success: false,
+        message: `An active offer already exists for the selected ${formattedType}. Please deactivate or delete it before creating a new one.`
+      });
+    }
+
+    const sameNameSameItemUsed = await Offer.findOne({
+      offerName,
+      offerType: formattedType,
+      applicableId: applicable,
+      status: { $ne: 'inactive' },
+      isDeleted: false
+    });
+
+    if (sameNameSameItemUsed) {
+      return res.status(400).json({
+        success: false,
+        message: `Offer name "${offerName}" has already been used for this ${formattedType}. Choose a different name.`
+      });
+    }
 
     const newOffer = new Offer({
       offerName,
@@ -238,7 +252,6 @@ if (sameNameSameItemUsed) {
     });
   }
 };
-
 
 
 const listAvailableProducts = async (req, res) => {

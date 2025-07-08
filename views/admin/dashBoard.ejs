@@ -5,945 +5,878 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <link  rel="stylesheet" href="/css/admin-css/dashboard.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+    <link href="/css/admin-css/dashboard.css"  rel="stylesheet">
+    <style>
+        .chart-container { position: relative; height: 300px; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+        .error-message { color: red; font-size: 0.9em; display: none; }
+        .custom-date-fields.active { display: flex; }
+        .custom-date-fields { display: none; }
+    </style>
 </head>
 <body>
-    <div class="main-content" id="mainContent">
-        <nav class="navbar navbar-expand-lg navbar-light">
-            <div class="container-fluid px-4">
-                <div class="d-flex align-items-center">
-                    <button class="sidebar-toggle me-3" id="sidebarToggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <a class="navbar-brand" href="#">Admin Dashboard</a>
-                </div>
-                <div class="navbar-nav ms-auto">
-                    <div class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                            <div class="user-avatar me-2">A</div>
-                            <span class="fw-medium">Admin</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
-                        </ul>
-                    </div>
+<div class="main-content" id="mainContent">
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container-fluid px-4">
+            <div class="d-flex align-items-center">
+                <button class="sidebar-toggle me-3" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <a class="navbar-brand" href="#">Admin Dashboard</a>
+            </div>
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                        <div class="user-avatar me-2">A</div>
+                        <span class="fw-medium">Admin</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                    </ul>
                 </div>
             </div>
-        </nav>
+        </div>
+    </nav>
 
-        <div class="container-fluid px-4 py-4">
-            <div class="mb-4">
-                <h2 class="section-title">Dashboard Overview</h2>
-                <div class="filter-section">
-                    <div class="row g-3">
+    <div class="container-fluid px-4 py-4">
+        <div class="mb-4">
+            <h2 class="section-title">Dashboard Overview</h2>
+            <div class="filter-section">
+                <div class="row g-3">
+                    <div class="col-md-2">
+                        <label class="form-label fw-medium">Time Period</label>
+                        <select class="form-select time-period" id="timePeriod">
+                            <option value="all">All Times</option>
+                            <option value="yesterday">Yesterday</option>
+                            <option value="today">Today</option>
+                            <option value="last7days">Last 7 Days</option>
+                            <option value="last30days">Last 30 Days</option>
+                            <option value="thisyear">This Year</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-medium">Order Status</label>
+                        <select class="form-select" id="orderStatus">
+                            <option value="all">All Statuses</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Processing">Processing</option>
+                            <option value="Shipped">Shipped</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Return Requested">Return Requested</option>
+                            <option value="Returned">Returned</option>
+                            <option value="Return Rejected">Return Rejected</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end gap-2" style="width: 373px;">
+                        <button class="btn btn-primary w-100" id="applyFilters">Apply Filters</button>
+                        <button class="btn btn-secondary w-100" id="clearFilters" style="height: 50px;">Clear Filters</button>
+                    </div>
+                    <div class="custom-date-fields" id="customDateFields">
                         <div class="col-md-2">
-                            <label class="form-label fw-medium">Time Period</label>
-                            <select class="form-select time-period" id="timePeriod">
-                                <option value="yesterday">Yesterday</option>
-                                <option value="today" selected>Today</option>
-                                <option value="last7days">Last 7 Days</option>
-                                <option value="last30days">Last 30 Days</option>
-                                <option value="thisyear">This Year</option>
-                                <option value="custom">Custom Range</option>
-                            </select>
+                            <label class="form-label fw-medium">Start Date <span class="required">*</span></label>
+                            <input type="text" class="form-control flatpickr" id="startDate" placeholder="Select date">
+                            <div class="error-message" id="startDateError">Invalid date format</div>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label fw-medium">Order Status</label>
-                            <select class="form-select" id="orderStatus">
-                                <option value="all" selected>All Statuses</option>
-                                <option value="Pending">Pending</option>
-                                <option value="Processing">Processing</option>
-                                <option value="Shipped">Shipped</option>
-                                <option value="Delivered">Delivered</option>
-                                <option value="Cancelled">Cancelled</option>
-                                <option value="Return Requested">Return Requested</option>
-                                <option value="Returned">Returned</option>
-                                <option value="Return Rejected">Return Rejected</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2 d-flex align-items-end gap-2">
-                            <button class="btn btn-primary w-100" id="applyFilters">Apply Filters</button>
-                            <button class="btn btn-secondary w-100" id="clearFilters">Clear Filters</button>
-                        </div>
-                        <div class="custom-date-fields" id="customDateFields">
-                            <div class="col-md-2">
-                                <label class="form-label fw-medium">Start Date <span class="required">*</span></label>
-                                <input type="text" class="form-control" id="startDate" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}">
-                                <div class="error-message" id="startDateError">Invalid date format</div>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label fw-medium">End Date <span class="required">*</span></label>
-                                <input type="text" class="form-control" id="endDate" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}">
-                                <div class="error-message" id="endDateError">Invalid date format</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row g-4 mb-4" id="statsSection">
-                    <div class="col-xl-3 col-md-6">
-                        <div class="stat-card">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <p class="stat-label">Total Customers</p>
-                                    <h3 class="stat-number" id="totalCustomers"><%= count %></h3>
-                                </div>
-                                <div class="stat-icon icon-customers">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6">
-                        <div class="stat-card">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <p class="stat-label">Total Revenue</p>
-                                    <h3 class="stat-number" id="totalRevenue">₹<%= totalRevenue.toFixed(2) %></h3>
-                                </div>
-                                <div class="stat-icon icon-revenue">
-                                    <i class="fas fa-dollar-sign"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6">
-                        <div class="stat-card">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <p class="stat-label">Total Orders</p>
-                                    <h3 class="stat-number" id="totalOrders"><%= orderCount %></h3>
-                                </div>
-                                <div class="stat-icon icon-orders">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6">
-                        <div class="stat-card">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <p class="stat-label">Total Products</p>
-                                    <h3 class="stat-number" id="totalProducts"><%= productCount %></h3>
-                                </div>
-                                <div class="stat-icon icon-products">
-                                    <i class="fas fa-box"></i>
-                                </div>
-                            </div>
+                            <label class="form-label fw-medium">End Date <span class="required">*</span></label>
+                            <input type="text" class="form-control flatpickr" id="endDate" placeholder="Select date">
+                            <div class="error-message" id="endDateError">Invalid date format</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row g-4 mb-4">
-                <div class="col-lg-8">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title fw-bold mb-3">Revenue Overview</h5>
-                            <div class="chart-legend">
-                                <div class="legend-item">
-                                    <div class="legend-dot" style="background-color: #8b5cf6;"></div>
-                                    <span>Revenue</span>
-                                </div>
-                                <div class="legend-item">
-                                    <div class="legend-dot" style="background-color: #10b981;"></div>
-                                    <span>Orders</span>
-                                </div>
+            <div class="row g-4 mb-4" id="statsSection">
+                <div class="col-xl-3 col-md-6">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="stat-label">Total Customers</p>
+                                <h3 class="stat-number" id="totalCustomers">0</h3>
                             </div>
-                            <div class="chart-container">
-                                <canvas id="revenueChart"></canvas>
+                            <div class="stat-icon icon-customers">
+                                <i class="fas fa-users"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-lg-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title fw-bold mb-3">Order Status</h5>
-                            <div class="chart-container">
-                                <canvas id="orderStatusChart"></canvas>
+                <div class="col-xl-3 col-md-6">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="stat-label">Total Revenue</p>
+                                <h3 class="stat-number" id="totalRevenue">₹0.00</h3>
                             </div>
-                            <div class="mt-3" id="orderStatusLegend">
-                                <% orderStatusData.forEach((status, index) => { %>
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <div class="d-flex align-items-center">
-                                            <div class="legend-dot me-2" style="background-color: <%= ['#FF9500', '#007AFF', '#34C759', '#00C896', '#FF3B30', '#FFCC02', '#8E8E93'][index] %>;"></div>
-                                            <small><%= status._id %></small>
-                                        </div>
-                                        <small class="fw-bold"><%= status.count %></small>
-                                    </div>
-                                <% }) %>
+                            <div class="stat-icon icon-revenue">
+                                <i class="fas fa-dollar-sign"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="row g-4 mb-4">
-                <div class="col-lg-6">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title fw-bold mb-3">Payment Methods</h5>
-                            <div class="chart-container">
-                                <canvas id="paymentChart"></canvas>
+                <div class="col-xl-3 col-md-6">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="stat-label">Total Orders</p>
+                                <h3 class="stat-number" id="totalOrders">0</h3>
                             </div>
-                            <div class="mt-3" id="paymentMethodLegend">
-                                <% paymentMethodData.forEach((method, index) => { %>
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <div class="d-flex align-items-center">
-                                            <div class="legend-dot me-2" style="background-color: <%= ['#8B5CF6', '#10B981', '#F59E0B'][index] %>;"></div>
-                                            <small><%= method._id %></small>
-                                        </div>
-                                        <small class="fw-bold"><%= ((method.count / paymentMethodData.reduce((sum, m) => sum + m.count, 0)) * 100).toFixed(0) %>%</small>
-                                    </div>
-                                <% }) %>
+                            <div class="stat-icon icon-orders">
+                                <i class="fas fa-shopping-cart"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-lg-6">
-                    <div class="card h-100 top-categories-card">
-                        <div class="card-body">
-                            <h5 class="card-title fw-bold mb-3">Top Categories</h5>
-                            <div class="chart-container">
-                                <canvas id="categoriesChart"></canvas>
+                <div class="col-xl-3 col-md-6">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="stat-label">Total Products</p>
+                                <h3 class="stat-number" id="totalProducts">0</h3>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6">
-                    <div class="card h-100 top-brands-card">
-                        <div class="card-body">
-                            <h5 class="card-title fw-bold mb-3">Top Brands</h5>
-                            <div class="chart-container">
-                                <canvas id="brandsChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6">
-                    <div class="card top-selling-card">
-                        <div class="card-header bg-white">
-                            <h5 class="card-title fw-bold mb-0">Top Selling Products</h5>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-hover mb-0" id="topSellingProductsTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Product</th>
-                                            <th>Quantity</th>
-                                            <th>Sales</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% topSellingProducts.forEach(product => { %>
-                                            <tr>
-                                                <td><%= product.productName %></td>
-                                                <td class="fw-bold"><%= product.totalQuantity %></td>
-                                                <td class="fw-bold">₹<%= product.totalSales.toFixed(2) %></td>
-                                            </tr>
-                                        <% }) %>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row g-4">
-                <div class="col-lg-12">
-                    <div class="card recent-orders-card">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                            <h5 class="card-title fw-bold mb-0">Recent Orders</h5>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-container">
-                                <table class="orders-table recent-orders-table" id="recentOrdersTable">
-                                    <thead class="table-header">
-                                        <tr>
-                                            <th>Order ID</th>
-                                            <th>Customer Name</th>
-                                            <th>Order Date</th>
-                                            <th>Total Amount</th>
-                                            <th>Payment Method</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% recentOrders.forEach(order => { %>
-                                            <tr class="table-row">
-                                                <td class="table-cell">
-                                                    <span class="order-id"><%= order.orderId || 'N/A' %></span>
-                                                </td>
-                                                <td class="table-cell">
-                                                    <span class="customer-name"><%= order.userId?.name || 'Unknown' %></span>
-                                                </td>
-                                                <td class="table-cell"><%= new Date(order.createdAt).toLocaleDateString('en-GB') %></td>
-                                                <td class="table-cell">
-                                                    <span class="amount">₹<%= order.finalAmount?.toFixed(2) || '0.00' %></span>
-                                                </td>
-                                                <td class="table-cell text-center">
-                                                    <span class="payment-method <%= order.paymentMethod?.toLowerCase().replace(' ', '-') || 'unknown' %>">
-                                                        <%= order.paymentMethod || 'Unknown' %>
-                                                    </span>
-                                                </td>
-                                                <td class="table-cell text-center">
-                                                    <span class="status <%= order.orderedItems[0]?.status?.toLowerCase().replace(' ', '-') || 'pending' %>">
-                                                        <%= order.orderedItems[0]?.status || 'Pending' %>
-                                                    </span>
-                                                </td>
-                                                <td class="table-cell text-center">
-                                                    <button class="view-btn" onclick="viewOrderDetails('<%= order._id %>')">VIEW</button>
-                                                </td>
-                                            </tr>
-                                        <% }) %>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="pagination-container">
-                                <nav aria-label="Page navigation">
-                                    <ul class="pagination justify-content-center" id="pagination">
-                                        <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
-                                            <a class="page-link" href="?page=<%= currentPage - 1 %>&timePeriod=<%= timePeriod || 'today' %>&status=<%= status || 'all' %><%= timePeriod === 'custom' && startDate && endDate ? '&startDate=' + startDate + '&endDate=' + endDate : '' %>">
-                                                <i class="fas fa-chevron-left"></i>
-                                            </a>
-                                        </li>
-                                        <% for(let i = 1; i <= totalPages; i++) { %>
-                                            <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-                                                <a class="page-link" href="?page=<%= i %>&timePeriod=<%= timePeriod || 'today' %>&status=<%= status || 'all' %><%= timePeriod === 'custom' && startDate && endDate ? '&startDate=' + startDate + '&endDate=' + endDate : '' %>"><%= i %></a>
-                                            </li>
-                                        <% } %>
-                                        <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
-                                            <a class="page-link" href="?page=<%= currentPage + 1 %>&timePeriod=<%= timePeriod || 'today' %>&status=<%= status || 'all' %><%= timePeriod === 'custom' && startDate && endDate ? '&startDate=' + startDate + '&endDate=' + endDate : '' %>">
-                                                <i class="fas fa-chevron-right"></i>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </nav>
+                            <div class="stat-icon icon-products">
+                                <i class="fas fa-box"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-8">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold mb-3">Revenue Overview</h5>
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background-color: #8b5cf6;"></div>
+                                <span>Revenue</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background-color: #10b981;"></div>
+                                <span>Orders</span>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold mb-3">Order Status</h5>
+                        <div class="chart-container">
+                            <canvas id="orderStatusChart"></canvas>
+                        </div>
+                        <div class="mt-3" id="orderStatusLegend"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold mb-3">Payment Methods</h5>
+                        <div class="chart-container">
+                            <canvas id="paymentChart"></canvas>
+                        </div>
+                        <div class="mt-3" id="paymentMethodLegend"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card h-100 top-categories-card">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold mb-3">Top Categories</h5>
+                        <div class="chart-container">
+                            <canvas id="categoriesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card h-100 top-brands-card">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold mb-3">Top Brands</h5>
+                        <div class="chart-container">
+                            <canvas id="brandsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card top-selling-card">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title fw-bold mb-0">Top Selling Products</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="topSellingProductsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Sales</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-12">
+                <div class="card recent-orders-card">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="card-title fw-bold mb-0">Recent Orders</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-container">
+                            <table class="orders-table recent-orders-table" id="recentOrdersTable">
+                                <thead class="table-header">
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer Name</th>
+                                        <th>Order Date</th>
+                                        <th>Total Amount</th>
+                                        <th>Payment Method</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <div class="pagination-container">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center" id="pagination"></ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script>
-        let revenueChartInstance, orderStatusChartInstance, paymentChartInstance, categoriesChartInstance, brandsChartInstance;
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+// Chart instances
+let revenueChartInstance, orderStatusChartInstance, paymentChartInstance, categoriesChartInstance, brandsChartInstance;
 
-        const chartColors = {
-            primary: '#8b5cf6',
-            success: '#10b981',
-            warning: '#f59e0b',
-            info: '#3b82f6',
-            orange: '#FF9500',
-            blue: '#007AFF',
-            green: '#34C759',
-            teal: '#00C896',
-            red: '#FF3B30',
-            yellow: '#FFCC02',
-            gray: '#8E8E93',
-            pink: '#FF2D92',
-        };
+// Color palette
+const chartColors = {
+    primary: '#8b5cf6',
+    success: '#10b981',
+    warning: '#f59e0b',
+    info: '#3b82f6',
+    orange: '#FF9500',
+    blue: '#007AFF',
+    green: '#34C759',
+    teal: '#00C896',
+    red: '#FF3B30',
+    yellow: '#FFCC02',
+    gray: '#8E8E93',
+    pink: '#FF2D92',
+};
 
-        // Function to validate date format (DD/MM/YYYY)
-        function validateDate(dateStr) {
-            const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
-            if (!regex.test(dateStr)) return false;
-            const [day, month, year] = dateStr.split('/').map(Number);
-            const date = new Date(year, month - 1, day);
-            return date.getDate() === day && date.getMonth() === month - 1 && date.getFullYear() === year;
+// Initialize Flatpickr for date pickers
+flatpickr(".flatpickr", {
+    dateFormat: "d/m/Y",
+    maxDate: "today",
+    allowInput: true,
+    onChange: function(selectedDates, dateStr, instance) {
+        instance.element.value = dateStr;
+    }
+});
+
+// Function to validate date format (DD/MM/YYYY)
+function validateDate(dateStr) {
+    const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+    if (!regex.test(dateStr)) return false;
+    const [day, month, year] = dateStr.split('/').map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.getDate() === day && date.getMonth() === month - 1 && date.getFullYear() === year;
+}
+
+// Function to convert DD/MM/YYYY to ISO date (YYYY-MM-DD)
+function toISODate(dateStr) {
+    if (!dateStr) return '';
+    const [day, month, year] = dateStr.split('/').map(Number);
+    return new Date(year, month - 1, day).toISOString().split('T')[0];
+}
+
+// Function to format date for display
+function formatDateForDisplay(dateStr) {
+    if (!dateStr) return '';
+    if (dateStr.includes('-')) {
+        const [year, month, day] = dateStr.split('-');
+        return `${day}/${month}/${year}`;
+    }
+    return dateStr; // For monthly data (e.g., "January 2023")
+}
+
+// Function to create heartbeat-like data
+function createHeartbeatData(data, isDaily) {
+    const heartbeatData = [];
+    const labels = [];
+    data.forEach((item, index) => {
+        const value = item.revenue || item.orderCount || 0;
+        const label = item.label;
+        // Add main data point
+        heartbeatData.push(value);
+        labels.push(label);
+        // Add intermediate point to create heartbeat effect
+        if (index < data.length - 1) {
+            heartbeatData.push(value * 0.8); // Slight dip for heartbeat effect
+            labels.push(label + ' '); // Space to differentiate intermediate point
         }
+    });
+    return { data: heartbeatData, labels };
+}
 
-        // Function to convert DD/MM/YYYY to ISO date
-        function toISODate(dateStr) {
-            const [day, month, year] = dateStr.split('/').map(Number);
-            return new Date(year, month - 1, day).toISOString().split('T')[0];
-        }
+// Function to update charts and tables with new data
+function updateDashboard(data) {
+    // Update Stats
+    document.getElementById('totalCustomers').textContent = data.count || 0;
+    document.getElementById('totalRevenue').textContent = `₹${(data.totalRevenue || 0).toFixed(2)}`;
+    document.getElementById('totalOrders').textContent = data.orderCount || 0;
+    document.getElementById('totalProducts').textContent = data.productCount || 0;
 
-        // Function to update charts and tables with new data
-        function updateDashboard(data) {
-            // Update Stats
-            document.getElementById('totalCustomers').textContent = data.count || 0;
-            document.getElementById('totalRevenue').textContent = `₹${(data.totalRevenue || 0).toFixed(2)}`;
-            document.getElementById('totalOrders').textContent = data.orderCount || 0;
-            document.getElementById('totalProducts').textContent = data.productCount || 0;
+    // Update Revenue Chart
+    if (revenueChartInstance) revenueChartInstance.destroy();
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    const chartContainer = revenueCtx.canvas.parentElement;
 
-           // Update Revenue Chart
-/// Update Revenue Chart
-if (revenueChartInstance) revenueChartInstance.destroy();
-const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    // Validate revenue data
+    const revenueData = Array.isArray(data.revenueData) ? data.revenueData.filter(item => item && item._id) : [];
 
-// Define month order for sorting and display
-const monthOrder = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-];
+    // Define month order for sorting
+    const monthOrder = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
 
-// Sort and format revenueData
-const sortedRevenueData = [...data.revenueData]
-    .filter(item => item._id) // Remove items with missing _id
-    .map(item => {
-        let label, sortKey;
-        if (item._id.includes('-')) {
-            // Handle daily data (YYYY-MM-DD)
-            label = new Date(item._id).toLocaleDateString('en-GB', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            }); // Format as DD/MM/YYYY
-            sortKey = item._id; // Use _id for sorting daily data
-        } else {
-            // Handle monthly data (full month names)
-            label = item._id;
-            sortKey = monthOrder.indexOf(item._id);
-        }
-        return { ...item, label, sortKey };
-    })
-    .sort((a, b) => {
-        if (a._id.includes('-')) {
-            // Sort daily data chronologically
-            return a.sortKey.localeCompare(b.sortKey);
-        }
-        // Sort monthly data by monthOrder index
-        return a.sortKey - b.sortKey;
+    // Format and sort revenue data
+    const isDailyData = revenueData.some(item => item._id.includes('-'));
+    const sortedRevenueData = revenueData
+        .map(item => {
+            let label, sortKey;
+            if (isDailyData) {
+                label = formatDateForDisplay(item._id);
+                sortKey = new Date(item._id).getTime();
+            } else {
+                const [month, year] = item._id.split(' ');
+                label = `${month} ${year}`;
+                sortKey = new Date(`${month} 1, ${year}`).getTime();
+            }
+            return { ...item, label, sortKey };
+        })
+        .sort((a, b) => a.sortKey - b.sortKey);
+
+    // Handle empty data
+    if (sortedRevenueData.length === 0) {
+        chartContainer.innerHTML = '<p class="text-center text-muted">No data available for the selected period</p>';
+        return;
+    } else if (!revenueCtx.canvas) {
+        chartContainer.innerHTML = '<canvas id="revenueChart"></canvas>';
+        revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    }
+
+    // Create heartbeat-like data for revenue and orders
+    const revenueHeartbeat = createHeartbeatData(sortedRevenueData.map(item => ({ ...item, revenue: item.revenue })), isDailyData);
+    const ordersHeartbeat = createHeartbeatData(sortedRevenueData.map(item => ({ ...item, orderCount: item.orderCount })), isDailyData);
+
+    revenueChartInstance = new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: revenueHeartbeat.labels,
+            datasets: [
+                {
+                    label: 'Revenue',
+                    data: revenueHeartbeat.data,
+                    borderColor: chartColors.primary,
+                    backgroundColor: chartColors.primary + '20',
+                    tension: 0, // No smoothing for sharp heartbeat effect
+                    borderWidth: 3,
+                    pointBackgroundColor: chartColors.primary,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: revenueHeartbeat.data.length > 1 ? 4 : 0,
+                    pointHoverRadius: 6,
+                },
+                {
+                    label: 'Orders',
+                    data: ordersHeartbeat.data,
+                    borderColor: chartColors.success,
+                    backgroundColor: chartColors.success + '20',
+                    tension: 0, // No smoothing for sharp heartbeat effect
+                    borderWidth: 3,
+                    pointBackgroundColor: chartColors.success,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: ordersHeartbeat.data.length > 1 ? 4 : 0,
+                    pointHoverRadius: 6,
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const label = context.dataset.label || '';
+                            const value = context.parsed.y;
+                            return `${label}: ${label === 'Revenue' ? '₹' + value.toFixed(2) : value}`;
+                        },
+                    },
+                },
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        color: '#64748b',
+                        maxRotation: revenueHeartbeat.labels.length > 20 ? 45 : 0,
+                        minRotation: revenueHeartbeat.labels.length > 20 ? 45 : 0,
+                        maxTicksLimit: 12,
+                    },
+                },
+                y: {
+                    grid: { color: '#f1f5f9' },
+                    ticks: {
+                        color: '#64748b',
+                        callback: function (value) {
+                            return value;
+                        },
+                    },
+                    beginAtZero: true,
+                },
+            },
+        },
     });
 
-revenueChartInstance = new Chart(revenueCtx, {
-    type: 'line',
-    data: {
-        labels: sortedRevenueData.map(item => item.label),
-        datasets: [
-            {
-                label: 'Revenue',
-                data: sortedRevenueData.map(item => item.revenue || 0),
-                borderColor: chartColors.primary,
-                backgroundColor: chartColors.primary + '20',
-                tension: 0,
-                stepped: 'before', // Step graph for revenue
-                fill: true,
-                borderWidth: 3,
-                pointBackgroundColor: chartColors.primary,
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 5,
-            },
-            {
-                label: 'Orders',
-                data: sortedRevenueData.map(item => item.orderCount || 0),
-                borderColor: chartColors.success,
-                backgroundColor: chartColors.success + '20',
-                tension: 0.4, // Smooth line for orders
-                fill: true,
-                borderWidth: 3,
-                pointBackgroundColor: chartColors.success,
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 5,
-            },
-        ],
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                callbacks: {
-                    label: function (context) {
-                        const label = context.dataset.label || '';
-                        const value = context.parsed.y;
-                        return `${label}: ${label === 'Revenue' ? '₹' + value.toFixed(2) : value}`;
-                    },
+    // Update Order Status Chart
+    if (orderStatusChartInstance) orderStatusChartInstance.destroy();
+    const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
+    orderStatusChartInstance = new Chart(orderStatusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: Array.isArray(data.orderStatusData) ? data.orderStatusData.map(item => item._id) : [],
+            datasets: [
+                {
+                    data: Array.isArray(data.orderStatusData) ? data.orderStatusData.map(item => item.count || 0) : [],
+                    backgroundColor: [
+                        chartColors.orange,
+                        chartColors.blue,
+                        chartColors.green,
+                        chartColors.teal,
+                        chartColors.red,
+                        chartColors.yellow,
+                        chartColors.gray,
+                    ].slice(0, data.orderStatusData?.length || 0),
+                    borderWidth: 0,
+                    cutout: '70%',
                 },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+        },
+    });
+
+    const orderStatusLegend = document.getElementById('orderStatusLegend');
+    orderStatusLegend.innerHTML = Array.isArray(data.orderStatusData)
+        ? data.orderStatusData
+              .map(
+                  (status, index) => `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex align-items-center">
+                        <div class="legend-dot me-2" style="background-color: ${
+                            ['#FF9500', '#007AFF', '#34C759', '#00C896', '#FF3B30', '#FFCC02', '#8E8E93'][index]
+                        };"></div>
+                        <small>${status._id || 'Unknown'}</small>
+                    </div>
+                    <small class="fw-bold">${status.count || 0}</small>
+                </div>
+            `
+              )
+              .join('')
+        : '<p class="text-center text-muted">No order status data available</p>';
+
+    // Update Payment Methods Chart
+    if (paymentChartInstance) paymentChartInstance.destroy();
+    const paymentCtx = document.getElementById('paymentChart').getContext('2d');
+    paymentChartInstance = new Chart(paymentCtx, {
+        type: 'doughnut',
+        data: {
+            labels: Array.isArray(data.paymentMethodData) ? data.paymentMethodData.map(item => item._id) : [],
+            datasets: [
+                {
+                    data: Array.isArray(data.paymentMethodData) ? data.paymentMethodData.map(item => item.count || 0) : [],
+                    backgroundColor: [chartColors.primary, chartColors.success, chartColors.warning].slice(
+                        0,
+                        data.paymentMethodData?.length || 0
+                    ),
+                    borderWidth: 0,
+                    cutout: '70%',
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+        },
+    });
+
+    const paymentMethodLegend = document.getElementById('paymentMethodLegend');
+    const totalPayments = Array.isArray(data.paymentMethodData)
+        ? data.paymentMethodData.reduce((sum, m) => sum + (m.count || 0), 0)
+        : 0;
+    paymentMethodLegend.innerHTML = Array.isArray(data.paymentMethodData)
+        ? data.paymentMethodData
+              .map(
+                  (method, index) => `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex align-items-center">
+                        <div class="legend-dot me-2" style="background-color: ${
+                            ['#8B5CF6', '#10B981', '#F59E0B'][index]
+                        };"></div>
+                        <small>${method._id || 'Unknown'}</small>
+                    </div>
+                    <small class="fw-bold">${totalPayments ? ((method.count / totalPayments) * 100).toFixed(0) : 0}%</small>
+                </div>
+            `
+              )
+              .join('')
+        : '<p class="text-center text-muted">No payment method data available</p>';
+
+    // Update Top Categories Chart
+    if (categoriesChartInstance) categoriesChartInstance.destroy();
+    const categoriesCtx = document.getElementById('categoriesChart').getContext('2d');
+    categoriesChartInstance = new Chart(categoriesCtx, {
+        type: 'bar',
+        data: {
+            labels: Array.isArray(data.topCategories) ? data.topCategories.map(item => item.categoryName || 'Unknown') : [],
+            datasets: [
+                {
+                    data: Array.isArray(data.topCategories) ? data.topCategories.map(item => item.totalSales || 0) : [],
+                    backgroundColor: chartColors.primary,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: '#64748b' } },
+                y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } },
             },
         },
-        scales: {
-            x: {
-                grid: { display: false },
-                ticks: {
-                    color: '#64748b',
-                    maxRotation: sortedRevenueData.length > 6 ? 45 : 0, // Rotate labels for >6 data points
-                    minRotation: sortedRevenueData.length > 6 ? 45 : 0,
-                    maxTicksLimit: 12, // Limit ticks to avoid clutter
+    });
+
+    // Update Top Brands Chart
+    if (brandsChartInstance) brandsChartInstance.destroy();
+    const brandsCtx = document.getElementById('brandsChart').getContext('2d');
+    brandsChartInstance = new Chart(brandsCtx, {
+        type: 'bar',
+        data: {
+            labels: Array.isArray(data.topBrands) ? data.topBrands.map(item => item.brandName || 'Unknown') : [],
+            datasets: [
+                {
+                    data: Array.isArray(data.topBrands) ? data.topBrands.map(item => item.totalSales || 0) : [],
+                    backgroundColor: chartColors.primary,
+                    borderRadius: 6,
+                    borderSkipped: false,
                 },
-            },
-            y: {
-                grid: { color: '#f1f5f9' },
-                ticks: {
-                    color: '#64748b',
-                    callback: function (value) {
-                        return this.getLabelForValue(value).includes('Revenue') ? '₹' + value : value;
-                    },
-                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: '#64748b' } },
+                y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } },
             },
         },
-        elements: { point: { hoverRadius: 8 } },
-    },
-});
-            // Update Order Status Chart
-            if (orderStatusChartInstance) orderStatusChartInstance.destroy();
-            const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
-            orderStatusChartInstance = new Chart(orderStatusCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: data.orderStatusData.map(item => item._id),
-                    datasets: [
-                        {
-                            data: data.orderStatusData.map(item => item.count),
-                            backgroundColor: [
-                                chartColors.orange,
-                                chartColors.blue,
-                                chartColors.green,
-                                chartColors.teal,
-                                chartColors.red,
-                                chartColors.yellow,
-                                chartColors.gray,
-                            ].slice(0, data.orderStatusData.length),
-                            borderWidth: 0,
-                            cutout: '70%',
-                        },
-                    ],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                },
-            });
+    });
 
-            // Update Order Status Legend
-            const orderStatusLegend = document.getElementById('orderStatusLegend');
-            orderStatusLegend.innerHTML = data.orderStatusData
-                .map(
-                    (status, index) => `
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="d-flex align-items-center">
-                            <div class="legend-dot me-2" style="background-color: ${
-                                ['#FF9500', '#007AFF', '#34C759', '#00C896', '#FF3B30', '#FFCC02', '#8E8E93'][index]
-                            };"></div>
-                            <small>${status._id}</small>
-                        </div>
-                        <small class="fw-bold">${status.count}</small>
-                    </div>
-                `
-                )
-                .join('');
+    // Update Top Selling Products Table
+    const topSellingProductsTable = document.querySelector('#topSellingProductsTable tbody');
+    topSellingProductsTable.innerHTML = Array.isArray(data.topSellingProducts)
+        ? data.topSellingProducts
+              .map(
+                  product => `
+                <tr>
+                    <td>${product.productName || 'N/A'}</td>
+                    <td class="fw-bold">${product.totalQuantity || 0}</td>
+                    <td class="fw-bold">₹${(product.totalSales || 0).toFixed(2)}</td>
+                </tr>
+            `
+              )
+              .join('')
+        : '<tr><td colspan="3" class="text-center text-muted">No top selling products available</td></tr>';
 
-            // Update Payment Methods Chart
-            if (paymentChartInstance) paymentChartInstance.destroy();
-            const paymentCtx = document.getElementById('paymentChart').getContext('2d');
-            paymentChartInstance = new Chart(paymentCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: data.paymentMethodData.map(item => item._id),
-                    datasets: [
-                        {
-                            data: data.paymentMethodData.map(item => item.count),
-                            backgroundColor: [chartColors.primary, chartColors.success, chartColors.warning].slice(
-                                0,
-                                data.paymentMethodData.length
-                            ),
-                            borderWidth: 0,
-                            cutout: '70%',
-                        },
-                    ],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                },
-            });
+    // Update Recent Orders Table
+    const recentOrdersTable = document.querySelector('#recentOrdersTable tbody');
+    recentOrdersTable.innerHTML = Array.isArray(data.recentOrders)
+        ? data.recentOrders
+              .map(
+                  order => `
+                <tr class="table-row">
+                    <td class="table-cell">
+                        <span class="order-id">${order.orderId || 'N/A'}</span>
+                    </td>
+                    <td class="table-cell">
+                        <span class="customer-name">${order.shippingAddress?.name || order.userId?.name || 'Unknown'}</span>
+                    </td>
+                    <td class="table-cell">${order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-GB') : 'N/A'}</td>
+                    <td class="table-cell">
+                        <span class="amount">₹${(order.finalAmount || 0).toFixed(2)}</span>
+                    </td>
+                    <td class="table-cell text-center">
+                        <span class="payment-method ${order.paymentMethod?.toLowerCase().replace(' ', '-') || 'unknown'}">
+                            ${order.paymentMethod || 'Unknown'}
+                        </span>
+                    </td>
+                    <td class="table-cell text-center">
+                        <span class="status ${order.orderedItems?.[0]?.status?.toLowerCase().replace(' ', '-') || 'pending'}">
+                            ${order.orderedItems?.[0]?.status || 'Pending'}
+                        </span>
+                    </td>
+                    <td class="table-cell text-center">
+                        <button class="view-btn" onclick="viewOrderDetails('${order._id || ''}')">VIEW</button>
+                    </td>
+                </tr>
+            `
+              )
+              .join('')
+        : '<tr><td colspan="7" class="text-center text-muted">No recent orders available</td></tr>';
 
-            // Update Payment Methods Legend
-            const paymentMethodLegend = document.getElementById('paymentMethodLegend');
-            const totalPayments = data.paymentMethodData.reduce((sum, m) => sum + m.count, 0);
-            paymentMethodLegend.innerHTML = data.paymentMethodData
-                .map(
-                    (method, index) => `
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="d-flex align-items-center">
-                            <div class="legend-dot me-2" style="background-color: ${
-                                ['#8B5CF6', '#10B981', '#F59E0B'][index]
-                            };"></div>
-                            <small>${method._id}</small>
-                        </div>
-                        <small class="fw-bold">${totalPayments ? ((method.count / totalPayments) * 100).toFixed(0) : 0}%</small>
-                    </div>
-                `
-                )
-                .join('');
+    // Update Pagination
+    const pagination = document.getElementById('pagination');
+    const timePeriod = document.getElementById('timePeriod').value;
+    const orderStatus = document.getElementById('orderStatus').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
 
-            // Update Top Categories Chart
-            if (categoriesChartInstance) categoriesChartInstance.destroy();
-            const categoriesCtx = document.getElementById('categoriesChart').getContext('2d');
-            categoriesChartInstance = new Chart(categoriesCtx, {
-                type: 'bar',
-                data: {
-                    labels: data.topCategories.map(item => item.categoryName),
-                    datasets: [
-                        {
-                            data: data.topCategories.map(item => item.totalSales),
-                            backgroundColor: chartColors.primary,
-                            borderRadius: 6,
-                            borderSkipped: false,
-                        },
-                    ],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { color: '#64748b' } },
-                        y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } },
-                    },
-                },
-            });
+    let paginationParams = `timePeriod=${encodeURIComponent(timePeriod)}&status=${encodeURIComponent(orderStatus)}`;
+    if (timePeriod === 'custom' && startDate && endDate) {
+        paginationParams += `&startDate=${encodeURIComponent(toISODate(startDate))}&endDate=${encodeURIComponent(toISODate(endDate))}`;
+    }
 
-            // Update Top Brands Chart
-            if (brandsChartInstance) brandsChartInstance.destroy();
-            const brandsCtx = document.getElementById('brandsChart').getContext('2d');
-            brandsChartInstance = new Chart(brandsCtx, {
-                type: 'bar',
-                data: {
-                    labels: data.topBrands.map(item => item.brandName),
-                    datasets: [
-                        {
-                            data: data.topBrands.map(item => item.totalSales),
-                            backgroundColor: chartColors.primary,
-                            borderRadius: 6,
-                            borderSkipped: false,
-                        },
-                    ],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { color: '#64748b' } },
-                        y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } },
-                    },
-                },
-            });
-
-            
-            const topSellingProductsTable = document.querySelector('#topSellingProductsTable tbody');
-            topSellingProductsTable.innerHTML = data.topSellingProducts
-                .map(
-                    product => `
-                    <tr>
-                        <td>${product.productName || 'N/A'}</td>
-                        <td class="fw-bold">${product.totalQuantity || 0}</td>
-                        <td class="fw-bold">₹${(product.totalSales || 0).toFixed(2)}</td>
-                    </tr>
-                `
-                )
-                .join('');
-
-            // Update Recent Orders Table
-            const recentOrdersTable = document.querySelector('#recentOrdersTable tbody');
-            recentOrdersTable.innerHTML = data.recentOrders
-                .map(
-                    order => `
-                    <tr class="table-row">
-                        <td class="table-cell">
-                            <span class="order-id">${order.orderId || 'N/A'}</span>
-                        </td>
-                        <td class="table-cell">
-                            <span class="customer-name">${order.shippingAddress?.name || 'Unknown'}</span>
-                        </td>
-                        <td class="table-cell">${new Date(order.createdAt).toLocaleDateString('en-GB')}</td>
-                        <td class="table-cell">
-                            <span class="amount">₹${(order.finalAmount || 0).toFixed(2)}</span>
-                        </td>
-                        <td class="table-cell text-center">
-                            <span class="payment-method ${order.paymentMethod?.toLowerCase().replace(' ', '-') || 'unknown'}">
-                                ${order.paymentMethod || 'Unknown'}
-                            </span>
-                        </td>
-                        <td class="table-cell text-center">
-                            <span class="status ${order.orderedItems[0]?.status?.toLowerCase().replace(' ', '-') || 'pending'}">
-                                ${order.orderedItems[0]?.status || 'Pending'}
-                            </span>
-                        </td>
-                        <td class="table-cell text-center">
-                            <button class="view-btn" onclick="viewOrderDetails('${order._id}')">VIEW</button>
-                        </td>
-                    </tr>
-                `
-                )
-                .join('');
-
-            // Update Pagination
-            const pagination = document.getElementById('pagination');
-            const timePeriod = document.getElementById('timePeriod').value;
-            const orderStatus = document.getElementById('orderStatus').value;
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-
-            let paginationParams = `timePeriod=${encodeURIComponent(timePeriod)}&status=${encodeURIComponent(orderStatus)}`;
-            if (timePeriod === 'custom' && startDate && endDate) {
-                paginationParams += `&startDate=${encodeURIComponent(toISODate(startDate))}&endDate=${encodeURIComponent(toISODate(endDate))}`;
-            }
-
-            pagination.innerHTML = `
-                <li class="page-item ${data.currentPage === 1 ? 'disabled' : ''}">
-                    <a class="page-link" href="?page=${data.currentPage - 1}&${paginationParams}">
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
+    pagination.innerHTML = `
+        <li class="page-item ${data.currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="?page=${data.currentPage - 1}&${paginationParams}">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </li>
+        ${Array.from({ length: data.totalPages || 1 }, (_, i) => i + 1)
+            .map(
+                i => `
+                <li class="page-item ${data.currentPage === i ? 'active' : ''}">
+                    <a class="page-link" href="?page=${i}&${paginationParams}">${i}</a>
                 </li>
-                ${Array.from({ length: data.totalPages }, (_, i) => i + 1)
-                    .map(
-                        i => `
-                        <li class="page-item ${data.currentPage === i ? 'active' : ''}">
-                            <a class="page-link" href="?page=${i}&${paginationParams}">${i}</a>
-                        </li>
-                    `
-                    )
-                    .join('')}
-                <li class="page-item ${data.currentPage === data.totalPages ? 'disabled' : ''}">
-                    <a class="page-link" href="?page=${data.currentPage + 1}&${paginationParams}">
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
-                </li>
-            `;
-        }
+            `
+            )
+            .join('')}
+        <li class="page-item ${data.currentPage === (data.totalPages || 1) ? 'disabled' : ''}">
+            <a class="page-link" href="?page=${data.currentPage + 1}&${paginationParams}">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>
+    `;
+}
 
-        // Initial chart rendering
-        updateDashboard({
-            count: <%= count %>,
-            totalRevenue: <%= totalRevenue %>,
-            orderCount: <%= orderCount %>,
-            productCount: <%= productCount %>,
-            revenueData: <%- JSON.stringify(revenueData) %>,
-            orderStatusData: <%- JSON.stringify(orderStatusData) %>,
-            paymentMethodData: <%- JSON.stringify(paymentMethodData) %>,
-            topCategories: <%- JSON.stringify(topCategories) %>,
-            topBrands: <%- JSON.stringify(topBrands) %>,
-            topSellingProducts: <%- JSON.stringify(topSellingProducts) %>,
-            recentOrders: <%- JSON.stringify(recentOrders) %>,
-            currentPage: <%= currentPage %>,
-            totalPages: <%= totalPages %>,
-        });
+// Initialize Dashboard
+function initializeDashboard() {
+    // Set default time period to 'all'
+    const timePeriodSelect = document.getElementById('timePeriod');
+    timePeriodSelect.value = 'all';
+    document.getElementById('orderStatus').value = 'all';
+    document.getElementById('customDateFields').classList.remove('active');
+    document.getElementById('startDate').value = '';
+    document.getElementById('endDate').value = '';
+    document.getElementById('startDateError').style.display = 'none';
+    document.getElementById('endDateError').style.display = 'none';
 
-        // Handle custom date fields visibility
-        document.getElementById('timePeriod').addEventListener('change', function () {
-            const customDateFields = document.getElementById('customDateFields');
-            if (this.value === 'custom') {
-                customDateFields.classList.add('active');
+    // Fetch initial data
+    fetchDashboardData('all', 'all');
+}
+
+// Fetch Dashboard Data
+function fetchDashboardData(timePeriod, orderStatus, startDate = '', endDate = '') {
+    const applyButton = document.getElementById('applyFilters');
+    applyButton.disabled = true;
+    applyButton.textContent = 'Loading...';
+
+    const params = new URLSearchParams();
+    params.append('timePeriod', timePeriod);
+    params.append('status', orderStatus);
+    if (timePeriod === 'custom' && startDate && endDate) {
+        params.append('startDate', toISODate(startDate));
+        params.append('endDate', toISODate(endDate));
+    }
+
+    fetch(`/admin/dashboard?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateDashboard(data);
             } else {
-                customDateFields.classList.remove('active');
-                document.getElementById('startDateError').style.display = 'none';
-                document.getElementById('endDateError').style.display = 'none';
-                document.getElementById('startDate').value = '';
-                document.getElementById('endDate').value = '';
+                alert(`Error loading data: ${data.message || 'Unknown error'}`);
             }
+        })
+        .catch(error => {
+            console.error('Fetch Error:', error);
+            alert('An error occurred while loading the dashboard data.');
+        })
+        .finally(() => {
+            applyButton.disabled = false;
+            applyButton.textContent = 'Apply Filters';
         });
+}
 
-        // Format date inputs to DD/MM/YYYY
-        ['startDate', 'endDate'].forEach(id => {
-            const input = document.getElementById(id);
-            input.addEventListener('input', function (e) {
-                let value = e.target.value.replace(/[^0-9]/g, '');
-                if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
-                if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
-                if (value.length > 10) value = value.slice(0, 10);
-                e.target.value = value;
-            });
-        });
+// Handle Time Period Change
+document.getElementById('timePeriod').addEventListener('change', function () {
+    const customDateFields = document.getElementById('customDateFields');
+    if (this.value === 'custom') {
+        customDateFields.classList.add('active');
+    } else {
+        customDateFields.classList.remove('active');
+        document.getElementById('startDateError').style.display = 'none';
+        document.getElementById('endDateError').style.display = 'none';
+        document.getElementById('startDate').value = '';
+        document.getElementById('endDate').value = '';
+    }
+});
 
-        // Handle Apply Filters button
-        document.getElementById('applyFilters').addEventListener('click', function () {
-            const timePeriod = document.getElementById('timePeriod').value;
-            const orderStatus = document.getElementById('orderStatus').value;
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
+// Handle Apply Filters
+document.getElementById('applyFilters').addEventListener('click', function () {
+    const timePeriod = document.getElementById('timePeriod').value;
+    const orderStatus = document.getElementById('orderStatus').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
 
-            // Validate custom date range if selected
-            if (timePeriod === 'custom') {
-                if (!validateDate(startDate)) {
-                    document.getElementById('startDateError').style.display = 'block';
-                    return;
-                }
-                if (!validateDate(endDate)) {
-                    document.getElementById('endDateError').style.display = 'block';
-                    return;
-                }
-                if (new Date(toISODate(startDate)) > new Date(toISODate(endDate))) {
-                    document.getElementById('endDateError').textContent = 'End date must be after start date';
-                    document.getElementById('endDateError').style.display = 'block';
-                    return;
-                }
-                document.getElementById('startDateError').style.display = 'none';
-                document.getElementById('endDateError').style.display = 'none';
-            }
-
-            // Show loading state
-            const applyButton = document.getElementById('applyFilters');
-            applyButton.disabled = true;
-            applyButton.textContent = 'Loading...';
-
-            // Prepare query parameters
-            const params = new URLSearchParams();
-            params.append('timePeriod', timePeriod);
-            params.append('status', orderStatus);
-            if (timePeriod === 'custom' && startDate && endDate) {
-                params.append('startDate', toISODate(startDate));
-                params.append('endDate', toISODate(endDate));
-            }
-
-            // Send AJAX request to fetch filtered data
-            fetch(`/admin/dashboard?${params.toString()}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        updateDashboard(data);
-                    } else {
-                        alert('Error fetching filtered data: ' + (data.message || 'Unknown error'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while applying filters.');
-                })
-                .finally(() => {
-                    applyButton.disabled = false;
-                    applyButton.textContent = 'Apply Filters';
-                });
-        });
-
-        // Handle Clear Filters button
-        document.getElementById('clearFilters').addEventListener('click', function () {
-            // Reset filter inputs
-            document.getElementById('timePeriod').value = 'today';
-            document.getElementById('orderStatus').value = 'all';
-            document.getElementById('startDate').value = '';
-            document.getElementById('endDate').value = '';
-            document.getElementById('customDateFields').classList.remove('active');
-            document.getElementById('startDateError').style.display = 'none';
-            document.getElementById('endDateError').style.display = 'none';
-
-            // Show loading state
-            const applyButton = document.getElementById('applyFilters');
-            applyButton.disabled = true;
-            applyButton.textContent = 'Loading...';
-
-            // Fetch default data
-            fetch('/admin/dashboard?timePeriod=today&status=all', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        updateDashboard(data);
-                    } else {
-                        alert('Error resetting filters: ' + (data.message || 'Unknown error'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while resetting filters.');
-                })
-                .finally(() => {
-                    applyButton.disabled = false;
-                    applyButton.textContent = 'Apply Filters';
-                });
-        });
-
-        // Handle pagination clicks
-        document.getElementById('pagination').addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = e.target.closest('.page-link');
-            if (!target || target.parentElement.classList.contains('disabled')) return;
-
-            const url = new URL(target.href);
-            const params = new URLSearchParams(url.search);
-
-            // Ensure all filter parameters are included
-            const timePeriod = document.getElementById('timePeriod').value;
-            const orderStatus = document.getElementById('orderStatus').value;
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-
-            params.set('timePeriod', timePeriod);
-            params.set('status', orderStatus);
-            if (timePeriod === 'custom') {
-                if (!validateDate(startDate) || !validateDate(endDate)) {
-                    alert('Please enter valid dates in DD/MM/YYYY format.');
-                    return;
-                }
-                if (new Date(toISODate(startDate)) > new Date(toISODate(endDate))) {
-                    alert('Start date must be before end date.');
-                    return;
-                }
-                params.set('startDate', toISODate(startDate));
-                params.set('endDate', toISODate(endDate));
-            }
-
-            // Show loading state
-            const applyButton = document.getElementById('applyFilters');
-            applyButton.disabled = true;
-            applyButton.textContent = 'Loading...';
-
-            // Fetch paginated data
-            fetch(`/admin/dashboard?${params.toString()}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-            })
-            
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        updateDashboard(data);
-                    } else {
-                        alert('Error fetching paginated data: ' + (data.message || 'Unknown error'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while loading the page.');
-                })
-                .finally(() => {
-                    applyButton.disabled = false;
-                    applyButton.textContent = 'Apply Filters';
-                });
-        });
-
-        // View Order Details function (placeholder)
-        function viewOrderDetails(orderId) {
-            window.location.href = `/admin/order-view/${orderId}`;
+    if (timePeriod === 'custom') {
+        if (!validateDate(startDate)) {
+            document.getElementById('startDateError').style.display = 'block';
+            document.getElementById('startDateError').textContent = 'Invalid date format (DD/MM/YYYY)';
+            return;
         }
-    </script>
+        if (!validateDate(endDate)) {
+            document.getElementById('endDateError').style.display = 'block';
+            document.getElementById('endDateError').textContent = 'Invalid date format (DD/MM/YYYY)';
+            return;
+        }
+        document.getElementById('startDateError').style.display = 'none';
+        document.getElementById('endDateError').style.display = 'none';
+    }
+
+    fetchDashboardData(timePeriod, orderStatus, startDate, endDate);
+});
+
+// Handle Clear Filters
+document.getElementById('clearFilters').addEventListener('click', function () {
+    initializeDashboard();
+});
+
+// Handle Pagination Clicks
+document.getElementById('pagination').addEventListener('click', function (e) {
+    e.preventDefault();
+    const target = e.target.closest('.page-link');
+    if (!target || target.parentElement.classList.contains('disabled')) return;
+
+    const url = new URL(target.href);
+    const params = new URLSearchParams(url.search);
+    const page = params.get('page');
+    const timePeriod = document.getElementById('timePeriod').value;
+    const orderStatus = document.getElementById('orderStatus').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+
+    if (timePeriod === 'custom') {
+        if (!validateDate(startDate) || !validateDate(endDate)) {
+            alert('Please enter valid dates in DD/MM/YYYY format.');
+            return;
+        }
+    }
+
+    params.set('timePeriod', timePeriod);
+    params.set('status', orderStatus);
+    if (timePeriod === 'custom' && startDate && endDate) {
+        params.set('startDate', toISODate(startDate));
+        params.set('endDate', toISODate(endDate));
+    }
+
+    fetch(`/admin/dashboard?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateDashboard(data);
+            } else {
+                alert(`Error fetching paginated data: ${data.message || 'Unknown error'}`);
+            }
+        })
+        .catch(error => {
+            console.error('Pagination Error:', error);
+            alert('An error occurred while loading the page.');
+        });
+});
+
+// View Order Details
+function viewOrderDetails(orderId) {
+    if (orderId) {
+        window.location.href = `/admin/order-view/${orderId}`;
+    } else {
+        alert('Invalid order ID');
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', initializeDashboard);
+</script>
 </body>
 </html>

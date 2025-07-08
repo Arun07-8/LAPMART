@@ -3,7 +3,7 @@ const Category=require("../../models/categorySchema");
 const Brand=require("../../models/BrandSchema");
 const {uploads}=require("../../config/multer")
 const cloudinary = require('../../config/cloudinary');
-
+const { distance } = require('fastest-levenshtein');
 
 
 const productInfo = async (req, res) => {
@@ -84,8 +84,8 @@ const loadaddProduct = async (req, res) => {
 const listAvailableProducts = async (req, res) => {
   try {
     const products = await Product.find(
-      { isDeleted: false, isListed: true }, // only listed, active products
-      '_id productName' // only return _id and productName
+      { isDeleted: false, isListed: true }, 
+      '_id productName'
     );
 
     res.status(200).json({ products }); // send in JSON format for dropdown
@@ -95,88 +95,100 @@ const listAvailableProducts = async (req, res) => {
   }
 };
 
-const addProducts = async (req, res) => {
-    try {
-    
-        const {
-            productName,
-            description,
-            brand,
-            category,
-            salePrice,
-            quantity,
-            processor,
-            graphicsCard,
-            ram,
-            Storage,
-            display,
-            operatingSystem,
-            Battery,
-            Weight,
-            Warranty,
-            additionalFeatures
-        } = req.body;
 
-        const productExist = await Product.findOne({
-            productName: productName.trim(),
-            isDeleted: false
-        });
-
-     
-
-        if (productExist) {
-            return res.status(400).json({ error: 'Product already exists' });
-        }
-     
-
-        if (!req.files || req.files.length < 2 || req.files.length > 5) {
-            return res.status(400).json({
-                error: `Please upload between 2 and 5 images. Received: ${req.files ? req.files.length : 0}.`
-            });
-        }
-
-        const images = req.files.map(file => ({
-            url: file.path,
-            public_id: file.filename
-        }));
-
-      
-        const newProduct = new Product({
-            productName,
-            description,
-            brand,
-            category,
-            salePrice: parseFloat(salePrice),
-            createdOn: new Date(),
-            quantity: parseInt(quantity),
-            productImage: images.map(img => img.url),
-            status: 'Available',
-            processor: processor || '',
-            graphicsCard: graphicsCard || '',
-            ram: ram || '',
-            Storage: Storage || '',
-            display: display || '',
-            operatingSystem: operatingSystem || '',
-            Battery: Battery || '',
-            Weight: Weight || '',
-            additionalFeatures: additionalFeatures || '',
-            Warranty: Warranty || ''
-        });
-
-        const savedProduct = await newProduct.save();
-        return res.status(200).json({
-            success: true,
-            message: 'Product added successfully',
-            productId: savedProduct._id
-        });
-    } catch (error) {
-        console.error('Error adding product:', error);
-        return res.status(500).json({
-            error: 'Internal server error',
-            details: error.message
-        });
-    }
+const normalizeName = (str) => {
+  return str.trim().toLowerCase().replace(/\s+/g, ' ');
 };
+
+const addProducts = async (req, res) => {
+  try {
+    const {
+      productName,
+      description,
+      brand,
+      category,
+      salePrice,
+      quantity,
+      processor,
+      graphicsCard,
+      ram,
+      Storage,
+      display,
+      operatingSystem,
+      Battery,
+      Weight,
+      Warranty,
+      additionalFeatures
+    } = req.body;
+
+    const normalizedInput = normalizeName(productName);
+
+    const existingProducts = await Product.find({ isDeleted: false });
+
+    const duplicate = existingProducts.find(prod => {
+      const existingName = normalizeName(prod.productName);
+      const dist = distance(normalizedInput, existingName);
+      const maxLen = Math.max(normalizedInput.length, existingName.length);
+      const similarity = 1 - dist / maxLen;
+      return similarity >= 0.8; // 80% or more same = duplicate
+    });
+
+    if (duplicate) {
+      return res.status(400).json({
+        error: `Product with a similar name already exists: "${duplicate.productName}"`
+      });
+    }
+
+    if (!req.files || req.files.length < 2 || req.files.length > 5) {
+      return res.status(400).json({
+        error: `Please upload between 2 and 5 images. Received: ${req.files ? req.files.length : 0}.`
+      });
+    }
+
+    const images = req.files.map(file => ({
+      url: file.path,
+      public_id: file.filename
+    }));
+
+    const newProduct = new Product({
+      productName: productName.trim(),
+      description,
+      brand,
+      category,
+      salePrice: parseFloat(salePrice),
+      createdOn: new Date(),
+      quantity: parseInt(quantity),
+      productImage: images.map(img => img.url),
+      status: 'Available',
+      processor: processor || '',
+      graphicsCard: graphicsCard || '',
+      ram: ram || '',
+      Storage: Storage || '',
+      display: display || '',
+      operatingSystem: operatingSystem || '',
+      Battery: Battery || '',
+      Weight: Weight || '',
+      additionalFeatures: additionalFeatures || '',
+      Warranty: Warranty || ''
+    });
+
+    const savedProduct = await newProduct.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Product added successfully',
+      productId: savedProduct._id
+    });
+
+  } catch (error) {
+    console.error('Error adding product:', error);
+    return res.status(500).json({
+      error: 'Internal server error',
+      details: error.message
+    });
+  }
+};
+
 
 const deleteImageFromCloudinary = async (publicId) => {
     if (!publicId) return;
@@ -288,16 +300,15 @@ const editProduct = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Product not found' });
         }
 
-        // Preserve existing images
+        
         updatedFields.productImage = [...(product.productImage || [])];
 
-        // Add new images from req.files
+    
         if (req.files && req.files.length > 0) {
             const newImageUrls = req.files.map(file => file.path);
             updatedFields.productImage = [...updatedFields.productImage, ...newImageUrls];
         }
 
-        // Validate total image count
         if (updatedFields.productImage.length < 2) {
             return res.status(400).json({
                 success: false,
@@ -424,36 +435,33 @@ const deleteProduct=async(req,res) => {
     }
 }
 
-// module.exports = { loadEditProduct, editProduct, removeProductImage };
+
 
 
 const searchproduct = async (req, res) => {
     try {
         const searchQuery = req.query.search ? req.query.search.trim() : '';
-
-        // Build query for MongoDB
-        let query = { isDeleted: false }; // Only include non-deleted products
+        let query = { isDeleted: false }; 
         if (searchQuery) {
             query.$and = [
                 { isDeleted: false },
                 {
                     $or: [
-                        { productName: { $regex: searchQuery, $options: 'i' } }, // Case-insensitive search on product name
-                        { 'category.name': { $regex: searchQuery, $options: 'i' } }, // Search category name
-                        { 'brand.name': { $regex: searchQuery, $options: 'i' } } // Search brand name
+                        { productName: { $regex: searchQuery, $options: 'i' } },
+                        { 'category.name': { $regex: searchQuery, $options: 'i' } }, 
+                        { 'brand.name': { $regex: searchQuery, $options: 'i' } }
                     ]
                 }
             ];
         }
 
-        // Fetch products with populated category and brand
-        const products = await Product.find(query)
-            .populate('category', 'name') // Only select category name
-            .populate('brand', 'name') // Only select brand name
-            .select('productName productImage category brand quantity salePrice isListed')
-            .lean(); // Convert to plain JavaScript object for faster processing
 
-        // Return JSON response
+        const products = await Product.find(query)
+            .populate('category', 'name') 
+            .populate('brand', 'name') 
+            .select('productName productImage category brand quantity salePrice isListed')
+            .lean();
+        
         res.json({ products });
     } catch (error) {
         console.error('Error in live search:', error);
@@ -471,6 +479,7 @@ module.exports={
     loadEditProduct,
     removeProductImage,
     deleteProduct,
-    deleteImageFromCloudinary
+    deleteImageFromCloudinary,
+    listAvailableProducts
 
 }

@@ -3,6 +3,7 @@ const User = require("../../models/userSchema")
 const Wallet = require("../../models/walletSchema")
 const fs = require('fs');
 const path = require('path');
+const Cart= require("../../models/cartSchema")
 
 const { applyBestOffer } = require("../../helpers/offerHelper")
 const generateInvoice=require("../../helpers/generateInvoice")
@@ -65,6 +66,7 @@ const getOrderPage = async (req, res) => {
     const grandTotal = Math.max(totalFinal - discountAmount, 0);
 
     const totalSavings = totalOriginal - totalFinal;
+    await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0 });
 
     res.render("Orderpage", {
       user: userData,
@@ -183,7 +185,6 @@ const getOrderViewPage = async (req, res) => {
 
     let order;
 
-    // Check if it's Razorpay order ID (starts with "order_")
     if (ordersid.startsWith("order_")) {
       order = await Order.findOne({ razorpayOrderId: ordersid }).populate("orderedItems.product");
     } else {
@@ -194,13 +195,12 @@ const getOrderViewPage = async (req, res) => {
       return res.redirect("/pageNotFound");
     }
 
-    // Offer & Coupon calculations
     let totalOriginal = 0;
     let totalFinal = 0;
     const orderedItemsWithOffers = [];
 
     for (const item of order.orderedItems) {
-      const updatedProduct = await applyBestOffer(item.product); // Your function
+      const updatedProduct = await applyBestOffer(item.product);
       const quantity = item.quantity;
       const originalPrice = item.product.salePrice;
       const offerPrice = updatedProduct.finalPrice || originalPrice;
@@ -263,6 +263,7 @@ const cancelOrder = async (req, res) => {
   try {
     const { orderId, productId, reason, details } = req.body;
 
+
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
@@ -272,13 +273,13 @@ const cancelOrder = async (req, res) => {
       const item = order.orderedItems.find(
         (item) => item.product.toString() === productId
       );
-
+      console.log(item,"item")
       if (!item) {
         return res.status(404).json({ success: false, message: "Product not found in order" });
       }
-
+      
       if (["Shipped", "Delivered"].includes(item.status)) {
-        return res.status(400).json({
+      return res.status(400).json({
           success: false,
           message: "Cannot cancel item after it has been shipped or delivered"
         });
@@ -394,6 +395,7 @@ const orderReturn = async (req, res) => {
 const downloadInvoice = async (req, res) => {
   try {
     const orderId = req.params.orderId;
+    console.log(orderId)
     if (!orderId) {
       console.error('No orderId provided');
       return res.status(400).json({ message: 'Order ID is required' });
@@ -414,8 +416,8 @@ const downloadInvoice = async (req, res) => {
       return res.status(404).json({ message: 'User associated with order not found' });
     }
 
-    // Create invoices directory
-    // const invoiceDir = path.join(__dirname, '../../public/invoices'); // Adjust path as needed
+  
+    const invoiceDir = path.join(__dirname, '../../public/invoices'); // Adjust path as needed
     await fs.promises.mkdir(invoiceDir, { recursive: true });
 
     const outputPath = path.join(invoiceDir, `invoice_${orderId}.pdf`);

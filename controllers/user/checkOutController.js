@@ -4,7 +4,6 @@ const User=require("../../models/userSchema")
 const Wallet=require("../../models/walletSchema")
 const {applyBestOffer}=require("../../helpers/offerHelper")
 const Coupon=require("../../models/couponSchema")
-
 const checkOutpage = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -12,14 +11,15 @@ const checkOutpage = async (req, res) => {
       return res.redirect('/login?redirect=/checkout');
     }
 
+   
     const existingCart = await Cart.findOne({ userId }).populate('items.productId');
     const existingAddress = await Address.findOne({ userId });
     const userData = await User.findById(userId);
-    let wallet = await Wallet.findOne({ user: userId });
 
+    let wallet = await Wallet.findOne({ user: userId });
     if (!wallet) {
       await Wallet.create({ user: userId, balance: 0, transactions: [] });
-      wallet = await Wallet.findOne({ user: userId }); // <--- re-fetch
+      wallet = await Wallet.findOne({ user: userId });
     }
 
     const addresses = existingAddress ? existingAddress.address : [];
@@ -32,34 +32,33 @@ const checkOutpage = async (req, res) => {
         const product = item.productId;
         const quantity = item.quantity;
         const salePrice = item.salePrice;
+
         const updatedProduct = await applyBestOffer(product);
         const finalPrice = updatedProduct.finalPrice || updatedProduct.salePrice;
 
         item.finalPrice = finalPrice;
+        item.subtotal = finalPrice * quantity;
+        item.savings = (salePrice - finalPrice) * quantity;
 
-        const subtotal = finalPrice * quantity;
-        const savings = (salePrice - finalPrice) * quantity;
-
-        item.subtotal = subtotal;
-        item.savings = savings;
-
-        totalPrice += subtotal;
-        totalSavings += savings;
+        totalPrice += item.subtotal;
+        totalSavings += item.savings;
       }
     }
 
-
-    const appliedCoupon = req.session.appliedCoupon;
+    let appliedCoupon = req.session.appliedCoupon || null;
     let coupon = null;
     let discountAmount = 0;
+    let couponCode = '';
 
-    if (appliedCoupon?.code) {
+    if (appliedCoupon?.couponId) {
       coupon = await Coupon.findOne({
-        couponCode: appliedCoupon.code,
+        _id: appliedCoupon.couponId,
+        couponCode: appliedCoupon.couponCode,
         isActive: true,
         isDeleted: false,
         validFrom: { $lte: new Date() },
-        validUpto: { $gte: new Date() }
+        validUpto: { $gte: new Date() },
+        usedBy: { $nin: [userId] },
       });
 
       if (coupon && totalPrice >= coupon.minPurchase) {
@@ -72,10 +71,18 @@ const checkOutpage = async (req, res) => {
         if (discountAmount > totalPrice) {
           discountAmount = totalPrice;
         }
+        couponCode = coupon.couponCode;
+      } else {
+        req.session.appliedCoupon = null;
+        appliedCoupon = null;
+        await new Promise((resolve, reject) => {
+          req.session.save(err => (err ? reject(err) : resolve()));
+        });
       }
     }
 
     const grandTotal = totalPrice - discountAmount;
+
 
     res.render("checkOut", {
       key_id: process.env.RAZORPAY_KEY_ID,
@@ -84,18 +91,19 @@ const checkOutpage = async (req, res) => {
       wallet: wallet,
       Cart: {
         ...existingCart?.toObject(),
-        items: existingCart.items.map(item => ({
+        items: existingCart?.items.map(item => ({
           ...item.toObject(),
           finalPrice: item.finalPrice,
           subtotal: item.subtotal,
           savings: item.savings,
-        })),
+        })) || [],
         totalPrice,
         totalSavings,
         discountAmount,
         grandTotal,
       },
-      coupon: coupon,
+      coupon,
+      appliedCoupon: appliedCoupon ? { ...appliedCoupon, code: couponCode } : null,
     });
 
   } catch (error) {
@@ -103,7 +111,6 @@ const checkOutpage = async (req, res) => {
     res.redirect("/pageNotFound");
   }
 };
-
 
 
 const checkoutHandler = async (req, res) => {

@@ -2,7 +2,6 @@
     <title>Order Details - #<%= order.orderId || 'Unknown' %></title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="/css/userside-css/userside.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
     :root {
@@ -974,10 +973,15 @@
                                 Retry Payment
                             </button>
                         <% } else if (['Pending', 'Processing', 'Shipped'].includes(orderStatus)) { %>
-                            <button class="cancel-btn-main <%= orderStatus === 'Cancelled' ? 'cancelled' : '' %>" data-order-id="<%= order._id %>" onclick="openCancelModal('order', '<%= order._id %>')">
-                                <i class="fas fa-times"></i>
-                                Cancel Order
-                            </button>
+                      <% order.orderedItems.forEach((item, index) => { %>
+  <button class="cancel-btn-main <%= item.status === 'Cancelled' ? 'cancelled' : '' %>"
+          data-order-id="<%= order._id %>"
+          data-product-id="<%= item.product._id %>"
+          onclick="openCancelModal('product', '<%= order._id %>', '<%= item.product._id %>')">
+    <i class="fas fa-times"></i> Cancel Product
+  </button>
+<% }) %>
+
                         <% } %>
                         <% if (orderStatus === 'Delivered') { %>
                             <button class="invoice-btn" onclick="downloadInvoice('<%= order._id %>')">
@@ -1220,7 +1224,7 @@
             </div>
             <form id="cancelForm">
                 <input type="hidden" id="cancelOrderId" name="orderId">
-                <input type="hidden" id="cancelProductId" name="productId">
+                <input type="hidden" id="cancelProductId" name="productId" value="%<=product._id%>">
                 <div class="form-group">
                     <label class="form-label">Cancellation Reason *</label>
                     <select class="form-select" id="cancelReason" name="reason">
@@ -1253,6 +1257,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
+
+        
         // Debug order data
         const order = <%- JSON.stringify(order || {}) %>;
      
@@ -1478,6 +1484,7 @@ async function retryPayment(orderId) {
             e.preventDefault();
             const orderId = document.getElementById('cancelOrderId').value;
             const productId = document.getElementById('cancelProductId').value;
+            console.log(productId,"prody")
             const reason = document.getElementById('cancelReason').value;
             const details = document.getElementById('cancelDetails').value;
 

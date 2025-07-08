@@ -22,6 +22,14 @@
                    date.getDate() == day;
         }
 
+         flatpickr("#validFrom", {
+    dateFormat: "d/m/Y"
+  });
+
+  flatpickr("#validUpto", {
+    dateFormat: "d/m/Y"
+  });
+
         // Convert dd/mm/yyyy to Date object
         function parseDate(dateString) {
             const [day, month, year] = dateString.split('/');

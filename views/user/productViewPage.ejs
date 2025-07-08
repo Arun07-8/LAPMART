@@ -2,8 +2,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
-  <link rel="stylesheet" href="/css/userside-css/userside-css/productView.css" type="text/css">
-   <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  <link rel="stylesheet" href=css/userside-css/userside-css/productView.css>
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 </head>
 <body>
   <!-- Breadcrumb with Box Shadow -->
@@ -560,7 +560,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Prevent non-numeric input
     quantityInput.addEventListener("keypress", function(e) {
       if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
         e.preventDefault();
@@ -568,7 +567,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Error message helper - Updated to use SweetAlert
   const showErrorMessage = (message) => {
     if (typeof Swal !== 'undefined') {
       Swal.fire({
@@ -578,12 +576,10 @@ document.addEventListener('DOMContentLoaded', () => {
         confirmButtonText: "OK"
       });
     } else {
-      // Fallback to console error if SweetAlert is not available
       console.error('SweetAlert not available. Error message:', message);
     }
   };
 
-  // Success message helper - Updated to use SweetAlert
   const showSuccessMessage = (title, callback) => {
     if (typeof Swal !== 'undefined') {
       Swal.fire({

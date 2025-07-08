@@ -1,352 +1,591 @@
-// Initialize Flatpickr for date inputs with proper configuration
-  flatpickr("#fromDate", {
+// Initialize Flatpickr for date inputs
+flatpickr("#startDate", {
     dateFormat: "d/m/Y",
-    maxDate: "today",
-    onChange: function (selectedDates, dateStr) {
-      if (selectedDates[0]) {
-        const toDateInput = document.getElementById('toDate');
-        if (toDateInput._flatpickr) {
-          toDateInput._flatpickr.set('minDate', selectedDates[0]);
+    allowInput: true,
+    onChange: function(selectedDates, dateStr) {
+        if (!validateDate(dateStr)) {
+            document.getElementById('startDateError').style.display = 'block';
+        } else {
+            document.getElementById('startDateError').style.display = 'none';
         }
-      }
-      triggerSearch();
-    },
-  });
+    }
+});
 
-  flatpickr("#toDate", {
+flatpickr("#endDate", {
     dateFormat: "d/m/Y",
-    maxDate: "today",
-    onChange: function (selectedDates, dateStr) {
-      if (selectedDates[0]) {
-        const fromDateInput = document.getElementById('fromDate');
-        if (fromDateInput._flatpickr) {
-          fromDateInput._flatpickr.set('maxDate', selectedDates[0]);
+    allowInput: true,
+    onChange: function(selectedDates, dateStr) {
+        if (!validateDate(dateStr)) {
+            document.getElementById('endDateError').style.display = 'block';
+        } else {
+            document.getElementById('endDateError').style.display = 'none';
         }
-      }
-      triggerSearch();
-    },
-  });
+    }
+});
 
+// Validate date format (DD/MM/YYYY)
+function validateDate(dateStr) {
+    const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+    if (!regex.test(dateStr)) return false;
+    const [day, month, year] = dateStr.split('/').map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.getDate() === day && date.getMonth() === month - 1 && date.getFullYear() === year;
+}
 
-  function debounce(func, delay) {
-    let timeoutId;
-    return function (...args) {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => func.apply(this, args), delay);
-    };
-  }
+// Convert DD/MM/YYYY to YYYY-MM-DD for API requests
+function toISODate(dateStr) {
+    const [day, month, year] = dateStr.split('/').map(Number);
+    return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+}
 
-  function formatDateForBackend(dateStr) {
-    if (!dateStr) return '';
-    const [day, month, year] = dateStr.split('/');
-    if (!day || !month || !year) return '';
-    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-  }
+// Validate date range (start <= end, max 90 days)
+function validateDateRange(startDate, endDate) {
+    if (!startDate || !endDate) return false;
+    if (!validateDate(startDate) || !validateDate(endDate)) return false;
+    const start = new Date(startDate.split('/').reverse().join('-'));
+    const end = new Date(endDate.split('/').reverse().join('-'));
+    const daysDiff = (end - start) / (1000 * 60 * 60 * 24);
+    return start <= end && daysDiff <= 90;
+}
 
+// Update dashboard with filtered data
+function updateDashboard(data) {
+    // Update summary stats
+    document.getElementById('totalCustomers').textContent = data.count || 0;
+    document.getElementById('totalRevenue').textContent = `₹${(data.totalRevenue || 0).toFixed(2)}`;
+    document.getElementById('totalOrders').textContent = data.orderCount || 0;
+    document.getElementById('totalProducts').textContent = data.productCount || 0;
 
-  let totalPages = parseInt('<%= totalPages %>') || 1;
+    // Update Revenue Chart
+    if (revenueChartInstance) revenueChartInstance.destroy();
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
 
-  // Function to get all search parameters
-  function getSearchParams() {
-    const searchInput = document.getElementById('searchInput').value.trim();
-    const fromDate = formatDateForBackend(document.getElementById('fromDate').value);
-    const toDate = formatDateForBackend(document.getElementById('toDate').value);
-    const status = document.getElementById('statusFilter').value;
-    const paymentMethod = document.getElementById('paymentMethodFilter').value;
+    // Determine if data is daily (YYYY-MM-DD) or monthly (YYYY-MM)
+    const isDailyData = data.timePeriod === 'custom' || data.timePeriod === 'today' || data.timePeriod === 'yesterday';
+    
+    // Format and sort revenue data
+    const sortedRevenueData = (data.revenueData || [])
+        .map(item => {
+            let label;
+            if (isDailyData) {
+                // Format daily data as DD/MM/YYYY
+                const [year, month, day] = item._id.split('-').map(Number);
+                label = new Date(year, month - 1, day).toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            } else {
+                // Format monthly data as Month YYYY
+                const [year, month] = item._id.split('-').map(Number);
+                label = new Date(year, month - 1, 1).toLocaleDateString('en-GB', {
+                    month: 'long',
+                    year: 'numeric'
+                });
+            }
+            return { ...item, label };
+        })
+        .sort((a, b) => a._id.localeCompare(b._id));
 
+    // Create line chart with heartbeat-like design
+    revenueChartInstance = new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: sortedRevenueData.map(item => item.label),
+            datasets: [
+                {
+                    label: 'Revenue',
+                    data: sortedRevenueData.map(item => item.revenue || 0),
+                    borderColor: chartColors.primary, // #8b5cf6
+                    backgroundColor: chartColors.primary + '20',
+                    tension: 0.7, // High tension for wavy, heartbeat-like effect
+                    fill: true,
+                    borderWidth: 5, // Thicker line for prominence
+                    pointBackgroundColor: chartColors.primary,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 3,
+                    pointRadius: sortedRevenueData.map((_, i) => (i % 2 === 0 ? 8 : 6)), // Alternating sizes for pulse effect
+                    pointHoverRadius: 12, // Larger hover effect
+                },
+                {
+                    label: 'Orders',
+                    data: sortedRevenueData.map(item => item.orderCount || 0),
+                    borderColor: chartColors.success, // #10b981
+                    backgroundColor: chartColors.success + '20',
+                    tension: 0.7, // High tension for wavy effect
+                    fill: true,
+                    borderWidth: 5,
+                    pointBackgroundColor: chartColors.success,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 3,
+                    pointRadius: sortedRevenueData.map((_, i) => (i % 2 === 0 ? 8 : 6)),
+                    pointHoverRadius: 12,
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }, // Hide default legend (custom legend in HTML)
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const label = context.dataset.label || '';
+                            const value = context.parsed.y;
+                            return `${label}: ${label === 'Revenue' ? '₹' + value.toFixed(2) : value}`;
+                        },
+                    },
+                },
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        color: '#64748b',
+                        maxRotation: sortedRevenueData.length > 10 ? 45 : 0, // Rotate labels for long ranges
+                        minRotation: sortedRevenueData.length > 10 ? 45 : 0,
+                        maxTicksLimit: 12, // Limit ticks for readability
+                    },
+                },
+                y: {
+                    grid: { color: '#f1f5f9' },
+                    ticks: {
+                        color: '#64748b',
+                        callback: function (value) {
+                            return this.getLabelForValue(value).includes('Revenue') ? '₹' + value : value;
+                        },
+                    },
+                },
+            },
+            elements: {
+                point: { hoverRadius: 12 },
+                line: {
+                    animation: {
+                        duration: 1200, // Smooth animation for loading
+                        easing: 'easeInOutSine', // Sine easing for heartbeat-like flow
+                    },
+                },
+            },
+            animation: {
+                onComplete: function () {
+                    // Apply pulsing effect to points
+                    this.data.datasets.forEach(dataset => {
+                        dataset.pointStyle = 'circle';
+                        dataset.pointRadius = dataset.data.map((_, i) => (i % 2 === 0 ? 8 : 6));
+                    });
+                    this.update();
+                },
+            },
+        },
+    });
 
-    return {
-      search: searchInput,
-      fromDate,
-      toDate,
-      status,
-      paymentMethod,
-      page: 1
-    };
-  }
+    // ... rest of the function (orderStatusChart, paymentChart, etc.) remains unchanged ...
 
-  // Function to show loading state
-  function showLoading() {
-    const tbody = document.querySelector('.orders-table tbody');
-    tbody.innerHTML = `
-      <tr class="table-row">
-        <td colspan="8" class="table-cell text-center">
-          <div class="d-flex justify-content-center align-items-center">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Loading...</span>
+    // Update Order Status Chart
+    if (orderStatusChartInstance) orderStatusChartInstance.destroy();
+    const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
+    orderStatusChartInstance = new Chart(orderStatusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: data.orderStatusData.map(item => item._id),
+            datasets: [
+                {
+                    data: data.orderStatusData.map(item => item.count),
+                    backgroundColor: [
+                        chartColors.orange,
+                        chartColors.blue,
+                        chartColors.green,
+                        chartColors.teal,
+                        chartColors.red,
+                        chartColors.yellow,
+                        chartColors.gray,
+                    ].slice(0, data.orderStatusData.length),
+                    borderWidth: 0,
+                    cutout: '70%',
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+        },
+    });
+
+    // Update Order Status Legend
+    const orderStatusLegend = document.getElementById('orderStatusLegend');
+    orderStatusLegend.innerHTML = data.orderStatusData
+        .map(
+            (status, index) => `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="legend-dot me-2" style="background-color: ${
+                        ['#FF9500', '#007AFF', '#34C759', '#00C896', '#FF3B30', '#FFCC02', '#8E8E93'][index]
+                    };"></div>
+                    <small>${status._id}</small>
+                </div>
+                <small class="fw-bold">${status.count}</small>
             </div>
-          </div>
-        </td>
-      </tr>
-    `;
-  }
+        `
+        )
+        .join('');
 
-  // Function to show error state
-  function showError(message) {
-    const tbody = document.querySelector('.orders-table tbody');
-    const errorRow = document.createElement('tr');
-    errorRow.innerHTML = `
-      <td colspan="8" class="text-center py-4 text-red-500">
-        ${message}
-      </td>
-    `;
-    tbody.innerHTML = '';
-    tbody.appendChild(errorRow);
-  }
-
-  // Function to show no results state
-  function showNoResults() {
-    const tbody = document.querySelector('.orders-table tbody');
-    tbody.innerHTML = `
-      <tr class="table-row">
-        <td colspan="8" class="table-cell text-center">
-          <div class="text-muted">
-            <i class="fas fa-search fa-2x mb-2"></i>
-            <p>No orders found matching your search criteria</p>
-          </div>
-        </td>
-      </tr>
-    `;
-  }
-
-  const triggerSearch = debounce(function () {
-    const params = getSearchParams();
-    const queryParams = new URLSearchParams(params);
-
-    console.log('Search URL:', `/admin/order-management?${queryParams.toString()}`);
-
-    showLoading();
-
-    fetch(`/admin/order-management?${queryParams.toString()}`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || ''
-      },
-      credentials: 'include'
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log('Search results:', data);
-      
-      if (data.error) {
-        throw new Error(data.message || 'An error occurred while searching');
-      }
-      
-      totalPages = data.totalPages;
-      if (data.orders && data.orders.length > 0) {
-        updateTable(data.orders);
-        updatePagination(data.currentPage, data.totalPages, queryParams);
-      } else {
-        showNoResults();
-      }
-    })
-    .catch(error => {
-      console.error('Search error:', error);
-      showError(error.message || 'An error occurred while searching. Please try again.');
+    // Update Payment Methods Chart
+    if (paymentChartInstance) paymentChartInstance.destroy();
+    const paymentCtx = document.getElementById('paymentChart').getContext('2d');
+    paymentChartInstance = new Chart(paymentCtx, {
+        type: 'doughnut',
+        data: {
+            labels: data.paymentMethodData.map(item => item._id),
+            datasets: [
+                {
+                    data: data.paymentMethodData.map(item => item.count),
+                    backgroundColor: [chartColors.primary, chartColors.success, chartColors.warning].slice(
+                        0,
+                        data.paymentMethodData.length
+                    ),
+                    borderWidth: 0,
+                    cutout: '70%',
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+        },
     });
-  }, 400);
 
-  // Update the orders table with new data
-  function updateTable(orders) {
-    const tbody = document.querySelector('.orders-table tbody');
-    tbody.innerHTML = '';
+    // Update Payment Methods Legend
+    const paymentMethodLegend = document.getElementById('paymentMethodLegend');
+    const totalPayments = data.paymentMethodData.reduce((sum, m) => sum + m.count, 0);
+    paymentMethodLegend.innerHTML = data.paymentMethodData
+        .map(
+            (method, index) => `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="legend-dot me-2" style="background-color: ${
+                        ['#8B5CF6', '#10B981', '#F59E0B'][index]
+                    };"></div>
+                    <small>${method._id}</small>
+                </div>
+                <small class="fw-bold">${totalPayments ? ((method.count / totalPayments) * 100).toFixed(0) : 0}%</small>
+            </div>
+        `
+        )
+        .join('');
 
-    orders.forEach((order) => {
-      if (!order) return;
-      
-      const row = document.createElement('tr');
-      row.classList.add('table-row');
-
-      // Get the main status from orderedItems
-      let mainStatus = 'Pending';
-      if (order.orderedItems && order.orderedItems.length > 0) {
-        const statuses = order.orderedItems.map(item => item.status);
-        if (statuses.includes('Cancelled')) mainStatus = 'Cancelled';
-        else if (statuses.includes('Pending')) mainStatus = 'Pending';
-        else if(statuses.includes('Shipped')) mainStatus = 'Shipped'
-        else if (statuses.includes('Return Request')) mainStatus = 'Return Request';
-        else if (statuses.includes('Returned')) mainStatus = 'Returned';
-        else if (statuses.every(status => status === 'Delivered')) mainStatus = 'Delivered';
-      }
-
-      const statusClass = 
-        mainStatus === 'Pending' ? 'bg-warning' : 
-        mainStatus === 'Cancelled' ? 'bg-danger' : 
-        mainStatus === 'Shipped'  ? 'bg-info':
-        mainStatus === 'Delivered' ? 'bg-success' : 
-        mainStatus === 'Return Request' ? 'bg-warning' :
-        mainStatus === 'Returned' ? 'bg-secondary' :
-        'bg-info';
-
-      row.innerHTML = `
-        <td class="table-cell">
-          <div class="product-image">
-            <% if (orders.orderedItems && order.orderedItems.length > 0 && order.orderedItems[0].product && order.orderedItems[0].product.images && order.orderedItems[0].product.images.length > 0) { %>
-                <img src="/<%= order.orderedItems[0].product.images[0] %>" alt="Product Image" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
-            <% } else { %>
-                📦
-            <% } %>
-          </div>
-        </td>
-        <td class="table-cell">
-          <span class="order-id">${order.orderId || 'N/A'}</span>
-        </td>
-        <td class="table-cell">
-          <span class="customer-name">${order.shippingAddress?.name || 'N/A'}</span>
-        </td>
-        <td class="table-cell">${order.createdAt ? new Date(order.createdAt).toDateString() : 'N/A'}</td>
-        <td class="table-cell">
-          <span class="amount">₹${order.totalPrice || '0'}</span>
-        </td>
-        <td class="table-cell">
-          <span class="payment-method ${(order.paymentMethod || 'card').toLowerCase()}">${order.paymentMethod || 'N/A'}</span>
-        </td>
-        <td class="table-cell">
-          <div class="product-list">
-            ${(order.orderedItems || []).map(item => `
-              <div class="mb-1">
-                <span class="d-block fw-bold">${item.product?.name || ''}</span>
-              </div>
-            `).join('')}
-          </div>
-          <div class="status-display mt-2">
-            <span class="status badge ${statusClass}">${mainStatus}</span>
-          </div>
-        </td>
-        <td class="table-cell">
-          <button class="view-btn" onclick="viewOrderDetails('${order._id}')">VIEW</button>
-        </td>
-      `;
-      tbody.appendChild(row);
+    // Update Top Categories Chart
+    if (categoriesChartInstance) categoriesChartInstance.destroy();
+    const categoriesCtx = document.getElementById('categoriesChart').getContext('2d');
+    categoriesChartInstance = new Chart(categoriesCtx, {
+        type: 'bar',
+        data: {
+            labels: data.topCategories.map(item => item.categoryName),
+            datasets: [
+                {
+                    data: data.topCategories.map(item => item.totalSales),
+                    backgroundColor: chartColors.primary,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: '#64748b' } },
+                y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } },
+            },
+        },
     });
-  }
 
-  // Update pagination controls
-  function updatePagination(currentPage, totalPagesLocal, queryParams) {
-    const pagination = document.querySelector('.pagination');
-    pagination.innerHTML = '';
+    // Update Top Brands Chart
+    if (brandsChartInstance) brandsChartInstance.destroy();
+    const brandsCtx = document.getElementById('brandsChart').getContext('2d');
+    brandsChartInstance = new Chart(brandsCtx, {
+        type: 'bar',
+        data: {
+            labels: data.topBrands.map(item => item.brandName),
+            datasets: [
+                {
+                    data: data.topBrands.map(item => item.totalSales),
+                    backgroundColor: chartColors.primary,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: '#64748b' } },
+                y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } },
+            },
+        },
+    });
 
-    const prevLi = document.createElement('li');
-    prevLi.classList.add('page-item');
-    if (currentPage === 1) prevLi.classList.add('disabled');
-    prevLi.innerHTML = `
-      <a class="page-link" href="#" aria-label="Previous" onclick="changePage(${currentPage - 1}, event)">
-        <i class="fas fa-chevron-left"></i>
-      </a>
-    `;
-    pagination.appendChild(prevLi);
+    // Update Top Selling Products Table
+    const topSellingProductsTable = document.querySelector('#topSellingProductsTable tbody');
+    topSellingProductsTable.innerHTML = data.topSellingProducts
+        .map(
+            product => `
+            <tr>
+                <td>${product.productName || 'N/A'}</td>
+                <td class="fw-bold">${product.totalQuantity || 0}</td>
+                <td class="fw-bold">₹${(product.totalSales || 0).toFixed(2)}</td>
+            </tr>
+        `
+        )
+        .join('');
 
-    let startPage = Math.max(1, currentPage - 2);
-    let endPage = Math.min(totalPagesLocal, startPage + 4);
-    if (endPage - startPage < 4 && totalPagesLocal > 5) {
-      startPage = Math.max(1, endPage - 4);
+    // Update Recent Orders Table
+    const recentOrdersTable = document.querySelector('#recentOrdersTable tbody');
+    recentOrdersTable.innerHTML = data.recentOrders
+        .map(
+            order => `
+            <tr class="table-row">
+                <td class="table-cell">
+                    <span class="order-id">${order.orderId || 'N/A'}</span>
+                </td>
+                <td class="table-cell">
+                    <span class="customer-name">${order.userId?.name || 'Unknown'}</span>
+                </td>
+                <td class="table-cell">${new Date(order.createdAt).toLocaleDateString('en-GB')}</td>
+                <td class="table-cell">
+                    <span class="amount">₹${(order.finalAmount || 0).toFixed(2)}</span>
+                </td>
+                <td class="table-cell text-center">
+                    <span class="payment-method ${order.paymentMethod?.toLowerCase().replace(' ', '-') || 'unknown'}">
+                        ${order.paymentMethod || 'Unknown'}
+                    </span>
+                </td>
+                <td class="table-cell text-center">
+                    <span class="status ${order.orderedItems[0]?.status?.toLowerCase().replace(' ', '-') || 'pending'}">
+                        ${order.orderedItems[0]?.status || 'Pending'}
+                    </span>
+                </td>
+                <td class="table-cell text-center">
+                    <button class="view-btn" onclick="viewOrderDetails('${order._id}')">VIEW</button>
+                </td>
+            </tr>
+        `
+        )
+        .join('');
+
+    // Update Pagination
+    const pagination = document.getElementById('pagination');
+    const timePeriod = document.getElementById('timePeriod').value;
+    const orderStatus = document.getElementById('orderStatus').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+
+    let paginationParams = `timePeriod=${encodeURIComponent(timePeriod)}&status=${encodeURIComponent(orderStatus)}`;
+    if (timePeriod === 'custom' && startDate && endDate) {
+        paginationParams += `&startDate=${encodeURIComponent(toISODate(startDate))}&endDate=${encodeURIComponent(toISODate(endDate))}`;
     }
 
-    for (let i = startPage; i <= endPage; i++) {
-      const pageLi = document.createElement('li');
-      pageLi.classList.add('page-item');
-      if (i === currentPage) pageLi.classList.add('active');
-      pageLi.innerHTML = `
-        <a class="page-link" href="#" onclick="changePage(${i}, event)">${i}</a>
-      `;
-      pagination.appendChild(pageLi);
+    pagination.innerHTML = `
+        <li class="page-item ${data.currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="?page=${data.currentPage - 1}&${paginationParams}">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </li>
+        ${Array.from({ length: data.totalPages }, (_, i) => i + 1)
+            .map(
+                i => `
+                <li class="page-item ${data.currentPage === i ? 'active' : ''}">
+                    <a class="page-link" href="?page=${i}&${paginationParams}">${i}</a>
+                </li>
+            `
+            )
+            .join('')}
+        <li class="page-item ${data.currentPage === data.totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="?page=${data.currentPage + 1}&${paginationParams}">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>
+    `;
+}
+
+// Handle custom date fields visibility
+document.getElementById('timePeriod').addEventListener('change', function () {
+    const customDateFields = document.getElementById('customDateFields');
+    if (this.value === 'custom') {
+        customDateFields.classList.add('active');
+    } else {
+        customDateFields.classList.remove('active');
+        document.getElementById('startDateError').style.display = 'none';
+        document.getElementById('endDateError').style.display = 'none';
+        document.getElementById('startDate').value = '';
+        document.getElementById('endDate').value = '';
+    }
+});
+
+// Handle Apply Filters button
+document.getElementById('applyFilters').addEventListener('click', function () {
+    const timePeriod = document.getElementById('timePeriod').value;
+    const orderStatus = document.getElementById('orderStatus').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+
+    // Validate custom date range
+    if (timePeriod === 'custom') {
+        if (!validateDateRange(startDate, endDate)) {
+            document.getElementById('startDateError').style.display = 'block';
+            document.getElementById('startDateError').textContent = 'Invalid date range. Ensure start date is before or equal to end date and range is within 90 days.';
+            document.getElementById('endDateError').style.display = 'block';
+            return;
+        }
+        document.getElementById('startDateError').style.display = 'none';
+        document.getElementById('endDateError').style.display = 'none';
     }
 
-    const nextLi = document.createElement('li');
-    nextLi.classList.add('page-item');
-    if (currentPage === totalPagesLocal) nextLi.classList.add('disabled');
-    nextLi.innerHTML = `
-      <a class="page-link" href="#" aria-label="Next" onclick="changePage(${currentPage + 1}, event)">
-        <i class="fas fa-chevron-right"></i>
-      </a>
-    `;
-    pagination.appendChild(nextLi);
-  }
+    // Show loading state
+    const applyButton = document.getElementById('applyFilters');
+    applyButton.disabled = true;
+    applyButton.textContent = 'Loading...';
 
-  // Change page
-  function changePage(page, event) {
-    event.preventDefault();
-    if (page < 1 || page > totalPages) return;
+    // Prepare query parameters
+    const params = new URLSearchParams();
+    params.append('timePeriod', timePeriod);
+    params.append('status', orderStatus);
+    if (timePeriod === 'custom' && startDate && endDate) {
+        params.append('startDate', toISODate(startDate));
+        params.append('endDate', toISODate(endDate));
+    }
 
-    const params = getSearchParams();
-    params.page = page;
-    const queryParams = new URLSearchParams(params);
-
-    showLoading();
-
-    fetch(`/admin/order-management?${queryParams.toString()}`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || ''
-      },
-      credentials: 'include'
+    // Fetch filtered data
+    fetch(`/admin/dashboard?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+        },
     })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      return response.json();
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateDashboard(data);
+            } else {
+                alert('Error fetching filtered data: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while applying filters.');
+        })
+        .finally(() => {
+            applyButton.disabled = false;
+            applyButton.textContent = 'Apply Filters';
+        });
+});
+
+// Handle Clear Filters button
+document.getElementById('clearFilters').addEventListener('click', function () {
+    // Reset filter inputs
+    document.getElementById('timePeriod').value = 'all';
+    document.getElementById('orderStatus').value = 'all';
+    document.getElementById('startDate').value = '';
+    document.getElementById('endDate').value = '';
+    document.getElementById('customDateFields').classList.remove('active');
+    document.getElementById('startDateError').style.display = 'none';
+    document.getElementById('endDateError').style.display = 'none';
+
+    // Show loading state
+    const applyButton = document.getElementById('applyFilters');
+    applyButton.disabled = true;
+    applyButton.textContent = 'Loading...';
+
+    // Fetch default data
+    fetch('/admin/dashboard?timePeriod=all&status=all', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+        },
     })
-    .then(data => {
-      if (data.error) {
-        throw new Error(data.message || 'An error occurred while loading the page');
-      }
-      totalPages = data.totalPages;
-      updateTable(data.orders);
-      updatePagination(data.currentPage, data.totalPages, queryParams);
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateDashboard(data);
+            } else {
+                alert('Error resetting filters: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while resetting filters.');
+        })
+        .finally(() => {
+            applyButton.disabled = false;
+            applyButton.textContent = 'Apply Filters';
+        });
+});
+
+// Handle pagination clicks
+document.getElementById('pagination').addEventListener('click', function (e) {
+    e.preventDefault();
+    const target = e.target.closest('.page-link');
+    if (!target || target.parentElement.classList.contains('disabled')) return;
+
+    const url = new URL(target.href);
+    const params = new URLSearchParams(url.search);
+
+    // Ensure all filter parameters are included
+    const timePeriod = document.getElementById('timePeriod').value;
+    const orderStatus = document.getElementById('orderStatus').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+
+    params.set('timePeriod', timePeriod);
+    params.set('status', orderStatus);
+    if (timePeriod === 'custom') {
+        if (!validateDateRange(startDate, endDate)) {
+            alert('Please enter a valid date range (within 90 days).');
+            return;
+        }
+        params.set('startDate', toISODate(startDate));
+        params.set('endDate', toISODate(endDate));
+    }
+
+    // Show loading state
+    const applyButton = document.getElementById('applyFilters');
+    applyButton.disabled = true;
+    applyButton.textContent = 'Loading...';
+
+    // Fetch paginated data
+    fetch(`/admin/dashboard?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+        },
     })
-    .catch(error => {
-      console.error('Page change error:', error);
-      showError(error.message || 'An error occurred while loading the page. Please try again.');
-    });
-  }
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateDashboard(data);
+            } else {
+                alert('Error fetching paginated data: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while loading the page.');
+        })
+        .finally(() => {
+            applyButton.disabled = false;
+            applyButton.textContent = 'Apply Filters';
+        });
+});
 
-  // Clear search
-  function clearSearch() {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('fromDate').value = '';
-    document.getElementById('toDate').value = '';
-    document.getElementById('statusFilter').value = 'All Orders';
-    document.getElementById('paymentMethodFilter').value = 'All';
-    triggerSearch();
-  }
-
-  // Event listeners for live search
-  document.getElementById('searchInput').addEventListener('input', triggerSearch);
-  document.getElementById('statusFilter').addEventListener('change', triggerSearch);
-  document.getElementById('paymentMethodFilter').addEventListener('change', triggerSearch);
-  document.getElementById('clearBtn').addEventListener('click', clearSearch);
-
-  // View order details
-  function viewOrderDetails(orderId) {
+// View Order Details function
+function viewOrderDetails(orderId) {
     window.location.href = `/admin/order-view/${orderId}`;
-  }
-
-  // Toggle sidebar for mobile
-  function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('open');
-  }
-
-  // Close sidebar when clicking outside on mobile
-  document.addEventListener('click', function (event) {
-    const sidebar = document.getElementById('sidebar');
-    const toggleBtn = document.querySelector('.mobile-menu-toggle');
-    if (
-      window.innerWidth <= 768 &&
-      !sidebar.contains(event.target) &&
-      !toggleBtn.contains(event.target) &&
-      sidebar.classList.contains('open')
-    ) {
-      sidebar.classList.remove('open');
-    }
-  });
+}

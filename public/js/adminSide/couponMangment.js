@@ -69,7 +69,7 @@
                         text: data.message || 'Coupon has been soft deleted',
                         timer: 1500,
                         showConfirmButton: false
-                    }).then(() => window.location.href = "/admin/ccoupon");
+                    }).then(() => window.location.href = "/admin/coupon");
                 } catch (error) {
                     Swal.fire({
                         icon: 'error',

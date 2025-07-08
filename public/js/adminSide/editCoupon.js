@@ -1,4 +1,4 @@
-
+// Debounce function
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -52,6 +52,32 @@ function validateField(fieldId, errorId, validationFn, errorMessage, emptyMessag
     return true;
 }
 
+// Validate date format (DD/MM/YYYY)
+function validateDateFormat(value, isCreatedDate = false) {
+    const regex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/(20\d{2})$/;
+    if (!regex.test(value)) return false;
+
+    const [day, month, year] = value.split('/').map(Number);
+    const date = new Date(year, month - 1, day);
+    
+    // Check if date is valid (prevents invalid dates like 31/04/YYYY)
+    if (date.getDate() !== day || date.getMonth() !== month - 1 || date.getFullYear() !== year) {
+        return false;
+    }
+
+    // For createdDate, ensure date is today or within next 30 days
+    if (isCreatedDate) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const maxDate = new Date();
+        maxDate.setDate(maxDate.getDate() + 30);
+        maxDate.setHours(23, 59, 59, 999);
+        return date >= today && date <= maxDate;
+    }
+
+    return true;
+}
+
 // Coupon code validation
 function validateCouponCode(code) {
     const regex = /^[A-Z0-9]{6,12}$/;
@@ -90,6 +116,11 @@ function validateCouponCodeField() {
     field.classList.add('is-valid');
     field.removeAttribute('aria-describedby');
     return true;
+}
+
+// Description validation
+function validateDescription(desc) {
+    return desc.length >= 10 && desc.length <= 200;
 }
 
 // Price validation
@@ -189,16 +220,6 @@ function validatePrices() {
     return { isValid, errors };
 }
 
-// Validate date format (DD/MM/YYYY)
-function validateDateFormat(value) {
-    const regex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/(20\d{2})$/;
-    if (!regex.test(value)) return false;
-
-    const [day, month, year] = value.split('/').map(Number);
-    const date = new Date(year, month - 1, day);
-    return date.getDate() === day && date.getMonth() === month - 1 && date.getFullYear() === year;
-}
-
 // Initialize Flatpickr for createdDate
 flatpickr('#createdDate', {
     dateFormat: 'd/m/Y',
@@ -213,16 +234,7 @@ flatpickr('#createdDate', {
             validateField(
                 'createdDate',
                 'createdDateError',
-                value => {
-                    if (!validateDateFormat(value)) return false;
-                    const selectedDate = new Date(value.split('/').reverse().join('-'));
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    const maxDate = new Date();
-                    maxDate.setDate(maxDate.getDate() + 30);
-                    maxDate.setHours(23, 59, 59, 999);
-                    return selectedDate >= today && selectedDate <= maxDate;
-                },
+                value => validateDateFormat(value, true),
                 'Created date must be today or within the next 30 days',
                 'Created date is required'
             );
@@ -285,12 +297,12 @@ document.getElementById('couponForm').addEventListener('submit', async function(
     let isValid = true;
     let errors = new Set();
 
-    // Validate coupon name
+    // Validate coupon name (updated to match add coupon logic)
     if (!validateField(
         'couponName',
         'couponNameError',
-        value => value.length >= 3 && value.length <= 50 && /^[A-Z0-9]+$/.test(value),
-        'Coupon name must be 3-50 uppercase letters or numbers only (e.g., WELCOME15)',
+        value => value.length >= 3 && value.length <= 50 && /^[A-Za-z0-9\s]+$/.test(value),
+        'Coupon name must be 3-50 alphanumeric characters',
         'Coupon name is required'
     )) {
         errors.add('Coupon name is invalid');
@@ -307,7 +319,7 @@ document.getElementById('couponForm').addEventListener('submit', async function(
     if (!validateField(
         'description',
         'descriptionError',
-        value => value.length >= 10 && value.length <= 200,
+        validateDescription,
         'Description must be 10-200 characters long',
         'Description is required'
     )) {
@@ -319,16 +331,7 @@ document.getElementById('couponForm').addEventListener('submit', async function(
     if (!validateField(
         'createdDate',
         'createdDateError',
-        value => {
-            if (!validateDateFormat(value)) return false;
-            const selectedDate = new Date(value.split('/').reverse().join('-'));
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const maxDate = new Date();
-            maxDate.setDate(maxDate.getDate() + 30);
-            maxDate.setHours(23, 59, 59, 999);
-            return selectedDate >= today && selectedDate <= maxDate;
-        },
+        value => validateDateFormat(value, true),
         'Created date must be today or within the next 30 days',
         'Created date is required'
     )) {
@@ -383,6 +386,7 @@ document.getElementById('couponForm').addEventListener('submit', async function(
                 body: JSON.stringify(couponData)
             });
             const data = await response.json();
+            console.log(data)
             if (response.ok) {
                 Swal.fire({
                     icon: 'success',
@@ -421,32 +425,30 @@ document.getElementById('couponForm').addEventListener('submit', async function(
     }
 });
 
-// Real-time validation for coupon name
+// Real-time validation for coupon name (updated to match add coupon logic)
 document.getElementById('couponName').addEventListener('input', debounce(() => {
-    const field = document.getElementById('couponName');
-    field.value = field.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
     validateField(
         'couponName',
         'couponNameError',
-        value => value.length >= 3 && value.length <= 50 && /^[A-Z0-9]+$/.test(value),
-        'Coupon name must be 3-50 uppercase letters or numbers only (e.g., WELCOME15)',
-        'Coupon name is required'
+        value => value.length >= 3 && value.length <= 50 && /^[A-Za-z0-9\s]+$/.test(value),
+        'Coupon name must be 3-50 alphanumeric characters'
     );
 }, 300));
 
-// Real-time validation for coupon code
+// Real-time validation for coupon code (updated to match add coupon logic)
 document.getElementById('couponCode').addEventListener('input', debounce(() => {
+    const field = document.getElementById('couponCode');
+    field.value = field.value.toUpperCase();
     validateCouponCodeField();
-}, 300));
+}, 500));
 
 // Real-time validation for description
 document.getElementById('description').addEventListener('input', debounce(() => {
     validateField(
         'description',
         'descriptionError',
-        value => value.length >= 10 && value.length <= 200,
-        'Description must be 10-200 characters long',
-        'Description is required'
+        validateDescription,
+        'Description must be 10-200 characters long'
     );
 }, 300));
 
@@ -459,12 +461,32 @@ document.getElementById('minPurchase').addEventListener('input', debounce(() => 
     validatePrices();
 }, 300));
 
+// Date input formatting (added from add coupon logic)
+['createdDate', 'expiryDate'].forEach(id => {
+    const input = document.getElementById(id);
+    input.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/[^0-9/]/g, '');
+        if (value.length === 2 || value.length === 5) {
+            value += '/';
+        }
+        e.target.value = value.slice(0, 10);
+        validateField(
+            id,
+            `${id}Error`,
+            value => validateDateFormat(value, id === 'createdDate'),
+            id === 'createdDate'
+                ? 'Please enter a valid date (DD/MM/YYYY) on or after today'
+                : 'Please enter a valid date (DD/MM/YYYY)'
+        );
+    });
+});
+
 // Cancel button
 function goBack() {
     Swal.fire({
         title: 'Are you sure?',
         text: 'Any unsaved changes will be lost.',
-        icon: 'warning',
+        icon: 'warning',    
         showCancelButton: true,
         confirmButtonColor: '#6366f1',
         cancelButtonColor: '#dc3545',

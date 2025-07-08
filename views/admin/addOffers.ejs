@@ -7,7 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Offer Management - Add New Offer</title>
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    <link href="/css/admin-css/addOffers.css" rel="stylesheet">
+    <link href="/css/admin-css/addOffers.css" rel="stylesheet" >
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
 </head>
 <body>
     <div class="app-layout">
@@ -90,26 +93,25 @@
                                 </div>
                             </div>
 
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="validFrom">Valid From <span class="required">*</span></label>
-                                    <div class="date-input-wrapper">
-                                        <input type="text" id="validFrom" name="validFrom" placeholder="dd/mm/yyyy" maxlength="10">
-                                        <span class="date-icon">📅</span>
-                                    </div>
-                                    <div class="error-message" id="validFromError">Please enter valid from date in dd/mm/yyyy format</div>
-                                </div>
+                           <div class="form-row">
+  <div class="form-group">
+    <label for="validFrom">Valid From <span class="required">*</span></label>
+    <div class="date-input-wrapper">
+      <input type="text" id="validFrom" name="validFrom" placeholder="dd/mm/yyyy" maxlength="10">
+      <span class="date-icon">📅</span>
+    </div>
+    <div class="error-message" id="validFromError">Please enter valid from date in dd/mm/yyyy format</div>
+  </div>
 
-                                <div class="form-group">
-                                    <label for="validUpto">Valid Upto <span class="required">*</span></label>
-                                    <div class="date-input-wrapper">
-                                        <input type="text" id="validUpto" name="validUpto" placeholder="dd/mm/yyyy" maxlength="10">
-                                        <span class="date-icon">📅</span>
-                                    </div>
-                                    <div class="error-message" id="validUptoError">Please enter valid upto date in dd/mm/yyyy format</div>
-                                </div>
-                            </div>
-
+  <div class="form-group">
+    <label for="validUpto">Valid Upto <span class="required">*</span></label>
+    <div class="date-input-wrapper">
+      <input type="text" id="validUpto" name="validUpto" placeholder="dd/mm/yyyy" maxlength="10">
+      <span class="date-icon">📅</span>
+    </div>
+    <div class="error-message" id="validUptoError">Please enter valid upto date in dd/mm/yyyy format</div>
+  </div>
+</div> 
                             <div class="form-group full-width">
                                 <label for="description">Description</label>
                                 <textarea id="description" name="description" placeholder="Enter offer description (optional)"></textarea>
@@ -129,6 +131,8 @@
             </div>
         </main>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/js/adminSide/addoffers.js"></script>
 </body>

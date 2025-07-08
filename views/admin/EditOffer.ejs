@@ -8,6 +8,7 @@
     <title>Offer Management - Edit Offer</title>
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link href="/css/admin-css/editOffer.css"  rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
     <div class="app-layout">
@@ -138,6 +139,7 @@ an></label>
             </div>
         </main>
     </div>
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Date formatting function
@@ -502,6 +504,16 @@ an></label>
                 });
             }
         });
+
+
+
+         flatpickr("#validFrom", {
+    dateFormat: "d/m/Y"
+  });
+
+  flatpickr("#validUpto", {
+    dateFormat: "d/m/Y"
+  });
 
         // Back button functionality
         function goBack() {

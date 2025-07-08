@@ -501,7 +501,7 @@
       <td><%= index + 1 + (currentPage - 1) * limit %></td>
       <td><%= user.name %></td>
       <td><%= new Date(user.createdAt).toLocaleDateString() %></td>
-      <td><span class="status-badge status-pending">Pending</span></td> <!-- You can change status based on logic -->
+      <td><span class="status-badge status-pending"><%=user.referralStatus%></span></td> <!-- You can change status based on logic -->
       <td class="reward-amount-table">₹200</td>
     </tr>
   <% }) %>

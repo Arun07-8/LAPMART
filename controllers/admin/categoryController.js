@@ -1,5 +1,5 @@
 const Category=require("../../models/categorySchema");
-
+const { distance } = require('fastest-levenshtein');
 
 
 //  category page rendering
@@ -35,27 +35,46 @@ const categoryInfo=async (req,res) => {
     }
 }
 
-//  adding categories
- const addCategory=async (req,res) => {
-    try{
-        const {name,description}=req.body;
-        const  existingCategory=await Category.findOne({name,isDeleted:false});
-        if(existingCategory){
-            return res.status(400).json({error:"Category already exists"}) 
-        } 
-        const newCategory=new Category({
-            name,
-            description,
-        })
 
-        await newCategory.save();
-        return res.json({message:"Category added successfully"})
+const normalizeName = (str) => {
+  return str.trim().toLowerCase().replace(/\s+/g, ' ');
+};
 
-    }catch(error){
-        return res.status(500).json({error:"Internal Server "})
+const addCategory = async (req, res) => {
+  try {
+    const { name, description } = req.body;
+    const normalizedInput = normalizeName(name);
 
+    const existingCategories = await Category.find({ isDeleted: false });
+
+    const duplicate = existingCategories.find((category) => {
+      const existingName = normalizeName(category.name);
+      const dist = distance(normalizedInput, existingName);
+      const maxLen = Math.max(normalizedInput.length, existingName.length);
+      const similarity = 1 - dist / maxLen;
+
+      return similarity >= 0.8; 
+    });
+
+    if (duplicate) {
+      return res.status(400).json({
+        error: `Category is too similar to existing: "${duplicate.name}"`,
+      });
     }
- }
+
+    const newCategory = new Category({
+      name: name.trim(),
+      description,
+    });
+
+    await newCategory.save();
+    return res.json({ message: 'Category added successfully' });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 
 //  listed category
 

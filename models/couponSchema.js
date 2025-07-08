@@ -43,7 +43,7 @@ const couponSchema = new Schema({
   },
   isExpired:{
     type:Boolean,
-    default:true
+    default:false
   },
   isDeleted: {
     type: Boolean,

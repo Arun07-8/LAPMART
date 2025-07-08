@@ -8,13 +8,19 @@ const Product = require("../../models/productSchema");
 const mongoose = require('mongoose');
 const { verifySignature } = require("../../helpers/razorpayUtils");
 const { applyBestOffer}=require("../../helpers/offerHelper")
+const { markCouponAsUsed } = require("../admin/couponController");
 const Wallet=require("../../models/walletSchema")
 const Coupon=require("../../models/couponSchema")
 
+
 const createOrder = async (req, res) => {
   try {
-    const { amount, addressId } = req.body; 
+    const { amount, addressId, productId, couponId } = req.body;
     const userId = req.session.user;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'User not logged in.' });
+    }
 
     if (!amount || isNaN(amount) || amount <= 0) {
       return res.status(400).json({ success: false, message: 'Invalid amount.' });
@@ -27,17 +33,18 @@ const createOrder = async (req, res) => {
     });
 
     if (!cart || cart.items.length === 0) {
-      return res.status(400).json({ success: false, message: 'Cart is empty' });
+      return res.status(400).json({ success: false, message: 'Cart is empty.' });
     }
 
     // Validate address
     const addressData = await Address.findOne({ userId, 'address._id': addressId });
     const selectedAddress = addressData?.address.find(addr => addr._id.toString() === addressId);
+
     if (!selectedAddress) {
-      return res.status(400).json({ success: false, message: 'Address not found' });
+      return res.status(400).json({ success: false, message: 'Address not found.' });
     }
 
-    // Calculate order details
+    // Calculate order items
     const orderedItems = [];
     let totalPrice = 0;
     let offerPrice = 0;
@@ -45,6 +52,7 @@ const createOrder = async (req, res) => {
     for (const item of cart.items) {
       const product = item.productId;
       const offer = await applyBestOffer(product) || {};
+
       const originalPrice = product.salePrice;
       const finalPrice = !isNaN(offer.finalPrice) ? offer.finalPrice : originalPrice;
       const offerDiscount = originalPrice - finalPrice;
@@ -68,40 +76,37 @@ const createOrder = async (req, res) => {
       offerPrice += offerDiscount * item.quantity;
     }
 
-    const appliedCoupon = req.session.appliedCoupon;
+    // Apply coupon if exists
     let discount = 0;
     let couponCode = null;
 
-    if (appliedCoupon) {
+    if (couponId && req.session.appliedCoupon?.couponId === couponId) {
       const coupon = await Coupon.findOne({
-        couponCode: appliedCoupon.code,
+        _id: couponId,
+        couponCode: req.session.appliedCoupon.couponCode,
         isActive: true,
         isDeleted: false,
+        validFrom: { $lte: new Date() },
+        validUpto: { $gte: new Date() },
+        usedBy: { $nin: [userId] },
       });
 
-      if (
-        coupon &&
-        !coupon.usedBy.includes(userId) &&
-        coupon.validFrom <= new Date() &&
-        coupon.validUpto >= new Date() &&
-        totalPrice >= coupon.minPurchase
-      ) {
+      if (coupon && totalPrice >= coupon.minPurchase) {
         discount = coupon.type === 'percentage'
           ? Math.floor((totalPrice * coupon.offerPrice) / 100)
           : coupon.offerPrice;
+
         if (discount > totalPrice) discount = totalPrice;
+
+        couponCode = coupon.couponCode;
+      } else {
+        req.session.appliedCoupon = null;
       }
     }
 
     const finalAmount = totalPrice - offerPrice - discount;
-    if (isNaN(finalAmount)) {
-      return res.status(400).json({ success: false, message: 'Invalid final amount calculation.' });
-    }
 
-    // Validate amount
-    if (Math.round(amount * 100) !== Math.round(finalAmount * 100)) {
-      return res.status(400).json({ success: false, message: 'Provided amount does not match calculated amount.' });
-    }
+    
 
     // Create Razorpay order
     const razorpayOrder = await razorpay.orders.create({
@@ -119,7 +124,7 @@ const createOrder = async (req, res) => {
       offerPrice,
       discount,
       finalAmount,
-      couponApplied: !!appliedCoupon,
+      couponApplied: !!couponId,
       couponCode,
       shippingAddress: selectedAddress,
       paymentMethod: 'Razorpay',
@@ -145,52 +150,31 @@ const createOrder = async (req, res) => {
   }
 };
 
-
-
 const verifyPayment = async (req, res) => {
   try {
-    const {
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-      orderId,
-    } = req.body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId, couponId } = req.body;
     const userId = req.session.user;
+    const cart= await Cart.findOne({userId})
+
     if (!userId) {
       req.session.appliedCoupon = null;
       return res.status(401).json({ success: false, message: 'User not logged in.' });
     }
-    let existingOrder;
-    try {
-      existingOrder = await Order.findOne({ _id: orderId, userId });
-      console.log(existingOrder,"order ")
-      if (!existingOrder) {
-        req.session.appliedCoupon = null;
-        return res.status(404).json({ success: false, message: 'Order not found or unauthorized.' });
-      }
-    } catch (dbError) {
-      console.error('Order fetch error:', dbError);
+
+    const existingOrder = await Order.findOne({ _id: orderId, userId }).populate("userId");
+    console.log(existingOrder,"ddd")
+    if (!existingOrder) {
       req.session.appliedCoupon = null;
-      return res.status(500).json({ success: false, message: 'Database error while fetching order.' });
+      return res.status(404).json({ success: false, message: 'Order not found or unauthorized.' });
+    } 
+
+     if (!cart || cart.items.length === 0) {
+      return res.status(400).json({ success: false, message: 'Cart is empty.' });
     }
-    let razorpayOrder;
-    try {
-      if (!razorpay_order_id) {
-  return res.status(400).json({ success: false, message: 'Missing Razorpay Order ID.' });
-}
-      razorpayOrder = await razorpay.orders.fetch(razorpay_order_id);
-    } catch (razorpayError) {
-      console.error('Razorpay fetch order error:', razorpayError);
-      req.session.appliedCoupon = null;
-      return res.status(400).json({ success: false, message: 'Failed to fetch Razorpay order.' });
-    }
-    const expectedAmount = Math.round(existingOrder.finalAmount * 100);
-    if (razorpayOrder.amount !== expectedAmount) {
-      console.error('Amount mismatch:', { razorpayAmount: razorpayOrder.amount, expectedAmount });
-      req.session.appliedCoupon = null;
-      return res.status(400).json({ success: false, message: 'Order amount mismatch.' });
-    }
-    // Verify payment signature
+
+    const razorpayOrder = await razorpay.orders.fetch(razorpay_order_id);
+
+
     const isValidSignature = verifySignature(
       razorpay_order_id,
       razorpay_payment_id,
@@ -202,55 +186,102 @@ const verifyPayment = async (req, res) => {
       req.session.appliedCoupon = null;
       return res.status(400).json({ success: false, message: 'Payment verification failed.' });
     }
-await Order.updateOne(
-  { _id: orderId, paymentStatus: { $ne: 'success' } },
-  {
-    $set: {
-      paymentStatus: 'success',
-      razorpayOrderId: razorpay_order_id,
-      razorpayPaymentId: razorpay_payment_id,
-      'orderedItems.$[].status': 'Pending'
-    }
-  }
-);
+  
 
-    if (existingOrder.couponApplied && existingOrder.couponCode) {
-      try {
-        const couponUpdateResult = await Coupon.updateOne(
-          { couponCode: existingOrder.couponCode, isActive: true, isDeleted: false },
-          { $addToSet: { usedBy: userId } }
-        );
-        if (couponUpdateResult.nModified === 0) {
-          console.warn(`Crify-paymeoupon ${existingOrder.couponCode} not updated. It may not exist or already used.`);
-        }
-      } catch (couponError) {
-        console.error('Coupon update error:', couponError);
+    await Order.updateOne(
+      { _id: orderId, paymentStatus: { $ne: 'success' } },
+      {
+        $set: {
+          paymentStatus: 'success',
+          razorpayOrderId: razorpay_order_id,
+          razorpayPaymentId: razorpay_payment_id,
+          'orderedItems.$[].status': 'Pending',
+        },
       }
-    }
- console.log("Before save:", existingOrder.paymentStatus); 
-
-await existingOrder.save();
-
-const updatedOrder = await Order.findById(existingOrder._id);
-console.log("After save:", updatedOrder.paymentStatus);
-
-    await Cart.findOneAndUpdate(
-      { userId },
-      { items: [], totalPrice: 0 }
     );
 
+    if (couponId && existingOrder.couponApplied && existingOrder.couponCode) {
+      await Coupon.updateOne(
+        { _id: couponId, couponCode: existingOrder.couponCode, isActive: true, isDeleted: false },
+        { $addToSet: { usedBy: userId } }
+      );
+      await markCouponAsUsed(userId, couponId);
+    }
+
+    const user = existingOrder.userId;
+    if (user.firstOrder && user.referredBy) {
+      let userWallet = await Wallet.findOne({ user: user._id });
+      if (!userWallet) {
+        userWallet = new Wallet({
+          user: user._id,
+          balance: 0,
+          transactions: [],
+        });
+      }
+
+      const userBonusDesc = "Referral bonus for first Razorpay order";
+      const transactionId = `TXN_${Date.now()}_${Math.floor(100000 + Math.random() * 900000)}`;
+      if (!userWallet.transactions.some(t => t.description === userBonusDesc)) {
+        userWallet.balance += 100;
+        userWallet.transactions.push({
+          transactionId,
+          amount: 100,
+          type: "credit",
+          description: userBonusDesc,
+          status: "success",
+          date: new Date(),
+        });
+        await userWallet.save();
+        user.wallet = userWallet._id;
+        await user.save();
+      }
+
+      const referrer = await User.findById(user.referredBy).populate("wallet");
+      if (referrer) {
+        let referrerWallet = await Wallet.findOne({ user: referrer._id });
+        if (!referrerWallet) {
+          referrerWallet = new Wallet({
+            user: referrer._id,
+            balance: 0,
+            transactions: [],
+          });
+        }
+        const referrerBonusDesc = `Referral bonus for ${user.name}'s Razorpay order`;
+        const referrerTransactionId = `TXN_${Date.now()}_${Math.floor(100000 + Math.random() * 900000)}`;
+        if (!referrerWallet.transactions.some(t => t.description === referrerBonusDesc)) {
+          referrerWallet.balance += 200;
+          referrerWallet.transactions.push({
+            transactionId: referrerTransactionId,
+            amount: 200,
+            type: "credit",
+            description: referrerBonusDesc,
+            status: "success",
+            date: new Date(),
+          });
+          await referrerWallet.save();
+          referrer.wallet = referrerWallet._id;
+          const referral = referrer.referralStatus.find(r => r.userId.toString() === user._id.toString());
+          if (referral) {
+            referral.status = "Completed";
+          }
+          await referrer.save();
+        }
+      }
+      
+
+      user.firstOrder = false;
+      await user.save();
+    }
+
     req.session.appliedCoupon = null;
+
     return res.status(200).json({
       success: true,
       message: 'Payment verified. Order updated.',
       orderId: existingOrder._id,
     });
   } catch (error) {
-    console.error('verifyPayment error:', {
-      message: error.message,
-      stack: error.stack,
-      requestBody: req.body,
-    });
+    console.error('verifyPayment error:', error);
     req.session.appliedCoupon = null;
     return res.status(500).json({ success: false, message: `Internal server error: ${error.message}` });
   }
@@ -260,14 +291,17 @@ console.log("After save:", updatedOrder.paymentStatus);
 const getPaymentFailed = async (req, res) => {
   try {
     const { orderId, errorCode, paymentId, reason ,amount} = req.query;
+    
+    console.log(paymentId)
     const userId = req.session.user;
     if (!userId) {
       return res.redirect('/login');
     }
+   const userData=await User.findById(userId)
 
     if (!orderId || !mongoose.Types.ObjectId.isValid(orderId)) {
       return res.status(200).render('paymentFailed', {
-        orderId: 'N/A',
+        orderId,
         errorCode: errorCode || 'INVALID_ORDER_ID',
         paymentId: paymentId || 'N/A',
         reason: reason || 'Missing or invalid order ID',
@@ -294,7 +328,8 @@ const getPaymentFailed = async (req, res) => {
       errorCode: errorCode || 'N/A',
       paymentId: paymentId || 'N/A',
       reason: reason || 'Unknown failure',
-      amount
+      amount,
+      user:userData
     });
   } catch (error) {
     console.error('Payment failed page error:', error);
@@ -359,7 +394,7 @@ const retryPayment = async (req, res) => {
 // Cash on Delivery
 const createCODOrder = async (req, res) => {
   try {
-    const { amount, addressId, paymentMethod } = req.body;
+    const { amount, addressId, paymentMethod, couponId } = req.body;
     const userId = req.session.user;
 
     if (!userId) {
@@ -374,13 +409,12 @@ const createCODOrder = async (req, res) => {
     if (paymentMethod !== 'Cash on Delivery') {
       return res.status(400).json({ success: false, message: 'Invalid payment method.' });
     }
-
-if (amount > 30000) {
-  return res.status(400).json({
-    success: false,
-    message: 'Cash on Delivery is allowed only for orders up to ₹30,000.',
-  });
-}
+    if (amount > 21000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cash on Delivery is allowed only for orders up to ₹21,000.',
+      });
+    }
 
     const user = await User.findById(userId).populate('wallet');
     if (!user) {
@@ -389,7 +423,7 @@ if (amount > 30000) {
 
     const cart = await Cart.findOne({ userId }).populate({
       path: "items.productId",
-      populate: [{ path: "category" }, { path: "brand" }]
+      populate: [{ path: "category" }, { path: "brand" }],
     });
 
     if (!cart || cart.items.length === 0) {
@@ -425,15 +459,14 @@ if (amount > 30000) {
       if (product.quantity < item.quantity) {
         return res.status(400).json({ success: false, message: `${product.name} has only ${product.quantity} in stock.` });
       }
-      const offer =await applyBestOffer(product) || {};
+
+      const offer = await applyBestOffer(product) || {};
       const originalPrice = product.salePrice;
       const finalPrice = !isNaN(offer.finalPrice) ? offer.finalPrice : originalPrice;
       const offerDiscount = originalPrice - finalPrice;
       const subtotal = finalPrice * item.quantity;
 
-      if (
-        isNaN(finalPrice) || isNaN(offerDiscount) || isNaN(subtotal)
-      ) {
+      if (isNaN(finalPrice) || isNaN(offerDiscount) || isNaN(subtotal)) {
         return res.status(400).json({ success: false, message: `Invalid pricing for product ${product.name}` });
       }
 
@@ -453,43 +486,38 @@ if (amount > 30000) {
     const totalPrice = orderedItems.reduce((sum, item) => sum + (item.originalPrice * item.quantity), 0);
     const offerPrice = orderedItems.reduce((sum, item) => sum + (item.offerDiscount * item.quantity), 0);
 
-    const appliedCoupon = req.session.appliedCoupon;
     let discount = 0;
     let couponCode = null;
 
-    if (appliedCoupon) {
-      couponCode = appliedCoupon.code;
+    if (couponId && req.session.appliedCoupon?.couponId === couponId) {
       const coupon = await Coupon.findOne({
-        couponCode,
+        _id: couponId,
+        couponCode: req.session.appliedCoupon.couponCode,
         isActive: true,
-        isDeleted: false
+        isDeleted: false,
+        validFrom: { $lte: new Date() },
+        validUpto: { $gte: new Date() },
+        usedBy: { $nin: [userId] },
       });
 
-      if (
-        coupon &&
-        !coupon.usedBy.includes(userId) &&
-        coupon.validFrom <= new Date() &&
-        coupon.validUpto >= new Date() &&
-        totalPrice >= coupon.minPurchase
-      ) {
+      if (coupon && totalPrice >= coupon.minPurchase) {
         discount = coupon.type === 'percentage'
           ? Math.floor((totalPrice * coupon.offerPrice) / 100)
           : coupon.offerPrice;
 
         if (discount > totalPrice) discount = totalPrice;
 
-        await Coupon.updateOne(
-          { _id: coupon._id },
-          { $addToSet: { usedBy: userId } }
-        );
+        couponCode = coupon.couponCode;
+        await Coupon.updateOne({ _id: coupon._id }, { $addToSet: { usedBy: userId } });
+        await markCouponAsUsed(userId, coupon._id);
+      } else {
+        req.session.appliedCoupon = null;
       }
     }
 
     const finalAmount = totalPrice - offerPrice - discount;
 
-    if (isNaN(finalAmount)) {
-      return res.status(400).json({ success: false, message: 'Invalid final amount calculation.' });
-    }
+   
 
     const shippingAddress = {
       addressType: selectedAddress.addressType,
@@ -511,7 +539,7 @@ if (amount > 30000) {
       offerPrice,
       discount,
       finalAmount,
-      couponApplied: !!appliedCoupon,
+      couponApplied: !!couponId,
       couponCode,
       shippingAddress,
       paymentMethod,
@@ -522,69 +550,6 @@ if (amount > 30000) {
 
     await newOrder.save();
 
-
-    if (user.firstOrder && user.referredBy) {
-      let userWallet = await Wallet.findOne({ user: user._id });
-      if (!userWallet) {
-        userWallet = new Wallet({
-          user: user._id,
-          balance: 0,
-          transactions: []
-        });
-      }
-
-      if (!userWallet.transactions.some(t => t.description === "Referral bonus for first COD purchase")) {
-        userWallet.balance += 100;
-        userWallet.transactions.push({
-          transactionId: new mongoose.Types.ObjectId().toString(),
-          amount: 100,
-          type: "credit",
-          description: "Referral bonus for first COD purchase",
-          status: "success",
-          date: new Date()
-        });
-        await userWallet.save();
-        user.wallet = userWallet._id;
-      }
-
-      const referrer = await User.findById(user.referredBy).populate('wallet');
-      if (referrer) {
-        let referrerWallet = await Wallet.findOne({ user: referrer._id });
-        if (!referrerWallet) {
-          referrerWallet = new Wallet({
-            user: referrer._id,
-            balance: 0,
-            transactions: []
-          });
-        }
-
-        if (!referrerWallet.transactions.some(t => t.description === `Referral bonus for ${user.name}'s first COD purchase`)) {
-          referrerWallet.balance += 200;
-          referrerWallet.transactions.push({
-            transactionId: new mongoose.Types.ObjectId().toString(),
-            amount: 200,
-            type: "credit",
-            description: `Referral bonus for ${user.name}'s first COD purchase`,
-            status: "success",
-            date: new Date()
-          });
-          await referrerWallet.save();
-          referrer.wallet = referrerWallet._id;
-
-          const referral = referrer.referralStatus.find(r => r.userId.toString() === user._id.toString());
-          if (referral) {
-            referral.status = "Completed";
-          }
-          await referrer.save();
-        }
-      }
-
-      user.firstOrder = false;
-      await user.save();
-    }
-
-    req.session.appliedCoupon = null;
-
     await User.findByIdAndUpdate(userId, { $push: { orderHistory: newOrder._id } });
     await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0 });
 
@@ -593,6 +558,8 @@ if (amount > 30000) {
       { userId },
       { $pull: { products: { productId: { $in: orderedProductIds } } } }
     );
+
+    req.session.appliedCoupon = null;
 
     res.status(200).json({
       success: true,
@@ -606,14 +573,10 @@ if (amount > 30000) {
   }
 };
 
-
-
-
-
 const walletPayment = async (req, res) => {
   try {
     const userId = req.session.user;
-    const { addressId } = req.body;
+    const { addressId, couponId } = req.body;
 
     if (!userId) {
       return res.status(401).json({ success: false, message: 'User not logged in' });
@@ -626,7 +589,7 @@ const walletPayment = async (req, res) => {
 
     const cart = await Cart.findOne({ userId }).populate({
       path: "items.productId",
-      populate: [{ path: "category" }, { path: "brand" }]
+      populate: [{ path: "category" }, { path: "brand" }],
     });
 
     if (!cart || cart.items.length === 0) {
@@ -681,48 +644,43 @@ const walletPayment = async (req, res) => {
         offerDiscount,
         subtotal,
         status: 'Pending',
-        paymentStatus: 'success'
+        paymentStatus: 'success',
       });
 
       totalPrice += originalPrice * item.quantity;
       offerPrice += offerDiscount * item.quantity;
     }
 
-    const appliedCoupon = req.session.appliedCoupon;
     let discount = 0;
     let couponCode = null;
 
-    if (appliedCoupon) {
-      couponCode = appliedCoupon.code;
-
+    if (couponId && req.session.appliedCoupon?.couponId === couponId) {
       const coupon = await Coupon.findOne({
-        couponCode,
+        _id: couponId,
+        couponCode: req.session.appliedCoupon.couponCode,
         isActive: true,
-        isDeleted: false
+        isDeleted: false,
+        validFrom: { $lte: new Date() },
+        validUpto: { $gte: new Date() },
+        usedBy: { $nin: [userId] },
       });
 
-      if (
-        coupon &&
-        !coupon.usedBy.includes(userId) &&
-        coupon.validFrom <= new Date() &&
-        coupon.validUpto >= new Date() &&
-        totalPrice >= coupon.minPurchase
-      ) {
+      if (coupon && totalPrice >= coupon.minPurchase) {
         discount = coupon.type === 'percentage'
           ? Math.floor((totalPrice * coupon.offerPrice) / 100)
           : coupon.offerPrice;
 
         if (discount > totalPrice) discount = totalPrice;
 
+        couponCode = coupon.couponCode;
         await Coupon.updateOne({ _id: coupon._id }, { $addToSet: { usedBy: userId } });
+        await markCouponAsUsed(userId, coupon._id);
+      } else {
+        req.session.appliedCoupon = null;
       }
     }
 
     const finalAmount = totalPrice - offerPrice - discount;
-
-    if (isNaN(finalAmount)) {
-      return res.status(400).json({ success: false, message: 'Invalid final amount calculation' });
-    }
 
     if (wallet.balance < finalAmount) {
       return res.status(400).json({ success: false, message: 'Insufficient wallet balance' });
@@ -748,7 +706,7 @@ const walletPayment = async (req, res) => {
       offerPrice,
       discount,
       finalAmount,
-      couponApplied: !!appliedCoupon,
+      couponApplied: !!couponId,
       couponCode,
       shippingAddress,
       paymentMethod: 'Wallet',
@@ -760,14 +718,16 @@ const walletPayment = async (req, res) => {
     await newOrder.save();
 
     const transactionId = `TXN_${Date.now()}_${Math.floor(100000 + Math.random() * 900000)}`;
+    console.log(finalAmount,"final")
     wallet.balance -= finalAmount;
+    console.log(wallet.balance,"balance")
     wallet.transactions.push({
       type: 'debit',
       amount: finalAmount,
       description: `Wallet payment for Order ${newOrder._id}`,
       transactionId,
       date: new Date(),
-      status: "success"
+      status: "success",
     });
     await wallet.save();
     await User.findByIdAndUpdate(userId, { wallet: wallet._id });
@@ -793,7 +753,6 @@ const walletPayment = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Failed to process wallet order' });
   }
 };
-
 module.exports = {
   createOrder,
   verifyPayment,
