@@ -138,19 +138,19 @@
         .btn-secondary:hover {
             background: #5a6268;
         }
-        .btn-export-pdf {
-            background: #e74c3c;
-            color: white;
+        .export-section .btn-export-pdf {
+            background: #e74c3c !important;
+            color: white !important;
         }
-        .btn-export-pdf:hover {
-            background: #c0392b;
+        .export-section .btn-export-pdf:hover {
+            background: #c0392b !important;
         }
-        .btn-export-excel {
-            background: #27ae60;
-            color: white;
+        .export-section .btn-export-excel {
+            background: #27ae60 !important;
+            color: white !important;
         }
-        .btn-export-excel:hover {
-            background: #219653;
+        .export-section .btn-export-excel:hover {
+            background: #219653 !important;
         }
         .sales-summary {
             background: white;
@@ -216,15 +216,15 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .data-table th:nth-child(1), .data-table td:nth-child(1) { width: 12%; max-width: 120px; } /* ORDER ID */
-        .data-table th:nth-child(2), .data-table td:nth-child(2) { width: 15%; max-width: 150px; } /* CUSTOMER */
-        .data-table th:nth-child(3), .data-table td:nth-child(3) { width: 10%; max-width: 100px; } /* AMOUNT */
-        .data-table th:nth-child(4), .data-table td:nth-child(4) { width: 10%; max-width: 100px; } /* DISCOUNT */
-        .data-table th:nth-child(5), .data-table td:nth-child(5) { width: 10%; max-width: 100px; } /* COUPON */
-        .data-table th:nth-child(6), .data-table td:nth-child(6) { width: 10%; max-width: 100px; } /* FINAL AMOUNT */
-        .data-table th:nth-child(7), .data-table td:nth-child(7) { width: 12%; max-width: 120px; } /* PAYMENT METHOD */
-        .data-table th:nth-child(8), .data-table td:nth-child(8) { width: 10%; max-width: 100px; } /* DATE */
-        .data-table th:nth-child(9), .data-table td:nth-child(9) { width: 11%; max-width: 110px; } /* STATUS */
+        .data-table th:nth-child(1), .data-table td:nth-child(1) { width: 12%; max-width: 120px; }
+        .data-table th:nth-child(2), .data-table td:nth-child(2) { width: 15%; max-width: 150px; }
+        .data-table th:nth-child(3), .data-table td:nth-child(3) { width: 10%; max-width: 100px; }
+        .data-table th:nth-child(4), .data-table td:nth-child(4) { width: 10%; max-width: 100px; }
+        .data-table th:nth-child(5), .data-table td:nth-child(5) { width: 10%; max-width: 100px; }
+        .data-table th:nth-child(6), .data-table td:nth-child(6) { width: 10%; max-width: 100px; }
+        .data-table th:nth-child(7), .data-table td:nth-child(7) { width: 12%; max-width: 120px; }
+        .data-table th:nth-child(8), .data-table td:nth-child(8) { width: 10%; max-width: 100px; }
+        .data-table th:nth-child(9), .data-table td:nth-child(9) { width: 11%; max-width: 110px; }
         .data-table tbody tr {
             border-bottom: 1px solid #eee;
             transition: background-color 0.2s;
@@ -625,19 +625,17 @@
         let currentSummary = <%- JSON.stringify(summary || { grossSales: '0.00', totalDiscount: '0.00', totalCoupons: '0.00', netSales: '0.00', totalOrders: 0, totalReturns: 0 }) %>;
         let currentPage = <%= currentPage || 1 %>;
         let totalPages = <%= totalPages || 1 %>;
-        const itemsPerPage = 10;
+        const itemsPerPage = 8;
         let isFetching = false;
         let loadingTimeout;
         const searchCache = new Map();
 
-        // Hide custom date range by default
         document.getElementById("customDateRange").style.display = "none";
 
-        // Initialize Flatpickr for date inputs
         document.addEventListener("DOMContentLoaded", function () {
             flatpickr("#startDate", {
                 dateFormat: "d/m/Y",
-                allowInput: true, // Allow typing
+                allowInput: true,
                 onChange: function (selectedDates, dateStr) {
                     if (dateStr) {
                         currentPage = 1;
@@ -647,7 +645,7 @@
             });
             flatpickr("#endDate", {
                 dateFormat: "d/m/Y",
-                allowInput: true, // Allow typing
+                allowInput: true,
                 onChange: function (selectedDates, dateStr) {
                     if (dateStr) {
                         currentPage = 1;
@@ -657,7 +655,6 @@
             });
         });
 
-        // Toggle input disabled state
         function toggleInputs(disabled) {
             document.getElementById("searchInput").disabled = disabled;
             document.getElementById("userSearchInput").disabled = disabled;
@@ -669,7 +666,6 @@
             document.querySelectorAll(".btn").forEach(btn => btn.disabled = disabled);
         }
 
-        // Handle date range select change
         document.getElementById("dateRangeSelect").addEventListener("change", function () {
             const customDateRange = document.getElementById("customDateRange");
             customDateRange.style.display = this.value === "custom" ? "flex" : "none";
@@ -681,7 +677,6 @@
             }
         });
 
-        // Debounce function for input handling
         function debounce(func, wait) {
             let timeout;
             return function (...args) {
@@ -690,7 +685,6 @@
             };
         }
 
-        // Add event listeners with debouncing
         const inputs = [
             { id: "searchInput", element: document.getElementById("searchInput"), event: "input" },
             { id: "userSearchInput", element: document.getElementById("userSearchInput"), event: "input" },
@@ -709,7 +703,6 @@
             }, 300));
         });
 
-        // Change page
         function changePage(page) {
             if (currentPage !== page && !isFetching) {
                 currentPage = page;
@@ -717,7 +710,6 @@
             }
         }
 
-        // Filter sales data
         async function filterSales() {
             if (isFetching) return;
             isFetching = true;
@@ -731,12 +723,11 @@
             let startDate = document.getElementById("startDate").value.trim();
             let endDate = document.getElementById("endDate").value.trim();
 
-            // Allow single date input for custom range
             if (dateRange === "custom") {
                 if (startDate && !endDate) {
-                    endDate = startDate; // Set endDate to startDate if only startDate is provided
+                    endDate = startDate;
                 } else if (endDate && !startDate) {
-                    startDate = endDate; // Set startDate to endDate if only endDate is provided
+                    startDate = endDate;
                 }
             }
 
@@ -814,7 +805,6 @@
             }
         }
 
-        // Render table data
         function renderTable() {
             const tbody = document.getElementById("orderTableBody");
             tbody.innerHTML = "";
@@ -824,7 +814,16 @@
                 return;
             }
 
+            const uniqueOrders = [];
+            const orderIds = new Set();
             currentOrders.forEach(order => {
+                if (!orderIds.has(order._id)) {
+                    orderIds.add(order._id);
+                    uniqueOrders.push(order);
+                }
+            });
+
+            uniqueOrders.forEach(order => {
                 const row = document.createElement("tr");
                 row.innerHTML = `
                     <td class="order-id">${order.orderId || 'N/A'}</td>
@@ -841,7 +840,6 @@
             });
         }
 
-        // Render summary data
         function renderSummary() {
             const summaryGrid = document.querySelector(".summary-grid");
             summaryGrid.innerHTML = `
@@ -872,52 +870,139 @@
             `;
         }
 
-        // Render pagination
         function renderPagination() {
             const pagination = document.getElementById("pagination");
             pagination.innerHTML = `<button disabled>Page ${currentPage} of ${totalPages}</button>`;
 
-            if (totalPages <= 1) return;
+            if (totalPages > 1) {
+                pagination.innerHTML += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">←</button>`;
 
-            const maxButtons = 5;
-            let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
-            let endPage = Math.min(totalPages, startPage + maxButtons - 1);
-            if (endPage - startPage + 1 < maxButtons) {
-                startPage = Math.max(1, endPage - maxButtons + 1);
-            }
-
-            if (currentPage > 1) {
-                pagination.innerHTML += `<button onclick="changePage(${currentPage - 1})">←</button>`;
-            } else {
-                pagination.innerHTML += `<button disabled>←</button>`;
-            }
-
-            if (startPage > 1) {
-                pagination.innerHTML += `<button onclick="changePage(1)">1</button>`;
-                if (startPage > 2) {
-                    pagination.innerHTML += `<button disabled>...</button>`;
+                const maxButtons = 5;
+                let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+                let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+                if (endPage - startPage + 1 < maxButtons) {
+                    startPage = Math.max(1, endPage - maxButtons + 1);
                 }
-            }
 
-            for (let i = startPage; i <= endPage; i++) {
-                pagination.innerHTML += `<button ${i === currentPage ? 'class="active" disabled' : ''} onclick="changePage(${i})">${i}</button>`;
-            }
-
-            if (endPage < totalPages) {
-                if (endPage < totalPages - 1) {
-                    pagination.innerHTML += `<button disabled>...</button>`;
+                if (startPage > 1) {
+                    pagination.innerHTML += `<button onclick="changePage(1)">1</button>`;
+                    if (startPage > 2) {
+                        pagination.innerHTML += `<button disabled>...</button>`;
+                    }
                 }
-                pagination.innerHTML += `<button onclick="changePage(${totalPages})">${totalPages}</button>`;
-            }
 
-            if (currentPage < totalPages) {
-                pagination.innerHTML += `<button onclick="changePage(${currentPage + 1})">→</button>`;
-            } else {
-                pagination.innerHTML += `<button disabled>→</button>`;
+                for (let i = startPage; i <= endPage; i++) {
+                    pagination.innerHTML += `<button ${i === currentPage ? 'class="active" disabled' : ''} onclick="changePage(${i})">${i}</button>`;
+                }
+
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) {
+                        pagination.innerHTML += `<button disabled>...</button>`;
+                    }
+                    pagination.innerHTML += `<button onclick="changePage(${totalPages})">${totalPages}</button>`;
+                }
+
+                pagination.innerHTML += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">→</button>`;
             }
         }
 
-        // Clear filters
+        function showError(message) {
+            const tbody = document.getElementById("orderTableBody");
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #e74c3c;">${message}</td></tr>`;
+        }
+
+        async function exportPDF() {
+            if (isFetching) return;
+            isFetching = true;
+            toggleInputs(true);
+
+            const search = document.getElementById("searchInput").value.trim().replace(/[<>]/g, '');
+            const userSearch = document.getElementById("userSearchInput").value.trim().replace(/[<>]/g, '');
+            const paymentMethod = document.getElementById("paymentMethodSelect").value;
+            const orderStatus = document.getElementById("orderStatusSelect").value;
+            const dateRange = document.getElementById("dateRangeSelect").value;
+            let startDate = document.getElementById("startDate").value.trim();
+            let endDate = document.getElementById("endDate").value.trim();
+
+            if (dateRange === "custom") {
+                if (startDate && !endDate) {
+                    endDate = startDate;
+                } else if (endDate && !startDate) {
+                    startDate = endDate;
+                }
+            }
+
+            try {
+                const response = await fetch("/admin/export-sales-report-pdf", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ search, userSearch, paymentMethod, orderStatus, dateRange, startDate, endDate })
+                });
+
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "sales_report.pdf";
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error("Error exporting PDF:", error);
+                showError(`Failed to export PDF: ${error.message}. <button onclick="exportPDF()">Retry</button>`);
+            } finally {
+                isFetching = false;
+                toggleInputs(false);
+            }
+        }
+
+        async function exportExcel() {
+            if (isFetching) return;
+            isFetching = true;
+            toggleInputs(true);
+
+            const search = document.getElementById("searchInput").value.trim().replace(/[<>]/g, '');
+            const userSearch = document.getElementById("userSearchInput").value.trim().replace(/[<>]/g, '');
+            const paymentMethod = document.getElementById("paymentMethodSelect").value;
+            const orderStatus = document.getElementById("orderStatusSelect").value;
+            const dateRange = document.getElementById("dateRangeSelect").value;
+            let startDate = document.getElementById("startDate").value.trim();
+            let endDate = document.getElementById("endDate").value.trim();
+
+            if (dateRange === "custom") {
+                if (startDate && !endDate) {
+                    endDate = startDate;
+                } else if (endDate && !startDate) {
+                    startDate = endDate;
+                }
+            }
+
+            try {
+                const response = await fetch("/admin/export-sales-report-excel", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ search, userSearch, paymentMethod, orderStatus, dateRange, startDate, endDate })
+                });
+
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "sales_report.xlsx";
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error("Error exporting Excel:", error);
+                showError(`Failed to export Excel: ${error.message}. <button onclick="exportExcel()">Retry</button>`);
+            } finally {
+                isFetching = false;
+                toggleInputs(false);
+            }
+        }
+
         function clearFilters() {
             document.getElementById("searchInput").value = "";
             document.getElementById("userSearchInput").value = "";
@@ -928,103 +1013,9 @@
             document.getElementById("endDate").value = "";
             document.getElementById("customDateRange").style.display = "none";
             currentPage = 1;
-            searchCache.clear();
             filterSales();
         }
 
-        // Export to PDF
-        async function exportPDF() {
-            if (isFetching) return;
-            isFetching = true;
-            toggleInputs(true);
-
-            const filterParams = {
-                search: document.getElementById("searchInput").value.trim().replace(/[<>]/g, ''),
-                userSearch: document.getElementById("userSearchInput").value.trim().replace(/[<>]/g, ''),
-                paymentMethod: document.getElementById("paymentMethodSelect").value,
-                orderStatus: document.getElementById("orderStatusSelect").value,
-                dateRange: document.getElementById("dateRangeSelect").value,
-                startDate: document.getElementById("startDate").value.trim(),
-                endDate: document.getElementById("endDate").value.trim()
-            };
-
-            try {
-                const response = await fetch("/admin/export-sales-report-pdf", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(filterParams)
-                });
-
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "sales_report.pdf";
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url);
-            } catch (error) {
-                console.error("Error exporting PDF:", error);
-                showError(`Failed to export PDF: ${error.message}`);
-            } finally {
-                isFetching = false;
-                toggleInputs(false);
-            }
-        }
-
-        // Export to Excel
-        async function exportExcel() {
-            if (isFetching) return;
-            isFetching = true;
-            toggleInputs(true);
-
-            const filterParams = {
-                search: document.getElementById("searchInput").value.trim().replace(/[<>]/g, ''),
-                userSearch: document.getElementById("userSearchInput").value.trim().replace(/[<>]/g, ''),
-                paymentMethod: document.getElementById("paymentMethodSelect").value,
-                orderStatus: document.getElementById("orderStatusSelect").value,
-                dateRange: document.getElementById("dateRangeSelect").value,
-                startDate: document.getElementById("startDate").value.trim(),
-                endDate: document.getElementById("endDate").value.trim()
-            };
-
-            try {
-                const response = await fetch("/admin/export-sales-report-excel", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(filterParams)
-                });
-
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "sales_report.xlsx";
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url);
-            } catch (error) {
-                console.error("Error exporting Excel:", error);
-                showError(`Failed to export Excel: ${error.message}`);
-            } finally {
-                isFetching = false;
-                toggleInputs(false);
-            }
-        }
-
-        // Show error message
-        function showError(message) {
-            const tableBody = document.getElementById("orderTableBody");
-            tableBody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #e74c3c;">${message}</td></tr>`;
-        }
-
-        // Toggle sidebar for mobile
         function toggleSidebar() {
             const sidebar = document.getElementById("sidebar-container");
             sidebar.style.display = sidebar.style.display === "block" ? "none" : "block";

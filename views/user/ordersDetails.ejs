@@ -555,27 +555,38 @@
   }
 
   if (order.orderedItems && order.orderedItems.length > 0 && !isPaymentFailed) {
-    const statuses = order.orderedItems.map(function(item) {
-      return item.status;
-    });
+    const statuses = order.orderedItems.map(item => item.status);
 
-    if (statuses.includes('Cancelled')) {
+    const allCancelled = statuses.every(s => s === 'Cancelled');
+    const allDelivered = statuses.every(s => s === 'Delivered');
+
+    const anyReturned = statuses.includes('Returned');
+    const anyReturnRequest = statuses.includes('Return Request');
+    const anyReturnRejected = statuses.includes('Return Rejected');
+    const anyShipped = statuses.includes('Shipped');
+    const anyProcessing = statuses.includes('Processing');
+    const anyPending = statuses.includes('Pending');
+
+    if (allCancelled) {
       orderStatus = 'Cancelled';
-    } else if (statuses.includes('Returned')) {
-      orderStatus = 'Returned';
-    } else if (statuses.includes('Return Request')) {
-      orderStatus = 'Return Request';
-    } else if (statuses.every(function(s) { return s === 'Delivered'; })) {
+    } else if (allDelivered) {
       orderStatus = 'Delivered';
-    } else if (statuses.includes('Shipped')) {
-      orderStatus = 'Shipped';
-    } else if (statuses.includes('Processing')) {
-      orderStatus = 'Processing';
-    } else if (statuses.includes('Pending')) {
-      orderStatus = 'Pending';
-    } else if (statuses.includes('Return Rejected')) {
+    } else if (anyReturnRequest) {
+      orderStatus = 'Return Request';
+    } else if (anyReturnRejected) {
       orderStatus = 'Return Rejected';
+    } else if (anyReturned) {
+      orderStatus = 'Returned';
+    } else if (anyShipped) {
+      orderStatus = 'Shipped';
+    } else if (anyProcessing) {
+      orderStatus = 'Processing';
+    } else if (anyPending) {
+      orderStatus = 'Pending';
+    } else {
+      orderStatus = 'Processing'; // fallback
     }
+
   } else if (isPaymentFailed) {
     orderStatus = 'Payment Failed';
   }
@@ -589,7 +600,6 @@
     paymentLabel = 'Wallet Paid';
   }
 %>
-
 <tr>  
   
   <td>#<%= order.orderId || 'Unknown' %></td>
@@ -748,13 +758,5 @@
 
     <%- include("../../views/partials/user/footer") %>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Debug order statuses
-        const orders = <%- JSON.stringify(orders || []) %>;
-        console.log('Orders data:', orders);
-        orders.forEach(order => {
-            console.log(`Order ID: ${order.orderId}, Item Statuses: ${order.orderedItems ? order.orderedItems.map(item => item.status).join(', ') : 'No items'}`);
-        });
-    </script>
 </body>
 </html>

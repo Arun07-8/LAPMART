@@ -419,7 +419,7 @@ const loadDashbard = async (req, res) => {
             responseData.recentOrders = [];
         }
 
-        console.log("Revenue Data:", JSON.stringify(revenueData, null, 2));
+     
 
         if (req.xhr || req.headers.accept.includes("json")) {
             return res.json(responseData);

@@ -1,5 +1,7 @@
 const Coupon = require("../../models/couponSchema");
 
+
+
 const availableCoupon = async (req, res) => {
   try {
     const today = new Date();
@@ -9,6 +11,7 @@ const availableCoupon = async (req, res) => {
       validFrom: { $lte: today },
       validUpto: { $gte: today },
     }).lean();
+
 
     res.json({ success: true, coupons });
   } catch (error) {
@@ -26,23 +29,27 @@ const applyCoupon = async (req, res) => {
       return res.status(401).json({ success: false, message: 'User not logged in' });
     }
 
+    // Check if a coupon is already applied
+    if (req.session.appliedCoupon) {
+      return res.status(400).json({
+        success: false,
+        message: 'A coupon is already applied. Remove it to apply a new one.',
+      });
+    }
+
     const coupon = await Coupon.findOne({
       couponCode: code.toUpperCase(),
       isActive: true,
       isDeleted: false,
       validFrom: { $lte: new Date() },
       validUpto: { $gte: new Date() },
+      usedBy: { $nin: [userId] },
     });
 
     if (!coupon) {
-      return res.status(404).json({ success: false, message: 'Coupon code is invalid or expired' });
-    }
-
-  
-    if (coupon.usedBy.includes(userId)) {
-      return res.status(400).json({
+      return res.status(404).json({
         success: false,
-        message: 'You have already used this coupon',
+        message: 'Coupon code is invalid, expired, or already used by you',
       });
     }
 
@@ -53,15 +60,16 @@ const applyCoupon = async (req, res) => {
       });
     }
 
-    const discount = coupon.type === 'percentage'
+    let discount = coupon.type === 'percentage'
       ? Math.floor((totalAmount * coupon.offerPrice) / 100)
       : coupon.offerPrice;
 
+    if (coupon.type === 'percentage' && coupon.maxAmount && discount > coupon.maxAmount) {
+      discount = coupon.maxAmount;
+    }
+
     if (discount > totalAmount) {
-      return res.status(400).json({
-        success: false,
-        message: 'Discount amount cannot exceed the total purchase amount',
-      });
+      discount = totalAmount;
     }
 
     req.session.appliedCoupon = {
@@ -81,7 +89,6 @@ const applyCoupon = async (req, res) => {
       discount,
       newTotal: totalAmount - discount,
     });
-
   } catch (error) {
     console.error('Apply coupon error:', error);
     res.status(500).json({ success: false, message: 'Server error: Failed to apply coupon' });
@@ -113,16 +120,57 @@ const markCouponAsUsed = async (userId, couponId) => {
   try {
     if (!couponId) return;
     await Coupon.findByIdAndUpdate(couponId, {
-      $addToSet: { usedBy: userId }
+      $addToSet: { usedBy: userId },
     });
   } catch (err) {
-    console.error("Error marking coupon as used:", err);
+    console.error('Error marking coupon as used:', err);
   }
 };
+
+const updatesession=async (req, res) => {
+ try {
+    const { couponId, couponCode, discount } = req.body;
+    if (!couponId || !couponCode) {
+      return res.status(400).json({ success: false, message: 'Invalid coupon data' });
+    }
+
+    req.session.appliedCoupon = { couponId, couponCode, discount };
+    await new Promise((resolve, reject) => {
+      req.session.save(err => (err ? reject(err) : resolve()));
+    });
+
+    console.log('Session updated:', req.session.appliedCoupon);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Update session error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update session' });
+  }
+}
+
+
+const clearSession= async (req, res) => {
+  try {
+    req.session.appliedCoupon = null;
+    await new Promise((resolve, reject) => {
+      req.session.save(err => (err ? reject(err) : resolve()));
+    });
+
+    console.log('Session cleared:', req.session.appliedCoupon);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Clear session error:', error);
+    res.status(500).json({ success: false, message: 'Failed to clear session' });
+  }
+}
+
 
 module.exports = {
   availableCoupon,
   applyCoupon,
   removeCoupon,
-  markCouponAsUsed
+  markCouponAsUsed,
+  clearSession,
+  updatesession
 };

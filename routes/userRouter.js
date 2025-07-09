@@ -12,8 +12,10 @@ const whishlistController=require("../controllers/user/wishlistController")
 const OrderController=require("../controllers/user/orderController")
 const walletController=require("../controllers/user/walletController")
 const couponController=require("../controllers/user/couponController")
-const {userAuth}=require("../middlewares/userAuth")
-const {profileUpload}=require("../config/multer")
+const  {userAuth,userAuthHome }=require("../middlewares/userAuth")
+const {profileUpload}=require("../config/multer");
+const { ReturnDocument } = require("mongodb");
+
 
 
 router.get("/pageNotFound",userController.pageNotFound)
@@ -26,13 +28,12 @@ router.post("/resendOtp",userController.resendOtp)
 router.get("/auth/google", passport.authenticate("google", {scope: ["profile", "email"]}));
 router.get('/auth/google/callback', (req, res, next) => {
       passport.authenticate('google', (err, user, info) => {
-          console.log()
       if (err || !user) {const message = info?.message || 'Authentication failed';
            return res.redirect(`/signup?message=${encodeURIComponent(message)}`);}
       req.logIn(user, (loginErr) => {if (loginErr) {
            return res.redirect(`/signup?message=${encodeURIComponent('Login failed')}`);}
       req.session.user = user._id;
-           return res.redirect('/home');
+           return res.redirect('/');
       });
     })(req, res, next);});
   
@@ -50,62 +51,69 @@ router.post("/reset-password",profileController.newPasswordSet)
 router.get("/forgot-resendOtp",profileController.loadresendOtp)
 
 //   Home page & Shopping page
-router.get("/home",userAuth,userController.LoadHomepage);
-router.get("/shop",userAuth,userController.loadShoppingPage)
-router.get("/productview",userAuth,productController.productViewPage);
+router.get("/",userAuthHome,userController.LoadHomepage);
+router.get("/shop",userAuthHome,userController.loadShoppingPage)
+router.get("/productview",productController.productViewPage);
+
+
+// protected routes 
+router.use(userAuth);
 
 //   User Profile
-router.get("/profile",userAuth,userProfile.userProfile)
-router.get("/editprofile",userAuth,userProfile.userEditprofile)
-router.post("/editprofile",userAuth,profileUpload,userProfile.profileUpdate)
-router.delete("/removeuserimage/:index",userAuth,userProfile.removeUserImage);
-router.post("/change-password",userAuth,userProfile.changepassword)
-router.post("/change-email", userAuth, userProfile.editemail);
-router.get("/email-otp", userAuth, userProfile.getOtpPage);
-router.post("/email-otp", userAuth, userProfile.verifyOtp);
-router.post("/resend-Otp", userAuth, userProfile.resendOtp);
-router.get("/referral",userAuth,userProfile.getreferralPage)
+router.get("/profile",userProfile.userProfile)
+router.get("/editprofile",userProfile.userEditprofile)
+router.post("/editprofile",profileUpload,userProfile.profileUpdate)
+router.delete("/removeuserimage/:index",userProfile.removeUserImage);
+router.post("/change-password",userProfile.changepassword)
+router.post("/change-email", userProfile.editemail);
+router.get("/email-otp", userProfile.getOtpPage);
+router.post("/email-otp",userProfile.verifyOtp);
+router.post("/resend-Otp",userProfile.resendOtp);
+router.get("/referral",userProfile.getreferralPage)
 router.get("/logout",userController.logout)
 
+
 //   Cart page
-router.get("/cart",userAuth,cartController.renderCartPage)
-router.post("/cart/add",userAuth,cartController.addTocart)
-router.post("/cart/remove",userAuth,cartController.removeCartProduct)
-router.post("/cart/update-quantity",userAuth,cartController.updateCartQuantity)
+router.get("/cart",cartController.renderCartPage)
+router.post("/cart/add",cartController.addTocart)
+router.post("/cart/remove",cartController.removeCartProduct)
+router.post("/cart/update-quantity",cartController.updateCartQuantity)
 
 //   address page
-router.get("/address",userAuth,addressController.addressPageload)
-router.get("/address/add",userAuth,addressController.getaddressAddpage)
-router.post("/address/add",userAuth,addressController.addaddressPage)
-router.get("/address/edit/:addressId",userAuth,addressController.editAddressPageLoad)
-router.post("/address/edit/:addressId",userAuth,addressController.editaddress)
-router.delete("/address/delete/:addressId",userAuth,addressController.deleteAddress)
-router.patch("/address/set-default/:addressId",userAuth,addressController.setDefaultAddress)
+router.get("/address",addressController.addressPageload)
+router.get("/address/add",addressController.getaddressAddpage)
+router.post("/address/add",addressController.addaddressPage)
+router.get("/address/edit/:addressId",addressController.editAddressPageLoad)
+router.post("/address/edit/:addressId",addressController.editaddress)
+router.delete("/address/delete/:addressId",addressController.deleteAddress)
+router.patch("/address/set-default/:addressId",addressController.setDefaultAddress)
 
 //wishlist Page
-router.get("/wishlist",userAuth,whishlistController.getWishlistPage)
-router.post("/wishlist/add",userAuth,whishlistController.addWishlist)
-router.delete("/wishlist/remove/:productId",userAuth,whishlistController.deleteWishlistProduct)
-router.post("/add/wishlist-cart/:productId", userAuth,whishlistController.addToCartFromWishlist);
+router.get("/wishlist",whishlistController.getWishlistPage)
+router.post("/wishlist/add",whishlistController.addWishlist)
+router.delete("/wishlist/remove/:productId",whishlistController.deleteWishlistProduct)
+router.post("/add/wishlist-cart/:productId",whishlistController.addToCartFromWishlist);
 
 //  checkOut page
-router.get("/checkout",userAuth,checkOutController.checkOutpage)
-router.post("/checkout",userAuth,checkOutController.checkoutHandler)
+router.get("/checkout",checkOutController.checkOutpage)
+router.post("/checkout",checkOutController.checkoutHandler)
 
 //  Order Page
-router.get("/order/:orderId",userAuth,OrderController.getOrderPage)
-router.get("/view-order",userAuth,OrderController.getViewOrderpage)
-router.get("/order-details/:orderId",userAuth,OrderController.getOrderViewPage)
-router.get("/order/invoice/:orderId", userAuth, OrderController.downloadInvoice);
-router.post("/order-details/cancel",userAuth,OrderController.cancelOrder)
-router.post("/order-details/return",userAuth,OrderController.orderReturn)
+router.get("/order/:orderId",OrderController.getOrderPage)
+router.get("/view-order",OrderController.getViewOrderpage)
+router.get("/order-details/:orderId",OrderController.getOrderViewPage)
+router.get("/order/invoice/:orderId", OrderController.downloadInvoice);
+router.post("/order-details/cancel",OrderController.cancelOrder)
+router.post("/order-details/return",OrderController.orderReturn)
 
 //  Wallect
-router.get("/wallet",userAuth,walletController.getWalletPage)
+router.get("/wallet",walletController.getWalletPage)
 
 // coupon controller
-router.get('/coupons/available',userAuth,couponController.availableCoupon)
-router.post("/coupons/apply",userAuth,couponController.applyCoupon)
-router.post("/coupons/remove",userAuth,couponController.removeCoupon)
+router.get('/coupons/available',couponController.availableCoupon)
+router.post("/coupons/apply",couponController.applyCoupon)
+router.post("/coupons/remove",couponController.removeCoupon)
+router.post('/update-session',couponController.updatesession)
+router.post('/clear-session',couponController.clearSession)
 
 module.exports=router;                

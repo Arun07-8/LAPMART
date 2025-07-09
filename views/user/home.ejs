@@ -103,7 +103,7 @@
 
             // Set initial active state for Home if on homepage
             if (window.location.pathname === '/home') {
-                const homeLink = document.querySelector('.header-scope a[href="/home"]');
+                const homeLink = document.querySelector('.header-scope a[href="/"]');
                 if (homeLink) {
                     homeLink.classList.add('active');
                     logo.classList.add('home-active');

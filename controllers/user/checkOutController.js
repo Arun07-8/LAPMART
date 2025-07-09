@@ -4,18 +4,15 @@ const User=require("../../models/userSchema")
 const Wallet=require("../../models/walletSchema")
 const {applyBestOffer}=require("../../helpers/offerHelper")
 const Coupon=require("../../models/couponSchema")
-
-
 const checkOutpage = async (req, res) => {
   try {
     const userId = req.session.user;
     if (!userId) {
+      console.log('No user session found, redirecting to login');
       return res.redirect('/login?redirect=/checkout');
     }
 
-   
     const existingCart = await Cart.findOne({ userId }).populate('items.productId');
-
     const existingAddress = await Address.findOne({ userId });
     const userData = await User.findById(userId);
 
@@ -53,6 +50,8 @@ const checkOutpage = async (req, res) => {
     let discountAmount = 0;
     let couponCode = '';
 
+    console.log('Session appliedCoupon:', JSON.stringify(req.session.appliedCoupon, null, 2));
+
     if (appliedCoupon?.couponId) {
       coupon = await Coupon.findOne({
         _id: appliedCoupon.couponId,
@@ -67,6 +66,9 @@ const checkOutpage = async (req, res) => {
       if (coupon && totalPrice >= coupon.minPurchase) {
         if (coupon.type === 'percentage') {
           discountAmount = Math.floor((totalPrice * coupon.offerPrice) / 100);
+          if (coupon.maxAmount && discountAmount > coupon.maxAmount) {
+            discountAmount = coupon.maxAmount;
+          }
         } else if (coupon.type === 'fixed') {
           discountAmount = coupon.offerPrice;
         }
@@ -75,7 +77,14 @@ const checkOutpage = async (req, res) => {
           discountAmount = totalPrice;
         }
         couponCode = coupon.couponCode;
+
+        // Update session with validated coupon data
+        req.session.appliedCoupon = { couponId: coupon._id, couponCode, discount: discountAmount };
+        await new Promise((resolve, reject) => {
+          req.session.save(err => (err ? reject(err) : resolve()));
+        });
       } else {
+        console.log('Invalid coupon, clearing session');
         req.session.appliedCoupon = null;
         appliedCoupon = null;
         await new Promise((resolve, reject) => {
@@ -84,7 +93,7 @@ const checkOutpage = async (req, res) => {
       }
     }
 
-    const grandTotal = totalPrice - discountAmount;
+    const grandTotal = Math.max(totalPrice - discountAmount, 0);
 
 
     res.render("checkOut", {
@@ -106,16 +115,13 @@ const checkOutpage = async (req, res) => {
         grandTotal,
       },
       coupon,
-      appliedCoupon: appliedCoupon ? { ...appliedCoupon, code: couponCode } : null,
+      appliedCoupon: appliedCoupon ? { couponId: appliedCoupon.couponId, code: couponCode, discount: discountAmount } : null,
     });
-
   } catch (error) {
     console.error("Checkout page error:", error);
     res.redirect("/pageNotFound");
   }
 };
-
-
 const checkoutHandler = async (req, res) => {
   try {
     const userId = req.session.user;

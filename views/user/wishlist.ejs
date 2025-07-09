@@ -15,7 +15,7 @@
         <div class="container">
             <!-- Enhanced Breadcrumb -->
             <nav class="breadcrumb-nav fade-in">
-                <a href="/home" class="me-2">
+                <a href="/" class="me-2">
                     <i class="fas fa-home me-1"></i>Home
                 </a>
                 <span class="me-2">›</span>
@@ -215,7 +215,6 @@
                     });
 
                     const data = await response.json();
-                    console.log('Remove Response:', data);
 
                     if (data.success) {
                         row.remove();

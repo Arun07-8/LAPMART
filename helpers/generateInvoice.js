@@ -38,7 +38,7 @@ const generateInvoice = async (order, user, outputPath) => {
       });
 
       writeStream.on('finish', () => {
-        console.log('Invoice generated successfully:', outputPath);
+      
         resolve();
       });
 

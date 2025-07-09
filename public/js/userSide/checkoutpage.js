@@ -34,9 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const productId = elements.productIdInput?.value;
   let appliedCoupon = elements.appliedCouponIdInput?.value || null;
   const appliedCouponCode = elements.couponInput?.value || '';
-  const discountAmount = parseFloat(elements.checkoutData.dataset.discountAmount || '0');
-
-  console.log('Initial Coupon State:', { appliedCoupon, appliedCouponCode, discountAmount });
+  let discountAmount = parseFloat(elements.checkoutData.dataset.discountAmount || '0');
 
   try {
     cartItems = JSON.parse(elements.cartItemsInput.value);
@@ -403,7 +401,19 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(data.message || 'Failed to apply coupon');
       }
 
+      // Update session with applied coupon
+      await fetch('/coupons/update-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          couponId: data.couponId,
+          couponCode: data.couponCode,
+          discount: data.discount,
+        }),
+      });
+
       appliedCoupon = data.couponId;
+      discountAmount = data.discount;
       totalAmount = data.newTotal;
       updatePriceDisplay(data.discount, data.newTotal);
       updateCouponButton(data.couponCode, true);
@@ -415,10 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
         icon: 'success',
         title: 'Coupon Applied',
         text: `Coupon ${couponCode} applied successfully!`,
-      })
-      .then(()=>{
-        window.location.reload()
-      })
+      });
     } catch (err) {
       console.error('Apply coupon error:', err);
       Swal.fire({ icon: 'error', title: 'Error', text: err.message || 'Failed to apply coupon' });
@@ -449,7 +456,14 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(data.message || 'Failed to remove coupon');
       }
 
+      // Clear session coupon
+      await fetch('/coupons/clear-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
       appliedCoupon = null;
+      discountAmount = 0;
       totalAmount = originalTotal;
       updatePriceDisplay(0, originalTotal);
       updateCouponButton('', false);
@@ -457,10 +471,7 @@ document.addEventListener('DOMContentLoaded', () => {
       elements.appliedCouponIdInput.value = '';
       elements.totalAmountInput.value = originalTotal;
 
-      Swal.fire({ icon: 'info', title: 'Coupon Removed', text: 'Coupon removed successfully' })
-        .then(()=>{
-        window.location.reload()
-      })
+      Swal.fire({ icon: 'info', title: 'Coupon Removed', text: 'Coupon removed successfully' });
     } catch (err) {
       console.error('Remove coupon error:', err);
       Swal.fire({ icon: 'error', title: 'Error', text: err.message || 'Failed to remove coupon' });
@@ -470,12 +481,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function updatePriceDisplay(discountAmount, finalAmount) {
+  function updatePriceDisplay(discount, finalAmount) {
     const breakdown = document.querySelector('.checkout-price-breakdown');
     const totalEl = document.querySelector('.checkout-grand-total span:last-child');
+    const grandTotalEl = document.querySelector('.checkout-grand-total1 span:last-child');
 
     let couponRow = document.getElementById('coupon-discount-row');
-    if (discountAmount > 0) {
+    if (discount > 0) {
       if (!couponRow) {
         couponRow = document.createElement('div');
         couponRow.className = 'checkout-price-row';
@@ -484,13 +496,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       couponRow.innerHTML = `
         <span class="checkout-price-label">Coupon Discount</span>
-        <span class="checkout-price-value checkout-savings">- ₹${discountAmount.toFixed(2)}</span>
+        <span class="checkout-price-value checkout-savings">- ₹${discount.toFixed(2)}</span>
       `;
     } else if (couponRow) {
       couponRow.remove();
     }
 
     if (totalEl) totalEl.textContent = `₹${finalAmount.toFixed(2)}`;
+    if (grandTotalEl) grandTotalEl.textContent = `₹${finalAmount.toFixed(2)}`;
   }
 
   function updateCouponButton(code, applied) {
@@ -506,8 +519,7 @@ document.addEventListener('DOMContentLoaded', () => {
       input.disabled = true;
       input.value = code;
       newApplyBtn.addEventListener('click', removeCoupon);
-    }
-     else {
+    } else {
       newApplyBtn.textContent = 'Apply';
       newApplyBtn.classList.remove('remove-coupon');
       input.disabled = false;
@@ -537,60 +549,60 @@ document.addEventListener('DOMContentLoaded', () => {
       Swal.fire({ icon: 'error', title: 'Error', text: err.message || 'Failed to load coupons' });
     }
   }
-function displayCoupons(coupons) {
-  const list = document.getElementById('available-coupon-list');
-  if (!list) {
-    console.error('Coupon list element not found');
-    return;
-  }
-  list.innerHTML = '';
 
-  if (!coupons || coupons.length === 0) {
-    list.innerHTML = '<li class="no-coupons">No coupons available.</li>';
-    return;
-  }
+  function displayCoupons(coupons) {
+    const list = document.getElementById('available-coupon-list');
+    if (!list) {
+      console.error('Coupon list element not found');
+      return;
+    }
+    list.innerHTML = '';
 
-  coupons.forEach(coupon => {
-    const li = document.createElement('li');
-    li.className = 'coupon-item';
-    li.innerHTML = `
-      <div class="coupon-card">
-        <div class="coupon-header">
-          <div class="coupon-code">${coupon.couponCode}</div>
-          <div class="coupon-discount">₹${coupon.offerPrice.toFixed(2)} OFF</div>
-        </div>
-        <div class="coupon-details">
-          <p class="coupon-description">${coupon.description || 'Use this coupon to save more'}</p>
-          <div class="coupon-terms">
-            <span class="coupon-min-order">Min order: ₹${coupon.minPurchase.toFixed(2)}</span>
-            <span class="coupon-max-discount">Max discount: ₹${coupon.maxDiscount?.toFixed(2) || coupon.offerPrice.toFixed(2)}</span>
+    if (!coupons || coupons.length === 0) {
+      list.innerHTML = '<li class="no-coupons">No coupons available.</li>';
+      return;
+    }
+
+    coupons.forEach(coupon => {
+      const li = document.createElement('li');
+      li.className = 'coupon-item';
+      li.innerHTML = `
+        <div class="coupon-card">
+          <div class="coupon-header">
+            <div class="coupon-code">${coupon.couponCode}</div>
+            <div class="coupon-discount">₹${coupon.offerPrice.toFixed(2)} OFF</div>
           </div>
-          <div class="coupon-validity">Valid till: ${new Date(coupon.validUpto).toLocaleDateString()}</div>
+          <div class="coupon-details">
+            <p class="coupon-description">${coupon.description || 'Use this coupon to save more'}</p>
+            <div class="coupon-terms">
+              <span class="coupon-min-order">Min order: ₹${coupon.minPurchase.toFixed(2)}</span>
+              <span class="coupon-max-discount">Max discount: ₹${coupon.maxDiscount?.toFixed(2) || coupon.offerPrice.toFixed(2)}</span>
+            </div>
+            <div class="coupon-validity">Valid till: ${new Date(coupon.validUpto).toLocaleDateString()}</div>
+          </div>
+          <button class="apply-coupon-btn" onclick="applyCouponFromModal('${coupon.couponCode}')">Apply Coupon</button>
         </div>
-        <button class="apply-coupon-btn" onclick="applyCouponFromModal('${coupon.couponCode}')">Apply Coupon</button>
-      </div>
-    `;
-    list.appendChild(li);
-  });
+      `;
+      list.appendChild(li);
+    });
 
-  // Reset scroll position of modal body
-  const modalBody = document.querySelector('.modal-body');
-  if (modalBody) {
-    modalBody.scrollTop = 0;
+    const modalBody = document.querySelector('.modal-body');
+    if (modalBody) {
+      modalBody.scrollTop = 0;
+    }
   }
-}
 
-window.applyCouponFromModal = function (code) {
-  const input = document.getElementById('checkout-coupon-input');
-  const modal = document.getElementById('coupon-modal');
-  if (input && modal) {
-    input.value = code;
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
-    applyCoupon(code);
-  } else {
-    console.error('Coupon input or modal not found');
-    Swal.fire({ icon: 'error', title: 'Error', text: 'Unable to apply coupon' });
-  }
-};
-});` `
+  window.applyCouponFromModal = function (code) {
+    const input = document.getElementById('checkout-coupon-input');
+    const modal = document.getElementById('coupon-modal');
+    if (input && modal) {
+      input.value = code;
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+      applyCoupon(code);
+    } else {
+      console.error('Coupon input or modal not found');
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Unable to apply coupon' });
+    }
+  };
+});

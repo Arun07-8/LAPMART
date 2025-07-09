@@ -200,6 +200,9 @@ const getOrderViewPage = async (req, res) => {
     const orderedItemsWithOffers = [];
 
     for (const item of order.orderedItems) {
+
+      const returnRejectNote=item.returnRejectNote
+
       const updatedProduct = await applyBestOffer(item.product);
       const quantity = item.quantity;
       const originalPrice = item.product.salePrice;
@@ -227,6 +230,7 @@ const getOrderViewPage = async (req, res) => {
         hasOffer,
         status: item.status,
         paymentStatus: item.paymentStatus || order.paymentStatus || 'pending',
+        returnRejectNote
       });
     }
 
@@ -261,96 +265,130 @@ const getOrderViewPage = async (req, res) => {
 
 const cancelOrder = async (req, res) => {
   try {
-    const { orderId, productId, reason, details } = req.body;
+    const { orderId, productIds, reason, details } = req.body;
+  
+    if (!orderId) {
+      return res.status(400).json({ success: false, message: "Order ID is required" });
+    }
 
-
-    const order = await Order.findById(orderId);
+    const order = await Order.findById(orderId).populate("orderedItems.product");
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
-    if (productId) {
-      const item = order.orderedItems.find(
-        (item) => item.product.toString() === productId
-      );
-      console.log(item,"item")
+    if (!order.orderedItems || order.orderedItems.length === 0) {
+      return res.status(400).json({ success: false, message: "No items in the order" });
+    }
+
+
+   let productIdsArray = [];
+
+if (Array.isArray(productIds)) {
+  productIdsArray = productIds;
+} else if (typeof productIds === "string") {
+  productIdsArray = [productIds];
+}
+
+
+const isFullCancellation = productIdsArray.length === 0 || 
+  (productIdsArray.length === order.orderedItems.length && 
+   productIdsArray.every(id => order.orderedItems.some(item => item.product._id.toString() === id)));
+
+if (isFullCancellation) {
+  productIdsArray = order.orderedItems.map(item => item.product._id.toString());
+}
+
+
+    if (productIdsArray.length === 0) {
+      return res.status(400).json({ success: false, message: "No products selected for cancellation" });
+    }
+
+   let totalRefundAmount = 0;
+    const failedItems = [];
+    let cancelledCount = 0;
+
+
+    const totalOrderSubtotal = order.orderedItems.reduce((sum, item) => sum + (item.subtotal || 0), 0);
+    const couponDiscountPerUnit = totalOrderSubtotal > 0 && order.discount ? (order.discount || 0) / totalOrderSubtotal : 0;
+
+    for (const productId of productIdsArray) {
+      const item = order.orderedItems.find( item => item.product && item.product._id.toString() === productId);  
       if (!item) {
-        return res.status(404).json({ success: false, message: "Product not found in order" });
+        failedItems.push({ productId, reason: "Product not found in order" });
+        continue;
       }
-      
-      if (["Shipped", "Delivered"].includes(item.status)) {
-      return res.status(400).json({
-          success: false,
-          message: "Cannot cancel item after it has been shipped or delivered"
-        });
+
+      if (["Shipped", "Delivered", "Return Request", "Returned", "Return Rejected"].includes(item.status)) {
+        failedItems.push({ productId, reason: `Cannot cancel: Item is ${item.status}` });
+        continue;
       }
 
       if (item.status === "Cancelled") {
-        return res.status(400).json({ success: false, message: "Product already cancelled" });
+        failedItems.push({ productId, reason: "Already cancelled" });
+        continue;
       }
 
-      // Cancel item
+
+const itemSubtotal = item.originalPrice || 0;
+const itemOfferDiscount = item.offerDiscount || 0;
+const itemCouponDiscount = item.couponDiscount || 0;
+const itemRefund = Math.max(0, itemSubtotal - itemOfferDiscount - itemCouponDiscount);
+
+      
       item.status = "Cancelled";
-
-      // Refund to wallet for Razorpay or Wallet payments
-      if (["Razorpay", "Wallet"].includes(order.paymentMethod)) {
-        const CancelAmount = order.totalPrice;
-        const transactionId = `TXN_${Date.now()}_${Math.floor(100000 + Math.random() * 700000)}`;
-
-        let wallet = await Wallet.findOne({ user: order.userId });
-
-        if (!wallet) {
-          wallet = new Wallet({
-            user: order.userId,
-            balance: CancelAmount,
-            transactions: [
-              {
-                amount: CancelAmount,
-                type: 'credit',
-                description: `Refund for cancelled item in order ${order.orderId}`,
-                transactionId,
-                status: 'success',
-              },
-            ],
-          });
-        } else {
-          wallet.balance += CancelAmount;
-          wallet.transactions.push({
-            amount: CancelAmount,
-            type: 'credit',
-            description: `Refund for cancelled item in order ${order.orderId}`,
-            transactionId,
-            status: 'success',
-          });
-        }
-
-        await wallet.save();
-      }
-
-      // Check if all items are cancelled
-      const allCancelled = order.orderedItems.every(i => i.status === "Cancelled");
-      if (allCancelled) {
-        order.isCancelled = true;
-        order.cancelReason = reason || "All items cancelled";
-        order.additionalNote = details || "";
-      }
-
-    } else {
-      return res.status(400).json({ success: false, message: "Only item-level cancel is supported in this flow" });
+      item.cancelReason = reason || "No reason provided";
+      item.additionalNote = details || "";
+      totalRefundAmount += itemRefund > 0 ? itemRefund : 0;
+      cancelledCount++;
     }
+
+    if (["Razorpay", "Wallet"].includes(order.paymentMethod) && totalRefundAmount > 0 && order.paymentStatus === "success") {
+      const transactionId = `TXN_${Date.now()}_${Math.floor(100000 + Math.random() * 700000)}`;
+      let wallet = await Wallet.findOne({ user: order.userId });
+
+      const transaction = {
+        amount: totalRefundAmount,
+        type: "credit",
+        description: `Refund for cancelled items in order ${order.orderId}`,
+        transactionId,
+        status: "success",
+      };
+
+      if (!wallet) {
+        wallet = new Wallet({
+          user: order.userId,
+          balance: totalRefundAmount,
+          transactions: [transaction],
+        });
+      } else {
+        wallet.balance += totalRefundAmount;
+        wallet.transactions.push(transaction);
+      }
+
+      await wallet.save();
+    }
+
+ const allCancelled = order.orderedItems.every(item => item.status === "Cancelled");
+if (allCancelled) {
+  order.isCancelled = true;
+  order.cancelReason = reason || "All items cancelled";
+  order.additionalNote = details || "";
+}
+
 
     await order.save();
 
     res.status(200).json({
       success: true,
-      message: "Item cancelled successfully. Wallet credited if Razorpay or Wallet was used."
+      message: `Cancelled ${cancelledCount} product(s). Refund: ₹${totalRefundAmount.toFixed(2)}`,
+      failedItems,
     });
-
   } catch (error) {
-    console.error("Cancel Order Error:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error('Cancel Order Error:', error);
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
+
 
 
 
@@ -364,7 +402,7 @@ const orderReturn = async (req, res) => {
         { _id: orderId, "orderedItems.product": productId },
         {
           $set: {
-            "orderedItems.$.status": "Return Request",
+            "orderedItems.$.status": "Return Requested",
             "orderedItems.$.isReturned": true,
             "orderedItems.$.returnReason": reason,
             "orderedItems.$.returnNote": note
@@ -395,7 +433,7 @@ const orderReturn = async (req, res) => {
 const downloadInvoice = async (req, res) => {
   try {
     const orderId = req.params.orderId;
-    console.log(orderId)
+
     if (!orderId) {
       console.error('No orderId provided');
       return res.status(400).json({ message: 'Order ID is required' });
@@ -440,7 +478,7 @@ const downloadInvoice = async (req, res) => {
       return res.status(500).json({ message: 'Invoice file was not created properly' });
     }
 
-    // Get file stats for proper headers
+  
     const stats = await fs.promises.stat(outputPath);
 
     // Set proper headers
@@ -449,7 +487,7 @@ const downloadInvoice = async (req, res) => {
     res.setHeader('Content-Length', stats.size);
     res.setHeader('Cache-Control', 'no-cache');
 
-    // Create read stream and pipe to response
+   
     const readStream = fs.createReadStream(outputPath);
     
     readStream.on('error', (err) => {

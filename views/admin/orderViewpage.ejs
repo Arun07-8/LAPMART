@@ -33,11 +33,11 @@
                         </span>
                         <div class="status-controls">
                             <select class="form-select status-dropdown" id="orderStatus_<%= order._id %>">
-                                <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
-                                <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
-                                <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                                <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                                <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+  <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+  <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+  <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+  <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+  <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
                             </select>
                             <button class="btn update-btn" data-order-id="<%= order._id %>" onclick="updateOrderStatus('<%= order._id %>', this)">
                                 <i class="fas fa-sync-alt me-1"></i> Update Status
@@ -100,7 +100,7 @@
                                         <th>Product</th>
                                         <th>Product Name</th>
                                         <th>Quantity</th>
-                                        <th>Unit Price</th>
+                                        <th>original Price</th>
                                         <th>Total Price</th>
                                         <th>Status</th>
                                     </tr>
@@ -136,7 +136,7 @@
 
       <!-- Total Price (unit × quantity) -->
       <td>
-        <span class="price-text">₹<%= item.product.salePrice.toFixed(2) %></span>
+        <span class="price-text">₹<%= item.product.finalPrice.toFixed(2) %></span>
       </td>
 
       <!-- Status -->

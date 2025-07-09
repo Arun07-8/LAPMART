@@ -386,7 +386,7 @@ document.getElementById('couponForm').addEventListener('submit', async function(
                 body: JSON.stringify(couponData)
             });
             const data = await response.json();
-            console.log(data)
+    
             if (response.ok) {
                 Swal.fire({
                     icon: 'success',

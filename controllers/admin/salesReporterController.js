@@ -3,16 +3,16 @@ const PDFDocument = require("pdfkit");
 const ExcelJS = require("exceljs");
 const moment = require("moment");
 
-    
+
 const getSalesReport = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = 8;
         const skip = (page - 1) * limit;
 
-
         const ordersAggregate = await Order.aggregate([
             { $unwind: { path: "$orderedItems", preserveNullAndEmptyArrays: true } },
+            { $match: { "orderedItems.status": "Delivered" } }, 
             {
                 $group: {
                     _id: "$_id",
@@ -40,30 +40,38 @@ const getSalesReport = async (req, res) => {
             { $limit: limit }
         ]);
 
-        // Count total orders
         const countAgg = await Order.aggregate([
             { $unwind: { path: "$orderedItems", preserveNullAndEmptyArrays: true } },
+            { $match: { "orderedItems.status": "Delivered" } }, 
             { $group: { _id: "$_id" } },
             { $count: "total" }
         ]);
         const totalOrders = countAgg[0]?.total || 0;
         const totalPages = Math.ceil(totalOrders / limit);
 
-        // Calculate summary
         let grossSales = 0;
         let totalDiscount = 0;
         let totalCoupons = 0;
         let netSales = 0;
         let totalReturns = 0;
 
-        const deliveredOrders = await Order.find({ "orderedItems.status": { $in: ["Delivered", "Returned"] } }).lean();
-        deliveredOrders.forEach(order => {
-            const isReturned = order.orderedItems.some(item => item.status === "Returned");
-            grossSales += parseFloat(order.totalPrice) || 0;
-            totalDiscount += parseFloat(order.discount) || 0;
-            totalCoupons += order.couponApplied ? parseFloat(order.discount) || 0 : 0;
-            netSales += isReturned ? 0 : parseFloat(order.finalAmount) || 0;
-            totalReturns += isReturned ? 1 : 0;
+        const allOrders = await Order.find().lean();
+        allOrders.forEach(order => {
+            order.orderedItems.forEach(item => {
+                if (item.status === "Delivered") { 
+                    const itemTotal = parseFloat(item.total) || 0;
+                    const itemDiscount = parseFloat(item.discount) || 0;
+                    const itemFinal = parseFloat(item.finalPrice) || itemTotal - itemDiscount;
+
+                    grossSales += itemTotal;
+                    totalDiscount += itemDiscount;
+                    totalCoupons += order.couponApplied ? itemDiscount : 0;
+                    netSales += itemFinal; 
+                    if (item.status === "Returned") {
+                        totalReturns += 1; 
+                    }
+                }
+            });
         });
 
         res.render("salesReport", {
@@ -85,14 +93,13 @@ const getSalesReport = async (req, res) => {
     }
 };
 
-// Filter Sales Report
+
 const filterSalesReport = async (req, res) => {
     try {
         const { search, userSearch, paymentMethod, orderStatus, dateRange, startDate, endDate, page = 1, limit = 10 } = req.body;
         const skip = (page - 1) * limit;
         let matchQuery = {};
 
-        // Input validation
         if (search && typeof search !== "string") {
             return res.status(400).json({ success: false, error: "Invalid order ID search term" });
         }
@@ -106,11 +113,9 @@ const filterSalesReport = async (req, res) => {
             return res.status(400).json({ success: false, error: "Invalid order status" });
         }
 
-        // Build match query
         if (search && search.trim()) {
             matchQuery.orderId = { $regex: search.trim(), $options: "i" };
         }
-
         if (userSearch && userSearch.trim()) {
             matchQuery.$or = [
                 { "shippingAddress.name": { $regex: userSearch.trim(), $options: "i" } },
@@ -118,15 +123,14 @@ const filterSalesReport = async (req, res) => {
                 { "shippingAddress.city": { $regex: userSearch.trim(), $options: "i" } }
             ];
         }
-
         if (paymentMethod) {
             matchQuery.paymentMethod = paymentMethod;
         }
 
-        // Handle date filtering
+        const dateFormat = "DD/MM/YYYY";
         if (dateRange && dateRange !== "custom") {
             let start, end;
-            const now = moment().utc(); // Use UTC to avoid timezone issues
+            const now = moment().utc();
             switch (dateRange) {
                 case "today":
                     start = now.clone().startOf("day").toDate();
@@ -161,30 +165,36 @@ const filterSalesReport = async (req, res) => {
                     end = now.clone().subtract(1, "year").endOf("year").toDate();
                     break;
                 default:
-                    start = now.clone().subtract(29, "days").startOf("day").toDate();
-                    end = now.clone().endOf("day").toDate();
+                    start = null;
+                    end = null;
             }
-            matchQuery.createdAt = { $gte: start, $lte: end };
-        } else if (dateRange === "custom" && (startDate || endDate)) {
-            const dateFormat = "DD/MM/YYYY";
-            if (startDate && !moment(startDate, dateFormat, true).isValid()) {
-                return res.status(400).json({ success: false, error: "Invalid start date format. Use DD/MM/YYYY." });
+            if (start && end) {
+                matchQuery.createdAt = { $gte: start, $lte: end };
             }
-            if (endDate && !moment(endDate, dateFormat, true).isValid()) {
-                return res.status(400).json({ success: false, error: "Invalid end date format. Use DD/MM/YYYY." });
-            }
-
-            if (startDate) {
-                matchQuery.createdAt = matchQuery.createdAt || {};
-                matchQuery.createdAt.$gte = moment(startDate, dateFormat).utc().startOf("day").toDate();
-            }
-            if (endDate) {
-                matchQuery.createdAt = matchQuery.createdAt || {};
-                matchQuery.createdAt.$lte = moment(endDate, dateFormat).utc().endOf("day").toDate();
+        } else if (dateRange === "custom") {
+            if (startDate || endDate) {
+                if (startDate && !moment(startDate, dateFormat, true).isValid()) {
+                    return res.status(400).json({ success: false, error: "Invalid start date format. Use DD/MM/YYYY." });
+                }
+                if (endDate && !moment(endDate, dateFormat, true).isValid()) {
+                    return res.status(400).json({ success: false, error: "Invalid end date format. Use DD/MM/YYYY." });
+                }
+                if (startDate) {
+                    matchQuery.createdAt = matchQuery.createdAt || {};
+                    matchQuery.createdAt.$gte = moment(startDate, dateFormat).utc().startOf("day").toDate();
+                }
+                if (endDate) {
+                    matchQuery.createdAt = matchQuery.createdAt || {};
+                    matchQuery.createdAt.$lte = moment(endDate, dateFormat).utc().endOf("day").toDate();
+                }
+                if (startDate && !endDate) {
+                    matchQuery.createdAt.$lte = moment(startDate, dateFormat).utc().endOf("day").toDate();
+                } else if (endDate && !startDate) {
+                    matchQuery.createdAt.$gte = moment(endDate, dateFormat).utc().startOf("day").toDate();
+                }
             }
         }
 
-        // Aggregate filtered orders
         const ordersAggregate = await Order.aggregate([
             { $match: matchQuery },
             { $unwind: { path: "$orderedItems", preserveNullAndEmptyArrays: true } },
@@ -216,7 +226,6 @@ const filterSalesReport = async (req, res) => {
             { $limit: parseInt(limit) }
         ]);
 
-        // Count total filtered orders
         const totalOrdersCount = await Order.aggregate([
             { $match: matchQuery },
             { $unwind: { path: "$orderedItems", preserveNullAndEmptyArrays: true } },
@@ -228,7 +237,6 @@ const filterSalesReport = async (req, res) => {
         const totalCount = totalOrdersCount.length > 0 ? totalOrdersCount[0].total : 0;
         const totalPages = Math.ceil(totalCount / limit);
 
-        // Calculate summary for filtered data
         let grossSales = 0;
         let totalDiscount = 0;
         let totalCoupons = 0;
@@ -281,17 +289,15 @@ const filterSalesReport = async (req, res) => {
     }
 };
 
-// Export Sales Report as PDF
 const exportSalesReportPDF = async (req, res) => {
     try {
         const { search, userSearch, paymentMethod, orderStatus, dateRange, startDate, endDate } = req.body;
         let matchQuery = {};
 
-        // Build match query
+        // Build matchQuery for filtering orders (unchanged)
         if (search && search.trim()) {
             matchQuery.orderId = { $regex: search.trim(), $options: "i" };
         }
-
         if (userSearch && userSearch.trim()) {
             matchQuery.$or = [
                 { "shippingAddress.name": { $regex: userSearch.trim(), $options: "i" } },
@@ -299,15 +305,14 @@ const exportSalesReportPDF = async (req, res) => {
                 { "shippingAddress.city": { $regex: userSearch.trim(), $options: "i" } }
             ];
         }
-
         if (paymentMethod) {
             matchQuery.paymentMethod = paymentMethod;
         }
 
-        // Handle date filtering
+        const dateFormat = "DD/MM/YYYY";
         if (dateRange && dateRange !== "custom") {
             let start, end;
-            const now = moment().utc(); // Use UTC to avoid timezone issues
+            const now = moment().utc();
             switch (dateRange) {
                 case "today":
                     start = now.clone().startOf("day").toDate();
@@ -342,30 +347,37 @@ const exportSalesReportPDF = async (req, res) => {
                     end = now.clone().subtract(1, "year").endOf("year").toDate();
                     break;
                 default:
-                    start = now.clone().subtract(29, "days").startOf("day").toDate();
-                    end = now.clone().endOf("day").toDate();
+                    start = null;
+                    end = null;
             }
-            matchQuery.createdAt = { $gte: start, $lte: end };
-        } else if (dateRange === "custom" && (startDate || endDate)) {
-            const dateFormat = "DD/MM/YYYY";
-            if (startDate && !moment(startDate, dateFormat, true).isValid()) {
-                return res.status(400).json({ success: false, error: "Invalid start date format. Use DD/MM/YYYY." });
+            if (start && end) {
+                matchQuery.createdAt = { $gte: start, $lte: end };
             }
-            if (endDate && !moment(endDate, dateFormat, true).isValid()) {
-                return res.status(400).json({ success: false, error: "Invalid end date format. Use DD/MM/YYYY." });
-            }
-
-            if (startDate) {
-                matchQuery.createdAt = matchQuery.createdAt || {};
-                matchQuery.createdAt.$gte = moment(startDate, dateFormat).utc().startOf("day").toDate();
-            }
-            if (endDate) {
-                matchQuery.createdAt = matchQuery.createdAt || {};
-                matchQuery.createdAt.$lte = moment(endDate, dateFormat).utc().endOf("day").toDate();
+        } else if (dateRange === "custom") {
+            if (startDate || endDate) {
+                if (startDate && !moment(startDate, dateFormat, true).isValid()) {
+                    return res.status(400).json({ success: false, error: "Invalid start date format. Use DD/MM/YYYY." });
+                }
+                if (endDate && !moment(endDate, dateFormat, true).isValid()) {
+                    return res.status(400).json({ success: false, error: "Invalid end date format. Use DD/MM/YYYY." });
+                }
+                if (startDate) {
+                    matchQuery.createdAt = matchQuery.createdAt || {};
+                    matchQuery.createdAt.$gte = moment(startDate, dateFormat).utc().startOf("day").toDate();
+                }
+                if (endDate) {
+                    matchQuery.createdAt = matchQuery.createdAt || {};
+                    matchQuery.createdAt.$lte = moment(endDate, dateFormat).utc().endOf("day").toDate();
+                }
+                if (startDate && !endDate) {
+                    matchQuery.createdAt.$lte = moment(startDate, dateFormat).utc().endOf("day").toDate();
+                } else if (endDate && !startDate) {
+                    matchQuery.createdAt.$gte = moment(endDate, dateFormat).utc().startOf("day").toDate();
+                }
             }
         }
 
-        // Aggregate orders for export
+        // Fetch orders with aggregation (unchanged)
         const ordersAggregate = await Order.aggregate([
             { $match: matchQuery },
             { $unwind: { path: "$orderedItems", preserveNullAndEmptyArrays: true } },
@@ -395,32 +407,31 @@ const exportSalesReportPDF = async (req, res) => {
             { $sort: { createdAt: -1 } }
         ]);
 
-        // Calculate summary
+        const uniqueOrders = [];
+        const orderIds = new Set();
+        ordersAggregate.forEach(order => {
+            if (!orderIds.has(order._id.toString())) {
+                orderIds.add(order._id.toString());
+                uniqueOrders.push(order);
+            }
+        });
+
+        // Calculate summary metrics (unchanged)
         let grossSales = 0;
         let totalDiscount = 0;
         let totalCoupons = 0;
         let netSales = 0;
         let totalReturns = 0;
-        let totalOrders = ordersAggregate.length;
-        let totalRefunds = 0;
-        let avgOrderValue = 0;
+        let totalOrders = uniqueOrders.length;
 
-        ordersAggregate.forEach(order => {
+        uniqueOrders.forEach(order => {
             const isReturned = order.orderedItems.some(item => item.status === "Returned");
-            const isCancelled = order.orderedItems.some(item => item.status === "Cancelled");
             grossSales += parseFloat(order.totalPrice) || 0;
             totalDiscount += parseFloat(order.discount) || 0;
             totalCoupons += order.couponApplied ? parseFloat(order.discount) || 0 : 0;
-            if (!isReturned && !isCancelled) {
-                netSales += parseFloat(order.finalAmount) || 0;
-            }
-            if (isReturned) {
-                totalReturns += 1;
-                totalRefunds += parseFloat(order.finalAmount) || 0;
-            }
+            netSales += isReturned ? 0 : parseFloat(order.finalAmount) || 0;
+            totalReturns += isReturned ? 1 : 0;
         });
-
-        avgOrderValue = totalOrders > 0 ? (netSales / totalOrders) : 0;
 
         const summary = {
             grossSales: grossSales.toFixed(2),
@@ -428,13 +439,10 @@ const exportSalesReportPDF = async (req, res) => {
             totalCoupons: totalCoupons.toFixed(2),
             netSales: netSales.toFixed(2),
             totalOrders,
-            totalReturns,
-            totalRefunds: totalRefunds.toFixed(2),
-            avgOrderValue: avgOrderValue.toFixed(2),
-            conversionRate: totalOrders > 0 ? ((totalOrders - totalReturns) / totalOrders * 100).toFixed(2) : 0
+            totalReturns
         };
 
-        // Create PDF
+        // Initialize PDF document
         const doc = new PDFDocument({
             margin: 1,
             size: 'A4',
@@ -476,15 +484,16 @@ const exportSalesReportPDF = async (req, res) => {
             }
         }
 
+        // Modified header to include "Lapkart"
         function addPageHeader() {
             drawBox(40, 40, doc.page.width - 80, 80, colors.primary);
             doc.font(fonts.title)
                .fontSize(24)
                .fillColor('white')
-               .text("SALES REPORT", 60, 65, { align: 'center', width: doc.page.width - 120 });
+               .text("Lapkart - Sales Report", 60, 55, { align: 'center', width: doc.page.width - 120 });
             doc.font(fonts.body)
                .fontSize(12)
-               .text(`Generated on: ${moment().format("DD MMMM YYYY, hh:mm A")}`, 60, 90, {
+               .text(`Generated on: ${moment().utc().format("DD MMMM YYYY, hh:mm A")}`, 60, 85, {
                    align: 'center',
                    width: doc.page.width - 120
                });
@@ -492,7 +501,7 @@ const exportSalesReportPDF = async (req, res) => {
 
         addPageHeader();
 
-        // Add filters section
+        // Filter text for report
         let filterText = "";
         let hasFilters = false;
         if (dateRange && dateRange !== "custom") {
@@ -524,7 +533,7 @@ const exportSalesReportPDF = async (req, res) => {
                });
         }
 
-        // Add summary section
+        // Sales Summary Section
         doc.moveDown(3);
         const summaryY = doc.y;
         drawBox(40, summaryY, doc.page.width - 80, 30, colors.secondary);
@@ -536,8 +545,7 @@ const exportSalesReportPDF = async (req, res) => {
         const summaryData = [
             ["Gross Sales", `₹${summary.grossSales}`, "Total Orders", summary.totalOrders],
             ["Total Discount", `₹${summary.totalDiscount}`, "Total Returns", summary.totalReturns],
-            ["Coupons Applied", `₹${summary.totalCoupons}`, "Avg Order Value", `₹${summary.avgOrderValue}`],
-            ["Net Sales", `₹${summary.netSales}`, "Conversion Rate", `${summary.conversionRate}%`]
+            ["Coupons Applied", `₹${summary.totalCoupons}`, "Net Sales", `₹${summary.netSales}`]
         ];
 
         let currentSummaryY = summaryY + 40;
@@ -553,9 +561,9 @@ const exportSalesReportPDF = async (req, res) => {
             doc.font(fonts.heading).text(row[3], 460, rowY + 8, { width: 100 });
         });
 
-        // Add order details table
+        // Order Details Table
         doc.moveDown(4);
-        const tableStartY = currentSummaryY + 120;
+        const tableStartY = currentSummaryY + 100;
         drawBox(10, tableStartY, doc.page.width - 20, 25, colors.primary);
         doc.font(fonts.heading)
            .fontSize(14)
@@ -589,7 +597,7 @@ const exportSalesReportPDF = async (req, res) => {
         let currentY = headerY + 35;
         const rowHeight = 25;
 
-        ordersAggregate.forEach((order, index) => {
+        uniqueOrders.forEach((order, index) => {
             if (currentY > doc.page.height - 100) {
                 doc.addPage();
                 addPageHeader();
@@ -597,7 +605,7 @@ const exportSalesReportPDF = async (req, res) => {
                 drawBox(tableLeft, currentY, tableWidth, 30, colors.lightGray, colors.darkGray);
                 doc.font(fonts.heading).fontSize(10).fillColor(colors.text);
                 headers.forEach((header, i) => {
-                    const x = tableLeft + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
+                    const x = tableLeft + colWidths.slice(0, i).replace((a, b) => a + b, 0);
                     doc.text(header, x + 5, currentY + 10, {
                         width: colWidths[i] - 10,
                         align: "center"
@@ -615,7 +623,7 @@ const exportSalesReportPDF = async (req, res) => {
 
             const rowData = [
                 order.orderId || "N/A",
-                moment(order.createdAt).format("DD MMM YY"),
+                moment(order.createdAt).utc().format("DD MMM YYYY"), // Ensure consistent date format
                 (order.shippingAddress?.name || "N/A").substring(0, 15),
                 `₹${(order.totalPrice || 0).toFixed(0)}`,
                 `₹${(order.discount || 0).toFixed(0)}`,
@@ -657,18 +665,14 @@ const exportSalesReportPDF = async (req, res) => {
         });
     }
 };
-
-// Export Sales Report as Excel
 const exportSalesReportExcel = async (req, res) => {
     try {
         const { search, userSearch, paymentMethod, orderStatus, dateRange, startDate, endDate } = req.body;
         let matchQuery = {};
 
-        // Build match query
         if (search && search.trim()) {
             matchQuery.orderId = { $regex: search.trim(), $options: "i" };
         }
-
         if (userSearch && userSearch.trim()) {
             matchQuery.$or = [
                 { "shippingAddress.name": { $regex: userSearch.trim(), $options: "i" } },
@@ -676,15 +680,14 @@ const exportSalesReportExcel = async (req, res) => {
                 { "shippingAddress.city": { $regex: userSearch.trim(), $options: "i" } }
             ];
         }
-
         if (paymentMethod) {
             matchQuery.paymentMethod = paymentMethod;
         }
 
-        // Handle date filtering
+        const dateFormat = "DD/MM/YYYY";
         if (dateRange && dateRange !== "custom") {
             let start, end;
-            const now = moment().utc(); // Use UTC to avoid timezone issues
+            const now = moment().utc();
             switch (dateRange) {
                 case "today":
                     start = now.clone().startOf("day").toDate();
@@ -719,30 +722,36 @@ const exportSalesReportExcel = async (req, res) => {
                     end = now.clone().subtract(1, "year").endOf("year").toDate();
                     break;
                 default:
-                    start = now.clone().subtract(29, "days").startOf("day").toDate();
-                    end = now.clone().endOf("day").toDate();
+                    start = null;
+                    end = null;
             }
-            matchQuery.createdAt = { $gte: start, $lte: end };
-        } else if (dateRange === "custom" && (startDate || endDate)) {
-            const dateFormat = "DD/MM/YYYY";
-            if (startDate && !moment(startDate, dateFormat, true).isValid()) {
-                return res.status(400).json({ success: false, error: "Invalid start date format. Use DD/MM/YYYY." });
+            if (start && end) {
+                matchQuery.createdAt = { $gte: start, $lte: end };
             }
-            if (endDate && !moment(endDate, dateFormat, true).isValid()) {
-                return res.status(400).json({ success: false, error: "Invalid end date format. Use DD/MM/YYYY." });
-            }
-
-            if (startDate) {
-                matchQuery.createdAt = matchQuery.createdAt || {};
-                matchQuery.createdAt.$gte = moment(startDate, dateFormat).utc().startOf("day").toDate();
-            }
-            if (endDate) {
-                matchQuery.createdAt = matchQuery.createdAt || {};
-                matchQuery.createdAt.$lte = moment(endDate, dateFormat).utc().endOf("day").toDate();
+        } else if (dateRange === "custom") {
+            if (startDate || endDate) {
+                if (startDate && !moment(startDate, dateFormat, true).isValid()) {
+                    return res.status(400).json({ success: false, error: "Invalid start date format. Use DD/MM/YYYY." });
+                }
+                if (endDate && !moment(endDate, dateFormat, true).isValid()) {
+                    return res.status(400).json({ success: false, error: "Invalid end date format. Use DD/MM/YYYY." });
+                }
+                if (startDate) {
+                    matchQuery.createdAt = matchQuery.createdAt || {};
+                    matchQuery.createdAt.$gte = moment(startDate, dateFormat).utc().startOf("day").toDate();
+                }
+                if (endDate) {
+                    matchQuery.createdAt = matchQuery.createdAt || {};
+                    matchQuery.createdAt.$lte = moment(endDate, dateFormat).utc().endOf("day").toDate();
+                }
+                if (startDate && !endDate) {
+                    matchQuery.createdAt.$lte = moment(startDate, dateFormat).utc().endOf("day").toDate();
+                } else if (endDate && !startDate) {
+                    matchQuery.createdAt.$gte = moment(endDate, dateFormat).utc().startOf("day").toDate();
+                }
             }
         }
 
-        // Aggregate orders for export
         const ordersAggregate = await Order.aggregate([
             { $match: matchQuery },
             { $unwind: { path: "$orderedItems", preserveNullAndEmptyArrays: true } },
@@ -772,15 +781,23 @@ const exportSalesReportExcel = async (req, res) => {
             { $sort: { createdAt: -1 } }
         ]);
 
-        // Calculate summary
+        const uniqueOrders = [];
+        const orderIds = new Set();
+        ordersAggregate.forEach(order => {
+            if (!orderIds.has(order._id.toString())) {
+                orderIds.add(order._id.toString());
+                uniqueOrders.push(order);
+            }
+        });
+
         let grossSales = 0;
         let totalDiscount = 0;
         let totalCoupons = 0;
         let netSales = 0;
         let totalReturns = 0;
-        let totalOrders = ordersAggregate.length;
+        let totalOrders = uniqueOrders.length;
 
-        ordersAggregate.forEach(order => {
+        uniqueOrders.forEach(order => {
             const isReturned = order.orderedItems.some(item => item.status === "Returned");
             grossSales += parseFloat(order.totalPrice) || 0;
             totalDiscount += parseFloat(order.discount) || 0;
@@ -789,16 +806,13 @@ const exportSalesReportExcel = async (req, res) => {
             totalReturns += isReturned ? 1 : 0;
         });
 
-        // Create Excel workbook
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sales Report");
 
-        // Add summary section
         worksheet.addRow(["Sales Report"]).font = { size: 16, bold: true };
         worksheet.addRow([`Generated on: ${moment().format("DD/MM/YYYY HH:mm")}`]).font = { size: 12 };
         worksheet.addRow([]);
 
-        // Add filters
         let filterText = dateRange && dateRange !== "custom" ? dateRange.charAt(0).toUpperCase() + dateRange.slice(1).replace(/([A-Z])/g, ' $1') : "";
         if (startDate || endDate) filterText = `${startDate ? startDate : 'Any'} to ${endDate ? endDate : 'Any'}`;
         const filters = [];
@@ -810,21 +824,18 @@ const exportSalesReportExcel = async (req, res) => {
         worksheet.addRow(["Filters:", allFilters || "No filters applied"]).font = { size: 12, bold: true };
         worksheet.addRow([]);
 
-        // Add summary data
         worksheet.addRow(["Summary"]).font = { size: 14, bold: true };
         worksheet.addRow(["Gross Sales", `₹${grossSales.toFixed(2)}`, "Total Orders", totalOrders]);
         worksheet.addRow(["Total Discount", `₹${totalDiscount.toFixed(2)}`, "Total Returns", totalReturns]);
         worksheet.addRow(["Coupons Applied", `₹${totalCoupons.toFixed(2)}`, "Net Sales", `₹${netSales.toFixed(2)}`]);
         worksheet.addRow([]);
 
-        // Add table headers
         worksheet.addRow(["Order ID", "Date", "Customer", "Amount", "Discount", "Final Amount", "Payment Method", "Status"]).font = { bold: true };
         worksheet.getRow(worksheet.lastRow.number).eachCell(cell => {
             cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'D3D3D3' } };
         });
 
-        // Add table data
-        ordersAggregate.forEach(order => {
+        uniqueOrders.forEach(order => {
             worksheet.addRow([
                 order.orderId || "N/A",
                 moment(order.createdAt).format("DD/MM/YYYY"),
@@ -837,7 +848,6 @@ const exportSalesReportExcel = async (req, res) => {
             ]);
         });
 
-        // Auto-size columns
         worksheet.columns.forEach(column => {
             let maxLength = 0;
             column.eachCell({ includeEmpty: true }, cell => {
@@ -847,7 +857,6 @@ const exportSalesReportExcel = async (req, res) => {
             column.width = maxLength + 2;
         });
 
-        // Write to buffer and send response
         const buffer = await workbook.xlsx.writeBuffer();
         res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         res.setHeader("Content-Disposition", 'attachment; filename="sales_report.xlsx"');

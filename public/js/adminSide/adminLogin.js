@@ -1,6 +1,6 @@
 
     const sessionData = document.getElementById('session-data');
-    console.log(sessionData);
+
     
         let sessionMessage = sessionData.dataset.message;
    

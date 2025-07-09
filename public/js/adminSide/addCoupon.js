@@ -1,13 +1,11 @@
 // Strong date validation
 function validateDateFormat(dateStr, isCreatedDate = false) {
-    // Regex for DD/MM/YYYY (01-31)/(01-12)/(20XX)
     const regex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/(20\d{2})$/;
     if (!regex.test(dateStr)) return false;
 
     const [day, month, year] = dateStr.split('/').map(Number);
     const date = new Date(year, month - 1, day);
 
-    // Check if date is valid (e.g., prevents 31/04/YYYY)
     if (
         date.getDate() !== day ||
         date.getMonth() !== month - 1 ||
@@ -16,10 +14,9 @@ function validateDateFormat(dateStr, isCreatedDate = false) {
         return false;
     }
 
-    // For createdDate, ensure date is today or in the future
     if (isCreatedDate) {
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // Normalize to start of day
+        today.setHours(0, 0, 0, 0);
         return date >= today;
     }
 
@@ -42,18 +39,18 @@ function validateCouponCodeFormat(code) {
 function validateCouponCode(code, errorElement) {
     if (!code) {
         errorElement.textContent = 'Coupon code is required';
-        errorElement.style.display = 'block';
+        errorElement.style.opacity = '1';
         return false;
     }
 
     const upperCode = code.toUpperCase();
     if (!validateCouponCodeFormat(upperCode)) {
         errorElement.textContent = 'Coupon code must be 6-12 uppercase letters or numbers';
-        errorElement.style.display = 'block';
+        errorElement.style.opacity = '1';
         return false;
     }
 
-    errorElement.style.display = 'none';
+    errorElement.style.opacity = '0';
     return true;
 }
 
@@ -66,7 +63,7 @@ function validateDescription(desc) {
 function clearErrors() {
     document.querySelectorAll('.validation-message').forEach(error => {
         error.textContent = '';
-        error.style.display = 'none';
+        error.style.opacity = '0';
         error.classList.remove('checking');
     });
     document.querySelectorAll('.form-control').forEach(input => {
@@ -93,11 +90,12 @@ function validateField(fieldId, errorId, validationFn, errorMessage) {
 
     if (!isValid) {
         error.textContent = message;
-        error.style.display = 'block';
+        error.style.opacity = '1';
         field.classList.add('is-invalid');
         field.setAttribute('aria-describedby', errorId);
     } else {
-        error.style.display = 'none';
+        error.textContent = '';
+        error.style.opacity = '0';
         field.classList.remove('is-invalid');
         field.removeAttribute('aria-describedby');
     }
@@ -138,69 +136,72 @@ function validatePrices() {
 
     if (!offerPrice || isNaN(offerPrice)) {
         offerPriceError.textContent = 'Discount amount is required';
-        offerPriceError.style.display = 'block';
+        offerPriceError.style.opacity = '1';
         offerPriceInput.classList.add('is-invalid');
         offerPriceInput.setAttribute('aria-describedby', 'offerPriceError');
         errors.push('Discount amount is required');
         isValid = false;
     } else if (offerPrice <= 1000) {
         offerPriceError.textContent = 'Discount amount must be greater than ₹1000';
-        offerPriceError.style.display = 'block';
+        offerPriceError.style.opacity = '1';
         offerPriceInput.classList.add('is-invalid');
         offerPriceInput.setAttribute('aria-describedby', 'offerPriceError');
         errors.push('Discount amount must be greater than ₹1000');
         isValid = false;
     } else if (offerPrice > 10000) {
         offerPriceError.textContent = 'Discount amount cannot exceed ₹100,000';
-        offerPriceError.style.display = 'block';
+        offerPriceError.style.opacity = '1';
         offerPriceInput.classList.add('is-invalid');
         offerPriceInput.setAttribute('aria-describedby', 'offerPriceError');
         errors.push('Discount amount cannot exceed ₹100,000');
         isValid = false;
     } else {
-        offerPriceError.style.display = 'none';
+        offerPriceError.textContent = '';
+        offerPriceError.style.opacity = '0';
         offerPriceInput.classList.remove('is-invalid');
         offerPriceInput.removeAttribute('aria-describedby');
     }
 
     if (!minPurchase || isNaN(minPurchase)) {
         minPurchaseError.textContent = 'Minimum purchase amount is required';
-        minPurchaseError.style.display = 'block';
+        minPurchaseError.style.opacity = '1';
         minPurchaseInput.classList.add('is-invalid');
         minPurchaseInput.setAttribute('aria-describedby', 'minPurchaseError');
         errors.push('Minimum purchase amount is required');
         isValid = false;
     } else if (minPurchase <= 20000) {
         minPurchaseError.textContent = 'Minimum purchase amount must be greater than ₹20,000';
-        minPurchaseError.style.display = 'block';
+        minPurchaseError.style.opacity = '1';
         minPurchaseInput.classList.add('is-invalid');
         minPurchaseInput.setAttribute('aria-describedby', 'minPurchaseError');
         errors.push('Minimum purchase amount must be greater than ₹20,000');
         isValid = false;
     } else if (minPurchase > 1000000) {
         minPurchaseError.textContent = 'Minimum purchase cannot exceed ₹1,000,000';
-        minPurchaseError.style.display = 'block';
+        minPurchaseError.style.opacity = '1';
         minPurchaseInput.classList.add('is-invalid');
         minPurchaseInput.setAttribute('aria-describedby', 'minPurchaseError');
         errors.push('Minimum purchase cannot exceed ₹1,000,000');
         isValid = false;
     } else {
-        minPurchaseError.style.display = 'none';
+        minPurchaseError.textContent = '';
+        minPurchaseError.style.opacity = '0';
         minPurchaseInput.classList.remove('is-invalid');
         minPurchaseInput.removeAttribute('aria-describedby');
     }
 
     if (minPurchase > 0 && offerPrice > minPurchase * 0.3) {
         validationMessage.textContent = `Discount amount cannot exceed 30% of minimum purchase (₹${(minPurchase * 0.3).toFixed(2)})`;
-        validationMessage.style.display = 'block';
+        validationMessage.style.opacity = '1';
         offerPriceInput.classList.add('is-invalid');
         minPurchaseInput.classList.add('is-invalid');
         offerPriceInput.setAttribute('aria-describedby', 'validationMessage');
         minPurchaseInput.setAttribute('aria-describedby', 'validationMessage');
         errors.push(`Discount amount cannot exceed 30% of minimum purchase`);
         isValid = false;
-    } else if (isValid) {
-        validationMessage.style.display = 'none';
+    } else {
+        validationMessage.textContent = '';
+        validationMessage.style.opacity = '0';
     }
 
     return { isValid, errors };
@@ -209,14 +210,14 @@ function validatePrices() {
 // Initialize Flatpickr for date inputs
 flatpickr('#createdDate', {
     dateFormat: 'd/m/Y',
-    minDate: 'today', // Prevent past dates
+    minDate: 'today',
     enableTime: false,
     allowInput: true,
     onClose: function(selectedDates, dateStr, instance) {
         validateField(
             'createdDate',
             'createdDateError',
-            value => validateDateFormat(value, true), // Pass true for createdDate
+            value => validateDateFormat(value, true),
             'Please enter a valid date (DD/MM/YYYY) on or after today'
         );
     }
@@ -224,7 +225,7 @@ flatpickr('#createdDate', {
 
 flatpickr('#expiryDate', {
     dateFormat: 'd/m/Y',
-    minDate: new Date().fp_incr(1), // Tomorrow or later
+    minDate: new Date().fp_incr(1),
     enableTime: false,
     allowInput: true,
     onClose: function(selectedDates, dateStr, instance) {
@@ -260,12 +261,12 @@ function debounce(func, wait) {
 // Form validation and submission
 document.getElementById('couponForm').addEventListener('submit', async function(e) {
     e.preventDefault();
+    if (Swal.isVisible()) return;
     clearErrors();
 
     let isValid = true;
     let errors = [];
 
-    // Validate all fields
     const couponNameValid = validateField(
         'couponName',
         'couponNameError',
@@ -288,7 +289,7 @@ document.getElementById('couponForm').addEventListener('submit', async function(
     const createdDateValid = validateField(
         'createdDate',
         'createdDateError',
-        value => validateDateFormat(value, true), // Pass true for createdDate
+        value => validateDateFormat(value, true),
         'Please enter a valid date (DD/MM/YYYY) on or after today'
     );
     if (!createdDateValid) errors.push('Created date is invalid');
@@ -411,14 +412,20 @@ document.getElementById('minPurchase').addEventListener('input', debounce(() => 
             value += '/';
         }
         e.target.value = value.slice(0, 10);
-        validateField(
-            id,
-            `${id}Error`,
-            value => validateDateFormat(value, id === 'createdDate'),
-            id === 'createdDate'
-                ? 'Please enter a valid date (DD/MM/YYYY) on or after today'
-                : 'Please enter a valid date (DD/MM/YYYY)'
-        );
+        if (value.length === 10) {
+            validateField(
+                id,
+                `${id}Error`,
+                value => validateDateFormat(value, id === 'createdDate'),
+                id === 'createdDate'
+                    ? 'Please enter a valid date (DD/MM/YYYY) on or after today'
+                    : 'Please enter a valid date (DD/MM/YYYY)'
+            );
+        } else {
+            document.getElementById(`${id}Error`).style.opacity = '0';
+            document.getElementById(id).classList.remove('is-invalid');
+            document.getElementById(id).removeAttribute('aria-describedby');
+        }
     });
 });
 

@@ -5,7 +5,7 @@ const searchUsers = async (req, res) => {
     try {
         let search = decodeURIComponent(req.query.search || "").trim();
         const page = parseInt(req.query.page) || 1;
-        const limit = 3; 
+        const limit = 10; 
         const searchTerms = search.split(/\s+/).filter(term => term.length > 0);
 
         if (searchTerms.some(term => term.length < 2)) {

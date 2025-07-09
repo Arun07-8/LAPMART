@@ -248,7 +248,7 @@
                 },
                 error: function (xhr) {
                     Swal.close();
-                    let errorMessage = 'An error occurred. Please try again.';
+                    let errorMessage = 'OTP verification failed. Please check and try again.';
                     let isExpired = false;
                     if (xhr.status === 404) {
                         errorMessage = 'OTP verification service unavailable. Please contact support.';

@@ -280,7 +280,7 @@ const   login = async (req, res) => {
         req.session.user = {_id:findUser._id,username:findUser.email}; 
      
         
-        res.redirect("/home");
+        res.redirect("/");
     } catch (error) {
         console.error("login error", error);
         req.session.Mes={type:"error",text:"Login failed. Please try again later"}
@@ -334,7 +334,7 @@ const loadShoppingPage = async (req, res) => {
     const {
       category = 'all',
       brand = 'all',
-      priceMin = 20000,
+      priceMin = 10000,
       priceMax = 150000,
       sort = 'popular',
       page = 1,
@@ -475,7 +475,7 @@ const  logout=async (req,res) => {
                 console.error("Session destruction error",error);
                 return res.redirect("/pageNotFound");
                }
-               return  res.redirect("/home");
+               return  res.redirect("/");
           })    
       } catch(error){
          console.error("Logout error",error);

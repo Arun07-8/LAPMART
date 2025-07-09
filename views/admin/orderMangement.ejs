@@ -296,7 +296,6 @@
     const params = getSearchParams();
     const queryParams = new URLSearchParams(params);
 
-    console.log('Search URL:', `/admin/order-management?${queryParams.toString()}`);
 
     showLoading();
 
@@ -316,7 +315,6 @@
       return response.json();
     })
     .then(data => {
-      console.log('Search results:', data);
       
       if (data.error) {
         throw new Error(data.message || 'An error occurred while searching');

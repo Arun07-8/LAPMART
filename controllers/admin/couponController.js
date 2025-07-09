@@ -3,17 +3,6 @@ const moment = require('moment');
 const { distance } = require('fastest-levenshtein');
 
 
-const markCouponAsUsed = async (userId, couponId) => {
-  try {
-    if (!userId || !couponId) return;
-
-    await Coupon.findByIdAndUpdate(couponId, {
-      $addToSet: { usedBy: userId } 
-    });
-  } catch (err) {
-    console.error("Error marking coupon as used:", err);
-  }
-};
 
 const couponManagementpage = async (req, res) => {
   try {
@@ -21,14 +10,11 @@ const couponManagementpage = async (req, res) => {
     const limit = 3;
     const skip = (page - 1) * limit;
 
-    console.log("hai");
-
     const searchQuery = req.query.search ? req.query.search.trim() : '';
     const fromDate = req.query.fromDate ? moment(req.query.fromDate, 'DD/MM/YY', true) : null;
     const toDate = req.query.toDate ? moment(req.query.toDate, 'DD/MM/YY', true) : null;
 
-    console.log(fromDate, "fromdate");
-    console.log(toDate, "todate");
+ 
 
 
     if (fromDate && !fromDate.isValid()) {
@@ -260,22 +246,20 @@ const editpageCoupon = async (req, res) => {
       couponName,
       couponCode,
       description,
-      validFrom,  // expected in DD/MM/YYYY
-      validUpto,  // expected in DD/MM/YYYY
+      validFrom, 
+      validUpto,  
       offerPrice,
       minPurchase
     } = req.body;
 
     const couponID = req.params.couponId;
 
-    console.log(couponName, couponCode, description, validFrom, validUpto, offerPrice, minPurchase);
 
-    // Validate required fields
     if (!couponName || !couponCode || !description || !validFrom || !validUpto || !offerPrice || !minPurchase) {
       return res.status(400).json({ success: false, message: "All fields are required." });
     }
 
-    // Parse DD/MM/YYYY into valid Date
+
     function parseDMY(dateStr) {
       if (!dateStr) return new Date('Invalid');
       const [day, month, year] = dateStr.split('/');
@@ -285,7 +269,7 @@ const editpageCoupon = async (req, res) => {
     const createdDate = parseDMY(validFrom);
     const expiryDate = parseDMY(validUpto);
 
-    // Validate parsed dates
+
     if (isNaN(createdDate.getTime()) || isNaN(expiryDate.getTime())) {
       return res.status(400).json({ success: false, message: "Invalid date format. Use DD/MM/YYYY." });
     }
@@ -294,19 +278,18 @@ const editpageCoupon = async (req, res) => {
       return res.status(400).json({ success: false, message: "Expiry date must be after created date." });
     }
 
-    // Check if coupon exists
     const couponExists = await Coupon.findById(couponID);
     if (!couponExists) {
       return res.status(404).json({ success: false, message: "Coupon not found" });
     }
 
-    // Check for duplicate code
+  
     const existing = await Coupon.findOne({ couponCode, _id: { $ne: couponID } });
     if (existing) {
       return res.status(400).json({ success: false, message: "Coupon code already exists" });
     }
 
-    // Update coupon
+ 
     const updatedCoupon = await Coupon.findByIdAndUpdate(
       couponID,
       {
@@ -350,5 +333,5 @@ module.exports = {
   editCoupon,
   editpageCoupon,
   deleteCoupon,
-  markCouponAsUsed 
+  
 };

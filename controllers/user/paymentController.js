@@ -8,7 +8,7 @@ const Product = require("../../models/productSchema");
 const mongoose = require('mongoose');
 const { verifySignature } = require("../../helpers/razorpayUtils");
 const { applyBestOffer}=require("../../helpers/offerHelper")
-const { markCouponAsUsed } = require("../admin/couponController");
+const { markCouponAsUsed } = require("../user/couponController");
 const Wallet=require("../../models/walletSchema")
 const Coupon=require("../../models/couponSchema")
 
@@ -76,7 +76,6 @@ const createOrder = async (req, res) => {
       offerPrice += offerDiscount * item.quantity;
     }
 
-    // Apply coupon if exists
     let discount = 0;
     let couponCode = null;
 
@@ -162,7 +161,7 @@ const verifyPayment = async (req, res) => {
     }
 
     const existingOrder = await Order.findOne({ _id: orderId, userId }).populate("userId");
-    console.log(existingOrder,"ddd")
+
     if (!existingOrder) {
       req.session.appliedCoupon = null;
       return res.status(404).json({ success: false, message: 'Order not found or unauthorized.' });
@@ -205,7 +204,7 @@ const verifyPayment = async (req, res) => {
         { _id: couponId, couponCode: existingOrder.couponCode, isActive: true, isDeleted: false },
         { $addToSet: { usedBy: userId } }
       );
-      await markCouponAsUsed(userId, couponId);
+      await markCouponAsUsed( couponId);
     }
 
     const user = existingOrder.userId;
@@ -292,7 +291,7 @@ const getPaymentFailed = async (req, res) => {
   try {
     const { orderId, errorCode, paymentId, reason ,amount} = req.query;
     
-    console.log(paymentId)
+   
     const userId = req.session.user;
     if (!userId) {
       return res.redirect('/login');
@@ -322,6 +321,12 @@ const getPaymentFailed = async (req, res) => {
     existingOrder.orderedItems.forEach(item => {
       item.status = 'Payment Failed';
     });
+
+    if(existingOrder.paymentStatus==="failed"){
+       
+      await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0 });
+    }
+    
     await existingOrder.save();
     res.status(200).render('paymentFailed', {
       orderId,
@@ -354,6 +359,8 @@ const retryPayment = async (req, res) => {
     }
 
     const existingOrder = await Order.findOne({ _id: orderId, userId });
+
+    
     if (!existingOrder) {
       return res.status(404).json({ success: false, message: "Order not found or unauthorized." });
     }
@@ -409,12 +416,12 @@ const createCODOrder = async (req, res) => {
     if (paymentMethod !== 'Cash on Delivery') {
       return res.status(400).json({ success: false, message: 'Invalid payment method.' });
     }
-    if (amount > 21000) {
-      return res.status(400).json({
-        success: false,
-        message: 'Cash on Delivery is allowed only for orders up to ₹21,000.',
-      });
-    }
+    // if (amount > 21000) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'Cash on Delivery is allowed only for orders up to ₹21,000.',
+    //   });
+    // }
 
     const user = await User.findById(userId).populate('wallet');
     if (!user) {
@@ -544,7 +551,7 @@ const createCODOrder = async (req, res) => {
       shippingAddress,
       paymentMethod,
       status: 'Pending',
-      paymentStatus: 'pending',
+      paymentStatus: 'success',
       invoiceDate: new Date(),
     });
 
@@ -718,9 +725,9 @@ const walletPayment = async (req, res) => {
     await newOrder.save();
 
     const transactionId = `TXN_${Date.now()}_${Math.floor(100000 + Math.random() * 900000)}`;
-    console.log(finalAmount,"final")
+  
     wallet.balance -= finalAmount;
-    console.log(wallet.balance,"balance")
+
     wallet.transactions.push({
       type: 'debit',
       amount: finalAmount,

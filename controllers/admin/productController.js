@@ -139,9 +139,9 @@ const addProducts = async (req, res) => {
       });
     }
 
-    if (!req.files || req.files.length < 2 || req.files.length > 5) {
+    if (!req.files || req.files.length < 1 || req.files.length > 4) {
       return res.status(400).json({
-        error: `Please upload between 2 and 5 images. Received: ${req.files ? req.files.length : 0}.`
+        error: `Please upload between 1 and 4 images. Received: ${req.files ? req.files.length : 0}.`
       });
     }
 

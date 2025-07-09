@@ -40,7 +40,7 @@
                 <div class="form-group">
                     <label for="couponName" class="form-label">Coupon Name</label>
                     <div class="icon-input">
-                        <i class="fas fa-tag"></i>
+                       
                         <input type="text" class="form-control" id="couponName" aria-describedby="couponNameError" value="<%=coupon.couponName%>">
                         <input type="hidden" value="<%=coupon._id%>" id="couponID">
                         <div id="couponNameError" class="validation-message" role="alert" style="display: none;"></div>
@@ -51,7 +51,7 @@
                 <div class="form-group">
                     <label for="couponCode" class="form-label">Coupon Code</label>
                     <div class="icon-input">
-                        <i class="fas fa-code"></i>
+                       
                         <input type="text" class="form-control" id="couponCode" aria-describedby="couponCodeError" value="<%=coupon.couponCode%>">
                         <div id="couponCodeError" class="validation-message" role="alert" style="display: none;"></div>
                     </div>
@@ -72,7 +72,7 @@
                         <div class="form-group">
                             <label for="createdDate" class="form-label">Created On</label>
                             <div class="date-input icon-input">
-                                <i class="fas fa-calendar-alt"></i>
+                               
                                 <input type="text" class="form-control" id="createdDate" value="<%=coupon.validFrom%>" aria-describedby="createdDateError" required>
                                 <div id="createdDateError" class="validation-message" role="alert" style="display: none;"></div>
                             </div>
@@ -82,7 +82,7 @@
                         <div class="form-group">
                             <label for="expiryDate" class="form-label">Expires On</label>
                             <div class="date-input icon-input">
-                                <i class="fas fa-calendar-alt"></i>
+                             
                                 <input type="text" class="form-control" id="expiryDate" value="<%=coupon.validUpto%>" aria-describedby="expiryDateError" required>
                                 <div id="expiryDateError" class="validation-message" role="alert" style="display: none;"></div>
                             </div>
@@ -96,7 +96,7 @@
                         <div class="form-group">
                             <label for="offerPrice" class="form-label">Discount Amount</label>
                             <div class="icon-input amount-input">
-                                <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--muted-color); z-index: 10;">₹</span>
+
                                 <input type="number" class="form-control" id="offerPrice" min="0" step="0.01" aria-describedby="offerPriceError" value="<%=coupon.offerPrice%>" required>
                                 <div id="offerPriceError" class="validation-message" role="alert" style="display: none;"></div>
                             </div>
@@ -106,7 +106,7 @@
                         <div class="form-group">
                             <label for="minPurchase" class="form-label">Minimum Purchase Amount</label>
                             <div class="icon-input amount-input">
-                                <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--muted-color); z-index: 10;">₹</span>
+                    
                                 <input type="number" class="form-control" id="minPurchase" min="0" step="0.01" aria-describedby="minPurchaseError" value="<%=coupon.minPurchase%>" required>
                                 <div id="minPurchaseError" class="validation-message" role="alert" style="display: none;"></div>
                             </div>

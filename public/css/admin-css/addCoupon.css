@@ -1,270 +1,265 @@
-        :root {
-            --primary-color: #6366f1;
-            --secondary-color: #f8fafc;
-            --text-color: #1e293b;
-            --muted-color: #64748b;
-            --border-color: #e2e8f0;
-            --danger-color: #ef4444;
-            --blue-shadow: rgba(99, 102, 241, 0.3);
-        }
+:root {
+    --primary-color: #6366f1;
+    --secondary-color: #f8fafc;
+    --text-color: #1e293b;
+    --muted-color: #64748b;
+    --border-color: #e2e8f0;
+    --danger-color: #ef4444;
+    --blue-shadow: rgba(99, 102, 241, 0.3);
+}
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--secondary-color);
-            color: var(--text-color);
-            line-height: 1.6;
-        }
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
 
-        .navbar {
-            background: white;
-            box-shadow: 0 4px 12px var(--blue-shadow);
-            padding: 1rem 0;
-        }
+.navbar {
+    background: white;
+    box-shadow: 0 4px 12px var(--blue-shadow);
+    padding: 1rem 0;
+}
 
-        .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--primary-color) !important;
-        }
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color) !important;
+}
 
-        .admin-profile {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--text-color);
-        }
+.admin-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-color);
+}
 
-        .admin-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white;
-        }
+.admin-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+}
 
-        .main-container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
+.main-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
 
-        .form-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 12px 40px var(--blue-shadow);
-            padding: 2.5rem;
-            margin-bottom: 2rem;
-            border: 1px solid var(--border-color);
-        }
+.form-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 12px 40px var(--blue-shadow);
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+}
 
-        .card-title {
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: var(--text-color);
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--border-color);
-        }
+.card-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+}
 
-        .form-label {
-            font-weight: 600;
-            color: var(--text-color);
-            margin-bottom: 0.5rem;
-        }
+.form-label {
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+}
 
-        .form-control {
-            border: none;
-            border-radius: 12px;
-            padding: 0.85rem 1rem;
-            font-size: 1rem;
-            background-color: white;
-            box-shadow: 0 6px 15px var(--blue-shadow);
-            transition: all 0.3s ease;
-            width: 100%;
-            max-width: 100%;
-            box-sizing: border-box;
-        }
+.form-control {
+    border: none;
+    border-radius: 12px;
+    padding: 0.85rem 1rem 0.85rem 2.5rem;
+    font-size: 1rem;
+    background-color: white;
+    box-shadow: 0 6px 15px var(--blue-shadow);
+    transition: all 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+    height: 48px; /* Fixed height for text and number inputs */
+}
 
-        .form-control:focus {
-            border: 2px solid var(--primary-color);
-            box-shadow: 0 0 0 0.3rem var(--blue-shadow);
-            transform: translateY(-1px);
-        }
+.form-control:focus {
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 0 0.3rem var(--blue-shadow);
+    height: 48px; /* Maintain height on focus */
+}
 
-        .form-control.is-invalid {
-            border: 2px solid var(--danger-color);
-            box-shadow: 0 0 0 0.3rem rgba(239, 68, 68, 0.2);
-        }
+.form-control.is-invalid {
+    border: 2px solid var(--danger-color);
+    box-shadow: 0 0 0 0.3rem rgba(239, 68, 68, 0.2);
+    padding: 0.85rem 1rem 0.85rem 2.5rem;
+    background-image: none;
+    height: 48px; /* Maintain height when invalid */
+}
 
-        .form-control::placeholder {
-            color: var(--muted-color);
-        }
+.form-control::placeholder {
+    color: var(--muted-color);
+}
 
-        textarea.form-control {
-            resize: vertical;
-            min-height: 120px;
-        }
+textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+    height: auto; /* Allow textarea to resize vertically */
+    padding-left: 1rem; /* No icon for textarea */
+}
 
-        #couponCode {
-            text-transform: uppercase;
-        }
+#couponCode {
+    text-transform: uppercase;
+}
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #8b5cf6 100%);
-            border: none;
-            border-radius: 10px;
-            padding: 0.75rem 2rem;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px var(--blue-shadow);
-        }
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #8b5cf6 100%);
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px var(--blue-shadow);
+}
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px var(--blue-shadow);
-        }
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px var(--blue-shadow);
+}
 
-        .btn-secondary {
-            background-color: #6c757d;
-            border: none;
-            border-radius: 10px;
-            padding: 0.75rem 2rem;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
+.btn-secondary {
+    background-color: #6c757d;
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
 
-        .btn-secondary:hover {
-            background-color: #5a6268;
-            transform: translateY(-1px);
-        }
+.btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+}
 
-        .validation-message {
-            color: var(--danger-color);
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
-            margin-left: 2.5rem;
-            width: calc(100% - 2.5rem);
-            font-weight: 500;
-            min-height: 1.5rem;
-        }
+.validation-message {
+    color: var(--danger-color);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    width: 100%;
+    font-weight: 500;
+    min-height: 1.5rem;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
 
-        .validation-message.checking {
-            color: #6b7280;
-            font-style: italic;
-        }
+.validation-message.checking {
+    color: #6b7280;
+    font-style: italic;
+}
 
-        .validation-message[style*="display: block"] {
-            animation: slideIn 0.3s ease;
-        }
+.validation-message[style*="opacity: 1"] {
+    animation: slideIn 0.3s ease;
+}
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
-        .row {
-            margin-bottom: 1.5rem;
-        }
+.row {
+    margin-bottom: 1.5rem;
+}
 
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
+.form-group {
+    margin-bottom: 1.5rem;
+}
 
-        .button-group {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border-color);
-        }
+.button-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
 
-        .icon-input, .amount-input {
-            position: relative;
-            width: 100%;
-            max-width: 100%;
-        }
+.icon-input, .amount-input {
+    position: relative;
+    width: 100%;
+}
 
-        .icon-input i, .amount-input span {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--muted-color);
-            z-index: 10;
-        }
+.icon-input i, .amount-input .currency-symbol {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted-color);
+    z-index: 20; /* Increased z-index to ensure icons stay visible */
+    pointer-events: none; /* Prevent icons from interfering with input */
+}
 
-        .icon-input .form-control, .amount-input .form-control {
-            padding-left: 2.5rem;
-        }
+.icon-input .form-control, .amount-input .form-control {
+    padding-left: 2.5rem;
+}
 
-        .date-input input[type="text"] {
-            color: var(--text-color);
-        }
+.date-input input[type="text"] {
+    color: var(--text-color);
+}
 
-        .row .col-md-6 .form-group {
-            padding: 0 0.5rem;
-        }
+.row .col-md-6 .form-group {
+    padding: 0 0.5rem;
+}
 
-        .row .col-md-6 .validation-message {
-            margin-left: 2.5rem;
-            width: calc(100% - 2.5rem);
-        }
+@media (max-width: 768px) {
+    .form-card {
+        padding: 1.5rem;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
 
-        @media (max-width: 768px) {
-            .form-card {
-                padding: 1.5rem;
-            }
-            
-            .button-group {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-            }
+    .form-control, .icon-input, .amount-input {
+        width: 100%;
+    }
 
-            .form-control, .icon-input, .amount-input {
-                max-width: 100%;
-            }
+    .validation-message {
+        width: 100%;
+    }
+    
+    .row .col-md-6 .form-group {
+        padding: 0;
+    }
+}
 
-            .validation-message {
-                margin-left: 0;
-                width: 100%;
-            }
-            
-            .row .col-md-6 .validation-message {
-                margin-left: 0;
-                width: 100%;
-            }
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
 
-            .row .col-md-6 .form-group {
-                padding: 0;
-            }
-        }
-
-        .animate-fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

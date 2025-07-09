@@ -1,6 +1,6 @@
-  /* Enhanced Shop Page Styles - Unique and Non-Overriding */
+
   :root {
-      /* Unique variables for enhanced design, prefixed to avoid conflicts */
+      
       --enhanced-primary: #1e40af; /* Rich blue for a modern look */
       --enhanced-primary-dark: #1e3a8a; /* Darker blue for hover states */
       --enhanced-accent: #22c55e; /* Vibrant green for highlights */

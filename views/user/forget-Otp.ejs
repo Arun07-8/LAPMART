@@ -31,7 +31,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <script>
-        console.log('SweetAlert2 loaded:', typeof Swal !== 'undefined');
 
         const inputs = document.querySelectorAll('.otp-input');
         const submitBtn = document.getElementById('submitBtn');
@@ -110,7 +109,6 @@
                 resendBtn.style.pointerEvents = 'none';
                 resendBtn.style.cursor = 'not-allowed';
 
-                console.log('Sending resend OTP request to /forgot-resendOtp');
                 Swal.fire({
         title: 'Processing...',
         text: 'Please wait while we process your request.',
@@ -205,7 +203,6 @@
             let otp = '';
             inputs.forEach(input => otp += input.value);
 
-            console.log('Sending OTP verification request to /forgot-verify with OTP:', otp);
 
             $.ajax({
                 type: 'POST',
@@ -244,7 +241,7 @@
                 },
                 error: function (xhr) {
                     console.error('OTP verification error:', xhr.status, xhr.responseText);
-                    let errorMessage = 'An error occurred. Please try again.';
+                    let errorMessage = 'OTP verification failed. Please check and try again.';
                     let isExpired = false;
                     if (xhr.status === 404) {
                         errorMessage = 'OTP verification service unavailable. Please contact support.';

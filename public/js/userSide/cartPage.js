@@ -173,7 +173,9 @@ async function removeItem(productId) {
         text: 'Item removed from cart!',
         timer: 1500,
         showConfirmButton: false
-      });
+      }).then(()=>{
+        window.location.reload()
+      })
 
     } catch (error) {
       console.error('Error removing item:', error);

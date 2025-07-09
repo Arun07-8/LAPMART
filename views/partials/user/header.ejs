@@ -789,7 +789,7 @@
         <header class="site-header">
             <!-- Logo -->
             <div class="logo">
-                <a href="/home">
+                <a href="/">
                     <div class="logo-container">
                         <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="2" y="7" width="20" height="10" rx="2" ry="2"></rect>
@@ -808,7 +808,7 @@
 
             <!-- Navigation -->
             <nav class="nav-links">
-                <a href="/home" class="nav-link">Home</a>
+                <a href="/" class="nav-link">Home</a>
                 <a href="/shop" class="nav-link">Shop</a>
                 <a href="#" class="nav-link">Contacts</a>
             </nav>
@@ -962,7 +962,7 @@
                 });
 
                 if (window.location.pathname === '/home') {
-                    const homeLink = document.querySelector('.header-scope a[href="/home"]');
+                    const homeLink = document.querySelector('.header-scope a[href="/"]');
                     if (homeLink) {
                         homeLink.classList.add('active');
                         logo.classList.add('home-active');

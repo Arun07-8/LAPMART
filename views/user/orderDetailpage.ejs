@@ -924,37 +924,41 @@
         <div class="main-content">
           
             <%
-  let orderStatus = (order.paymentStatus === 'Failed' || isRetry) ? 'Payment Failed' : 'Pending';
+ let orderStatus = (order.paymentStatus === 'Failed' || isRetry) ? 'Payment Failed' : 'Pending';
 
-  if (!(order.paymentStatus === 'Failed' || isRetry) && order.orderedItems && order.orderedItems.length > 0) {
-    const statuses = order.orderedItems.map(item => item.status);
+if (!(order.paymentStatus === 'Failed' || isRetry) && order.orderedItems && order.orderedItems.length > 0) {
+  const statuses = order.orderedItems.map(item => item.status);
 
-    const allCancelled = statuses.every(s => s === 'Cancelled');
-    const allDelivered = statuses.every(s => s === 'Delivered');
-    const anyReturnRequested = statuses.includes('Return Request');
-    const anyReturned = statuses.includes('Returned');
-    const anyShipped = statuses.includes('Shipped');
-    const anyProcessing = statuses.includes('Processing');
-    const anyPending = statuses.includes('Pending');
+  const allCancelled = statuses.every(status => status === 'Cancelled');
+  const allDelivered = statuses.every(status => status === 'Delivered');
+  const anyReturnRequested = statuses.includes('Return Request');
+  const anyReturnRejected = statuses.includes('Return Rejected');
+  const anyReturned = statuses.includes('Returned');
+  const anyShipped = statuses.includes('Shipped');
+  const anyProcessing = statuses.includes('Processing');
+  const anyPending = statuses.includes('Pending');
 
-    if (allCancelled) {
-      orderStatus = 'Cancelled';
-    } else if (allDelivered) {
-      orderStatus = 'Delivered';
-    } else if (anyReturnRequested) {
-      orderStatus = 'Return Request';
-    } else if (anyReturned) {
-      orderStatus = 'Returned';
-    } else if (anyShipped) {
-      orderStatus = 'Shipped';
-    } else if (anyProcessing) {
-      orderStatus = 'Processing';
-    } else if (anyPending) {
-      orderStatus = 'Pending';
-    } else {
-      orderStatus = 'Processing';
-    }
+  if (allCancelled) {
+    orderStatus = 'Cancelled';
+  } else if (allDelivered) {
+    orderStatus = 'Delivered';
+  } else if (anyReturnRequested) {
+    orderStatus = 'Return Request';
+  } else if (anyReturnRejected) {
+    orderStatus = 'Return Rejected';
+  } else if (anyReturned) {
+    orderStatus = 'Returned';
+  } else if (anyShipped) {
+    orderStatus = 'Shipped';
+  } else if (anyProcessing) {
+    orderStatus = 'Processing';
+  } else if (anyPending) {
+    orderStatus = 'Pending';
+  } else {
+    orderStatus = 'Processing';
   }
+}
+
 %>
 
             <div class="order-header <%= orderStatus === 'Payment Failed' ? 'payment-failed' : '' %>">
@@ -972,17 +976,17 @@
                                 <i class="fas fa-redo"></i>
                                 Retry Payment
                             </button>
-                        <% } else if (['Pending', 'Processing', 'Shipped'].includes(orderStatus)) { %>
-                      <% order.orderedItems.forEach((item, index) => { %>
-  <button class="cancel-btn-main <%= item.status === 'Cancelled' ? 'cancelled' : '' %>"
+                                  <% } %>
+<% if (['Pending', 'Processing'].includes(orderStatus)) { %>
+  <button class="cancel-btn-main"
           data-order-id="<%= order._id %>"
-          data-product-id="<%= item.product._id %>"
-          onclick="openCancelModal('product', '<%= order._id %>', '<%= item.product._id %>')">
-    <i class="fas fa-times"></i> Cancel Product
+          onclick="openCancelModal('order', '<%= order._id %>')">
+    <i class="fas fa-times"></i> Cancel Order
   </button>
-<% }) %>
+<% } %>
 
-                        <% } %>
+
+                  
                         <% if (orderStatus === 'Delivered') { %>
                             <button class="invoice-btn" onclick="downloadInvoice('<%= order._id %>')">
                                 <i class="fas fa-download"></i> Download Invoice
@@ -994,9 +998,9 @@
 
             <!-- Enhanced Status Timeline -->
             <div class="status-section <%= orderStatus === 'Payment Failed' ? 'payment-failed' : '' %>">
-                <div class="status-timeline <%= orderStatus.toLowerCase().replace(' ', '-') %>">
+                <div class="status-timeline  <%= orderStatus.toLowerCase().replace(' ', '-') %>">
                     <div class="status-step">
-                        <div class="status-icon <%= orderStatus === 'Payment Failed' ? 'payment-failed' : ['Pending', 'Processing', 'Shipped', 'Delivered', 'Return Request', 'Returned'].includes(orderStatus) ? 'active' : 'cancelled' %>">
+                        <div class="status-icon <%= orderStatus === 'Payment Failed' ? 'payment-failed' : ['Pending', 'Processing', 'Shipped', 'Delivered', 'Return Request', 'Returned','Return Rejected'].includes(orderStatus) ? 'active' : 'cancelled' %>">
                             <i class="fas fa-<%= orderStatus === 'Payment Failed' ? 'exclamation-circle' : 'check' %>"></i>
                         </div>
                         <div class="status-details">
@@ -1005,7 +1009,7 @@
                         </div>
                     </div>
                     <div class="status-step">
-                        <div class="status-icon <%= orderStatus === 'Processing' ? 'current' : ['Shipped', 'Delivered', 'Return Request', 'Returned'].includes(orderStatus) ? 'active' : orderStatus === 'Cancelled' || orderStatus === 'Payment Failed' ? 'cancelled' : '' %>">
+                        <div class="status-icon <%= orderStatus === 'Processing' ? 'current' : ['Shipped', 'Delivered', 'Return Request', 'Returned','Return Rejected'].includes(orderStatus) ? 'active' : orderStatus === 'Cancelled' || orderStatus === 'Payment Failed' ? 'cancelled' : '' %>">
                             <i class="fas <%= orderStatus === 'Processing' ? 'fa-cog fa-spin' : 'fa-check' %>"></i>
                         </div>
                         <div class="status-details">
@@ -1014,7 +1018,7 @@
                         </div>
                     </div>
                     <div class="status-step">
-                        <div class="status-icon <%= orderStatus === 'Shipped' ? 'current' : ['Delivered', 'Return Request', 'Returned'].includes(orderStatus) ? 'active' : orderStatus === 'Cancelled' || orderStatus === 'Payment Failed' ? 'cancelled' : '' %>">
+                        <div class="status-icon <%= orderStatus === 'Shipped' ? 'current' : ['Delivered', 'Return Request', 'Returned','Return Rejected'].includes(orderStatus) ? 'active' : orderStatus === 'Cancelled' || orderStatus === 'Payment Failed' ? 'cancelled' : '' %>">
                             <i class="fas <%= orderStatus === 'Shipped' ? 'fa-truck' : 'fa-check' %>"></i>
                         </div>
                         <div class="status-details">
@@ -1023,7 +1027,7 @@
                         </div>
                     </div>
                     <div class="status-step">
-                        <div class="status-icon <%= orderStatus === 'Delivered' ? 'current active' : orderStatus === 'Cancelled' || orderStatus === 'Payment Failed' ? 'cancelled' : ['Return Request', 'Returned'].includes(orderStatus) ? 'active' : '' %>">
+                        <div class="status-icon <%= orderStatus === 'Delivered' ? 'current active' : orderStatus === 'Cancelled' || orderStatus === 'Payment Failed' ? 'cancelled' : ['Return Request', 'Returned','Return Rejected'].includes(orderStatus) ? 'active' : '' %>">
                             <i class="fas <%= orderStatus === 'Delivered' ? 'fa-home' : 'fa-check' %>"></i>
                         </div>
                         <div class="status-details">
@@ -1033,7 +1037,7 @@
                     </div>
                 </div>
                 <div class="status-badge status-<%= orderStatus.toLowerCase().replace(' ', '-') %>">
-                    <i class="fas fa-<%= orderStatus === 'Payment Failed' ? 'exclamation-circle' : orderStatus === 'Delivered' ? 'check-circle' : orderStatus === 'Shipped' ? 'truck' : orderStatus === 'Processing' ? 'cog' : orderStatus === 'Cancelled' ? 'times' : orderStatus === 'Return Request' ? 'undo' : orderStatus === 'Returned' ? 'undo-alt' : 'clock' %>"></i>
+                    <i class="fas fa-<%= orderStatus === 'Payment Failed' ? 'exclamation-circle' : orderStatus === 'Delivered' ? 'check-circle' : orderStatus === 'Shipped' ? 'truck' : orderStatus === 'Processing' ? 'cog' : orderStatus === 'Cancelled' ? 'times' : orderStatus === 'Return Request' ? 'undo' : orderStatus === 'Returned' ? 'undo-alt' : 'clock'  %>"></i>
                     <%= orderStatus %>
                 </div>
             </div>
@@ -1066,19 +1070,26 @@
                                 <div class="product-status <%= orderStatus === 'Payment Failed' ? 'payment-failed' : '' %>"><%= orderStatus === 'Payment Failed' ? 'Payment Failed' : item.status || 'Pending' %></div>
                                 <div class="price-tag">₹<%= order.grandTotal || '0.00' %></div>
                                 <div class="product-actions">
-                                    <% if (item.status !== 'Payment Failed' && ['Pending', 'Processing', 'Shipped'].includes(item.status)) { %>
-                                        <button class="cancel-btn-product <%= item.status === 'Cancelled' ? 'cancelled' : '' %>" data-order-id="<%= order._id %>" data-product-id="<%= item.product._id %>" onclick="openCancelModal('item', '<%= order._id %>', '<%= item.product._id %>')">
-                                            <%= item.status === 'Cancelled' ? 'Cancelled' : 'Cancel Item' %>
-                                        </button>
+                              <% if (['Pending', 'Processing'].includes(item.status)) { %>
+            <button class="cancel-btn-product <%= item.status === 'Cancelled' ? 'cancelled' : '' %>"
+                    data-order-id="<%= order._id %>"
+                    data-product-id="<%= item.product._id %>"
+                    onclick="openCancelModal('item', '<%= order._id %>', '<%= item.product._id %>')">
+              <%= item.status === 'Cancelled' ? 'Cancelled' : 'Cancel Item' %>
+            </button>
+         
                                     <% } else if (item.status === 'Delivered') { %>
                                         <button class="cancel-btn-product return-btn-product" data-order-id="<%= order._id %>" data-product-id="<%= item.product._id %>" onclick="openReturnModal('<%= order._id %>', '<%= item.product._id %>')">
                                             <i class="fas fa-undo"></i> Return Item
                                         </button>
-                                    <% } else if (item.status === 'Return Rejected') { %>
-                                        <button class="btn btn-outline-danger" disabled>
-                                            <%= item.returnNote %>
-                                        </button>
-                                    <% } %>
+                   
+
+                                  <% } else if (item.status === 'Return Rejected') { %>
+  <div class="alert alert-danger mt-2 p-2" style="font-size: 0.95rem;">
+    <strong>Return Rejected:</strong> <%= item.returnRejectNote || 'No reason provided.' %>
+  </div>
+<% } %>
+
                                 </div>
                             </div>
                         </div>
@@ -1214,41 +1225,41 @@
     </div>
 
     <!-- Cancel Order/Item Modal -->
-    <div class="modal-overlay" id="cancelModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Cancel <span id="cancelType">Order</span></h3>
-                <button class="close-btn" onclick="closeCancelModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <form id="cancelForm">
-                <input type="hidden" id="cancelOrderId" name="orderId">
-                <input type="hidden" id="cancelProductId" name="productId" value="%<=product._id%>">
-                <div class="form-group">
-                    <label class="form-label">Cancellation Reason *</label>
-                    <select class="form-select" id="cancelReason" name="reason">
-                        <option value="">Select a reason</option>
-                        <option value="changed-mind">Changed My Mind</option>
-                        <option value="ordered-by-mistake">Ordered by Mistake</option>
-                        <option value="found-better-price">Found Better Price Elsewhere</option>
-                        <option value="delivery-too-late">Expected Delivery Too Late</option>
-                        <option value="other">Other</option>
-                    </select>
-                    <div class="invalid-feedback" id="cancelReasonError"></div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Additional Details</label>
-                    <textarea class="form-textarea" id="cancelDetails" name="details" placeholder="Please provide more details about the cancellation reason (optional)"></textarea>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-cancel" onclick="closeCancelModal()">Cancel</button>
-                    <button type="submit" class="btn-submit">Submit Cancellation Request</button>
-                </div>
-            </form>
-        </div>
+  <!-- Cancel Modal -->
+<div class="modal-overlay" id="cancelModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Cancel <span id="cancelType">Order</span></h3>
+      <button class="close-btn" onclick="closeCancelModal()">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
-
+    <form id="cancelForm">
+      <input type="hidden" id="cancelOrderId" name="orderId">
+      <input type="hidden" id="cancelProductId" name="productId">
+      <div class="form-group">
+        <label class="form-label">Cancellation Reason *</label>
+        <select class="form-select" id="cancelReason" name="reason">
+          <option value="">Select a reason</option>
+          <option value="changed-mind">Changed My Mind</option>
+          <option value="ordered-by-mistake">Ordered by Mistake</option>
+          <option value="found-better-price">Found Better Price Elsewhere</option>
+          <option value="delivery-too-late">Expected Delivery Too Late</option>
+          <option value="other">Other</option>
+        </select>
+        <div class="invalid-feedback" id="cancelReasonError"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Additional Details</label>
+        <textarea class="form-textarea" id="cancelDetails" name="details" placeholder="Please provide more details (optional)"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="closeCancelModal()">Cancel</button>
+        <button type="submit" class="btn-submit">Submit Cancellation Request</button>
+      </div>
+    </form>
+  </div>
+</div>
     
 
     <%- include("../../views/partials/user/footer") %>
@@ -1277,7 +1288,7 @@ async function retryPayment(orderId) {
     const response = await fetch('/payment/retry-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId, amount: order.finalAmount }) // Send orderId and amount
+      body: JSON.stringify({ orderId, amount: order.finalAmount }) 
     });
 
     const result = await response.json();
@@ -1464,125 +1475,129 @@ async function retryPayment(orderId) {
             }
         });
 
-        // Cancel Modal Functions
-        function openCancelModal(type, orderId, productId = null) {
-            document.getElementById('cancelModal').classList.add('show');
-            document.body.style.overflow = 'hidden';
-            document.getElementById('cancelType').textContent = type === 'order' ? 'Order' : 'Item';
-            document.getElementById('cancelOrderId').value = orderId;
-            document.getElementById('cancelProductId').value = productId || '';
-        }
+     function openCancelModal(type, orderId, productId = null) {
+  document.getElementById('cancelModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('cancelType').textContent = type === 'order' ? 'Order' : 'Item';
+  document.getElementById('cancelOrderId').value = orderId;
+  document.getElementById('cancelProductId').value = productId || '';
+}
 
-        function closeCancelModal() {
-            document.getElementById('cancelModal').classList.remove('show');
-            document.body.style.overflow = 'auto';
-            document.getElementById('cancelForm').reset();
-            document.getElementById('cancelReasonError').textContent = '';
-        }
+function closeCancelModal() {
+  document.getElementById('cancelModal').classList.remove('show');
+  document.body.style.overflow = 'auto';
+  document.getElementById('cancelForm').reset();
+  document.getElementById('cancelReasonError').textContent = '';
+}
 
-        document.getElementById('cancelForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const orderId = document.getElementById('cancelOrderId').value;
-            const productId = document.getElementById('cancelProductId').value;
-            console.log(productId,"prody")
-            const reason = document.getElementById('cancelReason').value;
-            const details = document.getElementById('cancelDetails').value;
+document.getElementById('cancelForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const orderId = document.getElementById('cancelOrderId').value;
+  const productId = document.getElementById('cancelProductId').value;
+  const reason = document.getElementById('cancelReason').value;
+  const details = document.getElementById('cancelDetails').value;
 
-            if (!reason) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Validation Error',
-                    text: 'Please select a cancellation reason.',
-                    confirmButtonColor: '#ff0000',
-                    confirmButtonText: 'OK'
-                });
-                document.getElementById('cancelReasonError').textContent = 'Please select a cancellation reason.';
-                return;
+
+  if (!reason) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Validation Error',
+      text: 'Please select a cancellation reason.',
+      confirmButtonColor: '#ff0000',
+      confirmButtonText: 'OK'
+    });
+    document.getElementById('cancelReasonError').textContent = 'Please select a cancellation reason.';
+    return;
+  }
+
+  const productIds = productId ? [productId] : [];
+
+  try {
+    const response = await fetch('/order-details/cancel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderId,
+        productIds,
+        reason,
+        details
+      })
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: result.message || `Cancellation request submitted successfully! ${productIds.length ? 'Item' : 'Order'} has been cancelled.`,
+        confirmButtonColor: '#ff0000',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        closeCancelModal();
+        if (productIds.length) {
+          const cancelBtn = document.querySelector(`.cancel-btn-product[data-product-id="${productIds[0]}"]`);
+          if (cancelBtn) {
+            cancelBtn.classList.add('cancelled');
+            cancelBtn.innerHTML = 'Cancelled';
+            cancelBtn.disabled = true;
+          }
+          const productItem = cancelBtn.closest('.product-item');
+          if (productItem) {
+            productItem.classList.add('cancelled');
+            productItem.querySelector('.product-status').textContent = 'Cancelled';
+          }
+        } else {
+          const cancelBtn = document.querySelector('.cancel-btn-main');
+          if (cancelBtn) {
+            cancelBtn.classList.add('cancelled');
+            cancelBtn.disabled = true;
+            cancelBtn.style.display = 'none';
+          }
+          document.querySelectorAll('.product-item').forEach(item => {
+            item.classList.add('cancelled');
+            item.querySelector('.product-status').textContent = 'Cancelled';
+            const itemCancelBtn = item.querySelector('.cancel-btn-product');
+            if (itemCancelBtn) {
+              itemCancelBtn.classList.add('cancelled');
+              itemCancelBtn.innerHTML = 'Cancelled';
+              itemCancelBtn.disabled = true;
             }
-
-            try {
-                const response = await fetch('/order-details/cancel', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        orderId,
-                        productId: productId || null,
-                        reason,
-                        details,
-                        status: 'Cancelled'
-                    })
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: result.message || `Cancellation request submitted successfully! ${productId ? 'Item' : 'Order'} has been cancelled. You will receive a confirmation email shortly.`,
-                        confirmButtonColor: '#ff0000',
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        closeCancelModal();
-                        if (productId) {
-                            const cancelBtn = document.querySelector(`.cancel-btn-product[data-product-id="${productId}"]`);
-                            if (cancelBtn) {
-                                cancelBtn.classList.add('cancelled');
-                                cancelBtn.innerHTML = 'Cancelled';
-                                cancelBtn.disabled = true;
-                            }
-                            const productItem = cancelBtn.closest('.product-item');
-                            if (productItem) {
-                                productItem.classList.add('cancelled');
-                                productItem.querySelector('.product-status').textContent = 'Cancelled';
-                            }
-                        } else {
-                            const cancelBtn = document.querySelector('.cancel-btn-main');
-                            if (cancelBtn) {
-                                cancelBtn.classList.add('cancelled');
-                                cancelBtn.disabled = true;
-                            }
-                            document.querySelectorAll('.product-item').forEach(item => {
-                                item.classList.add('cancelled');
-                                item.querySelector('.product-status').textContent = 'Cancelled';
-                                const itemCancelBtn = item.querySelector('.cancel-btn-product');
-                                if (itemCancelBtn) {
-                                    itemCancelBtn.classList.add('cancelled');
-                                    itemCancelBtn.innerHTML = 'Cancelled';
-                                    itemCancelBtn.disabled = true;
-                                }
-                            });
-                            const statusTimeline = document.querySelector('.status-timeline');
-                            statusTimeline.className = 'status-timeline cancelled';
-                            const statusBadge = document.querySelector('.status-badge');
-                            statusBadge.className = 'status-badge status-cancelled';
-                            statusBadge.innerHTML = `<i class="fas fa-times"></i> Cancelled`;
-                            document.querySelectorAll('.status-icon').forEach(icon => {
-                                icon.classList.add('cancelled');
-                                icon.classList.remove('active', 'current');
-                            });
-                        }
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Warning',
-                        text: result.message || 'Failed to submit cancellation request. Please try again.',
-                        confirmButtonColor: '#ff0000',
-                        confirmButtonText: 'OK'
-                    });
-                }
-            } catch (error) {
-                console.error('Error submitting cancellation:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: error.message || 'An unexpected error occurred. Please try again later.',
-                    confirmButtonColor: '#ff0000',
-                    confirmButtonText: 'OK'
-                });
-            }
-        });
+          });
+          const statusTimeline = document.querySelector('.status-timeline');
+          if (statusTimeline) statusTimeline.className = 'status-timeline cancelled';
+          const statusBadge = document.querySelector('.status-badge');
+          if (statusBadge) {
+            statusBadge.className = 'status-badge status-cancelled';
+            statusBadge.innerHTML = `<i class="fas fa-times"></i> Cancelled`;
+          }
+          document.querySelectorAll('.status-icon').forEach(icon => {
+            icon.classList.add('cancelled');
+            icon.classList.remove('active', 'current');
+          });
+        }
+        window.location.reload();
+      });
+    } else {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Warning',
+        text: result.message || 'Failed to submit cancellation request. Please try again.',
+        confirmButtonColor: '#ff0000',
+        confirmButtonText: 'OK'
+      });
+    }
+  } catch (error) {
+    console.error('Error submitting cancellation:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: error.message || 'An unexpected error occurred. Please try again later.',
+      confirmButtonColor: '#ff0000',
+      confirmButtonText: 'OK'
+    });
+  }
+});
 async function downloadInvoice(orderId) {
   try {
     if (!orderId) {
@@ -1697,8 +1712,7 @@ function showLoadingMessage(message) {
       }
     });
   } else {
-    console.log(message);
-    // Create simple loading indicator
+
     const loadingDiv = document.createElement('div');
     loadingDiv.id = 'loading-indicator';
     loadingDiv.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;color:#fff;padding:20px;border-radius:5px;z-index:9999;';

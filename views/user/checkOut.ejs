@@ -200,21 +200,12 @@
               <span class="checkout-price-label">Subtotal</span>
               <span class="checkout-price-value">₹<%= Cart.totalPrice.toFixed(2) %></span>
             </div>
-         
-           
-              <%
-              let coupenDiscount1=0
-              if(appliedCoupon && appliedCoupon.discount ){
-                coupenDiscount1=appliedCoupon.discount
-              }
-              %>
-              
-              <div class="checkout-price-row">
-              <span class="checkout-price-label">coupon discount</span>
-              <span class="checkout-price-value">
-  <%= appliedCoupon && appliedCoupon.discount ? '₹' + appliedCoupon.discount.toFixed(2) : '₹0.00' %>
-</span>
-            </div>
+            <% if (Cart.discountAmount > 0) { %>
+              <div class="checkout-price-row" id="coupon-discount-row">
+                <span class="checkout-price-label">Coupon Discount</span>
+                <span class="checkout-price-value checkout-savings">- ₹<%= Cart.discountAmount.toFixed(2) %></span>
+              </div>
+            <% } %>
             <div class="checkout-price-row">
               <span class="checkout-price-label">Shipping</span>
               <span class="checkout-price-value">₹0.00</span>
@@ -223,9 +214,9 @@
               <span class="checkout-price-label">Delivery Charge</span>
               <span class="checkout-price-value">₹0.00</span>
             </div>
-            <div class="checkout-price-row checkout-grand-total1">
+            <div class="checkout-price-row checkout-grand-total">
               <span class="checkout-price-label">Grand Total</span>
-              <span class="checkout-price-value1">₹<%= Cart.grandTotal-coupenDiscount1%></span>
+              <span class="checkout-price-value">₹<%= Cart.grandTotal.toFixed(2) %></span>
             </div>
           </div>
 
@@ -242,9 +233,6 @@
               🎫 View Available Coupons
             </button>
           </div>
-
-          <!-- Coupon Info Display -->
-     
 
           <!-- Place Order Button -->
           <button id="place-order" class="checkout-btn-primary" <%= Cart && Cart.items && Cart.items.length > 0 ? '' : 'disabled' %>>
@@ -267,18 +255,17 @@
   </div>
 
   <!-- Coupon Modal -->
- <!-- Coupon Modal -->
-<div id="coupon-modal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Available Coupons</h3>
-      <span id="close-coupon-modal" class="close">×</span>
-    </div>
-    <div class="modal-body">
-      <ul id="available-coupon-list"></ul>
+  <div id="coupon-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Available Coupons</h3>
+        <span id="close-coupon-modal" class="close">×</span>
+      </div>
+      <div class="modal-body">
+        <ul id="available-coupon-list"></ul>
+      </div>
     </div>
   </div>
-</div>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>

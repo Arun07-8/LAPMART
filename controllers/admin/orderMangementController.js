@@ -8,14 +8,16 @@ const Wallet=require("../../models/walletSchema")
 
 function getmainOrderStatus(orderedItems) {
   if (!orderedItems || orderedItems.length === 0) return 'Pending';
-  const statuses = orderedItems.map((item) => item.status);
-  if (statuses.includes('Cancelled')) return 'Cancelled';
-  if (statuses.includes('Pending')) return 'Pending';
-  if (statuses.includes('Shipped')) return 'Shipped';
+  const statuses = orderedItems.map(item => item.status);
+  if (statuses.every(status => status === 'Cancelled')) return 'Cancelled';
   if (statuses.includes('Return Request')) return 'Return Request';
   if (statuses.includes('Returned')) return 'Returned';
-  if (statuses.every((status) => status === 'Delivered')) return 'Delivered';
-  return 'Processing';
+  if (statuses.includes('Shipped')) return 'Shipped';
+  if (statuses.includes('Processing')) return 'Processing';
+  if (statuses.includes('Pending')) return 'Pending';
+  if (statuses.includes('Payment Failed')) return 'Payment Failed';
+  if (statuses.every(status => status === 'Delivered')) return 'Delivered';
+  return 'Processing'; 
 }
 
 const getOrderManagementPage = async (req, res) => {
@@ -24,8 +26,7 @@ const getOrderManagementPage = async (req, res) => {
         const limit = 4;
         const skip = (page - 1) * limit;
         let query = {};
-
-      
+       
         if (req.query.search && req.query.search.trim() !== '') {
             const searchTerm = req.query.search.trim();
             try {
@@ -48,10 +49,11 @@ const getOrderManagementPage = async (req, res) => {
 
 
         if (req.query.paymentMethod && req.query.paymentMethod !== 'All') {
-            query.paymentMethod = req.query.paymentMethod.toUpperCase();
+         
+            query.paymentMethod = { $regex: `^${req.query.paymentMethod}$`, $options: 'i' };
         }
 
- 
+    
         if (req.query.fromDate || req.query.toDate) {
             query.createdAt = {};
             if (req.query.fromDate) {
@@ -68,9 +70,11 @@ const getOrderManagementPage = async (req, res) => {
             }
         }
 
+
         if (req.query.status && req.query.status !== 'All Orders') {
             query['orderedItems.status'] = req.query.status;
         }
+
 
         const totalOrders = await Order.countDocuments(query);
         const totalPages = Math.ceil(totalOrders / limit);
@@ -89,60 +93,61 @@ const getOrderManagementPage = async (req, res) => {
             .skip(skip)
             .limit(limit);
 
-     const enrichedOrders = [];
+        // Enrich orders with additional data
+        const enrichedOrders = [];
+        for (const order of orders) {
+            order.mainStatus = getmainOrderStatus(order.orderedItems);
+            let totalOriginal = 0;
+            let totalFinal = 0;
+            const orderedItemsWithOffers = [];
 
-for (const order of orders) {
-  order.mainStatus = getmainOrderStatus(order.orderedItems);
-  let totalOriginal = 0;
-  let totalFinal = 0;
-  const orderedItemsWithOffers = [];
-  
-  for (const item of order.orderedItems) {
-    const updatedProduct = await applyBestOffer(item.product);
-    const quantity = item.quantity;
-    const originalPrice = item.product.salePrice;
-    const offerPrice = updatedProduct.finalPrice || originalPrice;
-    
-    const itemTotal = offerPrice * quantity;
-    totalOriginal += originalPrice * quantity;
-    totalFinal += itemTotal;
-    
-    orderedItemsWithOffers.push({
-      ...item.toObject(),
-      product: updatedProduct,
-      finalPrice: offerPrice,
-      totalPrice: itemTotal
-    });
-  }
-  
-  const discountAmount = order.discount || 0;
-  const grandTotal = Math.max(totalFinal - discountAmount, 0);
-  const totalSavings = totalOriginal - totalFinal;
-  const orderObj = order.toObject();
-  orderObj._id = order._id; 
-  orderObj.mainStatus = order.mainStatus; 
-  orderObj.orderedItems = orderedItemsWithOffers;
-  orderObj.totalOriginal = totalOriginal;
-  orderObj.totalFinal = totalFinal;
-  orderObj.totalSavings = totalSavings;
-  orderObj.discountAmount = discountAmount;
-  orderObj.grandTotal = grandTotal;
+            for (const item of order.orderedItems) {
+                const updatedProduct = await applyBestOffer(item.product);
+                const quantity = item.quantity;
+                const originalPrice = item.product.salePrice;
+                const offerPrice = updatedProduct.finalPrice || originalPrice;
 
-  enrichedOrders.push(orderObj);
-}
+                const itemTotal = offerPrice * quantity;
+                totalOriginal += originalPrice * quantity;
+                totalFinal += itemTotal;
 
+                orderedItemsWithOffers.push({
+                    ...item.toObject(),
+                    product: updatedProduct,
+                    finalPrice: offerPrice,
+                    totalPrice: itemTotal
+                });
+            }
+
+            const discountAmount = order.discount || 0;
+            const grandTotal = Math.max(totalFinal - discountAmount, 0);
+            const totalSavings = totalOriginal - totalFinal;
+            const orderObj = order.toObject();
+            orderObj._id = order._id;
+            orderObj.mainStatus = order.mainStatus;
+            orderObj.orderedItems = orderedItemsWithOffers;
+            orderObj.totalOriginal = totalOriginal;
+            orderObj.totalFinal = totalFinal;
+            orderObj.totalSavings = totalSavings;
+            orderObj.discountAmount = discountAmount;
+            orderObj.grandTotal = grandTotal;
+
+            enrichedOrders.push(orderObj);
+        }
+
+        // Handle AJAX requests
         if (req.xhr || req.headers.accept?.includes('json') || req.headers['x-requested-with'] === 'XMLHttpRequest') {
             return res.json({
-                orders:enrichedOrders,
+                orders: enrichedOrders,
                 currentPage: page,
                 totalPages,
                 totalOrders,
-                hasResults: orders.length > 0,
+                hasResults: enrichedOrders.length > 0,
                 searchQuery: req.query.search || ''
             });
         }
 
-        
+
         res.render("orderMangement", {
             orders: enrichedOrders,
             currentPage: page,
@@ -166,7 +171,6 @@ for (const order of orders) {
         res.redirect("/admin/pagenotFounderror");
     }
 };
-
 const getOrderDetailspage = async (req, res) => {
   try {
     const orderId = req.params.id;
@@ -318,10 +322,6 @@ const acceptReturn = async (req, res) => {
     const refundAmount = Number(Math.max(itemTotal - orderLevelDiscount, 0).toFixed(2));
 
 
-    if (isNaN(refundAmount)) {
-      console.error("refundAmount is NaN", { itemTotal, totalFinal, discount, finalPrice, quantity });
-      return res.status(500).json({ success: false, message: 'Refund calculation failed.' });
-    }
 
     const transactionId = `TXN_${Date.now()}_${Math.floor(100000 + Math.random() * 700000)}`;
 
@@ -396,6 +396,7 @@ const rejectReturn = async (req, res) => {
     const { orderId, productId } = req.params;
     const { reason } = req.body;
 
+
     const order = await Order.findById(orderId);
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
@@ -403,7 +404,7 @@ const rejectReturn = async (req, res) => {
     if (!item) return res.status(404).json({ success: false, message: 'Product not found in order' });
 
     item.status = 'Return Rejected';
-    item.returnNote = reason || 'No reason provided';
+    item.returnRejectNote = reason || 'No reason provided';
     item.isReturned = false;
 
     await order.save();

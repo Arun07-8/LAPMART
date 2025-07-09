@@ -1,10 +1,10 @@
-            let cropper = null;
+    let cropper = null;
     let currentImageIndex = -1;
     let isRecropping = false;
     let originalImages = [];
     let croppedImages = [];
     const minImages = 2;
-    const maxImages = 5;
+    const maxImages = 4;
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
     function sanitizeInput(input) {
@@ -92,7 +92,6 @@
             const reader = new FileReader();
             reader.onload = (e) => {
                 originalImages.push({ file, dataUrl: e.target.result });
-                console.log(`Added file to originalImages. Total originalImages: ${originalImages.length}`); // Debugging
                 // Start cropping only for the newly added images
                 if (originalImages.length === croppedImages.length + newFiles.length) {
                     updatePreview();
@@ -281,9 +280,7 @@ document.getElementById('editProductForm').addEventListener('submit', async func
     if (validateForm()) {
         const form = this;
         const formData = new FormData(form);
-        console.log('FormData contents:');
         for (const [key, value] of formData.entries()) {
-            console.log(`${key}:`, value);
         }
         Swal.fire({
             title: 'Processing...',

@@ -41,8 +41,8 @@ const orderSchema = new Schema({
     status: {
       type: String,
       enum: [
-        "Pending", "Shipped", "Delivered",
-        "Cancelled", "Return Requested", "Returned", "Return Rejected","Payment Failed"
+        "Pending", "Shipped", "Delivered","Processing",   
+        "Cancelled", "Return Request", "Returned", "Return Rejected","Payment Failed"
       ],
       default: "Pending",
       required: true
@@ -67,6 +67,11 @@ const orderSchema = new Schema({
       type: String,
       default: '', 
     },
+    returnRejectNote:{
+      type: String,
+      default: '', 
+    },
+    
   }],
   totalPrice: {
     type: Number,

@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Admin Dashboard - Add New Coupon</title>
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-        <link href="/css/admin-css/addCoupon.css" rel="stylesheet">
-    </head>
-    <body>
-        <%-include("../../views/partials/admin/header")%>
-        <!-- Navigation -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Add New Coupon</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="/css/admin-css/addCoupon.css" rel="stylesheet">
+</head>
+<body>
+    <%- include("../../views/partials/admin/header") %>
+    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
@@ -40,9 +40,9 @@
                 <div class="form-group">
                     <label for="couponName" class="form-label">Coupon Name</label>
                     <div class="icon-input">
-                        <i class="fas fa-tag"></i>
-                        <input type="text" class="form-control" id="couponName"  aria-describedby="couponNameError" required>
-                        <div id="couponNameError" class="validation-message" role="alert" style="display: none;"></div>
+                       
+                        <input type="text" class="form-control" id="couponName" aria-describedby="couponNameError" required>
+                        <div id="couponNameError" class="validation-message" role="alert"></div>
                     </div>
                 </div>
 
@@ -50,9 +50,9 @@
                 <div class="form-group">
                     <label for="couponCode" class="form-label">Coupon Code</label>
                     <div class="icon-input">
-                        <i class="fas fa-code"></i>
-                        <input type="text" class="form-control" id="couponCode"  aria-describedby="couponCodeError" required>
-                        <div id="couponCodeError" class="validation-message" role="alert" style="display: none;"></div>
+                       
+                        <input type="text" class="form-control" id="couponCode" aria-describedby="couponCodeError" required>
+                        <div id="couponCodeError" class="validation-message" role="alert"></div>
                     </div>
                 </div>
 
@@ -61,7 +61,7 @@
                     <label for="description" class="form-label">Coupon Description</label>
                     <div class="icon-input">
                         <textarea class="form-control" id="description" rows="4" aria-describedby="descriptionError" required></textarea>
-                        <div id="descriptionError" class="validation-message" role="alert" style="display: none;"></div>
+                        <div id="descriptionError" class="validation-message" role="alert"></div>
                     </div>
                 </div>
 
@@ -71,9 +71,9 @@
                         <div class="form-group">
                             <label for="createdDate" class="form-label">Created On</label>
                             <div class="date-input icon-input">
-                                <i class="fas fa-calendar-alt"></i>
-                                <input type="text" class="form-control" id="createdDate"   aria-describedby="createdDateError" required>
-                                <div id="createdDateError" class="validation-message" role="alert" style="display: none;"></div>
+                             
+                                <input type="text" class="form-control" id="createdDate" aria-describedby="createdDateError" required>
+                                <div id="createdDateError" class="validation-message" role="alert"></div>
                             </div>
                         </div>
                     </div>
@@ -81,9 +81,9 @@
                         <div class="form-group">
                             <label for="expiryDate" class="form-label">Expires On</label>
                             <div class="date-input icon-input">
-                                <i class="fas fa-calendar-alt"></i>
+                          
                                 <input type="text" class="form-control" id="expiryDate" aria-describedby="expiryDateError" required>
-                                <div id="expiryDateError" class="validation-message" role="alert" style="display: none;"></div>
+                                <div id="expiryDateError" class="validation-message" role="alert"></div>
                             </div>
                         </div>
                     </div>
@@ -95,9 +95,9 @@
                         <div class="form-group">
                             <label for="offerPrice" class="form-label">Discount Amount</label>
                             <div class="icon-input amount-input">
-                                <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--muted-color); z-index: 10;">₹</span>
-                                <input type="number" class="form-control" id="offerPrice"  min="0" step="0.01" aria-describedby="offerPriceError" required>
-                                <div id="offerPriceError" class="validation-message" role="alert" style="display: none;"></div>
+                                
+                                <input type="number" class="form-control" id="offerPrice" min="0" step="0.01" aria-describedby="offerPriceError" required>
+                                <div id="offerPriceError" class="validation-message" role="alert"></div>
                             </div>
                         </div>
                     </div>
@@ -105,16 +105,16 @@
                         <div class="form-group">
                             <label for="minPurchase" class="form-label">Minimum Purchase Amount</label>
                             <div class="icon-input amount-input">
-                                <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--muted-color); z-index: 10;">₹</span>
+                           
                                 <input type="number" class="form-control" id="minPurchase" min="0" step="0.01" aria-describedby="minPurchaseError" required>
-                                <div id="minPurchaseError" class="validation-message" role="alert" style="display: none;"></div>
+                                <div id="minPurchaseError" class="validation-message" role="alert"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- General Validation Message -->
-                <div id="validationMessage" class="validation-message" role="alert" style="display: none;"></div>
+                <div id="validationMessage" class="validation-message" role="alert"></div>
 
                 <!-- Buttons -->
                 <div class="button-group">

@@ -34,10 +34,6 @@ const cartSchema = new Schema({
       type: String,
       default: "placed"
     },
-    cancellationReason: {
-      type: String,
-      default: "none",
-    },
     addedAt: {
       type: Date,
       default: Date.now
