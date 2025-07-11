@@ -29,7 +29,7 @@ const applyCoupon = async (req, res) => {
       return res.status(401).json({ success: false, message: 'User not logged in' });
     }
 
-    // Check if a coupon is already applied
+ 
     if (req.session.appliedCoupon) {
       return res.status(400).json({
         success: false,
@@ -127,50 +127,10 @@ const markCouponAsUsed = async (userId, couponId) => {
   }
 };
 
-const updatesession=async (req, res) => {
- try {
-    const { couponId, couponCode, discount } = req.body;
-    if (!couponId || !couponCode) {
-      return res.status(400).json({ success: false, message: 'Invalid coupon data' });
-    }
-
-    req.session.appliedCoupon = { couponId, couponCode, discount };
-    await new Promise((resolve, reject) => {
-      req.session.save(err => (err ? reject(err) : resolve()));
-    });
-
-    console.log('Session updated:', req.session.appliedCoupon);
-
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Update session error:', error);
-    res.status(500).json({ success: false, message: 'Failed to update session' });
-  }
-}
-
-
-const clearSession= async (req, res) => {
-  try {
-    req.session.appliedCoupon = null;
-    await new Promise((resolve, reject) => {
-      req.session.save(err => (err ? reject(err) : resolve()));
-    });
-
-    console.log('Session cleared:', req.session.appliedCoupon);
-
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Clear session error:', error);
-    res.status(500).json({ success: false, message: 'Failed to clear session' });
-  }
-}
-
 
 module.exports = {
   availableCoupon,
   applyCoupon,
   removeCoupon,
   markCouponAsUsed,
-  clearSession,
-  updatesession
 };

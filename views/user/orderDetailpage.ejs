@@ -1066,9 +1066,9 @@ if (!(order.paymentStatus === 'Failed' || isRetry) && order.orderedItems && orde
                             <img src="<%= item.product && item.product.productImage && item.product.productImage[0] || 'https://via.placeholder.com/200' %>" alt="<%= item.product && item.product.productName || 'Product' %>" class="product-image">
                             <div class="product-details">
                                 <div class="producPricee"><%= item.product && item.product.productName || 'Unknown Product' %></div>
-                                <div class="product-meta">₹<%= order.grandTotal || '0.00' %> | Qty: <%= item.quantity || 1 %></div>
+                                <div class="product-meta">₹<%= item.finalPrice || '0.00' %> | Qty: <%= item.quantity || 1 %></div>
                                 <div class="product-status <%= orderStatus === 'Payment Failed' ? 'payment-failed' : '' %>"><%= orderStatus === 'Payment Failed' ? 'Payment Failed' : item.status || 'Pending' %></div>
-                                <div class="price-tag">₹<%= order.grandTotal || '0.00' %></div>
+                                <div class="price-tag">₹<%= order.finalAmount || '0.00' %></div>
                                 <div class="product-actions">
                               <% if (['Pending', 'Processing'].includes(item.status)) { %>
             <button class="cancel-btn-product <%= item.status === 'Cancelled' ? 'cancelled' : '' %>"

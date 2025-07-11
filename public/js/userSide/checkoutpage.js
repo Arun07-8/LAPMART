@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
           key: razorpayKey,
           amount: data.order.amount,
           currency: 'INR',
-          name: 'Lapkart',
+          name: 'Lapmart',
           description: 'Order Payment',
           order_id: data.order.id,
           handler: async (response) => {
@@ -401,16 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(data.message || 'Failed to apply coupon');
       }
 
-      // Update session with applied coupon
-      await fetch('/coupons/update-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          couponId: data.couponId,
-          couponCode: data.couponCode,
-          discount: data.discount,
-        }),
-      });
+    
 
       appliedCoupon = data.couponId;
       discountAmount = data.discount;
@@ -455,16 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok || !data.success) {
         throw new Error(data.message || 'Failed to remove coupon');
       }
-
-      // Clear session coupon
-      await fetch('/coupons/clear-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      appliedCoupon = null;
-      discountAmount = 0;
-      totalAmount = originalTotal;
+ 
       updatePriceDisplay(0, originalTotal);
       updateCouponButton('', false);
 

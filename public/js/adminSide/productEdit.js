@@ -449,16 +449,29 @@ function validateForm() {
         displayErrorMessage('description-error', 'Description is required.');
         isValid = false;
     }
-
-    if (salePrice.trim() === "") {
-        displayErrorMessage('offerPrice-error', 'Sale price is required.');
+if (salePrice.trim() === "") {
+    displayErrorMessage('offerPrice-error', 'Sale price is required.');
+    isValid = false;
+} else {
+    const price = parseFloat(salePrice);
+    if (price < 10000 || price > 150000) {
+        displayErrorMessage('offerPrice-error', 'Sale price must be between ₹10,000 and ₹15,0000.');
         isValid = false;
     }
+}
 
-    if (quantity.trim() === "") {
-        displayErrorMessage('quantity-error', 'Stock count is required.');
+
+if (quantity.trim() === "") {
+    displayErrorMessage('quantity-error', 'Stock count is required.');
+    isValid = false;
+} else {
+    const qty = parseInt(quantity.trim(), 10);
+    if (isNaN(qty) || qty < 1 || qty > 99) {
+        displayErrorMessage('quantity-error', 'Stock count must be between 1 and 99.');
         isValid = false;
     }
+}
+
 
     if (brand.trim() === "") {
         displayErrorMessage('brandName-error', 'Brand is required.');

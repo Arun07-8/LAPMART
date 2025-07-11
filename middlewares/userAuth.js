@@ -16,7 +16,7 @@ const userAuth = (req, res, next) => {
         next(error); 
       });
   } else {
-    return res.redirect("/login"); 
+  return res.status(401).json({ success: false, message: 'You need to be logged in to use this feature.', redirectUrl: "/login" });
   }
 };
   
@@ -38,6 +38,7 @@ const userAuthHome = (req, res, next) => {
         next(error); 
       });
   } else {
+
     return next();
   }
 };

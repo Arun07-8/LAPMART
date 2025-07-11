@@ -174,9 +174,7 @@
                 <div class="checkout-product-name">
                   <%= item.productId?.productName || 'Unknown Product' %>
                 </div>
-                <div class="checkout-product-meta">
-                  Size: <%= item.productId?.size || 'N/A' %> • Qty: <%= item.quantity %>
-                </div>
+              
                 <div class="checkout-product-price">
                   <% if (item.salePrice > item.finalPrice) { %>
                     <span class="checkout-original-price">₹<%= item.salePrice.toFixed(2) %></span>

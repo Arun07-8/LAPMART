@@ -354,19 +354,19 @@ function validateForm() {
             if (wordCount < 5) return 'Description must contain at least 5 words.';
             return '';
         }},
-        { id: 'brandId', validate: (value) => !value ? 'Please select a brand.' : '' }, // Corrected ID
-        { id: 'categoryId', validate: (value) => !value ? 'Please select a category.' : '' }, // Corrected ID
+        { id: 'brandId', validate: (value) => !value ? 'Please select a brand.' : '' }, 
+        { id: 'categoryId', validate: (value) => !value ? 'Please select a category.' : '' }, 
         
-        { id: 'offerAmount', validate: (value) => { // Corrected ID to match input
+        { id: 'offerAmount', validate: (value) => { 
             if (!value) return 'Offer price is required.';
             const price = parseFloat(value);
-            if (isNaN(price) || price < 15000 || price > 150000) return 'Offer price must be between 15000 and 150,000.';
+            if (isNaN(price) || price < 10000 || price > 150000) return 'Offer price must be between 10000 and 150,000.';
             return '';
         }},
-        { id: 'stockCount', validate: (value) => { // Corrected ID to match input
+        { id: 'stockCount', validate: (value) => { 
             if (!value) return 'Stock count is required.';
             const qty = parseInt(value);
-            if (isNaN(qty) || qty < 0 || qty > 1000) return 'Stock count must be between 0 and 1,000.';
+            if (isNaN(qty) || qty < 2 || qty > 1000) return 'Stock count must be between 0 and 1,000.';
             return '';
         }},
         { id: 'processor', validate: (value) => {

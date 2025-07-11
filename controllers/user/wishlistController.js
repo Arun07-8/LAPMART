@@ -5,11 +5,9 @@ const Product=require("../../models/productSchema")
 
 const getWishlistPage = async (req, res) => {
   try {
+    console.log(req.session.user)
     const userId = req.session.user;
-    if (!userId) {
-      return res.status(401).redirect('/login'); 
-    }
-
+  
     const page = parseInt(req.query.page) || 1;
     const limit = 3; 
     const skip = (page - 1) * limit; 
@@ -34,6 +32,7 @@ const getWishlistPage = async (req, res) => {
 
     const totalPages = Math.ceil(totalItems / limit);
     const userData = await User.findById(userId).lean();
+   
     res.render('wishlist', {
       wishlist: { products }, 
       currentPage: page,
@@ -49,39 +48,63 @@ const getWishlistPage = async (req, res) => {
 
 
 
-const addWishlist=async (req,res) => {
-    try {
-        const userId=req.session.user
-        const productId=req.body.productId
-        let wishlist=await Wishlist.findOne({userId})
 
-        if(!wishlist){
-            wishlist=new Wishlist({
-                userId,
-                products:[{productId}]
-            })
-        }else{
-            const exist=wishlist.products.some(item=>
-                item.productId.toString()===productId
-            )
+const addWishlist = async (req, res) => {
+  try {
 
-            if(!exist){
-                wishlist.products.push({productId})
-            }else{
-                return res.status(404).json({success:false,message:"Product already in wishlist"})
-            }
-        }
-    
-    const addwishlist=await wishlist.save()
-
-    if(addWishlist){
-        return res.status(200).json({success:true,message:"Product Added in wishlist"})
+  if (!req.session.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not logged in',
+        redirectUrl: '/login'
+      });
     }
 
-    } catch (error) {
-        console.error("product adding wishlist error",error)
+    const userId = req.session.user; // Ensure this matches your session structure
+    const productId = req.params.Id;
+
+    let wishlist = await Wishlist.findOne({ userId });
+
+    if (!wishlist) {
+      // Create a new wishlist if none exists
+      wishlist = new Wishlist({
+        userId,
+        products: [{ productId }],
+      });
+    } else {
+      // Check if product already exists in wishlist
+      const productExists = wishlist.products.some(
+        (item) => item.productId.toString() === productId
+      );
+
+      if (productExists) {
+        return res.status(400).json({
+          success: false,
+          message: 'Product is already in your wishlist.',
+        });
+      }
+
+      // Add product to existing wishlist
+      wishlist.products.push({ productId });
     }
-}
+
+    // Save the wishlist
+    await wishlist.save();
+
+    // Send success response
+    return res.status(200).json({
+      success: true,
+      message: 'Product added to wishlist successfully.',
+    });
+  } catch (error) {
+    console.error('Error adding product to wishlist:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error. Please try again later.',
+    });
+  }
+};
+
 
 
 const deleteWishlistProduct = async (req, res) => {

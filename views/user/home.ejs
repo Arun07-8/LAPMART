@@ -1,25 +1,680 @@
+
+    <%- include("../../views/partials/user/header") %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LapKart - Premium Electronics</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
-    <link href="/css/userside-css/userside-css/Header.css" rel="stylesheet" type="text/css">
-    <link href="/css/userside-css/userside-css/home.css" rel="stylesheet" type="text/css">
+    <title>LaptopHub - Discover Your Perfect Laptop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+z
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background: #ffffff;
+        }
+
+        /* Animated Banner Hero Section */
+        .hero {
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .banner-slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            animation: slide 15s infinite;
+        }
+
+        .banner-slide {
+            min-width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .banner-slide:nth-child(1) {
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><rect width="1200" height="800" fill="%23667eea"/><path d="M200 300h800v200H200z" fill="%23764ba2" opacity="0.3"/><circle cx="400" cy="400" r="100" fill="%23ffffff" opacity="0.1"/><circle cx="800" cy="400" r="150" fill="%23ffffff" opacity="0.05"/></svg>');
+        }
+
+        .banner-slide:nth-child(2) {
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><rect width="1200" height="800" fill="%23f093fb"/><path d="M300 200h600v400H300z" fill="%23f5576c" opacity="0.3"/><circle cx="600" cy="400" r="120" fill="%23ffffff" opacity="0.1"/></svg>');
+        }
+
+        .banner-slide:nth-child(3) {
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><rect width="1200" height="800" fill="%234facfe"/><path d="M100 350h1000v100H100z" fill="%2300f2fe" opacity="0.3"/><circle cx="300" cy="400" r="80" fill="%23ffffff" opacity="0.1"/><circle cx="900" cy="400" r="120" fill="%23ffffff" opacity="0.05"/></svg>');
+        }
+
+        @keyframes slide {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(0); }
+            33.33% { transform: translateX(-100%); }
+            58.33% { transform: translateX(-100%); }
+            66.66% { transform: translateX(-200%); }
+            91.66% { transform: translateX(-200%); }
+            100% { transform: translateX(0); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: left;
+            max-width: 700px;
+            padding: 2rem 3rem;
+            color: white;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero-title {
+            font-size: 4.5rem;
+            font-weight: 900;
+            font-family: 'Cinzel', serif;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 1.4rem;
+            color: #f3f4f6;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+            font-weight: 300;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .hero-btn {
+            display: inline-block;
+            padding: 1.3rem 3.5rem;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .hero-btn:hover::before {
+            left: 100%;
+        }
+
+        .hero-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.5);
+        }
+
+        /* Banner Indicators */
+        .banner-indicators {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: indicatorPulse 15s infinite;
+        }
+
+        .indicator:nth-child(1) { animation-delay: 0s; }
+        .indicator:nth-child(2) { animation-delay: 5s; }
+        .indicator:nth-child(3) { animation-delay: 10s; }
+
+        @keyframes indicatorPulse {
+            0%, 25% { background: rgba(255,255,255,1); transform: scale(1.2); }
+            33.33%, 100% { background: rgba(255,255,255,0.4); transform: scale(1); }
+        }
+
+        /* Stats Section */
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 4rem 2rem;
+            background: #ffffff;
+            max-width: 1400px;
+            margin: -3rem auto 0;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 5;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-10px);
+        }
+
+        .stat-item h3 {
+            font-size: 4rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-item p {
+            font-size: 1.2rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        /* Section Header */
+        .section-header {
+            text-align: center;
+            font-size: 3.5rem;
+            font-weight: 900;
+            font-family: 'Cinzel', serif;
+            color: #1a1a1a;
+            margin: 6rem auto 3rem;
+            text-transform: uppercase;
+            position: relative;
+            letter-spacing: 2px;
+        }
+
+        .section-header::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .product-card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.4s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .product-card:hover::before {
+            opacity: 0.05;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-card a {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            z-index: 2;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 280px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .product-card:hover .product-image::before {
+            transform: translateX(100%);
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+
+        .product-details {
+            padding: 2.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .product-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            line-height: 1.3;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .stars {
+            color: #fbbf24;
+            font-size: 1.2rem;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .review-count {
+            color: #64748b;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .product-price-container {
+            display: flex;
+            align-items: baseline;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: auto;
+        }
+
+        .product-price {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1a1a1a;
+        }
+
+        .product-regular-price {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            text-decoration: line-through;
+            font-weight: 400;
+        }
+
+        .product-discount {
+            font-size: 0.9rem;
+            color: #ef4444;
+            font-weight: 600;
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            padding: 0.3rem 0.75rem;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        /* Category Cards */
+        .category-section {
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            margin: 6rem 0;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            border-color: #667eea;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .category-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: #667eea;
+        }
+
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 1rem;
+        }
+
+        .category-description {
+            color: #64748b;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        /* Newsletter Section */
+        .newsletter {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 6rem 2rem;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .newsletter::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/><circle cx="20" cy="20" r="1" fill="white" opacity="0.05"/><circle cx="80" cy="30" r="1.5" fill="white" opacity="0.08"/></svg>');
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-100px); }
+        }
+
+        .newsletter h2 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .newsletter p {
+            font-size: 1.3rem;
+            color: #e5e7eb;
+            margin-bottom: 3rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .newsletter-form {
+            display: flex;
+            max-width: 600px;
+            margin: 0 auto;
+            gap: 1rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .newsletter-form input {
+            flex: 1;
+            padding: 1.5rem;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            outline: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .newsletter-form input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .newsletter-form button {
+            padding: 1.5rem 3rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .newsletter-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 3rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .hero-btn {
+                padding: 1rem 2.5rem;
+                font-size: 1rem;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 2rem;
+                padding: 3rem 1.5rem;
+            }
+            
+            .product-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .newsletter-form {
+                flex-direction: column;
+            }
+            
+            .newsletter-form input,
+            .newsletter-form button {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <%- include("../../views/partials/user/header") %>
-
-    <!-- Hero Section -->
+    <!-- Hero Section with Animated Banner -->
     <section class="hero">
-        <div class="hero-overlay"></div>
-        <div class="hero-content animate-on-scroll">
-            <h1 class="hero-title">Discover Your Perfect Laptop</h1>
-            <p class="hero-subtitle">Explore our premium collection of high-performance laptops tailored to your style and needs.</p>
-            <a href="/shop" class="hero-btn">Shop Now</a>
+        <div class="banner-slider">
+            <div class="banner-slide">
+                <div class="hero-content">
+                    <h1 class="hero-title">Gaming Laptops</h1>
+                    <p class="hero-subtitle">Unleash your gaming potential with our high-performance gaming laptops featuring cutting-edge graphics and lightning-fast processors.</p>
+                    <a href="/shop" class="hero-btn">Explore Gaming</a>
+                </div>
+            </div>
+            <div class="banner-slide">
+                <div class="hero-content">
+                    <h1 class="hero-title">Business Laptops</h1>
+                    <p class="hero-subtitle">Boost your productivity with our professional business laptops designed for performance, security, and reliability.</p>
+                    <a href="/shop" class="hero-btn">Shop Business</a>
+                </div>
+            </div>
+            <div class="banner-slide">
+                <div class="hero-content">
+                    <h1 class="hero-title">Creative Workstations</h1>
+                    <p class="hero-subtitle">Transform your creative vision into reality with our powerful workstations perfect for design, video editing, and content creation.</p>
+                    <a href="/shop" class="hero-btn">Create Now</a>
+                </div>
+            </div>
+        </div>
+        <div class="banner-indicators">
+            <div class="indicator"></div>
+            <div class="indicator"></div>
+            <div class="indicator"></div>
         </div>
     </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="stat-item animate-on-scroll">
+            <h3>500+</h3>
+            <p>Laptop Models</p>
+        </div>
+        <div class="stat-item animate-on-scroll">
+            <h3>50K+</h3>
+            <p>Happy Customers</p>
+        </div>
+        <div class="stat-item animate-on-scroll">
+            <h3>24/7</h3>
+            <p>Support</p>
+        </div>
+        <div class="stat-item animate-on-scroll">
+            <h3>2 Years</h3>
+            <p>Warranty</p>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+  <section class="category-section">
+  <h2 class="section-header animate-on-scroll">Shop by Category</h2>
+  <div class="category-grid">
+    <% categories.forEach(category => { %>
+      <a href="/shop?category=<%= category._id %>" class="category-link" style="text-decoration: none;">
+        <div class="category-card animate-on-scroll">
+          <% if (category.name === "Gaming Laptops") { %>
+            <div class="category-icon">🎮</div>
+          <% } else if (category.name === "Business Laptops") { %>
+            <div class="category-icon">💼</div>
+          <% } else if (category.name === "Student Laptops") { %>
+            <div class="category-icon">🎓</div>
+          <% } else { %>
+            <div class="category-icon">💻</div> <!-- default icon -->
+          <% } %>
+          <h3 class="category-title"><%= category.name %></h3>
+          <p class="category-description"><%= category.description %></p>
+        </div>
+      </a>
+    <% }); %>
+  </div>
+</section>
+
+
+
 
     <!-- New Arrivals Section -->
     <h2 class="section-header animate-on-scroll">New Arrivals</h2>
@@ -79,6 +734,73 @@
         <% } %>
     </section>
 
+    <!-- Newsletter Section -->
+    <section class="newsletter">
+        <h2>Stay Updated</h2>
+        <p>Get the latest laptop deals and tech news delivered to your inbox</p>
+        <form class="newsletter-form">
+            <input type="email" placeholder="Enter your email address" required>
+            <button type="submit">Subscribe</button>
+        </form>
+    </section>
+
+    <script>
+        // Scroll Animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Banner Indicator Click
+        document.querySelectorAll('.indicator').forEach((indicator, index) => {
+            indicator.addEventListener('click', () => {
+                const slider = document.querySelector('.banner-slider');
+                slider.style.transform = `translateX(-${index * 100}%)`;
+                slider.style.animationPlayState = 'paused';
+                
+                setTimeout(() => {
+                    slider.style.animationPlayState = 'running';
+                }, 3000);
+            });
+        });
+
+        // Category Card Hover Effects
+        document.querySelectorAll('.category-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                card.style.color = 'white';
+                card.querySelector('.category-icon').style.transform = 'scale(1.2) rotate(5deg)';
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.background = 'white';
+                card.style.color = '';
+                card.querySelector('.category-icon').style.transform = 'scale(1) rotate(0deg)';
+            });
+        });
+
+        // Newsletter Form
+        document.querySelector('.newsletter-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = e.target.querySelector('input').value;
+            alert(`Thank you for subscribing with ${email}!`);
+            e.target.reset();
+        });
+    </script>
+</body>
+</html>
     <%- include("../../views/partials/user/footer") %>
 
     <!-- JavaScript -->

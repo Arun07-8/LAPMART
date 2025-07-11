@@ -39,7 +39,8 @@ const productViewPage=async(req,res)=>{
             product: upadtedProduct,
             quantity:product.quantity,
             category:findCategory,
-            applyoffsimilerProducts
+            applyoffsimilerProducts,
+            wishlistProductIds
         })
         }
     }catch(error){

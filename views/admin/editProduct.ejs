@@ -5,10 +5,24 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Edit Product - Clean White Design</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
         <link href="/css/admin-css/productsEdit.css" rel="stylesheet">
+        <style>
+            .error-message {
+                color: red !important;
+                font-size: 0.875rem;
+                margin-top: 0.25rem;
+                display: none;
+            }
+            .error-message.active {
+                display: block !important;
+            }
+            .is-invalid {
+                border-color: red !important;
+            }
+        </style>
     </head>
     <body>
     <%- include("../../views/partials/admin/header") %>
@@ -20,38 +34,36 @@
 
         <form id="editProductForm" enctype="multipart/form-data" onsubmit="return validateForm()">
             <input type="hidden" id="productId" name="productId" value="<%= product ? product._id : '' %>">
-           <div class="container">
-        <div class="form-section">
-            <h3>Product Details</h3>
-            <div class="form-group">
-                <label for="productName" class="required">Product Name</label>
-                <input type="text" id="productName" name="productName" class="form-control"
-                    placeholder="Enter product name" value="<%= product.productName || '' %>">
-                <div id="productName-error" class="error-message"></div>
-            </div>
+            <div class="container">
+                <div class="form-section">
+                    <h3>Product Details</h3>
+                    <div class="form-group">
+                        <label for="productName" class="required">Product Name</label>
+                        <input type="text" id="productName" name="productName" class="form-control" placeholder="Enter product name" value="<%= product ? product.productName : '' %>">
+                        <div id="productName-error" class="error-message"></div>
+                    </div>
                     <div class="form-group">
                         <label for="description" class="required">Product Description</label>
-                        <textarea id="description" name="description" class="form-control" rows="4"
-                            placeholder="Enter product description" ><%= product ? product.description : '' %></textarea>
+                        <textarea id="description" name="description" class="form-control" rows="4" placeholder="Enter product description"><%= product ? product.description : '' %></textarea>
                         <div id="description-error" class="error-message"></div>
                     </div>
-                  <div class="form-group">
-                <label for="brandId" class="required">Brand</label> 
-                <select name="brand" class="form-control" id="brandId">
-                    <option value="" disabled <%= !product.brand ? 'selected' : '' %>>Select Brand</option>
-                    <% for(let i=0; i < brand.length; i++) { %>
+                    <div class="form-group">
+                        <label for="brandId" class="required">Brand</label> 
+                        <select name="brand" class="form-control" id="brandId">
+                            <option value="" disabled <%= !product.brand ? 'selected' : '' %>>Select Brand</option>
+                            <% for(let i=0; i < brand.length; i++) { %>
                                 <option value="<%= brand[i]._id %>" <%= product && product.brand && product.brand._id.toString() === brand[i]._id.toString() ? 'selected' : '' %>>
                                     <%= brand[i].name %>
                                 </option>
                             <% } %>
-                </select>
-                <div id="brandName-error" class="error-message"></div>
-            </div>
+                        </select>
+                        <div id="brandName-error" class="error-message"></div>
+                    </div>
                     <div class="form-group">
                         <label for="categoryId" class="required">Category</label>
                         <select name="category" class="form-control" id="categoryId">
                             <option value="" disabled <%= !product.category ? 'selected' : '' %>>Select Category</option>
-                             <% for(let i=0; i < category.length; i++) { %>
+                            <% for(let i=0; i < category.length; i++) { %>
                                 <option value="<%= category[i]._id %>" <%= product && product.category && product.category._id.toString() === category[i]._id.toString() ? 'selected' : '' %>>
                                     <%= category[i].name %>
                                 </option>
@@ -59,17 +71,14 @@
                         </select>
                         <div id="category-error" class="error-message"></div>
                     </div>
-                
                     <div class="form-group">
                         <label for="offerAmount" class="required">Sale Price</label>
-                        <input type="number" id="offerAmount" name="salePrice" class="form-control"
-                            placeholder="Enter offer price" value="<%= product ? product.salePrice : '' %>">
+                        <input type="number" id="offerAmount" name="salePrice" class="form-control" placeholder="Enter offer price" value="<%= product ? product.salePrice : '' %>">
                         <div id="offerPrice-error" class="error-message"></div>
                     </div>
                     <div class="form-group">
                         <label for="stockCount" class="required">Stock Count</label>
-                        <input type="number" id="stockCount" name="quantity" class="form-control"
-                            placeholder="Enter total stock count" value="<%= product ? product.quantity : '' %>">
+                        <input type="number" id="stockCount" name="quantity" class="form-control" placeholder="Enter total stock count" value="<%= product ? product.quantity : '' %>">
                         <div id="quantity-error" class="error-message"></div>
                     </div>
                 </div>
@@ -86,81 +95,71 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label required">Processor</label>
-                                <input type="text" class="form-control" id="processor" name="processor"
-                                    placeholder="e.g., Intel Core i7-13700H" value="<%= product && product.processor ? product.processor : '' %>">
+                                <input type="text" class="form-control" id="processor" name="processor" placeholder="e.g., Intel Core i7-13700H" value="<%= product && product.processor ? product.processor : '' %>">
                                 <div id="processor-error" class="error-message"></div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label required">Graphics Card</label>
-                                <input type="text" class="form-control" id="gpu" name="graphicsCard"
-                                    placeholder="e.g., NVIDIA RTX 4060"  value="<%= product && product.graphicsCard ? product.graphicsCard : '' %>">
+                                <input type="text" class="form-control" id="gpu" name="graphicsCard" placeholder="e.g., NVIDIA RTX 4060" value="<%= product && product.graphicsCard ? product.graphicsCard : '' %>">
                                 <div id="graphicsCard-error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label required">RAM</label>
-                                <input type="text" class="form-control" id="ram" name="ram"
-                                    placeholder="e.g., 16GB DDR5-5200" value="<%= product && product.ram ? product.ram : '' %>">
+                                <input type="text" class="form-control" id="ram" name="ram" placeholder="e.g., 16GB DDR5-5200" value="<%= product && product.ram ? product.ram : '' %>">
                                 <div id="ram-error" class="error-message"></div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label required">Storage</label>
-                                <input type="text" class="form-control" id="Storage" name="Storage"
-                                    placeholder="e.g., 1TB PCIe NVMe SSD" required  value="<%= product && product.Storage ? product.Storage : '' %>">
+                                <input type="text" class="form-control" id="Storage" name="Storage" placeholder="e.g., 1TB PCIe NVMe SSD" value="<%= product && product.Storage ? product.Storage : '' %>">
                                 <div id="Storage-error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label class="form-label required">Display</label>
-                                <input type="text" class="form-control" id="display" name="display"
-                                    placeholder="e.g., 15.6 inch IPS (2560x1440)" required   value="<%= product && product.display ? product.display : '' %>">
+                                <input type="text" class="form-control" id="display" name="display" placeholder="e.g., 15.6 inch IPS (2560x1440)" value="<%= product && product.display ? product.display : '' %>">
                                 <div id="display-error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label class="form-label required">Operating System</label>
-                                <input type="text" class="form-control" id="operatingSystem" name="operatingSystem"
-                                    placeholder="e.g., Windows 11 Home" required   value="<%= product && product.operatingSystem ? product.operatingSystem : '' %>">
+                                <input type="text" class="form-control" id="operatingSystem" name="operatingSystem" placeholder="e.g., Windows 11 Home" value="<%= product && product.operatingSystem ? product.operatingSystem : '' %>">
                                 <div id="operatingSystem-error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label required">Battery</label>
-                                <input type="text" class="form-control" id="Battery" name="Battery"
-                                    placeholder="e.g., 80Wh" required  value="<%= product && product.Battery ? product.Battery : '' %>">
+                                <input type="text" class="form-control" id="Battery" name="Battery" placeholder="e.g., 80Wh" value="<%= product && product.Battery ? product.Battery : '' %>">
                                 <div id="Battery-error" class="error-message"></div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label required">Weight</label>
-                                <input type="text" class="form-control" id="Weight" name="Weight"
-                                    placeholder="e.g., 1.8kg" required value="<%= product && product.Weight ? product.Weight : '' %>">
+                                <input type="text" class="form-control" id="Weight" name="Weight" placeholder="e.g., 1.8kg" value="<%= product && product.Weight ? product.Weight : '' %>">
                                 <div id="Weight-error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label class="form-label">Additional Features</label>
-                                <input type="text" class="form-control" id="additionalFeatures" name="additionalFeatures"
-                                    placeholder="e.g., Backlit Keyboard" value="<%= product && product.additionalFeatures ? product.additionalFeatures : '' %>">
+                                <input type="text" class="form-control" id="additionalFeatures" name="additionalFeatures" placeholder="e.g., Backlit Keyboard" value="<%= product && product.additionalFeatures ? product.additionalFeatures : '' %>">
                                 <div id="additionalFeatures-error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label class="form-label required">Warranty</label>
-                                <input type="text" class="form-control" id="Warranty" name="Warranty"
-                                    placeholder="e.g., 2 Year Limited Warranty" required   value="<%= product && product.Warranty ? product.Warranty : '' %>">
+                                <input type="text" class="form-control" id="Warranty" name="Warranty" placeholder="e.g., 2 Year Limited Warranty" value="<%= product && product.Warranty ? product.Warranty : '' %>">
                                 <div id="Warranty-error" class="error-message"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-             <div class="image-upload-container">
+                <div class="image-upload-container">
                     <h4 class="text-white">Product Images (Minimum 2, Maximum 5)</h4>
                     <div class="form-group">
                         <label for="images" class="text-white">Select Images</label>
@@ -170,9 +169,7 @@
                         <input type="file" name="images" id="images" class="form-control" accept="image/jpeg,image/png,image/webp" multiple style="display: none;">
                         <div id="images-error" class="error-message"></div>
                     </div>
-                    <div class="image-preview-container" id="imagePreviewContainer">
-                        <!-- Images will be populated by JavaScript -->
-                    </div>
+                    <div class="image-preview-container" id="imagePreviewContainer"></div>
                     <div class="cropper-container" id="cropperContainer" style="display: none;">
                         <h5 class="text-white">Crop Image <span id="cropImageNumber"></span></h5>
                         <div class="cropper-wrapper">
@@ -204,7 +201,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" ntegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <script>
         let cropper = null;
@@ -282,51 +279,52 @@
             });
         }
 
-      function updatePreview() {
-    const previewContainer = document.getElementById('imagePreviewContainer');
-    previewContainer.innerHTML = '';
-    const productId = document.getElementById('proID').value;
+        function updatePreview() {
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            previewContainer.innerHTML = '';
+            const productId = document.getElementById('proID').value;
 
-    const imagesToDisplay = croppedImages.length > 0 ? croppedImages : existingImages.map(url => ({ dataUrl: url, file: null }));
+            const imagesToDisplay = croppedImages.length > 0 ? croppedImages : existingImages.map(url => ({ dataUrl: url, file: null }));
 
-    if (imagesToDisplay.length === 0) {
-        previewContainer.innerHTML = '<p class="text-white">No images uploaded.</p>';
-        return;
-    }
+            if (imagesToDisplay.length === 0) {
+                previewContainer.innerHTML = '<p class="text-white">No images uploaded.</p>';
+                return;
+            }
 
-    const mainImageContainer = document.createElement('div');
-    mainImageContainer.className = 'main-image-container';
-    const mainImageDiv = document.createElement('div');
-    mainImageDiv.className = 'main-image-preview';
-    mainImageDiv.innerHTML = `
-        <img src="${imagesToDisplay[0].dataUrl}" alt="Main Preview">
-        <div class="preview-controls">
-            <button type="button" class="recrop-btn" onclick="recropImage(0)" title="Recrop"><i class="fas fa-crop-alt"></i></button>
-            <button type="button" class="remove-btn" onclick="removeImage('${productId}', 0)" title="Remove"><i class="fas fa-trash"></i></button>
-        </div>
-    `;
-    mainImageContainer.appendChild(mainImageDiv);
-    previewContainer.appendChild(mainImageContainer);
-
-    if (imagesToDisplay.length > 1) {
-        const secondaryImagesDiv = document.createElement('div');
-        secondaryImagesDiv.className = 'secondary-images';
-        imagesToDisplay.slice(1).forEach((img, index) => {
-            const actualIndex = index + 1;
-            const secondaryImageDiv = document.createElement('div');
-            secondaryImageDiv.className = 'secondary-image-preview';
-            secondaryImageDiv.innerHTML = `
-                <img src="${img.dataUrl}" alt="Secondary Preview ${actualIndex}">
+            const mainImageContainer = document.createElement('div');
+            mainImageContainer.className = 'main-image-container';
+            const mainImageDiv = document.createElement('div');
+            mainImageDiv.className = 'main-image-preview';
+            mainImageDiv.innerHTML = `
+                <img src="${imagesToDisplay[0].dataUrl}" alt="Main Preview">
                 <div class="preview-controls">
-                    <button type="button" class="recrop-btn" onclick="recropImage(${actualIndex})" title="Recrop"><i class="fas fa-crop-alt"></i></button>
-                    <button type="button" class="remove-btn" onclick="removeImage('${productId}', ${actualIndex})" title="Remove"><i class="fas fa-trash"></i></button>
+                    <button type="button" class="recrop-btn" onclick="recropImage(0)" title="Recrop"><i class="fas fa-crop-alt"></i></button>
+                    <button type="button" class="remove-btn" onclick="removeImage('${productId}', 0)" title="Remove"><i class="fas fa-trash"></i></button>
                 </div>
             `;
-            secondaryImagesDiv.appendChild(secondaryImageDiv);
-        });
-        previewContainer.appendChild(secondaryImagesDiv);
-    }
-}
+            mainImageContainer.appendChild(mainImageDiv);
+            previewContainer.appendChild(mainImageContainer);
+
+            if (imagesToDisplay.length > 1) {
+                const secondaryImagesDiv = document.createElement('div');
+                secondaryImagesDiv.className = 'secondary-images';
+                imagesToDisplay.slice(1).forEach((img, index) => {
+                    const actualIndex = index + 1;
+                    const secondaryImageDiv = document.createElement('div');
+                    secondaryImageDiv.className = 'secondary-image-preview';
+                    secondaryImageDiv.innerHTML = `
+                        <img src="${img.dataUrl}" alt="Secondary Preview ${actualIndex}">
+                        <div class="preview-controls">
+                            <button type="button" class="recrop-btn" onclick="recropImage(${actualIndex})" title="Recrop"><i class="fas fa-crop-alt"></i></button>
+                            <button type="button" class="remove-btn" onclick="removeImage('${productId}', ${actualIndex})" title="Remove"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `;
+                    secondaryImagesDiv.appendChild(secondaryImageDiv);
+                });
+                previewContainer.appendChild(secondaryImagesDiv);
+            }
+        }
+
         function startCrop(index) {
             if (index >= originalImages.length) {
                 updatePreview();
@@ -481,91 +479,86 @@
             isRecropping = false;
         }
 
- async function removeImage(productId, index) {
-    // Check if image exists at the given index
-    if (!existingImages[index] && !croppedImages[index]) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'No Image',
-            text: 'There is no image to remove at this position.'
-        });
-        return;
-    }
-
-    // Check if removing the image would violate the minimum image requirement
-    const totalImages = existingImages.length + croppedImages.filter(img => img.file).length;
-    if (totalImages <= minImages) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Minimum Images Required',
-            text: `You must have at least ${minImages} images. Cannot remove this image.`
-        });
-        return;
-    }
-
-    Swal.fire({
-        title: 'Are you sure?',
-        text: 'This will permanently remove the product image!',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, remove it!'
-    }).then(async (result) => {
-        if (result.isConfirmed) {
-            try {
-                // Show loading
+        async function removeImage(productId, index) {
+            if (!existingImages[index] && !croppedImages[index]) {
                 Swal.fire({
-                    title: 'Removing...',
-                    text: 'Please wait while we remove the product image',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
+                    icon: 'warning',
+                    title: 'No Image',
+                    text: 'There is no image to remove at this position.'
                 });
+                return;
+            }
 
-                // If the image is an existing image (stored on the server), send a DELETE request
-                if (existingImages[index] && !croppedImages[index]?.file) {
-                    const response = await fetch(`/admin/remove-product-image/${productId}/${index}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
+            const totalImages = existingImages.length + croppedImages.filter(img => img.file).length;
+            if (totalImages <= minImages) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Minimum Images Required',
+                    text: `You must have at least ${minImages} images. Cannot remove this image.`
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This will permanently remove the product image!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, remove it!'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        Swal.fire({
+                            title: 'Removing...',
+                            text: 'Please wait while we remove the product image',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        if (existingImages[index] && !croppedImages[index]?.file) {
+                            const response = await fetch(`/admin/remove-product-image/${productId}/${index}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                }
+                            });
+
+                            const data = await response.json();
+                            if (!data.success) {
+                                throw new Error(data.message || 'Failed to remove the image.');
+                            }
                         }
-                    });
 
-                    const data = await response.json();
-                    if (!data.success) {
-                        throw new Error(data.message || 'Failed to remove the image.');
+                        existingImages.splice(index, 1);
+                        croppedImages.splice(index, 1);
+
+                        updatePreview();
+                        updateFormFiles();
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Image Removed',
+                            text: 'The product image has been removed successfully.',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    } catch (error) {
+                        console.error('Error removing image:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while removing the image: ' + error.message
+                        });
                     }
                 }
-
-                // Remove the image from arrays
-                existingImages.splice(index, 1);
-                croppedImages.splice(index, 1);
-
-                // Update UI
-                updatePreview();
-                updateFormFiles();
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Image Removed',
-                    text: 'The product image has been removed successfully.',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-            } catch (error) {
-                console.error('Error removing image:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'An error occurred while removing the image: ' + error.message
-                });
-            }
+            });
         }
-    });
-}
+
         function updateFormFiles() {
             const dataTransfer = new DataTransfer();
             croppedImages.forEach(img => {
@@ -576,6 +569,99 @@
             imageInput.files = dataTransfer.files;
         }
 
+        function validateForm() {
+            clearErrorMessages();
+            let isValid = true;
+
+            const fields = [
+                { id: 'productName', errorId: 'productName-error', message: 'Product name is required.', validate: value => value.trim() !== '' },
+                { id: 'description', errorId: 'description-error', message: 'Description is required.', validate: value => value.trim() !== '' },
+                { id: 'brandId', errorId: 'brandName-error', message: 'Brand is required.', validate: value => value.trim() !== '' },
+                { id: 'categoryId', errorId: 'category-error', message: 'Category is required.', validate: value => value.trim() !== '' },
+                { id: 'offerAmount', errorId: 'offerPrice-error', message: 'Sale price must be between ₹10,000 and ₹150,000.', validate: value => {
+                    const price = parseFloat(value);
+                    return !isNaN(price) && price >= 10000 && price <= 150000;
+                }},
+                { id: 'stockCount', errorId: 'quantity-error', message: 'Stock count must be between 1 and 99.', validate: value => {
+                    const qty = parseInt(value, 10);
+                    return !isNaN(qty) && qty >= 1 && qty <= 99;
+                }},
+                { id: 'processor', errorId: 'processor-error', message: 'Processor is required.', validate: value => value.trim() !== '' },
+                { id: 'gpu', errorId: 'graphicsCard-error', message: 'Graphics card is required.', validate: value => value.trim() !== '' },
+                { id: 'ram', errorId: 'ram-error', message: 'RAM is required.', validate: value => value.trim() !== '' },
+                { id: 'Storage', errorId: 'Storage-error', message: 'Storage is required.', validate: value => value.trim() !== '' },
+                { id: 'display', errorId: 'display-error', message: 'Display is required.', validate: value => value.trim() !== '' },
+                { id: 'operatingSystem', errorId: 'operatingSystem-error', message: 'Operating system is required.', validate: value => value.trim() !== '' },
+                { id: 'Battery', errorId: 'Battery-error', message: 'Battery is required.', validate: value => value.trim() !== '' },
+                { id: 'Weight', errorId: 'Weight-error', message: 'Weight is required.', validate: value => value.trim() !== '' },
+                { id: 'Warranty', errorId: 'Warranty-error', message: 'Warranty is required.', validate: value => value.trim() !== '' },
+                { id: 'images', errorId: 'images-error', message: `Please upload at least ${minImages} images.`, validate: () => croppedImages.length >= minImages }
+            ];
+
+            fields.forEach(field => {
+                const value = field.id !== 'images' ? document.getElementById(field.id).value : null;
+                if (!field.validate(value)) {
+                    console.log(`Validation failed for ${field.id}: ${field.message}`);
+                    displayErrorMessage(field.errorId, field.message);
+                    isValid = false;
+                }
+            });
+
+            if (!isValid) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    text: 'Please correct the errors in the form before submitting.',
+                    position: 'center',
+                    showConfirmButton: true,
+                    timer: 3000
+                });
+            }
+
+            return isValid;
+        }
+
+        function displayErrorMessage(elementId, message) {
+            console.log(`Displaying error for ${elementId}: ${message}`);
+            const errorElement = document.getElementById(elementId);
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.add('active');
+                errorElement.style.display = 'block';
+                errorElement.style.color = 'red';
+            }
+            const inputElement = document.getElementById(elementId.replace('-error', ''));
+            if (inputElement) {
+                inputElement.classList.add('is-invalid');
+            }
+        }
+
+        function clearErrorMessage(id) {
+            console.log(`Clearing error for ${id}`);
+            const errorElement = document.getElementById(`${id}-error`);
+            if (errorElement) {
+                errorElement.textContent = '';
+                errorElement.classList.remove('active');
+                errorElement.style.display = 'none';
+            }
+            const element = document.getElementById(id);
+            if (element) {
+                element.classList.remove('is-invalid');
+            }
+        }
+
+        function clearErrorMessages() {
+            console.log('Clearing all error messages');
+            const errorElements = document.getElementsByClassName('error-message');
+            for (let i = 0; i < errorElements.length; i++) {
+                errorElements[i].textContent = '';
+                errorElements[i].classList.remove('active');
+                errorElements[i].style.display = 'none';
+            }
+            const inputElements = document.querySelectorAll('.form-control, .form-select');
+            inputElements.forEach(element => element.classList.remove('is-invalid'));
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             updatePreview();
 
@@ -583,11 +669,7 @@
                 event.preventDefault();
 
                 if (!validateForm()) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Validation Error',
-                        text: 'Please correct the errors in the form before submitting.',
-                    });
+                    console.log('Form validation failed');
                     return;
                 }
 
@@ -629,6 +711,7 @@
                         });
                     }
                 } catch (error) {
+                    console.error('Form submission error:', error);
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
@@ -637,123 +720,6 @@
                 }
             });
         });
-
-        function validateForm() {
-            clearErrorMessages();
-            const productName = document.getElementById('productName').value;
-            const description = document.getElementById('description').value;
-            const salePrice = document.getElementById('offerAmount').value;
-            const quantity = document.getElementById('stockCount').value;
-            const brand = document.getElementById('brandId').value;
-            const category = document.getElementById('categoryId').value;
-            const processor = document.getElementById('processor').value;
-            const graphicsCard = document.getElementById('gpu').value;
-            const ram = document.getElementById('ram').value;
-            const Storage = document.getElementById('Storage').value;
-            const display = document.getElementById('display').value;
-            const operatingSystem = document.getElementById('operatingSystem').value;
-            const Battery = document.getElementById('Battery').value;
-            const Weight = document.getElementById('Weight').value;
-            const Warranty = document.getElementById('Warranty').value;
-
-            let isValid = true;
-
-            if (productName.trim() === '') {
-                displayErrorMessage('productName-error', 'Product name is required.');
-                isValid = false;
-            }
-            if (description.trim() === '') {
-                displayErrorMessage('description-error', 'Description is required.');
-                isValid = false;
-            }
-            if (salePrice.trim() === '') {
-                displayErrorMessage('offerPrice-error', 'Sale price is required.');
-                isValid = false;
-            }
-            if (quantity.trim() === '') {
-                displayErrorMessage('quantity-error', 'Stock count is required.');
-                isValid = false;
-            }
-            if (!brand) {
-                displayErrorMessage('brandName-error', 'Brand is required.');
-                isValid = false;
-            }
-            if (!category) {
-                displayErrorMessage('category-error', 'Category is required.');
-                isValid = false;
-            }
-            if (!processor) {
-                displayErrorMessage('processor-error', 'Processor is required.');
-                isValid = false;
-            }
-            if (!graphicsCard) {
-                displayErrorMessage('graphicsCard-error', 'Graphics card is required.');
-                isValid = false;
-            }
-            if (!ram) {
-                displayErrorMessage('ram-error', 'RAM is required.');
-                isValid = false;
-            }
-            if (!Storage) {
-                displayErrorMessage('Storage-error', 'Storage is required.');
-                isValid = false;
-            }
-            if (!display) {
-                displayErrorMessage('display-error', 'Display is required.');
-                isValid = false;
-            }
-            if (!operatingSystem) {
-                displayErrorMessage('operatingSystem-error', 'Operating system is required.');
-                isValid = false;
-            }
-            if (!Battery) {
-                displayErrorMessage('Battery-error', 'Battery is required.');
-                isValid = false;
-            }
-            if (!Weight) {
-                displayErrorMessage('Weight-error', 'Weight is required.');
-                isValid = false;
-            }
-            if (!Warranty) {
-                displayErrorMessage('Warranty-error', 'Warranty is required.');
-                isValid = false;
-            }
-            if (existingImages.length + croppedImages.filter(img => img.file).length < minImages) {
-                displayErrorMessage('images-error', `Please upload at least ${minImages} images.`);
-                isValid = false;
-            }
-
-            return isValid;
-        }
-
-        function displayErrorMessage(elementId, message) {
-            const errorElement = document.getElementById(elementId);
-            if (errorElement) {
-                errorElement.textContent = message;
-                errorElement.style.color = 'red';
-                errorElement.style.display = 'block';
-            }
-        }
-
-        function clearErrorMessage(id) {
-            const errorElement = document.getElementById(`${id}-error`);
-            if (errorElement) {
-                errorElement.textContent = '';
-                errorElement.style.display = 'none';
-            }
-            const element = document.getElementById(id);
-            if (element) {
-                element.classList.remove('is-invalid');
-            }
-        }
-
-        function clearErrorMessages() {
-            const errorElements = document.getElementsByClassName('error-message');
-            for (let i = 0; i < errorElements.length; i++) {
-                errorElements[i].textContent = '';
-                errorElements[i].style.display = 'none';
-            }
-        }
     </script>
 </body>
 </html>

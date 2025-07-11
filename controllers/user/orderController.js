@@ -308,8 +308,6 @@ if (isFullCancellation) {
     let cancelledCount = 0;
 
 
-    const totalOrderSubtotal = order.orderedItems.reduce((sum, item) => sum + (item.subtotal || 0), 0);
-    const couponDiscountPerUnit = totalOrderSubtotal > 0 && order.discount ? (order.discount || 0) / totalOrderSubtotal : 0;
 
     for (const productId of productIdsArray) {
       const item = order.orderedItems.find( item => item.product && item.product._id.toString() === productId);  
@@ -328,18 +326,27 @@ if (isFullCancellation) {
         continue;
       }
 
-
+let itemRefund=0
 const itemSubtotal = item.originalPrice || 0;
 const itemOfferDiscount = item.offerDiscount || 0;
 const itemCouponDiscount = item.couponDiscount || 0;
-const itemRefund = Math.max(0, itemSubtotal - itemOfferDiscount - itemCouponDiscount);
+if(!isFullCancellation){
+   itemRefund = Math.max(0, itemSubtotal - itemOfferDiscount - itemCouponDiscount);
+}else{
+   itemRefund=order.finalAmount
+}
 
       
       item.status = "Cancelled";
       item.cancelReason = reason || "No reason provided";
       item.additionalNote = details || "";
+      if(!isFullCancellation){
       totalRefundAmount += itemRefund > 0 ? itemRefund : 0;
-      cancelledCount++;
+       cancelledCount++;
+      }else{
+        totalRefundAmount = itemRefund > 0 ? itemRefund : 0;
+        cancelledCount++;
+      }
     }
 
     if (["Razorpay", "Wallet"].includes(order.paymentMethod) && totalRefundAmount > 0 && order.paymentStatus === "success") {
@@ -376,7 +383,7 @@ if (allCancelled) {
 }
 
 
-    await order.save();
+    await order.save()
 
     res.status(200).json({
       success: true,

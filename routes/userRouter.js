@@ -12,6 +12,7 @@ const whishlistController=require("../controllers/user/wishlistController")
 const OrderController=require("../controllers/user/orderController")
 const walletController=require("../controllers/user/walletController")
 const couponController=require("../controllers/user/couponController")
+const contactsController=require("../controllers/user/contactsController")
 const  {userAuth,userAuthHome }=require("../middlewares/userAuth")
 const {profileUpload}=require("../config/multer");
 const { ReturnDocument } = require("mongodb");
@@ -55,6 +56,8 @@ router.get("/",userAuthHome,userController.LoadHomepage);
 router.get("/shop",userAuthHome,userController.loadShoppingPage)
 router.get("/productview",productController.productViewPage);
 
+// contact page
+router.get("/contacts",contactsController.contactPage)
 
 // protected routes 
 router.use(userAuth);
@@ -90,7 +93,7 @@ router.patch("/address/set-default/:addressId",addressController.setDefaultAddre
 
 //wishlist Page
 router.get("/wishlist",whishlistController.getWishlistPage)
-router.post("/wishlist/add",whishlistController.addWishlist)
+router.post("/wishlist/add/:Id",whishlistController.addWishlist)
 router.delete("/wishlist/remove/:productId",whishlistController.deleteWishlistProduct)
 router.post("/add/wishlist-cart/:productId",whishlistController.addToCartFromWishlist);
 
@@ -113,7 +116,8 @@ router.get("/wallet",walletController.getWalletPage)
 router.get('/coupons/available',couponController.availableCoupon)
 router.post("/coupons/apply",couponController.applyCoupon)
 router.post("/coupons/remove",couponController.removeCoupon)
-router.post('/update-session',couponController.updatesession)
-router.post('/clear-session',couponController.clearSession)
+
+
+
 
 module.exports=router;                

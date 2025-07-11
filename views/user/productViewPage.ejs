@@ -17,12 +17,11 @@
     </nav>
   </div>
 
-  <!-- Product Section -->
+  
   <div class="container mb-5">
     <div class="product-section">
-<!-- Product Images Column -->
+
 <div class="product-images">
-  <!-- Thumbnail Images - Left Side Vertical -->
   <div class="product-thumbs-container">
     <% if (product.productImage && product.productImage.length > 0) { %>
       <% product.productImage.forEach((image, index) => { %>
@@ -90,7 +89,7 @@
         <!-- Product Title with Wishlist Button -->
         <div class="product-title-section">
           <h1><%= product.productName %></h1>
-          <button class="wishlist-btn <%= wishlistProductIds.includes(product._id.toString()) ? 'active' : ''%>" id="wishlist-btn"data-product-id="<%= product._id %>"
+          <button class="wishlist-btn <%= wishlistProductIds.includes(product._id.toString()) ? 'active' : ''%>" id="wishlist-btn"   onclick="initAddToWishlistButton('<%= product._id %>')"
         data-product-name="<%= product.productName %>">
             <i class="far fa-heart"></i>
           </button>
@@ -412,16 +411,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script>
-      document.addEventListener('DOMContentLoaded', function () {
-                
-                initAddToWishlistButton();
 
-                    let resizeTimeout;
-                    window.addEventListener('resize', () => {
-                        clearTimeout(resizeTimeout);
-                        resizeTimeout = setTimeout(checkMobileView, 100);
-                    });
-                });
     
 document.addEventListener('DOMContentLoaded', () => {
   const thumbnails = document.querySelectorAll('.product-thumb');
@@ -525,7 +515,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (currentQty < maxQty) {
       qtyInput.value = currentQty + 1;
-      console.log('Quantity increased to:', currentQty + 1);
     } else {
       showErrorMessage("Cannot add more than available stock.");
     }
@@ -537,7 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (currentQty > 1) {
       qtyInput.value = currentQty - 1;
-      console.log('Quantity decreased to:', currentQty - 1);
+     
     }
   };
 
@@ -589,7 +578,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showConfirmButton: false
       }).then(callback);
     } else {
-      console.log('SweetAlert not available. Success message:', title);
+     
       if (callback) callback();
     }
   };
@@ -610,9 +599,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     } else {
-      console.log('SweetAlert not available. Login prompt shown.');
-      // Fallback behavior without redirect
-      console.log("Please log in to add items to the cart.");
+     
     }
   };
 
@@ -647,7 +634,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const originalText = addToCartBtn.textContent;
         addToCartBtn.textContent = "Adding...";
 
-        console.log('Sending to cart:', { productId, quantity, price });
+      
 
         // Send request to backend
         const response = await fetch("/cart/add", {
@@ -664,17 +651,42 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const data = await response.json();
-        console.log('Backend response:', data);
+      
 
         // Handle response
         if (data.success) {
           showSuccessMessage("Added to cart successfully!", () => {
             window.location.href = "/cart";
           });
-        } else if (data.redirectToLogin) {
-          showLoginPrompt();
-        } else {
-          showErrorMessage(data.message || "Failed to add to cart.");
+        }
+        else if(data.redirectUrl) {
+if (data.redirectUrl) {
+  await Swal.fire({
+    icon: 'warning',
+    title: 'Please log in',
+    text: data.message || 'You need to be logged in to use this feature.',
+    confirmButtonText: 'Go to Login',
+    showCancelButton: true
+  }).then(result => {
+    if (result.isConfirmed) {
+      window.location.href = data.redirectUrl;
+    }
+  })
+  return;
+}else {
+                        await Swal.fire({
+                        icon: 'error',
+                        title: 'Failed to Add',
+                        text: data.message || 'Something went wrong while adding to cart.',
+                        position: 'center', 
+                        showConfirmButton: true,
+                        confirmButtonText: 'OK',
+                        timer: 4000,
+                        timerProgressBar: true
+                    })
+}
+
+
         }
 
       } catch (error) {
@@ -693,49 +705,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const { productId, maxQty, price } = getProductData();
     const quantity = parseInt(document.getElementById("quantity").value) || 1;
     
-    console.log('Current Product State:', {
-      productId,
-      quantity,
-      maxQty,
-      price,
-      isValid: productId && quantity > 0 && quantity <= maxQty
-    });
+   
   };
 
 
 });
          // Updated Wishlist Function
-    function initAddToWishlistButton() {
-        const buttons = document.querySelectorAll('.wishlist-btn'); // Corrected variable name
+    function initAddToWishlistButton(productId) {
+        const buttons = document.querySelectorAll('.wishlist-btn'); 
         buttons.forEach(button => {
             button.addEventListener('click', async function (e) {
-                e.preventDefault(); // Prevent default navigation
+                e.preventDefault();
                 e.stopPropagation();
 
-                const productId = this.dataset.productId;
-                const productName = this.dataset.productName; // Now defined in HTML
+                const Id =productId;
+          
+                const productName = this.dataset.productName; 
 
-                // Disable button and show loading state
+           
                 const originalContent = this.innerHTML;
                 this.disabled = true;
                 this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
 
                 try {
-                    const res = await fetch('/wishlist/add', {
+                    const res = await fetch(`/wishlist/add/${Id}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ productId }),
                     });
 
                     const data = await res.json();
 
                     if (data.success) {
-                        // Toggle active class to show the product is in the wishlist
+                     
                         this.classList.add('active');
 
-                        // Success message with centered SweetAlert
+                        
                         await Swal.fire({
                             icon: 'success',
                             title: 'Added to Wishlist!',
@@ -745,7 +751,23 @@ document.addEventListener('DOMContentLoaded', () => {
                             timer: 3000,
                             timerProgressBar: true
                         });
-                    } else {
+                    } else if(data.redirectUrl){
+
+                                              if (data.redirectUrl) {
+  await Swal.fire({
+    icon: 'warning',
+    title: 'Please log in',
+    text: data.message || 'You need to be logged in to use this feature.',
+    confirmButtonText: 'Go to Login',
+    showCancelButton: true
+  }).then(result => {
+    if (result.isConfirmed) {
+      window.location.href = data.redirectUrl;
+    }
+  });
+  return;
+}
+                    }else
                         // Error message with centered SweetAlert
                         await Swal.fire({
                             icon: 'error',
@@ -756,8 +778,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             confirmButtonText: 'OK',
                             timer: 4000,
                             timerProgressBar: true
-                        });
-                    }
+                        })
+
+   
+         
                 } catch (err) {
                     console.error('Add to wishlist error:', err);
                     // Network error message with centered SweetAlert

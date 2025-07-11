@@ -49,7 +49,7 @@ const addbrand = async (req, res) => {
 
     const existingBrands = await Brand.find({ isDeleted: false });
 
-    const duplicate = existingBrands.find((brand) => {
+      const duplicate = existingBrands.find((brand) => {
       const existingName = normalizeName(brand.name);
       const dist = distance(normalizedInput, existingName);
       const maxLen = Math.max(normalizedInput.length, existingName.length);
@@ -128,14 +128,12 @@ const editBrand=async (req,res) => {
 //  deleted brand
 const softdeleteBrand=async (req,res) => {
     try{
-    
         const id=req.params.id;   
         const delBrand=await Brand.findByIdAndUpdate( 
             id,
             {isDeleted:true},
             {new:true}
         );
-        
         if(!delBrand){
             return res.status(404).json({error:"Brand Not found"});
         }

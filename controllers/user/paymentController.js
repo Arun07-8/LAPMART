@@ -290,8 +290,6 @@ const verifyPayment = async (req, res) => {
 const getPaymentFailed = async (req, res) => {
   try {
     const { orderId, errorCode, paymentId, reason ,amount} = req.query;
-    
-   
     const userId = req.session.user;
     if (!userId) {
       return res.redirect('/login');
@@ -323,12 +321,12 @@ const getPaymentFailed = async (req, res) => {
     });
 
     if(existingOrder.paymentStatus==="failed"){
-       
       await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0 });
     }
     
     await existingOrder.save();
-    res.status(200).render('paymentFailed', {
+    if(paymentStatus==="failed"){
+      res.status(200).render('paymentFailed', {
       orderId,
       errorCode: errorCode || 'N/A',
       paymentId: paymentId || 'N/A',
@@ -336,6 +334,8 @@ const getPaymentFailed = async (req, res) => {
       amount,
       user:userData
     });
+    }
+    
   } catch (error) {
     console.error('Payment failed page error:', error);
     res.status(500).render('paymentFailed', {
@@ -416,12 +416,12 @@ const createCODOrder = async (req, res) => {
     if (paymentMethod !== 'Cash on Delivery') {
       return res.status(400).json({ success: false, message: 'Invalid payment method.' });
     }
-    // if (amount > 21000) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: 'Cash on Delivery is allowed only for orders up to ₹21,000.',
-    //   });
-    // }
+    if (amount > 21000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cash on Delivery is allowed only for orders up to ₹21,000.',
+      });
+    }
 
     const user = await User.findById(userId).populate('wallet');
     if (!user) {

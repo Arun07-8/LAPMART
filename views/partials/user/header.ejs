@@ -782,6 +782,55 @@
                 font-size: 18px;
             }
         }
+        .profile-avatar {
+  width: 40px;
+  height: 40px;
+  background-color: #ddd;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;.profile-avatar {
+  width: 40px;
+  height: 40px;
+  background-color: #ddd;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.avatar-letter {
+  font-size: 18px;
+  font-weight: bold;
+  color: #444;
+}
+
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.avatar-letter {
+  font-size: 18px;
+  font-weight: bold;
+  color: #444;
+}
+
     </style>
 </head>
 <body>
@@ -808,19 +857,20 @@
 
             <!-- Navigation -->
             <nav class="nav-links">
-                <a href="/" class="nav-link">Home</a>
-                <a href="/shop" class="nav-link">Shop</a>
-                <a href="#" class="nav-link">Contacts</a>
+                <a href="/" class="nav-link" id="home">Home</a>
+                <a href="/shop" class="nav-link" id="shop">Shop</a>
+                <a href="/contacts" class="nav-link" id="contacts">Contacts</a>
+                <a href="#" class="nav-link" id="About">About</a>
             </nav>
 
             <!-- Cart and Profile Section -->
             <div class="cart-profile">
-                <a href="/wishlist" aria-label="Wishlist">
+                <a href="/wishlist" aria-label="Wishlist" id="Wishlist-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                     </svg>
                 </a>
-                <a href="/cart" aria-label="Cart">
+                <a href="/cart" aria-label="Cart" id="cart-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="9" cy="21" r="1"></circle>
                         <circle cx="20" cy="21" r="1"></circle>
@@ -831,9 +881,15 @@
                 <% if (locals.user) { %>
                     <div class="profile-container">
                         <button class="profile-button" id="profileButton" aria-label="Profile">
-                            <div class="profile-avatar">
-                                <%= user.name.charAt(0).toUpperCase() %>
-                            </div>
+             
+<div class="profile-avatar">
+  <% if (user.profileImage && user.profileImage[0]) { %>
+    <img src="<%= user.profileImage[0] %>" alt="Profile Image" class="avatar-img" />
+  <% } else { %>
+    <span class="avatar-letter"><%= user.name.charAt(0).toUpperCase() %></span>
+  <% } %>
+</div>
+
                             <span class="username"><%= user.name %></span>
                             <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -873,7 +929,76 @@
         </header>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+
+
+  document.getElementById('cart-btn').addEventListener('click', async function (e) {
+    e.preventDefault(); // Stop default redirect
+
+    try {
+      const res = await fetch('/cart', {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        window.location.href = '/cart';
+      } else {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Login Required',
+          text:  'Please login to view your cart',
+          confirmButtonText: 'OK'
+        });
+      }
+
+    } catch (error) {
+      console.error('Error checking cart:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Something went wrong',
+        text: 'Unable to access cart. Try again later.',
+      });
+    }
+  });
+
+
+  document.getElementById('Wishlist-btn').addEventListener('click', async function (e) {
+    e.preventDefault(); // Stop default redirect
+
+    try {
+      const res = await fetch('/wishlist', {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        window.location.href = '/wishlist';
+      } else {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Login Required',
+          text:  'Please login to view your wishlist',
+          confirmButtonText: 'OK'
+        });
+      }
+
+    } catch (error) {
+      console.error('Error checking wishlist:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Something went wrong',
+        text: 'Unable to access wishlist. Try again later.',
+      });
+    }
+  });
+
+
         (function() {
             // Utility: Debounce function for resize events
             const debounce = (func, wait) => {
