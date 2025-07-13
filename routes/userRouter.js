@@ -13,6 +13,7 @@ const OrderController=require("../controllers/user/orderController")
 const walletController=require("../controllers/user/walletController")
 const couponController=require("../controllers/user/couponController")
 const contactsController=require("../controllers/user/contactsController")
+const aboutController=require("../controllers/user/aboutController")
 const  {userAuth,userAuthHome }=require("../middlewares/userAuth")
 const {profileUpload}=require("../config/multer");
 const { ReturnDocument } = require("mongodb");
@@ -58,6 +59,11 @@ router.get("/productview",productController.productViewPage);
 
 // contact page
 router.get("/contacts",contactsController.contactPage)
+router.post("/contacts",contactsController.sendEmail)
+
+// about page
+router.get("/about",aboutController.getAboutPage)
+
 
 // protected routes 
 router.use(userAuth);
@@ -74,6 +80,7 @@ router.post("/email-otp",userProfile.verifyOtp);
 router.post("/resend-Otp",userProfile.resendOtp);
 router.get("/referral",userProfile.getreferralPage)
 router.get("/logout",userController.logout)
+router.get("/check-session", userController.checkSession);
 
 
 //   Cart page

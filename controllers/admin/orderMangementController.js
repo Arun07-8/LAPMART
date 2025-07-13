@@ -3,22 +3,8 @@ const User = require("../../models/userSchema")
 const Product=require("../../models/productSchema")
 const { applyBestOffer } = require("../../helpers/offerHelper")
 const Wallet=require("../../models/walletSchema")
+const {getmainOrderStatus} =require("../../helpers/getmainOrderStatus")
 
-
-
-function getmainOrderStatus(orderedItems) {
-  if (!orderedItems || orderedItems.length === 0) return 'Pending';
-  const statuses = orderedItems.map(item => item.status);
-  if (statuses.every(status => status === 'Cancelled')) return 'Cancelled';
-  if (statuses.includes('Return Request')) return 'Return Request';
-  if (statuses.includes('Returned')) return 'Returned';
-  if (statuses.includes('Shipped')) return 'Shipped';
-  if (statuses.includes('Processing')) return 'Processing';
-  if (statuses.includes('Pending')) return 'Pending';
-  if (statuses.includes('Payment Failed')) return 'Payment Failed';
-  if (statuses.every(status => status === 'Delivered')) return 'Delivered';
-  return 'Processing'; 
-}
 
 const getOrderManagementPage = async (req, res) => {
     try {
@@ -93,7 +79,6 @@ const getOrderManagementPage = async (req, res) => {
             .skip(skip)
             .limit(limit);
 
-        // Enrich orders with additional data
         const enrichedOrders = [];
         for (const order of orders) {
             order.mainStatus = getmainOrderStatus(order.orderedItems);
@@ -303,6 +288,7 @@ const acceptReturn = async (req, res) => {
     const item = order.orderedItems.find(
       (item) => item.product.toString() === productId
     );
+    console.log(item)
     if (!item) {
       return res.status(404).json({ success: false, message: 'Product not found in order.' });
     }
@@ -313,18 +299,15 @@ const acceptReturn = async (req, res) => {
 
     const product = await Product.findById(item.product);
     const offerAppliedProduct = await applyBestOffer(product);
-    const finalPrice = offerAppliedProduct.finalPrice
-
+    const finalPrice = offerAppliedProduct.salePrice
+    
     const quantity = item.quantity || 1;
     const itemTotal = finalPrice * quantity;
 
     const orderLevelDiscount = order.discount || 0;
     const refundAmount = Number(Math.max(itemTotal - orderLevelDiscount, 0).toFixed(2));
 
-
-
     const transactionId = `TXN_${Date.now()}_${Math.floor(100000 + Math.random() * 700000)}`;
-
     // Wallet handling
     let wallet = await Wallet.findOne({ user: order.userId });
 

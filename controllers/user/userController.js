@@ -310,7 +310,7 @@ const LoadHomepage = async (req, res) => {
             const userData = await User.findById(user);
             return res.render("home", { user: userData, product: updatedProduct ,categories:categories});
         } else {
-            return res.render("home", { product: updatedProduct});
+            return res.render("home", { product: updatedProduct,categories:categories});
         }
     } catch (error) {
         console.error("Home page is not working", error);
@@ -334,7 +334,7 @@ const loadShoppingPage = async (req, res) => {
             }
         }
 
-        console.log('Query Parameters:', req.query);
+
 
         const {
             category = 'all',
@@ -415,7 +415,6 @@ const loadShoppingPage = async (req, res) => {
 
         const updatedProducts = await Promise.all(products.map(async (product) => {
             const updated = await applyBestOffer(product);
-            console.log('Updated Product:', { _id: updated._id, productName: updated.productName, salePrice: updated.salePrice, discountedPrice: updated.discountedPrice });
             return updated;
         }));
 
@@ -503,6 +502,16 @@ const  logout=async (req,res) => {
       }       
     
 }
+
+
+const checkSession = (req, res) => {
+  if (req.session && req.session.user) {
+    res.json({ loggedIn: true });
+  } else {
+    res.json({ loggedIn: false });
+  }
+};
+
 module.exports = {
     signup,
     LoadHomepage,
@@ -514,6 +523,7 @@ module.exports = {
     login,
     logout,
     loadShoppingPage,
-    renderOtpPge
+    renderOtpPge,
+    checkSession
 
 };

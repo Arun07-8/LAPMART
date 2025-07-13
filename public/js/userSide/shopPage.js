@@ -280,8 +280,10 @@ function initAddToWishlistButton() {
                     }).then(result => {
                         if (result.isConfirmed) {
                             window.location.href = data.redirectUrl;
+                        }else {
+                             window.location.reload()
                         }
-                    });
+                    })
                     return;
                 } else {
                     await Swal.fire({

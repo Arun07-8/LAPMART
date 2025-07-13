@@ -1,0 +1,438 @@
+<%- include("../../views/partials/user/header") %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Lapmart Premium Laptops</title>
+    <style>
+        /* Reset only for this page content, not affecting header */
+        .about-page * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .about-page {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.7;
+            color: #2c2c2c;
+            background-color: #ffffff;
+        }
+
+        .about-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .about-header {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
+            color: #2c2c2c;
+            padding: 100px 0;
+            text-align: center;
+            position: relative;
+            border-bottom: 3px solid #d4af37;
+        }
+
+        .about-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(212, 175, 55, 0.03) 0%, rgba(212, 175, 55, 0.08) 100%);
+            z-index: 1;
+        }
+
+        .about-header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .about-logo {
+            font-size: 4rem;
+            font-weight: 300;
+            margin-bottom: 20px;
+            color: #d4af37;
+            text-shadow: 0 2px 4px rgba(212, 175, 55, 0.2);
+            letter-spacing: 4px;
+            font-family: 'Georgia', serif;
+        }
+
+        .about-tagline {
+            font-size: 1.4rem;
+            margin-bottom: 30px;
+            color: #666;
+            font-style: italic;
+            font-weight: 300;
+        }
+
+        .about-main-content {
+            background: #ffffff;
+            margin: -50px auto 0;
+            position: relative;
+            z-index: 3;
+            border-radius: 0;
+            box-shadow: 0 0 60px rgba(212, 175, 55, 0.1);
+            overflow: hidden;
+        }
+
+        .about-section {
+            padding: 80px 60px;
+            background: #ffffff;
+        }
+
+        .about-section:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .about-section h2 {
+            color: #2c2c2c;
+            font-size: 2.8rem;
+            margin-bottom: 40px;
+            text-align: center;
+            position: relative;
+            font-weight: 300;
+            font-family: 'Georgia', serif;
+        }
+
+        .about-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(to right, #d4af37, #f4d03f);
+            border-radius: 1px;
+        }
+
+        .about-section p {
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+            color: #555;
+            text-align: center;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.8;
+        }
+
+        .about-features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .about-feature-card {
+            background: #ffffff;
+            padding: 50px 40px;
+            border-radius: 0;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(212, 175, 55, 0.1);
+            transition: all 0.4s ease;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.05), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .about-feature-card:hover::before {
+            left: 100%;
+        }
+
+        .about-feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(212, 175, 55, 0.15);
+            border-color: #d4af37;
+        }
+
+        .about-feature-icon {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #d4af37, #f4d03f);
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .about-feature-card h3 {
+            color: #2c2c2c;
+            font-size: 1.6rem;
+            margin-bottom: 20px;
+            font-weight: 400;
+            font-family: 'Georgia', serif;
+        }
+
+        .about-feature-card p {
+            color: #666;
+            font-size: 1.1rem;
+            text-align: left;
+            line-height: 1.6;
+        }
+
+        .about-stats-section {
+            background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+            color: white;
+            padding: 100px 60px;
+            text-align: center;
+            position: relative;
+        }
+
+        .about-stats-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(212, 175, 55, 0.05) 0%, rgba(212, 175, 55, 0.1) 100%);
+            z-index: 1;
+        }
+
+        .about-stats-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .about-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 50px;
+            margin-top: 60px;
+        }
+
+        .about-stat-item {
+            text-align: center;
+        }
+
+        .about-stat-number {
+            font-size: 3.5rem;
+            font-weight: 300;
+            margin-bottom: 15px;
+            color: #d4af37;
+            font-family: 'Georgia', serif;
+        }
+
+        .about-stat-label {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .about-cta-section {
+            background: #d4af37;
+            color: white;
+            padding: 80px 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.1) 100%);
+            z-index: 1;
+        }
+
+        .about-cta-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .about-cta-button {
+            display: inline-block;
+            background: white;
+            color: #d4af37;
+            padding: 18px 50px;
+            text-decoration: none;
+            border-radius: 0;
+            font-weight: 400;
+            font-size: 1.2rem;
+            margin-top: 30px;
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            border: 2px solid transparent;
+            font-family: 'Georgia', serif;
+        }
+
+        .about-cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+            background: transparent;
+            color: white;
+            border-color: white;
+        }
+
+        .about-premium-highlight {
+            background: linear-gradient(135deg, #f8f8f8 0%, #ffffff 100%);
+            border-left: 4px solid #d4af37;
+            padding: 40px;
+            margin: 40px 0;
+            font-style: italic;
+            font-size: 1.3rem;
+            color: #555;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .about-logo {
+                font-size: 2.8rem;
+                letter-spacing: 2px;
+            }
+            
+            .about-section {
+                padding: 60px 30px;
+            }
+            
+            .about-section h2 {
+                font-size: 2.2rem;
+            }
+            
+            .about-features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .about-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .about-feature-card {
+                padding: 40px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="about-page">
+        <div class="about-header">
+            <div class="about-container">
+                <div class="about-header-content">
+                    <div class="about-logo">LAPMART</div>
+                    <div class="about-tagline">Premium Laptops, Exceptional Excellence</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="about-container">
+            <div class="about-main-content">
+                <div class="about-section">
+                    <h2>About Lapmart</h2>
+                    <p>Welcome to Lapmart, where cutting-edge technology meets uncompromising quality in the world of premium laptops. We are dedicated to providing discerning customers with the finest selection of high-performance laptops, backed by exceptional service and expertise.</p>
+                    
+                    <div class="about-premium-highlight">
+                        "At Lapmart, we don't just sell laptops – we deliver technological excellence that empowers your digital ambitions."
+                    </div>
+                    
+                    <p>Founded by technology enthusiasts in Calicut in June 2025, Lapmart has evolved into a trusted destination for premium laptops from the world's leading manufacturers. Our commitment to excellence and deep understanding of computing needs sets us apart in the competitive landscape.</p>
+                </div>
+
+                <div class="about-section">
+                    <h2>Our Mission</h2>
+                    <p>At Lapmart, our mission is to be the definitive source for premium laptops, offering curated selections that meet the highest standards of performance, design, and reliability. We believe that exceptional computing experiences should be accessible to professionals, creators, and enthusiasts who demand nothing but the best.</p>
+                    <p>We strive to build lasting partnerships with our customers by providing expert guidance, premium products, and unparalleled service that exceeds expectations at every touchpoint.</p>
+                </div>
+
+                <div class="about-section">
+                    <h2>Why Choose Lapmart?</h2>
+                    <div class="about-features-grid">
+                        <div class="about-feature-card">
+                            <div class="about-feature-icon">💻</div>
+                            <h3>Premium Selection</h3>
+                            <p>Carefully curated collection of high-end laptops from top-tier brands, ensuring you have access to the latest technology and superior build quality for every computing need.</p>
+                        </div>
+                        <div class="about-feature-card">
+                            <div class="about-feature-icon">⚡</div>
+                            <h3>Express Delivery</h3>
+                            <p>Fast, secure shipping with premium packaging to ensure your investment arrives in perfect condition. We understand that time is valuable for our discerning customers.</p>
+                        </div>
+                        <div class="about-feature-card">
+                            <div class="about-feature-icon">🔒</div>
+                            <h3>Secure Transactions</h3>
+                            <p>Enterprise-grade security protocols protect your personal and financial information. Shop with complete confidence knowing your privacy is our priority.</p>
+                        </div>
+                        <div class="about-feature-card">
+                            <div class="about-feature-icon">💎</div>
+                            <h3>Quality Assurance</h3>
+                            <p>Every laptop undergoes rigorous quality checks before delivery. We guarantee authentic products with full manufacturer warranties and our quality commitment.</p>
+                        </div>
+                        <div class="about-feature-card">
+                            <div class="about-feature-icon">🎯</div>
+                            <h3>Expert Guidance</h3>
+                            <p>Our technology specialists provide personalized recommendations to help you find the perfect laptop that matches your specific requirements and budget.</p>
+                        </div>
+                        <div class="about-feature-card">
+                            <div class="about-feature-icon">🤝</div>
+                            <h3>Premium Support</h3>
+                            <p>Dedicated customer service team available to assist with technical questions, product information, and after-sales support throughout your ownership experience.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="about-stats-section">
+            <div class="about-container">
+                <div class="about-stats-content">
+                    <h2 style="color: white; margin-bottom: 30px; font-weight: 300;">Our Excellence</h2>
+                    <p style="color: rgba(255,255,255,0.9); font-size: 1.3rem; margin-bottom: 0; font-weight: 300;">Performance metrics that reflect our commitment to quality</p>
+                    <div class="about-stats-grid">
+                        <div class="about-stat-item">
+                            <div class="about-stat-number">15K+</div>
+                            <div class="about-stat-label">Satisfied Customers</div>
+                        </div>
+                        <div class="about-stat-item">
+                            <div class="about-stat-number">500+</div>
+                            <div class="about-stat-label">Premium Laptop Models</div>
+                        </div>
+                        <div class="about-stat-item">
+                            <div class="about-stat-number">50+</div>
+                            <div class="about-stat-label">Countries Served</div>
+                        </div>
+                        <div class="about-stat-item">
+                            <div class="about-stat-number">99.8%</div>
+                            <div class="about-stat-label">Customer Satisfaction</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="about-cta-section">
+            <div class="about-container">
+                <div class="about-cta-content">
+                    <h2 style="color: white; margin-bottom: 30px; font-weight: 300;">Ready to Experience Premium Computing?</h2>
+                    <p style="color: rgba(255,255,255,0.9); font-size: 1.3rem; font-weight: 300;">Join thousands of professionals who trust Lapmart for their premium laptop needs.</p>
+                    <a href="#" class="about-cta-button">Explore Premium Collection</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<%- include("../../views/partials/user/footer") %>

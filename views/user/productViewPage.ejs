@@ -670,6 +670,8 @@ if (data.redirectUrl) {
   }).then(result => {
     if (result.isConfirmed) {
       window.location.href = data.redirectUrl;
+    }else{
+       window.location.reload()
     }
   })
   return;

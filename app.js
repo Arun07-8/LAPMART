@@ -26,16 +26,16 @@ app.set("view engine","ejs");
 
 app.use(session({
     secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({  
-    mongoUrl: process.env.MONGODB_URI,
-    collectionName: 'sessions'
-  }),
+    resave: false,                    
+    saveUninitialized: false,          
+    store: MongoStore.create({        
+      mongoUrl: process.env.MONGODB_URI,
+      collectionName: 'sessions'       
+    }),
     cookie: {
-        secure: false,       
-        httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24  // 1 day
+        secure: false,                
+        httpOnly: true,                
+        maxAge: 1000 * 60 * 60 * 24    
     }
 }));
 

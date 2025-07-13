@@ -409,7 +409,7 @@ const orderReturn = async (req, res) => {
         { _id: orderId, "orderedItems.product": productId },
         {
           $set: {
-            "orderedItems.$.status": "Return Requested",
+            "orderedItems.$.status": "Return Request",
             "orderedItems.$.isReturned": true,
             "orderedItems.$.returnReason": reason,
             "orderedItems.$.returnNote": note

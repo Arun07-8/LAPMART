@@ -1,5 +1,6 @@
 
-    <%- include("../../views/partials/user/header") %>
+
+<%- include("../../views/partials/user/header") %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +14,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-z
+
         body {
             font-family: 'Inter', sans-serif;
             line-height: 1.6;
@@ -51,6 +52,28 @@ z
             display: flex;
             align-items: center;
             justify-content: flex-start;
+        }
+
+        /* Video Background Styling */
+        .banner-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .banner-slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 2;
         }
 
         .banner-slide:nth-child(1) {
@@ -601,10 +624,15 @@ z
     <section class="hero">
         <div class="banner-slider">
             <div class="banner-slide">
+                <!-- Video Background -->
+                <video autoplay muted loop playsinline class="banner-video">
+                    <source src="/img/video/x4fa4f3ce9_large.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                </video>
                 <div class="hero-content">
-                    <h1 class="hero-title">Gaming Laptops</h1>
-                    <p class="hero-subtitle">Unleash your gaming potential with our high-performance gaming laptops featuring cutting-edge graphics and lightning-fast processors.</p>
-                    <a href="/shop" class="hero-btn">Explore Gaming</a>
+                    <h1 class="hero-title">Creative Workstations</h1>
+                    <p class="hero-subtitle">Transform your creative vision into reality with our powerful workstations perfect for design, video editing, and content creation.</p>
+                    <a href="/shop" class="hero-btn"> Create Now</a>
                 </div>
             </div>
             <div class="banner-slide">
@@ -616,9 +644,9 @@ z
             </div>
             <div class="banner-slide">
                 <div class="hero-content">
-                    <h1 class="hero-title">Creative Workstations</h1>
-                    <p class="hero-subtitle">Transform your creative vision into reality with our powerful workstations perfect for design, video editing, and content creation.</p>
-                    <a href="/shop" class="hero-btn">Create Now</a>
+                    <h1 class="hero-title">Gaming Laptops</h1>
+                    <p class="hero-subtitle">Experience ultimate gaming performance with our cutting-edge gaming laptops designed for victory. </p>
+                    <a href="/shop" class="hero-btn">Explore Gaming</a>
                 </div>
             </div>
         </div>
@@ -650,31 +678,28 @@ z
     </section>
 
     <!-- Categories Section -->
-  <section class="category-section">
-  <h2 class="section-header animate-on-scroll">Shop by Category</h2>
-  <div class="category-grid">
-    <% categories.forEach(category => { %>
-      <a href="/shop?category=<%= category._id %>" class="category-link" style="text-decoration: none;">
-        <div class="category-card animate-on-scroll">
-          <% if (category.name === "Gaming Laptops") { %>
-            <div class="category-icon">🎮</div>
-          <% } else if (category.name === "Business Laptops") { %>
-            <div class="category-icon">💼</div>
-          <% } else if (category.name === "Student Laptops") { %>
-            <div class="category-icon">🎓</div>
-          <% } else { %>
-            <div class="category-icon">💻</div> <!-- default icon -->
-          <% } %>
-          <h3 class="category-title"><%= category.name %></h3>
-          <p class="category-description"><%= category.description %></p>
+    <section class="category-section">
+        <h2 class="section-header animate-on-scroll">Shop by Category</h2>
+        <div class="category-grid">
+            <% categories.forEach(category => { %>
+                <a href="/shop?category=<%= category._id %>" class="category-link" style="text-decoration: none;">
+                    <div class="category-card animate-on-scroll">
+                        <% if (category.name === "Gaming Laptops") { %>
+                            <div class="category-icon">🎮</div>
+                        <% } else if (category.name === "Business Laptops") { %>
+                            <div class="category-icon">💼</div>
+                        <% } else if (category.name === "Student Laptops") { %>
+                            <div class="category-icon">🎓</div>
+                        <% } else { %>
+                            <div class="category-icon">💻</div>
+                        <% } %>
+                        <h3 class="category-title"><%= category.name %></h3>
+                        <p class="category-description"><%= category.description %></p>
+                    </div>
+                </a>
+            <% }); %>
         </div>
-      </a>
-    <% }); %>
-  </div>
-</section>
-
-
-
+    </section>
 
     <!-- New Arrivals Section -->
     <h2 class="section-header animate-on-scroll">New Arrivals</h2>
@@ -734,16 +759,6 @@ z
         <% } %>
     </section>
 
-    <!-- Newsletter Section -->
-    <section class="newsletter">
-        <h2>Stay Updated</h2>
-        <p>Get the latest laptop deals and tech news delivered to your inbox</p>
-        <form class="newsletter-form">
-            <input type="email" placeholder="Enter your email address" required>
-            <button type="submit">Subscribe</button>
-        </form>
-    </section>
-
     <script>
         // Scroll Animation
         const observerOptions = {
@@ -798,6 +813,7 @@ z
             alert(`Thank you for subscribing with ${email}!`);
             e.target.reset();
         });
+    </script>
     </script>
 </body>
 </html>

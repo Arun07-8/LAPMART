@@ -4,75 +4,69 @@ const User = require("../../models/userSchema")
 const {applyBestOffer}=require("../../helpers/offerHelper")
 const Wishlist=require("../../models/wishlistSchema")
 
-const renderCartPage = async (req, res) => {
-  try {
-    const userId = req.session.user;
-    const userData = await User.findById(userId);
-    const cart = await Cart.findOne({ userId }).populate("items.productId");
+  const renderCartPage = async (req, res) => {
+    try {
+      const userId = req.session.user;
+      const userData = await User.findById(userId);
+      const cart = await Cart.findOne({ userId }).populate("items.productId");
 
-    if (!cart || cart.items.length === 0) {
-      return res.render("cartPage", {
-        cart: [],
-        user: userData,
-        totalDiscount: 0,
-        message: "Cart is empty"
-      });
-    }
-
-    let updated = false;
-    cart.items = cart.items.filter(item => {
-      const product = item.productId;
-      if (!product || product.quantity === 0) {
-        updated = true;
-        return false;
+      if (!cart || cart.items.length === 0) {
+        return res.render("cartPage", {
+          cart: [],
+          user: userData,
+          totalDiscount: 0,
+          message: "Cart is empty"
+        });
       }
-      return true;
-    });
 
-    if (updated) {
-      await cart.save();
+      let updated = false;
+      cart.items = cart.items.filter(item => {
+        const product = item.productId;
+        if (!product || product.quantity === 0) {
+          updated = true;
+          return false;
+        }
+        return true;
+      });
+
+      if (updated) {
+        await cart.save();
+      }
+
+      // Apply offers
+      let originalTotal = 0;
+      let discountedTotal = 0;
+
+      const cartWithOffers = await Promise.all(
+        cart.items.map(async (item) => {
+          const offerProduct = await applyBestOffer(item.productId);
+          const salePrice = offerProduct.salePrice;
+          const offerPrice = offerProduct.finalPrice || salePrice;
+
+          originalTotal += salePrice * item.quantity;
+          discountedTotal += offerPrice * item.quantity;
+
+          return {
+            ...item.toObject(),
+            product: offerProduct,       
+            productId: item.productId     
+          };
+        })
+      );
+
+      const totalDiscount = originalTotal - discountedTotal;
+
+      return res.render("cartPage", {
+        cart: cartWithOffers,
+        user: userData,
+        message: null,
+        totalDiscount
+      });
+
+    } catch (error) {
+      console.error("Cart page can't be loaded:", error);
     }
-
-    // Apply offers
-    let originalTotal = 0;
-    let discountedTotal = 0;
-
-    const cartWithOffers = await Promise.all(
-      cart.items.map(async (item) => {
-        const offerProduct = await applyBestOffer(item.productId);
-        const salePrice = offerProduct.salePrice;
-        const offerPrice = offerProduct.finalPrice || salePrice;
-
-        originalTotal += salePrice * item.quantity;
-        discountedTotal += offerPrice * item.quantity;
-
-        return {
-          ...item.toObject(),
-          product: offerProduct,       
-          productId: item.productId     
-        };
-      })
-    );
-
-    const totalDiscount = originalTotal - discountedTotal;
-
-    return res.render("cartPage", {
-      cart: cartWithOffers,
-      user: userData,
-      message: null,
-      totalDiscount
-    });
-
-  } catch (error) {
-    console.error("Cart page can't be loaded:", error);
-    return res.status(500).render("cartPage", {
-      cart: [],
-      message: "Something went wrong while loading your cart",
-      totalDiscount: 0,
-      user: null
-    });
-  }
-};
+  };
 
 const addTocart = async (req, res) => {
   try {

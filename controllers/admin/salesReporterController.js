@@ -3,7 +3,6 @@ const PDFDocument = require("pdfkit");
 const ExcelJS = require("exceljs");
 const moment = require("moment");
 
-
 const getSalesReport = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -12,7 +11,7 @@ const getSalesReport = async (req, res) => {
 
         const ordersAggregate = await Order.aggregate([
             { $unwind: { path: "$orderedItems", preserveNullAndEmptyArrays: true } },
-            { $match: { "orderedItems.status": "Delivered" } }, 
+            { $match: { "orderedItems.status": "Delivered" } },
             {
                 $group: {
                     _id: "$_id",
@@ -42,7 +41,7 @@ const getSalesReport = async (req, res) => {
 
         const countAgg = await Order.aggregate([
             { $unwind: { path: "$orderedItems", preserveNullAndEmptyArrays: true } },
-            { $match: { "orderedItems.status": "Delivered" } }, 
+            { $match: { "orderedItems.status": "Delivered" } },
             { $group: { _id: "$_id" } },
             { $count: "total" }
         ]);
@@ -58,7 +57,7 @@ const getSalesReport = async (req, res) => {
         const allOrders = await Order.find().lean();
         allOrders.forEach(order => {
             order.orderedItems.forEach(item => {
-                if (item.status === "Delivered") { 
+                if (item.status === "Delivered") {
                     const itemTotal = parseFloat(item.total) || 0;
                     const itemDiscount = parseFloat(item.discount) || 0;
                     const itemFinal = parseFloat(item.finalPrice) || itemTotal - itemDiscount;
@@ -66,9 +65,9 @@ const getSalesReport = async (req, res) => {
                     grossSales += itemTotal;
                     totalDiscount += itemDiscount;
                     totalCoupons += order.couponApplied ? itemDiscount : 0;
-                    netSales += itemFinal; 
+                    netSales += itemFinal;
                     if (item.status === "Returned") {
-                        totalReturns += 1; 
+                        totalReturns += 1;
                     }
                 }
             });
@@ -93,13 +92,13 @@ const getSalesReport = async (req, res) => {
     }
 };
 
-
 const filterSalesReport = async (req, res) => {
     try {
-        const { search, userSearch, paymentMethod, orderStatus, dateRange, startDate, endDate, page = 1, limit = 10 } = req.body;
+        const { search, userSearch, paymentMethod, dateRange, startDate, endDate, page = 1, limit = 10 } = req.body;
         const skip = (page - 1) * limit;
-        let matchQuery = {};
+        let matchQuery = { "orderedItems.status": "Delivered" }; // Ensure only Delivered orders
 
+        // Input validation
         if (search && typeof search !== "string") {
             return res.status(400).json({ success: false, error: "Invalid order ID search term" });
         }
@@ -109,10 +108,8 @@ const filterSalesReport = async (req, res) => {
         if (paymentMethod && !["Razorpay", "Cash on Delivery", "Wallet"].includes(paymentMethod)) {
             return res.status(400).json({ success: false, error: "Invalid payment method" });
         }
-        if (orderStatus && !["Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Return Request", "Returned", "Return Rejected"].includes(orderStatus)) {
-            return res.status(400).json({ success: false, error: "Invalid order status" });
-        }
 
+        // Apply search filters
         if (search && search.trim()) {
             matchQuery.orderId = { $regex: search.trim(), $options: "i" };
         }
@@ -127,6 +124,7 @@ const filterSalesReport = async (req, res) => {
             matchQuery.paymentMethod = paymentMethod;
         }
 
+        // Date filter handling
         const dateFormat = "DD/MM/YYYY";
         if (dateRange && dateRange !== "custom") {
             let start, end;
@@ -170,35 +168,38 @@ const filterSalesReport = async (req, res) => {
             }
             if (start && end) {
                 matchQuery.createdAt = { $gte: start, $lte: end };
+                console.log(`Predefined date range applied: ${dateRange}, Start: ${start}, End: ${end}`);
             }
-        } else if (dateRange === "custom") {
-            if (startDate || endDate) {
-                if (startDate && !moment(startDate, dateFormat, true).isValid()) {
-                    return res.status(400).json({ success: false, error: "Invalid start date format. Use DD/MM/YYYY." });
-                }
-                if (endDate && !moment(endDate, dateFormat, true).isValid()) {
-                    return res.status(400).json({ success: false, error: "Invalid end date format. Use DD/MM/YYYY." });
-                }
-                if (startDate) {
-                    matchQuery.createdAt = matchQuery.createdAt || {};
-                    matchQuery.createdAt.$gte = moment(startDate, dateFormat).utc().startOf("day").toDate();
-                }
-                if (endDate) {
-                    matchQuery.createdAt = matchQuery.createdAt || {};
-                    matchQuery.createdAt.$lte = moment(endDate, dateFormat).utc().endOf("day").toDate();
-                }
-                if (startDate && !endDate) {
-                    matchQuery.createdAt.$lte = moment(startDate, dateFormat).utc().endOf("day").toDate();
-                } else if (endDate && !startDate) {
-                    matchQuery.createdAt.$gte = moment(endDate, dateFormat).utc().startOf("day").toDate();
-                }
+        } else if (dateRange === "custom" && (startDate || endDate)) {
+            // Validate custom date inputs
+            if (startDate && !moment(startDate, dateFormat, true).isValid()) {
+                return res.status(400).json({ success: false, error: "Invalid start date format. Use DD/MM/YYYY." });
             }
+            if (endDate && !moment(endDate, dateFormat, true).isValid()) {
+                return res.status(400).json({ success: false, error: "Invalid end date format. Use DD/MM/YYYY." });
+            }
+            // Ensure endDate is not before startDate
+            if (startDate && endDate && moment(endDate, dateFormat).isBefore(moment(startDate, dateFormat))) {
+                return res.status(400).json({ success: false, error: "End date cannot be before start date." });
+            }
+
+            matchQuery.createdAt = {};
+            if (startDate) {
+                matchQuery.createdAt.$gte = moment(startDate, dateFormat).utc().startOf("day").toDate();
+            }
+            if (endDate) {
+                matchQuery.createdAt.$lte = moment(endDate, dateFormat).utc().endOf("day").toDate();
+            }
+            console.log(`Custom date range applied: Start: ${startDate || 'N/A'}, End: ${endDate || 'N/A'}`);
         }
 
+        // Log matchQuery for debugging
+        console.log("Match Query:", JSON.stringify(matchQuery, null, 2));
+
+        // Fetch orders with aggregation
         const ordersAggregate = await Order.aggregate([
-            { $match: matchQuery },
             { $unwind: { path: "$orderedItems", preserveNullAndEmptyArrays: true } },
-            { $match: orderStatus ? { "orderedItems.status": orderStatus } : {} },
+            { $match: matchQuery },
             {
                 $group: {
                     _id: "$_id",
@@ -226,10 +227,10 @@ const filterSalesReport = async (req, res) => {
             { $limit: parseInt(limit) }
         ]);
 
+        // Count total orders
         const totalOrdersCount = await Order.aggregate([
-            { $match: matchQuery },
             { $unwind: { path: "$orderedItems", preserveNullAndEmptyArrays: true } },
-            { $match: orderStatus ? { "orderedItems.status": orderStatus } : {} },
+            { $match: matchQuery },
             { $group: { _id: "$_id" } },
             { $count: "total" }
         ]);
@@ -237,6 +238,7 @@ const filterSalesReport = async (req, res) => {
         const totalCount = totalOrdersCount.length > 0 ? totalOrdersCount[0].total : 0;
         const totalPages = Math.ceil(totalCount / limit);
 
+        // Calculate summary metrics
         let grossSales = 0;
         let totalDiscount = 0;
         let totalCoupons = 0;
@@ -244,9 +246,8 @@ const filterSalesReport = async (req, res) => {
         let totalReturns = 0;
 
         const filteredOrders = await Order.aggregate([
-            { $match: matchQuery },
             { $unwind: { path: "$orderedItems", preserveNullAndEmptyArrays: true } },
-            { $match: orderStatus ? { "orderedItems.status": orderStatus } : {} },
+            { $match: matchQuery },
             {
                 $group: {
                     _id: "$_id",
@@ -269,6 +270,9 @@ const filterSalesReport = async (req, res) => {
             totalReturns += isReturned ? 1 : 0;
         });
 
+        // Log results for debugging
+        console.log(`Total Orders Found: ${totalCount}, Orders Returned: ${ordersAggregate.length}`);
+
         res.json({
             success: true,
             orders: ordersAggregate,
@@ -281,7 +285,8 @@ const filterSalesReport = async (req, res) => {
                 totalReturns
             },
             totalPages,
-            currentPage: parseInt(page)
+            currentPage: parseInt(page),
+            filtersApplied: { search, userSearch, paymentMethod, dateRange, startDate, endDate }
         });
     } catch (error) {
         console.error("Error filtering sales report:", error);
@@ -291,10 +296,9 @@ const filterSalesReport = async (req, res) => {
 
 const exportSalesReportPDF = async (req, res) => {
     try {
-        const { search, userSearch, paymentMethod, orderStatus, dateRange, startDate, endDate } = req.body;
-        let matchQuery = {};
+        const { search, userSearch, paymentMethod, dateRange, startDate, endDate } = req.body;
+        let matchQuery = { "orderedItems.status": "Delivered" };
 
-        // Build matchQuery for filtering orders (unchanged)
         if (search && search.trim()) {
             matchQuery.orderId = { $regex: search.trim(), $options: "i" };
         }
@@ -352,36 +356,34 @@ const exportSalesReportPDF = async (req, res) => {
             }
             if (start && end) {
                 matchQuery.createdAt = { $gte: start, $lte: end };
+                console.log(`PDF: Predefined date range applied: ${dateRange}, Start: ${start}, End: ${end}`);
             }
-        } else if (dateRange === "custom") {
-            if (startDate || endDate) {
-                if (startDate && !moment(startDate, dateFormat, true).isValid()) {
-                    return res.status(400).json({ success: false, error: "Invalid start date format. Use DD/MM/YYYY." });
-                }
-                if (endDate && !moment(endDate, dateFormat, true).isValid()) {
-                    return res.status(400).json({ success: false, error: "Invalid end date format. Use DD/MM/YYYY." });
-                }
-                if (startDate) {
-                    matchQuery.createdAt = matchQuery.createdAt || {};
-                    matchQuery.createdAt.$gte = moment(startDate, dateFormat).utc().startOf("day").toDate();
-                }
-                if (endDate) {
-                    matchQuery.createdAt = matchQuery.createdAt || {};
-                    matchQuery.createdAt.$lte = moment(endDate, dateFormat).utc().endOf("day").toDate();
-                }
-                if (startDate && !endDate) {
-                    matchQuery.createdAt.$lte = moment(startDate, dateFormat).utc().endOf("day").toDate();
-                } else if (endDate && !startDate) {
-                    matchQuery.createdAt.$gte = moment(endDate, dateFormat).utc().startOf("day").toDate();
-                }
+        } else if (dateRange === "custom" && (startDate || endDate)) {
+            if (startDate && !moment(startDate, dateFormat, true).isValid()) {
+                return res.status(400).json({ success: false, error: "Invalid start date format. Use DD/MM/YYYY." });
             }
+            if (endDate && !moment(endDate, dateFormat, true).isValid()) {
+                return res.status(400).json({ success: false, error: "Invalid end date format. Use DD/MM/YYYY." });
+            }
+            if (startDate && endDate && moment(endDate, dateFormat).isBefore(moment(startDate, dateFormat))) {
+                return res.status(400).json({ success: false, error: "End date cannot be before start date." });
+            }
+
+            matchQuery.createdAt = {};
+            if (startDate) {
+                matchQuery.createdAt.$gte = moment(startDate, dateFormat).utc().startOf("day").toDate();
+            }
+            if (endDate) {
+                matchQuery.createdAt.$lte = moment(endDate, dateFormat).utc().endOf("day").toDate();
+            }
+            console.log(`PDF: Custom date range applied: Start: ${startDate || 'N/A'}, End: ${endDate || 'N/A'}`);
         }
 
-        // Fetch orders with aggregation (unchanged)
+        console.log("PDF Match Query:", JSON.stringify(matchQuery, null, 2));
+
         const ordersAggregate = await Order.aggregate([
-            { $match: matchQuery },
             { $unwind: { path: "$orderedItems", preserveNullAndEmptyArrays: true } },
-            { $match: orderStatus ? { "orderedItems.status": orderStatus } : {} },
+            { $match: matchQuery },
             {
                 $group: {
                     _id: "$_id",
@@ -416,7 +418,6 @@ const exportSalesReportPDF = async (req, res) => {
             }
         });
 
-        // Calculate summary metrics (unchanged)
         let grossSales = 0;
         let totalDiscount = 0;
         let totalCoupons = 0;
@@ -442,7 +443,8 @@ const exportSalesReportPDF = async (req, res) => {
             totalReturns
         };
 
-        // Initialize PDF document
+        console.log(`PDF: Total Orders: ${totalOrders}, Gross Sales: ${grossSales}`);
+
         const doc = new PDFDocument({
             margin: 1,
             size: 'A4',
@@ -455,7 +457,7 @@ const exportSalesReportPDF = async (req, res) => {
         doc.on("end", () => {
             const pdfData = Buffer.concat(buffers);
             res.setHeader("Content-Type", "application/pdf");
-            res.setHeader("Content-Disposition", 'attachment; filename="sales_report.pdf"');
+            res.setHeader("Content-Disposition", 'attachment; filename="sales_report_delivered.pdf"');
             res.send(pdfData);
         });
 
@@ -484,13 +486,12 @@ const exportSalesReportPDF = async (req, res) => {
             }
         }
 
-        // Modified header to include "Lapkart"
         function addPageHeader() {
             drawBox(40, 40, doc.page.width - 80, 80, colors.primary);
             doc.font(fonts.title)
                .fontSize(24)
                .fillColor('white')
-               .text("Lapkart - Sales Report", 60, 55, { align: 'center', width: doc.page.width - 120 });
+               .text("Lapkart - Delivered Sales Report", 60, 55, { align: 'center', width: doc.page.width - 120 });
             doc.font(fonts.body)
                .fontSize(12)
                .text(`Generated on: ${moment().utc().format("DD MMMM YYYY, hh:mm A")}`, 60, 85, {
@@ -501,7 +502,6 @@ const exportSalesReportPDF = async (req, res) => {
 
         addPageHeader();
 
-        // Filter text for report
         let filterText = "";
         let hasFilters = false;
         if (dateRange && dateRange !== "custom") {
@@ -516,7 +516,7 @@ const exportSalesReportPDF = async (req, res) => {
         if (search) filters.push(`Order ID: ${search}`);
         if (userSearch) filters.push(`Customer: ${userSearch}`);
         if (paymentMethod) filters.push(`Payment: ${paymentMethod}`);
-        if (orderStatus) filters.push(`Status: ${orderStatus}`);
+        filters.push("Status: Delivered");
 
         if (hasFilters || filters.length > 0) {
             doc.moveDown(2);
@@ -533,14 +533,13 @@ const exportSalesReportPDF = async (req, res) => {
                });
         }
 
-        // Sales Summary Section
         doc.moveDown(3);
         const summaryY = doc.y;
         drawBox(40, summaryY, doc.page.width - 80, 30, colors.secondary);
         doc.font(fonts.heading)
            .fontSize(16)
            .fillColor('white')
-           .text("SALES SUMMARY", 60, summaryY + 8, { align: 'center', width: doc.page.width - 120 });
+           .text("DELIVERED SALES SUMMARY", 60, summaryY + 8, { align: 'center', width: doc.page.width - 120 });
 
         const summaryData = [
             ["Gross Sales", `₹${summary.grossSales}`, "Total Orders", summary.totalOrders],
@@ -561,14 +560,13 @@ const exportSalesReportPDF = async (req, res) => {
             doc.font(fonts.heading).text(row[3], 460, rowY + 8, { width: 100 });
         });
 
-        // Order Details Table
         doc.moveDown(4);
         const tableStartY = currentSummaryY + 100;
         drawBox(10, tableStartY, doc.page.width - 20, 25, colors.primary);
         doc.font(fonts.heading)
            .fontSize(14)
            .fillColor('white')
-           .text("ORDER DETAILS", 20, tableStartY + 6, { align: 'center', width: doc.page.width - 20 });
+           .text("DELIVERED ORDER DETAILS", 20, tableStartY + 6, { align: 'center', width: doc.page.width - 20 });
 
         const tableLeft = 10;
         const tableWidth = doc.page.width - 20;
@@ -605,7 +603,7 @@ const exportSalesReportPDF = async (req, res) => {
                 drawBox(tableLeft, currentY, tableWidth, 30, colors.lightGray, colors.darkGray);
                 doc.font(fonts.heading).fontSize(10).fillColor(colors.text);
                 headers.forEach((header, i) => {
-                    const x = tableLeft + colWidths.slice(0, i).replace((a, b) => a + b, 0);
+                    const x = tableLeft + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
                     doc.text(header, x + 5, currentY + 10, {
                         width: colWidths[i] - 10,
                         align: "center"
@@ -623,13 +621,13 @@ const exportSalesReportPDF = async (req, res) => {
 
             const rowData = [
                 order.orderId || "N/A",
-                moment(order.createdAt).utc().format("DD MMM YYYY"), // Ensure consistent date format
+                moment(order.createdAt).utc().format("DD MMM YYYY"),
                 (order.shippingAddress?.name || "N/A").substring(0, 15),
                 `₹${(order.totalPrice || 0).toFixed(0)}`,
                 `₹${(order.discount || 0).toFixed(0)}`,
                 `₹${(order.finalAmount || 0).toFixed(0)}`,
                 (order.paymentMethod || "N/A").substring(0, 10),
-                order.orderedItems[0]?.status || "N/A"
+                order.orderedItems[0]?.status || "Delivered"
             ];
 
             rowData.forEach((data, i) => {
@@ -644,7 +642,6 @@ const exportSalesReportPDF = async (req, res) => {
             currentY += rowHeight;
         });
 
-        // Add page numbers
         const pageCount = doc.bufferedPageRange().count;
         for (let i = 0; i < pageCount; i++) {
             doc.switchToPage(i);
@@ -665,15 +662,18 @@ const exportSalesReportPDF = async (req, res) => {
         });
     }
 };
+
 const exportSalesReportExcel = async (req, res) => {
     try {
-        const { search, userSearch, paymentMethod, orderStatus, dateRange, startDate, endDate } = req.body;
-        let matchQuery = {};
+        const { search, userSearch, paymentMethod, dateRange, startDate, endDate } = req.body;
+        let matchQuery = { "orderedItems.status": "Delivered" };
 
         if (search && search.trim()) {
             matchQuery.orderId = { $regex: search.trim(), $options: "i" };
         }
-        if (userSearch && userSearch.trim()) {
+        if (userSearch && userSearch
+
+.trim()) {
             matchQuery.$or = [
                 { "shippingAddress.name": { $regex: userSearch.trim(), $options: "i" } },
                 { "shippingAddress.address": { $regex: userSearch.trim(), $options: "i" } },
@@ -727,35 +727,34 @@ const exportSalesReportExcel = async (req, res) => {
             }
             if (start && end) {
                 matchQuery.createdAt = { $gte: start, $lte: end };
+                console.log(`Excel: Predefined date range applied: ${dateRange}, Start: ${start}, End: ${end}`);
             }
-        } else if (dateRange === "custom") {
-            if (startDate || endDate) {
-                if (startDate && !moment(startDate, dateFormat, true).isValid()) {
-                    return res.status(400).json({ success: false, error: "Invalid start date format. Use DD/MM/YYYY." });
-                }
-                if (endDate && !moment(endDate, dateFormat, true).isValid()) {
-                    return res.status(400).json({ success: false, error: "Invalid end date format. Use DD/MM/YYYY." });
-                }
-                if (startDate) {
-                    matchQuery.createdAt = matchQuery.createdAt || {};
-                    matchQuery.createdAt.$gte = moment(startDate, dateFormat).utc().startOf("day").toDate();
-                }
-                if (endDate) {
-                    matchQuery.createdAt = matchQuery.createdAt || {};
-                    matchQuery.createdAt.$lte = moment(endDate, dateFormat).utc().endOf("day").toDate();
-                }
-                if (startDate && !endDate) {
-                    matchQuery.createdAt.$lte = moment(startDate, dateFormat).utc().endOf("day").toDate();
-                } else if (endDate && !startDate) {
-                    matchQuery.createdAt.$gte = moment(endDate, dateFormat).utc().startOf("day").toDate();
-                }
+        } else if (dateRange === "custom" && (startDate || endDate)) {
+            if (startDate && !moment(startDate, dateFormat, true).isValid()) {
+                return res.status(400).json({ success: false, error: "Invalid start date format. Use DD/MM/YYYY." });
             }
+            if (endDate && !moment(endDate, dateFormat, true).isValid()) {
+                return res.status(400).json({ success : false, error: "Invalid end date format. Use DD/MM/YYYY." });
+            }
+            if (startDate && endDate && moment(endDate, dateFormat).isBefore(moment(startDate, dateFormat))) {
+                return res.status(400).json({ success: false, error: "End date cannot be before start date." });
+            }
+
+            matchQuery.createdAt = {};
+            if (startDate) {
+                matchQuery.createdAt.$gte = moment(startDate, dateFormat).utc().startOf("day").toDate();
+            }
+            if (endDate) {
+                matchQuery.createdAt.$lte = moment(endDate, dateFormat).utc().endOf("day").toDate();
+            }
+            console.log(`Excel: Custom date range applied: Start: ${startDate || 'N/A'}, End: ${endDate || 'N/A'}`);
         }
 
+        console.log("Excel Match Query:", JSON.stringify(matchQuery, null, 2));
+
         const ordersAggregate = await Order.aggregate([
-            { $match: matchQuery },
             { $unwind: { path: "$orderedItems", preserveNullAndEmptyArrays: true } },
-            { $match: orderStatus ? { "orderedItems.status": orderStatus } : {} },
+            { $match: matchQuery },
             {
                 $group: {
                     _id: "$_id",
@@ -806,10 +805,12 @@ const exportSalesReportExcel = async (req, res) => {
             totalReturns += isReturned ? 1 : 0;
         });
 
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet("Sales Report");
+        console.log(`Excel: Total Orders: ${totalOrders}, Gross Sales: ${grossSales}`);
 
-        worksheet.addRow(["Sales Report"]).font = { size: 16, bold: true };
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("Delivered Sales Report");
+
+        worksheet.addRow(["Delivered Sales Report"]).font = { size: 16, bold: true };
         worksheet.addRow([`Generated on: ${moment().format("DD/MM/YYYY HH:mm")}`]).font = { size: 12 };
         worksheet.addRow([]);
 
@@ -819,7 +820,7 @@ const exportSalesReportExcel = async (req, res) => {
         if (search) filters.push(`Order ID: ${search}`);
         if (userSearch) filters.push(`Customer: ${userSearch}`);
         if (paymentMethod) filters.push(`Payment: ${paymentMethod}`);
-        if (orderStatus) filters.push(`Status: ${orderStatus}`);
+        filters.push("Status: Delivered");
         const allFilters = [filterText, ...filters].filter(f => f).join(" | ");
         worksheet.addRow(["Filters:", allFilters || "No filters applied"]).font = { size: 12, bold: true };
         worksheet.addRow([]);
@@ -844,7 +845,7 @@ const exportSalesReportExcel = async (req, res) => {
                 `₹${(order.discount || 0).toFixed(2)}`,
                 `₹${(order.finalAmount || 0).toFixed(2)}`,
                 order.paymentMethod || "N/A",
-                order.orderedItems[0]?.status || "N/A"
+                order.orderedItems[0]?.status || "Delivered"
             ]);
         });
 
@@ -859,7 +860,7 @@ const exportSalesReportExcel = async (req, res) => {
 
         const buffer = await workbook.xlsx.writeBuffer();
         res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        res.setHeader("Content-Disposition", 'attachment; filename="sales_report.xlsx"');
+        res.setHeader("Content-Disposition", 'attachment; filename="sales_report_delivered.xlsx"');
         res.send(buffer);
     } catch (error) {
         console.error("Error exporting Excel:", error);

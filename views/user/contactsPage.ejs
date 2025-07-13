@@ -4,115 +4,481 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us - TechLaptops Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="/css/userside-css/userside-css/contacts.css" rel="stylesheet">
+    <title>Contact Us - Lapmart Premium Laptops</title>
+    <link href="https://fonts.googleapis.com/css2?family=Georgia:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        /* Reset only for this page content, not affecting header */
+        .contact-page * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .contact-page {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.7;
+            color: #2c2c2c;
+            background-color: #ffffff;
+        }
+
+        .contact-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .contact-header {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
+            color: #2c2c2c;
+            padding: 100px 0;
+            text-align: center;
+            position: relative;
+            border-bottom: 3px solid #d4af37;
+        }
+
+        .contact-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(212, 175, 55, 0.03) 0%, rgba(212, 175, 55, 0.08) 100%);
+            z-index: 1;
+        }
+
+        .contact-header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .contact-logo {
+            font-size: 4rem;
+            font-weight: 300;
+            margin-bottom: 20px;
+            color: #d4af37;
+            text-shadow: 0 2px 4px rgba(212, 175, 55, 0.2);
+            letter-spacing: 4px;
+            font-family: 'Georgia', serif;
+        }
+
+        .contact-tagline {
+            font-size: 1.4rem;
+            margin-bottom: 30px;
+            color: #666;
+            font-style: italic;
+            font-weight: 300;
+        }
+
+        .contact-main-content {
+            background: #ffffff;
+            margin: -50px auto 0;
+            position: relative;
+            z-index: 3;
+            border-radius: 0;
+            box-shadow: 0 0 60px rgba(212, 175, 55, 0.1);
+            overflow: hidden;
+        }
+
+        .contact-section {
+            padding: 80px 60px;
+            background: #ffffff;
+        }
+
+        .contact-section:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .contact-section h2 {
+            color: #2c2c2c;
+            font-size: 2.8rem;
+            margin-bottom: 40px;
+            text-align: center;
+            position: relative;
+            font-weight: 300;
+            font-family: 'Georgia', serif;
+        }
+
+        .contact-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(to right, #d4af37, #f4d03f);
+            border-radius: 1px;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-top: 60px;
+        }
+
+        .contact-form {
+            background: #ffffff;
+            padding: 50px;
+            border-radius: 0;
+            box-shadow: 0 10px 40px rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.02), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .contact-form:hover::before {
+            left: 100%;
+        }
+
+        .contact-form h3 {
+            color: #2c2c2c;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            font-weight: 300;
+            font-family: 'Georgia', serif;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c2c2c;
+            font-weight: 400;
+            font-size: 1.1rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid rgba(212, 175, 55, 0.2);
+            border-radius: 0;
+            font-size: 1rem;
+            font-family: 'Georgia', serif;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #d4af37;
+            background: #ffffff;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
+        }
+
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .error-message.show {
+            opacity: 1;
+        }
+
+        .form-group input.error,
+        .form-group textarea.error {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            color: white;
+            border: none;
+            padding: 18px;
+            font-size: 1.2rem;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            border-radius: 0;
+            font-family: 'Georgia', serif;
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(212, 175, 55, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .contact-info {
+            background: #ffffff;
+            padding: 50px;
+            border-radius: 0;
+            box-shadow: 0 10px 40px rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .contact-info h3 {
+            color: #2c2c2c;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            font-weight: 300;
+            font-family: 'Georgia', serif;
+            text-align: center;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #fafafa;
+            transition: all 0.3s ease;
+        }
+
+        .info-item:hover {
+            background: #f0f0f0;
+            transform: translateX(5px);
+        }
+
+        .info-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #d4af37, #f4d03f);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin-right: 20px;
+            flex-shrink: 0;
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .info-content h4 {
+            color: #2c2c2c;
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            font-weight: 400;
+            font-family: 'Georgia', serif;
+        }
+
+        .info-content p {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .map-section {
+            background: #fafafa;
+            padding: 80px 60px;
+            text-align: center;
+        }
+
+        .map-section h2 {
+            color: #2c2c2c;
+            font-size: 2.8rem;
+            margin-bottom: 40px;
+            position: relative;
+            font-weight: 300;
+            font-family: 'Georgia', serif;
+        }
+
+        .map-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(to right, #d4af37, #f4d03f);
+            border-radius: 1px;
+        }
+
+        .map-container {
+            max-width: 100%;
+            height: 450px;
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .map-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        @media (max-width: 768px) {
+            .contact-logo {
+                font-size: 2.8rem;
+                letter-spacing: 2px;
+            }
+            
+            .contact-section {
+                padding: 60px 30px;
+            }
+            
+            .contact-section h2 {
+                font-size: 2.2rem;
+            }
+            
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .contact-form,
+            .contact-info {
+                padding: 40px 30px;
+            }
+            
+            .map-section {
+                padding: 60px 30px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="header">
-        <div class="container">
-            <h1>CONTACT US</h1>
-            <p>Get in touch with our laptop experts for personalized assistance</p>
-        </div>
-    </div>
-
-    <div class="contact-section">
-        <div class="container">
-            <div class="contact-grid">
-                <div class="contact-form">
-                    <h2>Send Us a Message</h2>
-                    <form id="contactForm">
-                        <div class="form-group">
-                            <label for="fullName">Full Name *</label>
-                            <input type="text" id="fullName" name="fullName">
-                            <div class="error-message" id="fullNameError">Please enter your full name</div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="email">Email Address *</label>
-                            <input type="email" id="email" name="email">
-                            <div class="error-message" id="emailError">Please enter a valid email address</div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="phone">Phone Number</label>
-                            <input type="tel" id="phone" name="phone">
-                            <div class="error-message" id="phoneError">Please enter a valid phone number</div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="subject">Subject *</label>
-                            <input type="text" id="subject" name="subject">
-                            <div class="error-message" id="subjectError">Please enter a subject</div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="message">Message *</label>
-                            <textarea id="message" name="message" placeholder="Tell us about your laptop needs or any questions you have..."></textarea>
-                            <div class="error-message" id="messageError">Please enter your message</div>
-                        </div>
-                        
-                        <button type="submit" class="submit-btn">Send Message</button>
-                    </form>
+    <div class="contact-page">
+        <div class="contact-header">
+            <div class="contact-container">
+                <div class="contact-header-content">
+                    <div class="contact-logo">CONTACT US</div>
+                    <div class="contact-tagline">Get in touch with our premium laptop experts</div>
                 </div>
+            </div>
+        </div>
 
-                <div class="contact-info">
-                    <h2>Contact Information</h2>
-                    <div class="contact-info-content">
-                        <div class="info-item">
-                            <div class="info-icon">📍</div>
-                            <div class="info-content">
-                                <h3>Our Address</h3>
-                                <p>123 LapMart, Digital District<br>Malappuram, Kerala 676519, India</p>
-                            </div>
+        <div class="contact-container">
+            <div class="contact-main-content">
+                <div class="contact-section">
+                    <h2>Get In Touch</h2>
+                    <div class="contact-grid">
+                        <div class="contact-form">
+                            <h3>Send Us a Message</h3>
+                            <form id="contactForm">
+                                <div class="form-group">
+                                    <label for="fullName">Full Name *</label>
+                                    <input type="text" id="fullName" name="fullName">
+                                    <div class="error-message" id="fullNameError">Please enter your full name</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="email">Email Address *</label>
+                                    <input type="email" id="email" name="email">
+                                    <div class="error-message" id="emailError">Please enter a valid email address</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="phone">Phone Number</label>
+                                    <input type="tel" id="phone" name="phone">
+                                    <div class="error-message" id="phoneError">Please enter a valid phone number</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="subject">Subject *</label>
+                                    <input type="text" id="subject" name="subject">
+                                    <div class="error-message" id="subjectError">Please enter a subject</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="message">Message *</label>
+                                    <textarea id="message" name="message" placeholder="Tell us about your laptop needs or any questions you have..."></textarea>
+                                    <div class="error-message" id="messageError">Please enter your message</div>
+                                </div>
+                                
+                                <button type="submit" class="submit-btn">Send Message</button>
+                            </form>
                         </div>
-                        
-                        <div class="info-item">
-                            <div class="info-icon">📞</div>
-                            <div class="info-content">
-                                <h3>Phone Number</h3>
-                                <p>+91 94950 12345<br>+91 94950 67890</p>
+
+                        <div class="contact-info">
+                            <h3>Contact Information</h3>
+                            <div class="info-item">
+                                <div class="info-icon">📍</div>
+                                <div class="info-content">
+                                    <h4>Our Address</h4>
+                                    <p>123 LapMart, Digital District<br>Calicut, Kerala 676519, India</p>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-icon">📧</div>
-                            <div class="info-content">
-                                <h3>Email Address</h3>
-                                <p>info@Lapmartlaptops.com<br>support@LapMartlaptops.com</p>
+                            
+                            <div class="info-item">
+                                <div class="info-icon">📞</div>
+                                <div class="info-content">
+                                    <h4>Phone Number</h4>
+                                    <p>+91 94950 12345<br>+91 94950 67890</p>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-icon">🕒</div>
-                            <div class="info-content">
-                                <h3>Response Time</h3>
-                                <p>We typically respond within 2-4 hours during business hours</p>
+                            
+                            <div class="info-item">
+                                <div class="info-icon">📧</div>
+                                <div class="info-content">
+                                    <h4>Email Address</h4>
+                                    <p>info@lapmart.com<br>support@lapmart.com</p>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <div class="info-icon">🕒</div>
+                                <div class="info-content">
+                                    <h4>Response Time</h4>
+                                    <p>We typically respond within 2-4 hours during business hours</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="map-section">
-                <h2>Find Us on Map</h2>
-                <div class="map-container">
-                    <iframe
-                 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3187.50761620033!2d75.89309908945833!3d11.15366907563411!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba6502f41ef4e8b%3A0xf4c653a7548cccd!2sKinfra%20Techno%20Industrial%20Park!5e0!3m2!1sen!2sin!4v1752254819059!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-                        width="600" 
-                        height="450" 
-                        style="border:0;" 
-                        allowfullscreen="" 
-                        loading="lazy" 
-                        referrerpolicy="no-referrer-when-downgrade"
-                        title="TechLaptops Pro Location Map">
-                    </iframe>
+                <div class="map-section">
+                    <h2>Find Us on Map</h2>
+                    <div class="map-container">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3187.50761620033!2d75.89309908945833!3d11.15366907563411!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba6502f41ef4e8b%3A0xf4c653a7548cccd!2sKinfra%20Techno%20Industrial%20Park!5e0!3m2!1sen!2sin!4v1752254819059!5m2!1sen!2sin" 
+                            width="600" 
+                            height="450" 
+                            style="border:0;" 
+                            allowfullscreen="" 
+                            loading="lazy" 
+                            referrerpolicy="no-referrer-when-downgrade"
+                            title="Lapmart Location Map">
+                        </iframe>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.min.js"></script>
+    
     <script>
         // Form validation functions
         function validateField(fieldId, errorId, validationFn, errorMessage) {
@@ -185,8 +551,8 @@
             validateField('message', 'messageError', validateMessage, 'Please enter your message (at least 10 characters)');
         });
 
-        // Form submission
-        document.getElementById('contactForm').addEventListener('submit', function(e) {
+        // Form submission with fetch API and SweetAlert
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             clearErrors();
@@ -203,34 +569,90 @@
                 const submitBtn = document.querySelector('.submit-btn');
                 const originalText = submitBtn.textContent;
                 
+                // Show loading state
                 submitBtn.textContent = 'Sending...';
                 submitBtn.style.background = 'linear-gradient(135deg, #6c757d 0%, #495057 100%)';
                 submitBtn.disabled = true;
                 
-                // Simulate API call
-                setTimeout(() => {
-                    alert('Thank you for your message! We will get back to you within 2-4 hours.');
-                    document.getElementById('contactForm').reset();
-                    clearErrors();
-                    
-                    submitBtn.textContent = originalText;
-                    submitBtn.style.background = 'linear-gradient(135deg, rgba(184,134,11,0.8) 0%, rgba(218,165,32,0.8) 50%, rgba(255,215,0,0.8) 100%)';
-                    submitBtn.disabled = false;
-                }, 2000);
-            }
-        });
-
-        // Add smooth scrolling for better UX
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth'
+                // Prepare form data
+                const formData = {
+                    fullName: document.getElementById('fullName').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    subject: document.getElementById('subject').value,
+                    message: document.getElementById('message').value
+                };
+                
+                try {
+                    // Send data to server
+                    const response = await fetch('/contacts', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
                     });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Message Sent Successfully!',
+                            html: `
+                                <p>Thank you <strong>${formData.fullName}</strong> for contacting Lapmart!</p>
+                                <p>We have received your message and will respond within 2-4 hours.</p>
+                                <p>A confirmation email has been sent to <strong>${formData.email}</strong></p>
+                            `,
+                            confirmButtonText: 'Excellent!',
+                            confirmButtonColor: '#d4af37',
+                            timer: 5000,
+                            timerProgressBar: true
+                        });
+                        
+                        // Reset form
+                        document.getElementById('contactForm').reset();
+                        clearErrors();
+                        
+                    } else {
+                        throw new Error(result.message || 'Failed to send message');
+                    }
+                    
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Failed to Send Message',
+                        html: `
+                            <p>Sorry, there was an error sending your message.</p>
+                            <p><strong>Error:</strong> ${error.message}</p>
+                            <p>Please try again or contact us directly at:</p>
+                            <p><strong>Email:</strong> info@lapmart.com</p>
+                            <p><strong>Phone:</strong> +91 94950 12345</p>
+                        `,
+                        confirmButtonText: 'Try Again',
+                        confirmButtonColor: '#d4af37',
+                        showCancelButton: true,
+                        cancelButtonText: 'Contact Directly'
+                    }).then((result) => {
+                        if (result.dismiss === Swal.DismissReason.cancel) {
+                            window.location.href = 'mailto:info@lapmart.com?subject=' + encodeURIComponent(formData.subject) + '&body=' + encodeURIComponent(formData.message);
+                        }
+                    });
+                } finally {
+                    // Reset button state
+                    submitBtn.textContent = originalText;
+                    submitBtn.style.background = 'linear-gradient(135deg, #d4af37 0%, #f4d03f 100%)';
+                    submitBtn.disabled = false;
                 }
-            });
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Please Fix Form Errors',
+                    text: 'Please fill in all required fields correctly before submitting.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#d4af37'
+                });
+            }
         });
     </script>
 </body>
