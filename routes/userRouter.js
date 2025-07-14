@@ -27,7 +27,7 @@ router.post("/signup",userController.signup)
 router.get("/verify-Otp",userController.renderOtpPge)
 router.post("/verify-Otp",userController.verifyOtp);
 router.post("/resendOtp",userController.resendOtp)
-router.get("http://lapmart.shop/auth/google/callback", passport.authenticate("google", {scope: ["profile", "email"]}));
+router.get("/auth/google", passport.authenticate("google", {scope: ["profile", "email"]}));
 router.get('/auth/google/callback', (req, res, next) => {
       passport.authenticate('google', (err, user, info) => {
       if (err || !user) {const message = info?.message || 'Authentication failed';
