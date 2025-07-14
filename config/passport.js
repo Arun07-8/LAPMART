@@ -26,12 +26,14 @@ passport.use(new GoogleStrategy({
 
 async(accessToken,refreshToken,profile,done)=>{
     try {
+      console.log("profile",profile)
         let  user=await  User.findOne({googleid:profile.id});
+        console.log(user,"user")
         if(user){
            if( !user.isBlocked)
                return  done(null,user);
            else{
-               return done (null,false,{message:"User is Blocked by the admin"})
+               return  done (null,false,{message:"User is Blocked by the admin"})
            }
         }else{
 
