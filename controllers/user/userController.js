@@ -291,33 +291,44 @@ const   login = async (req, res) => {
 }; 
 //  Home page  rendering
 const LoadHomepage = async (req, res) => {
-    try {
-        const user = req.session.user;
-        const categories = await Category.find({ isListed: true, isDeleted: false });
-        const brand = await Brand.find({ isListed: true, isDeleted: false });
-        const productData = await Product.find({
-            isListed: true,
-            isDeleted:false,
-            category: { $in: categories.map((category) => category._id) },
-            brand: { $in: brand.map((brand) => brand._id) },
-            quantity: { $gt: 0 }
-        });
-        const updatedProduct=await Promise.all(
-            productData.map(product=>applyBestOffer(product))
-        ) 
-        updatedProduct.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
-        if (user) {
-            const userData = await User.findById(user);
-            return res.render("home", { user: userData, product: updatedProduct ,categories:categories});
-        } else {
-            return res.render("home", { product: updatedProduct,categories:categories});
-        }
-    } catch (error) {
-        console.error("Home page is not working", error);
-        res.redirect("pageNotFound")
+  try {
+    const user = req.session.user || null;
+    const categories = await Category.find({ isListed: true, isDeleted: false });
+    const brand = await Brand.find({ isListed: true, isDeleted: false });
+
+    const productData = await Product.find({
+      isListed: true,
+      isDeleted: false,
+      category: { $in: categories.map((c) => c._id) },
+      brand: { $in: brand.map((b) => b._id) },
+      quantity: { $gt: 0 },
+    });
+
+    const updatedProduct = await Promise.all(
+      productData.map((product) => applyBestOffer(product))
+    );
+
+    updatedProduct.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
+
+    if (user) {
+      const userData = await User.findById(user);
+      return res.render("home", {
+        user: userData,
+        product: updatedProduct,
+        categories,
+      });
+    } else {
+      return res.render("home", {
+        product: updatedProduct,
+        categories,
+      });
     }
-    
+  } catch (error) {
+    console.error("❌ Error loading homepage:", error);
+    res.redirect("pageNotFound");
+  }
 };
+
 
 
 const loadShoppingPage = async (req, res) => {
