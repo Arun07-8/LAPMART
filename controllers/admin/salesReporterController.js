@@ -168,7 +168,7 @@ const filterSalesReport = async (req, res) => {
             }
             if (start && end) {
                 matchQuery.createdAt = { $gte: start, $lte: end };
-                console.log(`Predefined date range applied: ${dateRange}, Start: ${start}, End: ${end}`);
+            
             }
         } else if (dateRange === "custom" && (startDate || endDate)) {
             // Validate custom date inputs
@@ -190,11 +190,11 @@ const filterSalesReport = async (req, res) => {
             if (endDate) {
                 matchQuery.createdAt.$lte = moment(endDate, dateFormat).utc().endOf("day").toDate();
             }
-            console.log(`Custom date range applied: Start: ${startDate || 'N/A'}, End: ${endDate || 'N/A'}`);
+           
         }
 
         // Log matchQuery for debugging
-        console.log("Match Query:", JSON.stringify(matchQuery, null, 2));
+     
 
         // Fetch orders with aggregation
         const ordersAggregate = await Order.aggregate([
@@ -271,7 +271,7 @@ const filterSalesReport = async (req, res) => {
         });
 
         // Log results for debugging
-        console.log(`Total Orders Found: ${totalCount}, Orders Returned: ${ordersAggregate.length}`);
+    
 
         res.json({
             success: true,
@@ -356,7 +356,7 @@ const exportSalesReportPDF = async (req, res) => {
             }
             if (start && end) {
                 matchQuery.createdAt = { $gte: start, $lte: end };
-                console.log(`PDF: Predefined date range applied: ${dateRange}, Start: ${start}, End: ${end}`);
+               
             }
         } else if (dateRange === "custom" && (startDate || endDate)) {
             if (startDate && !moment(startDate, dateFormat, true).isValid()) {
@@ -376,10 +376,10 @@ const exportSalesReportPDF = async (req, res) => {
             if (endDate) {
                 matchQuery.createdAt.$lte = moment(endDate, dateFormat).utc().endOf("day").toDate();
             }
-            console.log(`PDF: Custom date range applied: Start: ${startDate || 'N/A'}, End: ${endDate || 'N/A'}`);
+          
         }
 
-        console.log("PDF Match Query:", JSON.stringify(matchQuery, null, 2));
+     
 
         const ordersAggregate = await Order.aggregate([
             { $unwind: { path: "$orderedItems", preserveNullAndEmptyArrays: true } },
@@ -443,7 +443,7 @@ const exportSalesReportPDF = async (req, res) => {
             totalReturns
         };
 
-        console.log(`PDF: Total Orders: ${totalOrders}, Gross Sales: ${grossSales}`);
+       
 
         const doc = new PDFDocument({
             margin: 1,
@@ -727,7 +727,7 @@ const exportSalesReportExcel = async (req, res) => {
             }
             if (start && end) {
                 matchQuery.createdAt = { $gte: start, $lte: end };
-                console.log(`Excel: Predefined date range applied: ${dateRange}, Start: ${start}, End: ${end}`);
+              
             }
         } else if (dateRange === "custom" && (startDate || endDate)) {
             if (startDate && !moment(startDate, dateFormat, true).isValid()) {
@@ -747,10 +747,10 @@ const exportSalesReportExcel = async (req, res) => {
             if (endDate) {
                 matchQuery.createdAt.$lte = moment(endDate, dateFormat).utc().endOf("day").toDate();
             }
-            console.log(`Excel: Custom date range applied: Start: ${startDate || 'N/A'}, End: ${endDate || 'N/A'}`);
+    
         }
 
-        console.log("Excel Match Query:", JSON.stringify(matchQuery, null, 2));
+    
 
         const ordersAggregate = await Order.aggregate([
             { $unwind: { path: "$orderedItems", preserveNullAndEmptyArrays: true } },
@@ -805,7 +805,7 @@ const exportSalesReportExcel = async (req, res) => {
             totalReturns += isReturned ? 1 : 0;
         });
 
-        console.log(`Excel: Total Orders: ${totalOrders}, Gross Sales: ${grossSales}`);
+
 
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Delivered Sales Report");

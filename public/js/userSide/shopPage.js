@@ -75,7 +75,6 @@ function initFilterForm() {
             input.addEventListener('change', () => {
                 clearTimeout(debounceTimeout);
                 debounceTimeout = setTimeout(() => {
-                    console.log('Submitting filter form with:', new URLSearchParams(new FormData(filterForm)).toString());
                     filterForm.submit();
                 }, 300); // Debounce to prevent rapid submissions
             });
@@ -90,7 +89,6 @@ function initSortSelect() {
             const params = new URLSearchParams(window.location.search);
             params.set('sort', sortSelect.value);
             params.set('page', '1');
-            console.log('Navigating to:', `/shop?${params.toString()}`);
             window.location.href = `/shop?${params.toString()}`;
         });
     }
@@ -121,7 +119,7 @@ function initSearchInput() {
             const params = new URLSearchParams(window.location.search);
             params.set('search', searchTerm);
             params.set('page', '1');
-            console.log('Navigating to:', `/shop?${params.toString()}`);
+         
             window.location.href = `/shop?${params.toString()}`;
         }, 500);
     };

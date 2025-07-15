@@ -77,7 +77,7 @@ const signup = async (req, res) => {
     };
 
     res.json({ success: true, message: "OTP sent" });
-    console.log("signup otp:",otp)
+
   } catch (error) {
     console.error("Signup error:", error.message);
     res.json({ success: false, message: "Signup failed", referralCode: formReferralCode || "" });
@@ -223,7 +223,7 @@ const resendOtp = async (req, res) => {
     }
 
     req.session.userOtp = { otp, expiresAt: otpExpiration };
-    console.log("Resend OTP:", otp);
+
 
     return res.status(200).json({ success: true, message: "OTP resent successfully" });
   } catch (error) {

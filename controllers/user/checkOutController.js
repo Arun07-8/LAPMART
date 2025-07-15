@@ -90,8 +90,7 @@ const checkOutpage = async (req, res) => {
 
       const grandTotal = Math.max(totalPrice - discountAmount, 0);
 
-      console.log("Saved coupon in session:", req.session.appliedCoupon);
-      console.log("Applied Coupon for render:", appliedCoupon);
+   
 
 
       res.render("checkOut", {

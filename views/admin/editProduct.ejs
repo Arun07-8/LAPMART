@@ -601,7 +601,7 @@
             fields.forEach(field => {
                 const value = field.id !== 'images' ? document.getElementById(field.id).value : null;
                 if (!field.validate(value)) {
-                    console.log(`Validation failed for ${field.id}: ${field.message}`);
+                 
                     displayErrorMessage(field.errorId, field.message);
                     isValid = false;
                 }
@@ -622,7 +622,6 @@
         }
 
         function displayErrorMessage(elementId, message) {
-            console.log(`Displaying error for ${elementId}: ${message}`);
             const errorElement = document.getElementById(elementId);
             if (errorElement) {
                 errorElement.textContent = message;
@@ -637,7 +636,6 @@
         }
 
         function clearErrorMessage(id) {
-            console.log(`Clearing error for ${id}`);
             const errorElement = document.getElementById(`${id}-error`);
             if (errorElement) {
                 errorElement.textContent = '';
@@ -651,7 +649,6 @@
         }
 
         function clearErrorMessages() {
-            console.log('Clearing all error messages');
             const errorElements = document.getElementsByClassName('error-message');
             for (let i = 0; i < errorElements.length; i++) {
                 errorElements[i].textContent = '';
@@ -669,7 +666,6 @@
                 event.preventDefault();
 
                 if (!validateForm()) {
-                    console.log('Form validation failed');
                     return;
                 }
 

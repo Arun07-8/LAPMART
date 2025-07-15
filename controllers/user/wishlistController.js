@@ -5,7 +5,7 @@ const Product=require("../../models/productSchema")
 
 const getWishlistPage = async (req, res) => {
   try {
-    console.log(req.session.user)
+
     const userId = req.session.user;
   
     const page = parseInt(req.query.page) || 1;

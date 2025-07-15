@@ -107,9 +107,7 @@
                                                         <div class="product-brand">
                                                             <i class="fas fa-certificate me-1"></i>Brand: <%= item.productId.brand.name %>
                                                         </div>
-                                                        <div class="product-size">
-                                                            <i class="fas fa-flask me-1"></i>Size: 100 ml
-                                                        </div>
+                        
                                                     </div>
                                                 </div>
                                             </div>
@@ -303,7 +301,7 @@
 
                 const data = await response.json();
                
-console.log(data)
+
                 if (data.success) {
                     const row = document.querySelector(`.wishlist-item[data-item-id="${productId}"]`);
                     if (row) {

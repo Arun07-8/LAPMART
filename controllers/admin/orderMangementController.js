@@ -288,7 +288,7 @@ const acceptReturn = async (req, res) => {
     const item = order.orderedItems.find(
       (item) => item.product.toString() === productId
     );
-    console.log(item)
+    
     if (!item) {
       return res.status(404).json({ success: false, message: 'Product not found in order.' });
     }
