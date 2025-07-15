@@ -187,7 +187,7 @@ function initAddToCartButtons() {
                         position: 'center',
                         showConfirmButton: true,
                         confirmButtonText: 'OK',
-                        timer: 3000,
+                        timer: 2000,
                         timerProgressBar: true
                     });
                 } else if (data.redirectUrl) {
