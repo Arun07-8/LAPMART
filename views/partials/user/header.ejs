@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
         /* Enhanced Scoped Header Styles */
@@ -30,6 +29,7 @@
             text-align: center;
             font-size: 14px;
             z-index: 1001;
+            position: relative;
         }
 
         .header-scope .banner-content a {
@@ -218,11 +218,19 @@
             border-radius: 10px;
             transition: all 0.3s ease;
             position: relative;
+            z-index: 1001; /* Ensure Wishlist button is above other elements */
         }
 
         .header-scope .cart-profile > a:hover {
             background-color: #2d3b3c;
             color: #d4af37;
+        }
+
+        /* Fix Wishlist button overlap */
+        .header-scope .wishlist-btn {
+            z-index: 1001; /* Ensure no overlap */
+            position: relative;
+            background: transparent; /* Prevent background conflicts */
         }
 
         /* Sign In Button */
@@ -290,59 +298,34 @@
             font-size: 14px;
         }
 
-        /* Profile Dropdown Menu */
+        /* Profile Dropdown */
         .header-scope .profile-dropdown {
-            display: none;
             position: absolute;
             top: 100%;
             right: 0;
-            width: 200px;
-            background: #ffffff;
+            background: #fff;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none;
+            flex-direction: column;
             border-radius: 8px;
-            z-index: 1004;
-            padding: 10px;
+            z-index: 1003;
+            min-width: 160px;
         }
 
         .header-scope .profile-dropdown.active {
-            display: block;
-        }
-
-        .header-scope .profile-dropdown-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .header-scope .profile-dropdown-list li {
-            margin: 5px 0;
-        }
-
-        .header-scope .profile-dropdown-list a {
             display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 16px;
-            color: #000000;
+        }
+
+        .header-scope .profile-dropdown a {
+            padding: 10px 20px;
             text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+            color: #000;
             font-size: 14px;
-            font-weight: 500;
+            transition: background 0.3s ease;
         }
 
-        .header-scope .profile-dropdown-list a:hover {
-            background-color: #f0f0f0;
-            color: #d4af37;
-        }
-
-        .header-scope .profile-dropdown-list .logout-link {
-            color: #e53e3e;
-        }
-
-        .header-scope .profile-dropdown-list .logout-link:hover {
-            background-color: #ffe5e5;
-            color: #c53030;
+        .header-scope .profile-dropdown a:hover {
+            background: #f0f0f0;
         }
 
         /* Sidebar Styles */
@@ -392,11 +375,6 @@
             border-bottom: 1px solid #e0e0e0;
         }
 
-        .header-scope .sidebar-header .profile-avatar {
-            width: 50px;
-            height: 50px;
-        }
-
         .header-scope .sidebar-menu {
             list-style: none;
             padding: 10px 0;
@@ -434,89 +412,22 @@
             color: #c53030;
         }
 
-        /* Sidebar Dropdown Menu */
-        .header-scope .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 200px;
-            background: #ffffff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            z-index: 1004;
-            padding: 10px;
+        /* Sidebar Section Styling */
+        .header-scope .sidebar-section {
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
         }
 
-        .header-scope .dropdown-menu.active {
-            display: block;
+        .header-scope .sidebar-section:last-child {
+            border-bottom: none;
         }
 
-        .header-scope .dropdown-menu-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .header-scope .dropdown-menu-list li {
-            margin: 5px 0;
-        }
-
-        .header-scope .dropdown-menu-list a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 16px;
-            color: #000000;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+        .header-scope .sidebar-section-title {
             font-size: 14px;
-            font-weight: 500;
-        }
-
-        .header-scope .dropdown-menu-list a:hover {
-            background-color: #f0f0f0;
-            color: #d4af37;
-        }
-
-        .header-scope .dropdown-menu-list .logout-link {
-            color: #e53e3e;
-        }
-
-        .header-scope .dropdown-menu-list .logout-link:hover {
-            background-color: #ffe5e5;
-            color: #c53030;
-        }
-
-        /* Unique Wishlist Icon Styling */
-        .header-scope .wishlist-link svg {
-            transition: all 0.3s ease;
-            fill: none;
-            stroke: #d4af37;
-        }
-
-        .header-scope .wishlist-link:hover svg {
-            transform: scale(1.2);
-            fill: #d4af37;
-            stroke: #ffffff;
-        }
-
-        .header-scope .wishlist-link.active svg {
-            fill: #d4af37;
-            stroke: #ffffff;
-            transform: scale(1.1);
-        }
-
-        /* Header Wishlist Icon Styling */
-        .header-scope .wishlist-btn svg {
-            transition: all 0.3s ease;
-        }
-
-        .header-scope .wishlist-btn.active svg {
-            fill: #d4af37;
-            stroke: #ffffff;
-            transform: scale(1.1);
+            font-weight: 600;
+            color: #666;
+            padding: 10px 16px;
+            text-transform: uppercase;
         }
 
         /* Mobile Menu Toggle */
@@ -655,29 +566,7 @@
             }
 
             .header-scope .profile-dropdown {
-                display: none;
-            }
-
-            .header-scope .sidebar-menu {
-                display: block;
-            }
-        }
-
-        @media (min-width: 901px) {
-            .header-scope .sidebar-menu {
-                display: none;
-            }
-
-            .header-scope .sidebar {
-                width: 280px;
-            }
-
-            .header-scope .sidebar-header {
-                cursor: pointer;
-            }
-
-            .header-scope .dropdown-menu {
-                display: none;
+                display: none !important;
             }
         }
 
@@ -788,7 +677,7 @@
             }
         }
 
-        .header-scope .profile-avatar {
+        .profile-avatar {
             width: 40px;
             height: 40px;
             background-color: #ddd;
@@ -800,14 +689,14 @@
             margin-right: 8px;
         }
 
-        .header-scope .avatar-img {
+        .avatar-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             border-radius: 50%;
         }
 
-        .header-scope .avatar-letter {
+        .avatar-letter {
             font-size: 18px;
             font-weight: bold;
             color: #444;
@@ -820,7 +709,7 @@
             <!-- Logo and Hamburger Container -->
             <div class="logo-hamburger-container">
                 <!-- Mobile menu toggle -->
-                <div class="menu-toggle">
+                <div class="menu-toggle" role="button" aria-label="Toggle menu">
                     <div class="hamburger"></div>
                 </div>
 
@@ -828,14 +717,18 @@
                 <div class="logo">
                     <a href="/">
                         <div class="logo-container">
+                            <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                            </svg>
                             <span class="logo-text">LapMart</span>
                         </div>
+                        <span class="logo-subtext">Premium Laptops</span>
                     </a>
                 </div>
             </div>
 
             <!-- Navigation -->
-            <nav class="nav-links">
+            <nav class="nav-links" role="navigation" aria-label="Main navigation">
                 <a href="/" class="nav-link" id="home">Home</a>
                 <a href="/shop" class="nav-link" id="shop">Shop</a>
                 <a href="/contacts" class="nav-link" id="contacts">Contacts</a>
@@ -869,17 +762,12 @@
                             </div>
                             <span class="username"><%= user.name %></span>
                         </button>
-                        <!-- Profile Dropdown for Laptop Screens -->
                         <div class="profile-dropdown" id="profileDropdown">
-                            <ul class="profile-dropdown-list">
-                                <li><a href="/wishlist" id="Wishlist-btn-header" class="wishlist-link"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> Wishlist</a></li>
-                                <li><a href="/cart" id="cart-btn-header"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg> Cart</a></li>
-                                <li><a href="/profile"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> Profile</a></li>
-                                <li><a href="/view-order"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg> My Orders</a></li>
-                                <li><a href="/address"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> Address</a></li>
-                                <li><a href="/wallet"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h16v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-4"></path><path d="M18 12a2 2 0 0 0 0 4h3"></path></svg> Wallet</a></li>
-                                <li><a href="/logout" class="logout-link"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> Logout</a></li>
-                            </ul>
+                            <a href="/profile">Profile</a>
+                            <a href="/view-order">My Orders</a>
+                            <a href="/address">Address</a>
+                            <a href="/wallet">Wallet</a>
+                            <a href="/logout">Logout</a>
                         </div>
                     </div>
                 <% } else { %>
@@ -896,9 +784,9 @@
         </header>
 
         <!-- Sidebar -->
-        <div class="sidebar" id="sidebar">
+        <div class="sidebar" id="sidebar" role="complementary" aria-label="Sidebar navigation">
             <% if (locals.user) { %>
-                <div class="sidebar-header" id="sidebarHeader">
+                <div class="sidebar-header">
                     <div class="profile-avatar">
                         <% if (user.profileImage && user.profileImage[0]) { %>
                             <img src="<%= user.profileImage[0] %>" alt="Profile Image" class="avatar-img" />
@@ -911,22 +799,6 @@
                         <p><%= user.email %></p>
                     </div>
                 </div>
-                <!-- Sidebar Menu for Mobile -->
-                <ul class="sidebar-menu">
-                    <li><a href="/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> Home</a></li>
-                    <li><a href="/shop"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16  ascended="true">10</path></svg> Shop</a></li>
-                    <li><a href="/contacts"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg> Contacts</a></li>
-                    <li><a href="/about"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="8"></line></svg> About</a></li>
-                    <% if (locals.user) { %>
-                        <li><a href="/wishlist" id="Wishlist-btn-sidebar-mobile" class="wishlist-link"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> Wishlist</a></li>
-                        <li><a href="/cart" id="cart-btn-sidebar-mobile"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg> Cart</a></li>
-                        <li><a href="/profile"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> Profile</a></li>
-                        <li><a href="/view-order"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg> My Orders</a></li>
-                        <li><a href="/address"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> Address</a></li>
-                        <li><a href="/wallet"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h16v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-4"></path><path d="M18 12a2 2 0 0 0 0 4h3"></path></svg> Wallet</a></li>
-                        <li><a href="/logout" class="logout-link"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> Logout</a></li>
-                    <% } %>
-                </ul>
             <% } else { %>
                 <div class="sidebar-header">
                     <a href="/login" class="signin-btn" style="width: 100%; justify-content: center;">
@@ -934,226 +806,204 @@
                             <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
                             <polyline points="10 17 15 12 10 7"></polyline>
                             <line x1="15" y1="12" x2="3" y2="12"></line>
-                        </svg>
+                        </svg>  
                         Sign In
                     </a>
                 </div>
-                <ul class="sidebar-menu">
-                    <li><a href="/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> Home</a></li>
-                    <li><a href="/shop"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg> Shop</a></li>
-                    <li><a href="/contacts"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg> Contacts</a></li>
-                    <li><a href="/about"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="8"></line></svg> About</a></li>
-                </ul>
             <% } %>
+            <ul class="sidebar-menu">
+                <li><a href="/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> Home</a></li>
+                <li><a href="/shop"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg> Shop</a></li>
+                <li><a href="/contacts"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg> Contacts</a></li>
+                <li><a href="/about"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="8"></line></svg> About</a></li>
+                <% if (locals.user) { %>
+                    <div class="sidebar-section">
+                        <div class="sidebar-section-title">Shopping</div>
+                        <li><a href="/wishlist" id="Wishlist-btn-sidebar"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> Wishlist</a></li>
+                        <li><a href="/cart" id="cart-btn-sidebar"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg> Cart</a></li>
+                        <li><a href="/profile"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> Profile</a></li>
+                        <li><a href="/view-order"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg> My Orders</a></li>
+                    </div>
+                    <div class="sidebar-section">
+                        <div class="sidebar-section-title">Account</div>
+                        <li><a href="/address"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> Address</a></li>
+                        <li><a href="/wallet"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h16v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-4"></path><path d="M18 12a2 2 0 0 0 0 4h3"></path></svg> Wallet</a></li>
+                        <li><a href="/logout" class="logout-link"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> Logout</a></li>
+                    </div>
+                <% } %>
+            </ul>
         </div>
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // Utility: Debounce function for resize events
-    const debounce = (func, wait) => {
-        let timeout;
-        return (...args) => {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(null, args), wait);
-        };
-    };
-
-    // Sidebar toggle
-    const menuToggle = document.querySelector('.header-scope .menu-toggle');
-    const sidebar = document.getElementById('sidebar');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
-    const profileButton = document.getElementById('profileButton');
-    const profileDropdown = document.getElementById('profileDropdown');
-
-    // Function to close all menus
-    const closeAllMenus = () => {
-        if (sidebar) sidebar.classList.remove('active');
-        if (sidebarOverlay) sidebarOverlay.classList.remove('active');
-        if (menuToggle) menuToggle.classList.remove('active');
-        if (profileDropdown) profileDropdown.classList.remove('active');
-    };
-
-    // Sidebar toggle logic
-    if (menuToggle && sidebar && sidebarOverlay) {
-        menuToggle.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation(); // Prevent event bubbling
-            const isActive = sidebar.classList.contains('active');
-            closeAllMenus();
-            if (!isActive) {
-                sidebar.classList.add('active');
-                sidebarOverlay.classList.add('active');
-                menuToggle.classList.add('active');
+        document.addEventListener('DOMContentLoaded', () => {
+            // Top Banner Close
+            const closeBanner = document.querySelector('.close-btn');
+            if (closeBanner) {
+                closeBanner.addEventListener('click', () => {
+                    document.querySelector('.top-banner').style.display = 'none';
+                });
             }
-        });
 
-        sidebarOverlay.addEventListener('click', () => {
-            closeAllMenus();
-        });
-
-        // Close sidebar when clicking a link
-        const sidebarLinks = sidebar.querySelectorAll('.sidebar-menu a, .profile-dropdown-list a');
-        sidebarLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                closeAllMenus();
-            });
-        });
-    }
-
-    // Profile dropdown toggle for laptop screens
-    if (profileButton && profileDropdown) {
-        profileButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation(); // Prevent event bubbling to document
-            if (window.innerWidth > 900) {
-                console.log('Toggling profile dropdown'); // Debugging
-                profileDropdown.classList.toggle('active');
-            } else {
-                // For mobile, toggle sidebar instead
-                const isSidebarActive = sidebar.classList.contains('active');
-                closeAllMenus();
-                if (!isSidebarActive) {
-                    sidebar.classList.add('active');
-                    sidebarOverlay.classList.add('active');
-                    menuToggle.classList.add('active');
+            // Session Check for Cart and Wishlist
+            const checkSession = async (url, action) => {
+                try {
+                    const res = await fetch('/check-session', {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    const data = await res.json();
+                    if (data.loggedIn) {
+                        window.location.href = url;
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Login Required',
+                            text: `Please login to view your ${action}`,
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                } catch (error) {
+                    console.error(`Error checking ${action}:`, error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Something went wrong',
+                        text: `Unable to access ${action}. Try again later.`
+                    });
                 }
-            }
-        });
-    }
+            };
 
-    // Close profile dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-        if (window.innerWidth > 900 && profileDropdown && !profileButton.contains(e.target) && !profileDropdown.contains(e.target)) {
-            profileDropdown.classList.remove('active');
-        }
-    });
-
-    // Navigation active state
-    const logo = document.querySelector('.header-scope .logo');
-    const navLinks = document.querySelectorAll('.header-scope .nav-link');
-    navLinks.forEach(link => {
-        link.addEventListener('click', function (e) {
-            navLinks.forEach(l => l.classList.remove('active'));
-            this.classList.add('active');
-            if (this.getAttribute('href') === '/') {
-                logo.classList.add('home-active');
-            } else {
-                logo.classList.remove('home-active');
-            }
-        });
-    });
-
-    // Set active state for current page
-    if (window.location.pathname === '/') {
-        const homeLink = document.querySelector('.header-scope a[href="/"]');
-        if (homeLink) {
-            homeLink.classList.add('active');
-            logo.classList.add('home-active');
-        }
-    }
-
-    // Set active state for wishlist
-    const wishlistLinks = document.querySelectorAll('.wishlist-link');
-    const wishlistBtn = document.getElementById('Wishlist-btn');
-    if (window.location.pathname === '/wishlist') {
-        wishlistLinks.forEach(link => link.classList.add('active'));
-        if (wishlistBtn) wishlistBtn.classList.add('active');
-    }
-
-    // Wishlist button in header and dropdown
-    const wishlistBtnHeader = document.getElementById('Wishlist-btn-header');
-    const wishlistBtnSidebarMobile = document.getElementById('Wishlist-btn-sidebar-mobile');
-    const wishlistBtn = document.getElementById('Wishlist-btn');
-    const handleWishlistClick = async (e, btn) => {
-        e.preventDefault();
-        try {
-            const res = await fetch('/check-session', {
-                method: 'GET',
-                headers: { 'Accept': 'application/json' }
+            // Cart and Wishlist Button Handlers
+            ['cart-btn', 'cart-btn-sidebar'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.addEventListener('click', e => {
+                        e.preventDefault();
+                        checkSession('/cart', 'cart');
+                    });
+                }
             });
-            const data = await res.json();
-            if (res.ok && data.loggedIn) {
-                window.location.href = '/wishlist';
-            } else {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Login Required',
-                    text: 'Please login to view your wishlist',
-                    confirmButtonText: 'OK'
+
+            ['Wishlist-btn', 'Wishlist-btn-sidebar'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.addEventListener('click', e => {
+                        e.preventDefault();
+                        checkSession('/wishlist', 'wishlist');
+                    });
+                }
+            });
+
+            // Sidebar and Navigation Logic
+            (function() {
+                const debounce = (func, wait) => {
+                    let timeout;
+                    return (...args) => {
+                        clearTimeout(timeout);
+                        timeout = setTimeout(() => func.apply(null, args), wait);
+                    };
+                };
+
+                const menuToggle = document.querySelector('.menu-toggle');
+                const sidebar = document.getElementById('sidebar');
+                const sidebarOverlay = document.getElementById('sidebarOverlay');
+                const profileButton = document.getElementById('profileButton');
+                const logo = document.querySelector('.logo');
+                const navLinks = document.querySelectorAll('.nav-link');
+
+                // Set active link based on current URL
+                const currentPath = window.location.pathname;
+                navLinks.forEach(link => {
+                    if (link.getAttribute('href') === currentPath) {
+                        link.classList.add('active');
+                        logo.classList.toggle('home-active', currentPath === '/');
+                    }
+                    link.addEventListener('click', function() {
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        this.classList.add('active');
+                        logo.classList.toggle('home-active', this.getAttribute('href') === '/');
+                    });
                 });
-            }
-        } catch (error) {
-            console.error('Error checking wishlist:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Something went wrong',
-                text: 'Unable to access wishlist. Try again later.'
-            });
-        }
-    };
 
-    if (wishlistBtnHeader) {
-        wishlistBtnHeader.addEventListener('click', (e) => handleWishlistClick(e, wishlistBtnHeader));
-    }
-    if (wishlistBtnSidebarMobile) {
-        wishlistBtnSidebarMobile.addEventListener('click', (e) => handleWishlistClick(e, wishlistBtnSidebarMobile));
-    }
-    if (wishlistBtn) {
-        wishlistBtn.addEventListener('click', (e) => handleWishlistClick(e, wishlistBtn));
-    }
+                // Sidebar toggle
+                if (menuToggle && sidebar && sidebarOverlay) {
+                    const toggleSidebar = () => {
+                        menuToggle.classList.toggle('active');
+                        sidebar.classList.toggle('active');
+                        sidebarOverlay.classList.toggle('active');
+                    };
 
-    // Cart button in header and dropdown
-    const cartBtnHeader = document.getElementById('cart-btn-header');
-    const cartBtnSidebarMobile = document.getElementById('cart-btn-sidebar-mobile');
-    const cartBtn = document.getElementById('cart-btn');
-    const handleCartClick = async (e) => {
-        e.preventDefault();
-        try {
-            const res = await fetch('/check-session', {
-                method: 'GET',
-                headers: { 'Accept': 'application/json' }
-            });
-            const data = await res.json();
-            if (data.loggedIn) {
-                window.location.href = '/cart';
-            } else {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Login Required',
-                    text: 'Please login to view your cart',
-                    confirmButtonText: 'OK'
-                });
-            }
-        } catch (error) {
-            console.error('Error checking session:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Something went wrong',
-                text: 'Unable to access cart. Try again later.'
-            });
-        }
-    };
+                    menuToggle.addEventListener('click', toggleSidebar);
+                    sidebarOverlay.addEventListener('click', toggleSidebar);
 
-    if (cartBtnHeader) {
-        cartBtnHeader.addEventListener('click', handleCartClick);
-    }
-    if (cartBtnSidebarMobile) {
-        cartBtnSidebarMobile.addEventListener('click', handleCartClick);
-    }
-    if (cartBtn) {
-        cartBtn.addEventListener('click', handleCartClick);
-    }
+                    // Close sidebar on link click
+                    sidebar.querySelectorAll('.sidebar-menu a').forEach(link => {
+                        link.addEventListener('click', toggleSidebar);
+                    });
 
-    // Responsive: Debounced resize handler
-    window.addEventListener('resize', debounce(() => {
-        if (window.innerWidth > 900) {
-            closeAllMenus();
-        }
-    }, 100));
-});
-</script>
+                    // Keyboard accessibility for menu toggle
+                    menuToggle.addEventListener('keydown', e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggleSidebar();
+                        }
+                    });
+                }
+
+                // Profile dropdown and sidebar toggle
+                if (profileButton) {
+                    profileButton.addEventListener('click', e => {
+                        e.preventDefault();
+                        if (window.innerWidth > 900) {
+                            const dropdown = document.getElementById('profileDropdown');
+                            dropdown.classList.toggle('active');
+                        } else {
+                            // Mobile: Open sidebar
+                            menuToggle.classList.toggle('active');
+                            sidebar.classList.toggle('active');
+                            sidebarOverlay.classList.toggle('active');
+                        }
+                    });
+
+                    // Close dropdown when clicking outside
+                    document.addEventListener('click', e => {
+                        const dropdown = document.getElementById('profileDropdown');
+                        const container = document.querySelector('.profile-container');
+                        if (window.innerWidth > 900 && !container.contains(e.target)) {
+                            dropdown.classList.remove('active');
+                        }
+                    });
+
+                    // Keyboard accessibility for profile button
+                    profileButton.addEventListener('keydown', e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            if (window.innerWidth > 900) {
+                                const dropdown = document.getElementById('profileDropdown');
+                                dropdown.classList.toggle('active');
+                            } else {
+                                menuToggle.classList.toggle('active');
+                                sidebar.classList.toggle('active');
+                                sidebarOverlay.classList.toggle('active');
+                            }
+                        }
+                    });
+                }
+
+                // Close sidebar on resize
+                window.addEventListener('resize', debounce(() => {
+                    if (window.innerWidth > 900 && sidebar && sidebarOverlay) {
+                        sidebar.classList.remove('active');
+                        sidebarOverlay.classList.remove('active');
+                        menuToggle.classList.remove('active');
+                        const dropdown = document.getElementById('profileDropdown');
+                        if (dropdown) dropdown.classList.remove('active');
+                    }
+                }, 100));
+            })();
+        });
+    </script>
 </body>
 </html>
