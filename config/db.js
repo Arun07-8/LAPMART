@@ -1,18 +1,20 @@
-const mongoose=require("mongoose");
-const env=require("dotenv").config()
+const mongoose = require("mongoose");
+require("dotenv").config(); // ✅ Load .env at the top
 
+const connectDB = async () => {
+  try {
+    console.log("🌐 Connecting to MongoDB...");
 
-const connectDB=async()=>{
-    try{
-       
-        await mongoose.connect(process.env.MONGODB_URI);
-        console.log("DB connected");
-        
-    }catch(error){
-         console.log("DB Connection  error",error.message);
-         process.exit(1);
-  
-    }
-}
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
 
-module.exports=connectDB
+    console.log("✅ MongoDB connected successfully");
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error); // Show full error
+    process.exit(1); // Exit the app if DB fails
+  }
+};
+
+module.exports = connectDB;

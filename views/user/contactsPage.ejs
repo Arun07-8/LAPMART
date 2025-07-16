@@ -1,1010 +1,660 @@
+<%- include("../../views/partials/user/header") %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LapMart - Premium Electronics</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <title>Contact Us - Lapmart Premium Laptops</title>
+    <link href="https://fonts.googleapis.com/css2?family=Georgia:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.min.css" rel="stylesheet">
     <style>
-        /* Enhanced Scoped Header Styles */
-        .header-scope {
-            font-family: 'Poppins', sans-serif;
-            display: block;
-        }
-
-        .header-scope * {
+        /* Reset only for this page content, not affecting header */
+        .contact-page * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        /* Header Styles */
-        .header-scope .site-header {
-            background: #ffffff;
+        .contact-page {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.7;
+            color: #2c2c2c;
+            background-color: #ffffff;
+        }
+
+        .contact-container {
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 0 20px;
-            height: 85px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
+        }
+
+        .contact-header {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
+            color: #2c2c2c;
+            padding: 100px 0;
+            text-align: center;
+            position: relative;
+            border-bottom: 3px solid #d4af37;
+        }
+
+        .contact-header::before {
+            content: '';
+            position: absolute;
             top: 0;
-            z-index: 1000;
-            flex-wrap: nowrap;
-            gap: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            min-width: 100%;
-            overflow: hidden; /* Prevent content overflow */
-        }
-
-        /* Logo and Hamburger Container */
-        .header-scope .logo-hamburger-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-shrink: 0;
-            min-width: 0;
-            z-index: 1001; /* Ensure no overlap with other elements */
-        }
-
-        /* Logo Section */
-        .header-scope .logo {
-            display: flex;
-            align-items: center;
-            flex-shrink: 0;
-            transition: margin-left 0.3s ease;
-        }
-
-        .header-scope .logo.home-active {
-            margin-left: 5px;
-        }
-
-        .header-scope .logo a {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-        }
-
-        .header-scope .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .header-scope .logo-icon {
-            width: 36px;
-            height: 36px;
-            color: #060606;
-            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
-            transition: all 0.3s ease;
-            flex-shrink: 0;
-        }
-
-        .header-scope .logo-text {
-            font-family: 'Cinzel', serif;
-            font-size: 41px;
-            font-weight: 900;
-            background: linear-gradient(to bottom, #000000 50%, #b0b0b0 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            position: relative;
-            white-space: nowrap; /* Prevent text wrapping */
-            padding-right: 10px; /* Add padding to avoid overlap */
-        }
-
-        .header-scope .logo-text::after {
-            content: '';
-            position: absolute;
-            width: 50%;
-            height: 2px;
-            bottom: -5px;
-            left: 25%;
-            background: #000000;
-            transition: width 0.3s ease;
-        }
-
-        .header-scope .logo a:hover .logo-icon {
-            transform: scale(1.05);
-            color: #d4af37;
-            filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.6));
-        }
-
-        .header-scope .logo a:hover .logo-text {
-            transform: scale(1.03);
-            background: linear-gradient(to bottom, #191717 50%, #a0a0a0 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
-        }
-
-        .header-scope .logo a:hover .logo-text::after {
-            width: 80%;
-        }
-
-        .header-scope .logo-subtext {
-            font-family: 'Poppins', sans-serif;
-            font-size: 10px;
-            font-weight: 500;
-            color: #000000;
-            margin-top: 4px;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
-        }
-
-        /* Navigation */
-        .header-scope .nav-links {
-            display: flex;
-            gap: 40px;
-            align-items: center;
-            flex-grow: 1;
-            justify-content: center;
-        }
-
-        .header-scope .nav-links a {
-            text-decoration: none;
-            color: #000000;
-            font-weight: 500;
-            font-size: 16px;
-            transition: color 0.3s ease;
-            position: relative;
-            padding: 5px 0; /* Add padding to avoid overlap */
-        }
-
-        .header-scope .nav-links a.active {
-            color: #d4af37;
-            font-weight: 600;
-        }
-
-        .header-scope .nav-links a.active::after {
-            width: 100%;
-        }
-
-        .header-scope .nav-links a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
             left: 0;
-            background: #d4af37;
-            transition: width 0.3s ease;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(212, 175, 55, 0.03) 0%, rgba(212, 175, 55, 0.08) 100%);
+            z-index: 1;
         }
 
-        .header-scope .nav-links a:hover {
-            color: #d4af37;
-        }
-
-        .header-scope .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        /* Right Section */
-        .header-scope .cart-profile {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex-shrink: 0;
-            flex-wrap: nowrap;
-            z-index: 1001; /* Ensure no overlap */
-        }
-
-        /* Wishlist and Cart Icons */
-        .header-scope .cart-profile > a {
-            color: #000000;
-            text-decoration: none;
-            padding: 10px;
-            border-radius: 10px;
-            transition: all 0.3s ease;
+        .contact-header-content {
             position: relative;
-            flex-shrink: 0; /* Prevent icons from shrinking */
+            z-index: 2;
         }
 
-        .header-scope .cart-profile > a:hover {
-            background-color: #2d3b3c;
+        .contact-logo {
+            font-size: 4rem;
+            font-weight: 300;
+            margin-bottom: 20px;
             color: #d4af37;
+            text-shadow: 0 2px 4px rgba(212, 175, 55, 0.2);
+            letter-spacing: 4px;
+            font-family: 'Georgia', serif;
         }
 
-        .header-scope .wishlist-btn,
-        .header-scope .cart-btn {
-            z-index: 1001;
-            background: transparent;
+        .contact-tagline {
+            font-size: 1.4rem;
+            margin-bottom: 30px;
+            color: #666;
+            font-style: italic;
+            font-weight: 300;
         }
 
-        /* Sign In Button */
-        .header-scope .signin-btn {
-            background: #d4af37;
-            color: #1a2526;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+        .contact-main-content {
+            background: #ffffff;
+            margin: -50px auto 0;
+            position: relative;
+            z-index: 3;
+            border-radius: 0;
+            box-shadow: 0 0 60px rgba(212, 175, 55, 0.1);
+            overflow: hidden;
+        }
+
+        .contact-section {
+            padding: 80px 60px;
+            background: #ffffff;
+        }
+
+        .contact-section:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .contact-section h2 {
+            color: #2c2c2c;
+            font-size: 2.8rem;
+            margin-bottom: 40px;
+            text-align: center;
+            position: relative;
+            font-weight: 300;
+            font-family: 'Georgia', serif;
+        }
+
+        .contact-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(to right, #d4af37, #f4d03f);
+            border-radius: 1px;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-top: 60px;
+        }
+
+        .contact-form {
+            background: #ffffff;
+            padding: 50px;
+            border-radius: 0;
+            box-shadow: 0 10px 40px rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.02), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .contact-form:hover::before {
+            left: 100%;
+        }
+
+        .contact-form h3 {
+            color: #2c2c2c;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            font-weight: 300;
+            font-family: 'Georgia', serif;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c2c2c;
+            font-weight: 400;
+            font-size: 1.1rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid rgba(212, 175, 55, 0.2);
+            border-radius: 0;
+            font-size: 1rem;
+            font-family: 'Georgia', serif;
             transition: all 0.3s ease;
-            white-space: nowrap;
+            background: #fafafa;
         }
 
-        .header-scope .signin-btn:hover {
-            transform: translateY(-2px);
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #d4af37;
+            background: #ffffff;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
+        }
+
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .error-message.show {
+            opacity: 1;
+        }
+
+        .form-group input.error,
+        .form-group textarea.error {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            color: white;
+            border: none;
+            padding: 18px;
+            font-size: 1.2rem;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            border-radius: 0;
+            font-family: 'Georgia', serif;
             box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
         }
 
-        /* Profile Container */
-        .header-scope .profile-container {
-            position: relative;
-            display: inline-block;
-            z-index: 1002;
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(212, 175, 55, 0.4);
         }
 
-        .header-scope .profile-button {
-            background: none;
-            border: none;
-            cursor: pointer;
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .contact-info {
+            background: #ffffff;
+            padding: 50px;
+            border-radius: 0;
+            box-shadow: 0 10px 40px rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .contact-info h3 {
+            color: #2c2c2c;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            font-weight: 300;
+            font-family: 'Georgia', serif;
+            text-align: center;
+        }
+
+        .info-item {
             display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            border-radius: 10px;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #fafafa;
             transition: all 0.3s ease;
-            color: #000000;
         }
 
-        .header-scope .profile-button:hover {
-            background-color: #2d3b3c;
-            color: #d4af37;
+        .info-item:hover {
+            background: #f0f0f0;
+            transform: translateX(5px);
         }
 
-        .header-scope .profile-avatar {
-            width: 36px;
-            height: 36px;
-            background: #d4af37;
+        .info-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #d4af37, #f4d03f);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #1a2526;
-            font-weight: 600;
-            font-size: 14px;
+            font-size: 1.5rem;
+            color: white;
+            margin-right: 20px;
             flex-shrink: 0;
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
         }
 
-        .header-scope .username {
-            font-weight: 500;
-            font-size: 14px;
-            white-space: nowrap;
+        .info-content h4 {
+            color: #2c2c2c;
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            font-weight: 400;
+            font-family: 'Georgia', serif;
         }
 
-        /* Profile Dropdown */
-        .header-scope .profile-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            display: none;
-            flex-direction: column;
-            border-radius: 8px;
-            z-index: 1003;
-            min-width: 160px;
-        }
-
-        .header-scope .profile-dropdown.active {
-            display: flex;
-        }
-
-        .header-scope .profile-dropdown a {
-            padding: 10px 20px;
-            text-decoration: none;
-            color: #000;
-            font-size: 14px;
-            transition: background 0.3s ease;
-        }
-
-        .header-scope .profile-dropdown a:hover {
-            background: #f0f0f0;
-        }
-
-        /* Sidebar Styles */
-        .header-scope .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 280px;
-            height: 100%;
-            background: #ffffff;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-            z-index: 1003;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            overflow-y: auto; /* Enable scrolling */
-        }
-
-        .header-scope .sidebar.active {
-            transform: translateX(0);
-        }
-
-        .header-scope .sidebar-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            z-index: 1002;
-        }
-
-        .header-scope .sidebar-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .header-scope .sidebar-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .header-scope .sidebar-menu {
-            list-style: none;
-            padding: 10px 0;
-            flex-grow: 1;
-        }
-
-        .header-scope .sidebar-menu li {
-            margin: 5px 0;
-        }
-
-        .header-scope .sidebar-menu a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            color: #000000;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .header-scope .sidebar-menu a:hover {
-            background-color: #f0f0f0;
-            color: #d4af37;
-        }
-
-        .header-scope .sidebar-menu .logout-link {
-            color: #e53e3e;
-        }
-
-        .header-scope .sidebar-menu .logout-link:hover {
-            background-color: #ffe5e5;
-            color: #c53030;
-        }
-
-        /* Sidebar Section Styling */
-        .header-scope .sidebar-section {
-            padding: 10px 0;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .header-scope .sidebar-section:last-child {
-            border-bottom: none;
-        }
-
-        .header-scope .sidebar-section-title {
-            font-size: 14px;
-            font-weight: 600;
+        .info-content p {
             color: #666;
-            padding: 10px 16px;
-            text-transform: uppercase;
-            margin-bottom: 5px; /* Add spacing to avoid overlap */
+            font-size: 1rem;
+            line-height: 1.6;
         }
 
-        /* Mobile Menu Toggle */
-        .header-scope .menu-toggle {
-            display: none;
-            flex-direction: column;
-            cursor: pointer;
-            gap: 6px;
-            width: 30px;
-            height: 24px;
+        .map-section {
+            background: #fafafa;
+            padding: 80px 60px;
+            text-align: center;
+        }
+
+        .map-section h2 {
+            color: #2c2c2c;
+            font-size: 2.8rem;
+            margin-bottom: 40px;
             position: relative;
-            margin-right: 10px;
-            order: -1;
-            z-index: 1001; /* Ensure hamburger is above other elements */
+            font-weight: 300;
+            font-family: 'Georgia', serif;
         }
 
-        .header-scope .hamburger,
-        .header-scope .hamburger::before,
-        .header-scope .hamburger::after {
-            width: 30px;
-            height: 5px;
-            background: linear-gradient(90deg, #d4af37, #2d3b3c);
-            border-radius: 5px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .header-scope .hamburger {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        .header-scope .hamburger::before,
-        .header-scope .hamburger::after {
+        .map-section h2::after {
             content: '';
             position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(to right, #d4af37, #f4d03f);
+            border-radius: 1px;
         }
 
-        .header-scope .hamburger::before {
-            transform: translateY(-12px);
+        .map-container {
+            max-width: 100%;
+            height: 450px;
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.1);
         }
 
-        .header-scope .hamburger::after {
-            transform: translateY(12px);
-        }
-
-        .header-scope .menu-toggle.active .hamburger {
-            background: transparent;
-            box-shadow: none;
-        }
-
-        .header-scope .menu-toggle.active .hamburger::before {
-            transform: rotate(45deg);
-            background: #d4af37;
-            box-shadow: none;
-        }
-
-        .header-scope .menu-toggle.active .hamburger::after {
-            transform: rotate(-45deg);
-            background: #d4af37;
-            box-shadow: none;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 1200px) {
-            .header-scope .nav-links {
-                gap: 25px;
-            }
-
-            .header-scope .logo-text {
-                font-size: 32px;
-            }
-
-            .header-scope .logo-icon {
-                width: 30px;
-                height: 30px;
-            }
-
-            .header-scope .logo-subtext {
-                font-size: 9px;
-            }
-
-            .header-scope .cart-profile {
-                gap: 15px;
-            }
-        }
-
-        @media (max-width: 1024px) {
-            .header-scope .site-header {
-                padding: 0 15px;
-            }
-
-            .header-scope .nav-links {
-                gap: 20px;
-            }
-
-            .header-scope .logo-text {
-                font-size: 30px;
-            }
-
-            .header-scope .logo-icon {
-                width: 28px;
-                height: 28px;
-            }
-
-            .header-scope .logo-subtext {
-                font-size: 8px;
-            }
-        }
-
-        @media (max-width: 900px) {
-            .header-scope .nav-links {
-                display: none;
-            }
-
-            .header-scope .menu-toggle {
-                display: flex;
-            }
-
-            .header-scope .cart-profile .wishlist-btn,
-            .header-scope .cart-profile .cart-btn {
-                display: none;
-            }
-
-            .header-scope .logo-text {
-                font-size: 28px;
-                padding-right: 8px;
-            }
-
-            .header-scope .logo-icon {
-                width: 26px;
-                height: 26px;
-            }
-
-            .header-scope .logo-subtext {
-                font-size: 7px;
-            }
-
-            .header-scope .profile-dropdown {
-                display: none !important;
-            }
+        .map-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
         @media (max-width: 768px) {
-            .header-scope .site-header {
-                padding: 0 8px;
-                height: 56px;
-                gap: 6px;
+            .contact-logo {
+                font-size: 2.8rem;
+                letter-spacing: 2px;
             }
-
-            .header-scope .logo-hamburger-container {
-                gap: 8px;
+            
+            .contact-section {
+                padding: 60px 30px;
             }
-
-            .header-scope .logo-text {
-                font-size: 22px;
-                padding-right: 6px;
+            
+            .contact-section h2 {
+                font-size: 2.2rem;
             }
-
-            .header-scope .logo-icon {
-                width: 20px;
-                height: 20px;
+            
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
             }
-
-            .header-scope .logo-subtext {
-                font-size: 6px;
-                display: block;
+            
+            .contact-form,
+            .contact-info {
+                padding: 40px 30px;
             }
-
-            .header-scope .cart-profile {
-                gap: 6px;
+            
+            .map-section {
+                padding: 60px 30px;
             }
-
-            .header-scope .menu-toggle {
-                width: 24px;
-                height: 18px;
-                margin-right: 8px;
-            }
-
-            .header-scope .hamburger,
-            .header-scope .hamburger::before,
-            .header-scope .hamburger::after {
-                width: 24px;
-                height: 3px;
-            }
-
-            .header-scope .hamburger::before {
-                transform: translateY(-7px);
-            }
-
-            .header-scope .hamburger::after {
-                transform: translateY(7px);
-            }
-
-            .header-scope .signin-btn {
-                padding: 6px 10px;
-                font-size: 12px;
-            }
-
-            .header-scope .profile-avatar {
-                width: 30px;
-                height: 30px;
-                font-size: 12px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header-scope .site-header {
-                padding: 0 5px;
-                height: 50px;
-                gap: 4px;
-                justify-content: space-between;
-            }
-
-            .header-scope .logo {
-                flex: 0 0 auto;
-            }
-
-            .header-scope .logo-text {
-                font-size: 20px;
-                padding-right: 4px;
-            }
-
-            .header-scope .logo-icon {
-                width: 18px;
-                height: 18px;
-            }
-
-            .header-scope .logo-subtext {
-                display: none;
-            }
-
-            .header-scope .cart-profile {
-                gap: 4px;
-                flex: 0 0 auto;
-            }
-
-            .header-scope .signin-btn {
-                padding: 5px 8px;
-                font-size: 10px;
-                gap: 2px;
-            }
-
-            .header-scope .signin-btn svg {
-                width: 10px;
-                height: 10px;
-            }
-
-            .header-scope .profile-button {
-                padding: 3px 5px;
-            }
-
-            .header-scope .profile-avatar {
-                width: 28px;
-                height: 28px;
-                font-size: 10px;
-            }
-
-            .header-scope .sidebar {
-                width: 260px;
-                padding: 15px;
-            }
-
-            .header-scope .sidebar-section-title {
-                font-size: 12px;
-                padding: 8px 12px;
-            }
-        }
-
-        .header-scope .profile-avatar {
-            width: 40px;
-            height: 40px;
-            background-color: #ddd;
-            border-radius: 50%;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 8px;
-            flex-shrink: 0;
-        }
-
-        .header-scope .avatar-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 50%;
-        }
-
-        .header-scope .avatar-letter {
-            font-size: 18px;
-            font-weight: bold;
-            color: #444;
         }
     </style>
 </head>
 <body>
-    <div class="header-scope">
-        <header class="site-header">
-            <!-- Logo and Hamburger Container -->
-            <div class="logo-hamburger-container">
-                <!-- Mobile menu toggle -->
-                <div class="menu-toggle" role="button" aria-label="Toggle menu">
-                    <div class="hamburger"></div>
-                </div>
-
-                <!-- Logo -->
-                <div class="logo">
-                    <a href="/">
-                        <div class="logo-container">
-                            <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-                            </svg>
-                            <span class="logo-text">LapMart</span>
-                        </div>
-                        <span class="logo-subtext">Premium Laptops</span>
-                    </a>
+    <div class="contact-page">
+        <div class="contact-header">
+            <div class="contact-container">
+                <div class="contact-header-content">
+                    <div class="contact-logo">CONTACT US</div>
+                    <div class="contact-tagline">Get in touch with our premium laptop experts</div>
                 </div>
             </div>
-
-            <!-- Navigation -->
-            <nav class="nav-links" role="navigation" aria-label="Main navigation">
-                <a href="/" class="nav-link" id="home">Home</a>
-                <a href="/shop" class="nav-link" id="shop">Shop</a>
-                <a href="/contacts" class="nav-link" id="contacts">Contacts</a>
-                <a href="/about" class="nav-link" id="About">About</a>
-            </nav>
-
-            <!-- Cart and Profile Section -->
-            <div class="cart-profile">
-                <a href="/wishlist" aria-label="Wishlist" id="Wishlist-btn" class="wishlist-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                    </svg>
-                </a>
-                <a href="/cart" aria-label="Cart" id="cart-btn" class="cart-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="9" cy="21" r="1"></circle>
-                        <circle cx="20" cy="21" r="1"></circle>
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                    </svg>
-                </a>
-
-                <% if (locals.user) { %>
-                    <div class="profile-container">
-                        <button class="profile-button" id="profileButton" aria-label="Profile">
-                            <div class="profile-avatar">
-                                <% if (user.profileImage && user.profileImage[0]) { %>
-                                    <img src="<%= user.profileImage[0] %>" alt="Profile Image" class="avatar-img" />
-                                <% } else { %>
-                                    <span class="avatar-letter"><%= user.name.charAt(0).toUpperCase() %></span>
-                                <% } %>
-                            </div>
-                            <span class="username"><%= user.name %></span>
-                        </button>
-                        <div class="profile-dropdown" id="profileDropdown">
-                            <a href="/profile">Profile</a>
-                            <a href="/view-order">My Orders</a>
-                            <a href="/address">Address</a>
-                            <a href="/wallet">Wallet</a>
-                            <a href="/logout">Logout</a>
-                        </div>
-                    </div>
-                <% } else { %>
-                    <a href="/login" class="signin-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-                            <polyline points="10 17 15 12 10 7"></polyline>
-                            <line x1="15" y1="12" x2="3" y2="12"></line>
-                        </svg>
-                        Sign In
-                    </a>
-                <% } %>
-            </div>
-        </header>
-
-        <!-- Sidebar -->
-        <div class="sidebar" id="sidebar" role="complementary" aria-label="Sidebar navigation">
-            <% if (locals.user) { %>
-                <div class="sidebar-header">
-                    <div class="profile-avatar">
-                        <% if (user.profileImage && user.profileImage[0]) { %>
-                            <img src="<%= user.profileImage[0] %>" alt="Profile Image" class="avatar-img" />
-                        <% } else { %>
-                            <span class="avatar-letter"><%= user.name.charAt(0).toUpperCase() %></span>
-                        <% } %>
-                    </div>
-                    <div class="profile-info">
-                        <h4><%= user.name %></h4>
-                        <p><%= user.email %></p>
-                    </div>
-                </div>
-            <% } else { %>
-                <div class="sidebar-header">
-                    <a href="/login" class="signin-btn" style="width: 100%; justify-content: center;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-                            <polyline points="10 17 15 12 10 7"></polyline>
-                            <line x1="15" y1="12" x2="3" y2="12"></line>
-                        </svg>  
-                        Sign In
-                    </a>
-                </div>
-            <% } %>
-            <ul class="sidebar-menu">
-                <li><a href="/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> Home</a></li>
-                <li><a href="/shop"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg> Shop</a></li>
-                <li><a href="/contacts"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg> Contacts</a></li>
-                <li><a href="/about"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="8"></line></svg> About</a></li>
-                <% if (locals.user) { %>
-                    <div class="sidebar-section">
-                        <div class="sidebar-section-title">Shopping</div>
-                        <li><a href="/wishlist" id="Wishlist-btn-sidebar"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> Wishlist</a></li>
-                        <li><a href="/cart" id="cart-btn-sidebar"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg> Cart</a></li>
-                        <li><a href="/profile"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> Profile</a></li>
-                        <li><a href="/view-order"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg> My Orders</a></li>
-                    </div>
-                    <div class="sidebar-section">
-                        <div class="sidebar-section-title">Account</div>
-                        <li><a href="/address"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> Address</a></li>
-                        <li><a href="/wallet"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h16v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-4"></path><path d="M18 12a2 2 0 0 0 0 4h3"></path></svg> Wallet</a></li>
-                        <li><a href="/logout" class="logout-link"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> Logout</a></li>
-                    </div>
-                <% } %>
-            </ul>
         </div>
-        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <div class="contact-container">
+            <div class="contact-main-content">
+                <div class="contact-section">
+                    <h2>Get In Touch</h2>
+                    <div class="contact-grid">
+                        <div class="contact-form">
+                            <h3>Send Us a Message</h3>
+                            <form id="contactForm">
+                                <div class="form-group">
+                                    <label for="fullName">Full Name *</label>
+                                    <input type="text" id="fullName" name="fullName">
+                                    <div class="error-message" id="fullNameError">Please enter your full name</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="email">Email Address *</label>
+                                    <input type="email" id="email" name="email">
+                                    <div class="error-message" id="emailError">Please enter a valid email address</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="phone">Phone Number</label>
+                                    <input type="tel" id="phone" name="phone">
+                                    <div class="error-message" id="phoneError">Please enter a valid phone number</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="subject">Subject *</label>
+                                    <input type="text" id="subject" name="subject">
+                                    <div class="error-message" id="subjectError">Please enter a subject</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="message">Message *</label>
+                                    <textarea id="message" name="message" placeholder="Tell us about your laptop needs or any questions you have..."></textarea>
+                                    <div class="error-message" id="messageError">Please enter your message</div>
+                                </div>
+                                
+                                <button type="submit" class="submit-btn">Send Message</button>
+                            </form>
+                        </div>
+
+                        <div class="contact-info">
+                            <h3>Contact Information</h3>
+                            <div class="info-item">
+                                <div class="info-icon">📍</div>
+                                <div class="info-content">
+                                    <h4>Our Address</h4>
+                                    <p>123 LapMart, Digital District<br>Calicut, Kerala 676519, India</p>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <div class="info-icon">📞</div>
+                                <div class="info-content">
+                                    <h4>Phone Number</h4>
+                                    <p>+91 94950 12345<br>+91 94950 67890</p>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <div class="info-icon">📧</div>
+                                <div class="info-content">
+                                    <h4>Email Address</h4>
+                                    <p>info@lapmart.com<br>support@lapmart.com</p>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <div class="info-icon">🕒</div>
+                                <div class="info-content">
+                                    <h4>Response Time</h4>
+                                    <p>We typically respond within 2-4 hours during business hours</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="map-section">
+                    <h2>Find Us on Map</h2>
+                    <div class="map-container">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3187.50761620033!2d75.89309908945833!3d11.15366907563411!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba6502f41ef4e8b%3A0xf4c653a7548cccd!2sKinfra%20Techno%20Industrial%20Park!5e0!3m2!1sen!2sin!4v1752254819059!5m2!1sen!2sin" 
+                            width="600" 
+                            height="450" 
+                            style="border:0;" 
+                            allowfullscreen="" 
+                            loading="lazy" 
+                            referrerpolicy="no-referrer-when-downgrade"
+                            title="Lapmart Location Map">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.min.js"></script>
+    
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Session Check for Cart and Wishlist
-            const checkSession = async (url, action) => {
+        // Form validation functions
+        function validateField(fieldId, errorId, validationFn, errorMessage) {
+            const field = document.getElementById(fieldId);
+            const error = document.getElementById(errorId);
+            
+            if (!validationFn(field.value)) {
+                field.classList.add('error');
+                error.textContent = errorMessage;
+                error.classList.add('show');
+                return false;
+            } else {
+                field.classList.remove('error');
+                error.classList.remove('show');
+                return true;
+            }
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(error => {
+                error.classList.remove('show');
+            });
+            document.querySelectorAll('.error').forEach(field => {
+                field.classList.remove('error');
+            });
+        }
+
+        // Validation functions
+        function validateName(name) {
+            return name.trim().length >= 2;
+        }
+
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function validatePhone(phone) {
+            if (phone.trim() === '') return true; // Phone is optional
+            const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+            return phoneRegex.test(phone.replace(/\s/g, ''));
+        }
+
+        function validateSubject(subject) {
+            return subject.trim().length >= 3;
+        }
+
+        function validateMessage(message) {
+            return message.trim().length >= 10;
+        }
+
+        // Real-time validation
+        document.getElementById('fullName').addEventListener('blur', function() {
+            validateField('fullName', 'fullNameError', validateName, 'Please enter your full name (at least 2 characters)');
+        });
+
+        document.getElementById('email').addEventListener('blur', function() {
+            validateField('email', 'emailError', validateEmail, 'Please enter a valid email address');
+        });
+
+        document.getElementById('phone').addEventListener('blur', function() {
+            validateField('phone', 'phoneError', validatePhone, 'Please enter a valid phone number');
+        });
+
+        document.getElementById('subject').addEventListener('blur', function() {
+            validateField('subject', 'subjectError', validateSubject, 'Please enter a subject (at least 3 characters)');
+        });
+
+        document.getElementById('message').addEventListener('blur', function() {
+            validateField('message', 'messageError', validateMessage, 'Please enter your message (at least 10 characters)');
+        });
+
+        // Form submission with fetch API and SweetAlert
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            clearErrors();
+            
+            // Validate all fields
+            const isNameValid = validateField('fullName', 'fullNameError', validateName, 'Please enter your full name (at least 2 characters)');
+            const isEmailValid = validateField('email', 'emailError', validateEmail, 'Please enter a valid email address');
+            const isPhoneValid = validateField('phone', 'phoneError', validatePhone, 'Please enter a valid phone number');
+            const isSubjectValid = validateField('subject', 'subjectError', validateSubject, 'Please enter a subject (at least 3 characters)');
+            const isMessageValid = validateField('message', 'messageError', validateMessage, 'Please enter your message (at least 10 characters)');
+            
+            // If all validations pass
+            if (isNameValid && isEmailValid && isPhoneValid && isSubjectValid && isMessageValid) {
+                const submitBtn = document.querySelector('.submit-btn');
+                const originalText = submitBtn.textContent;
+                
+                // Show loading state
+                submitBtn.textContent = 'Sending...';
+                submitBtn.style.background = 'linear-gradient(135deg, #6c757d 0%, #495057 100%)';
+                submitBtn.disabled = true;
+                
+                // Prepare form data
+                const formData = {
+                    fullName: document.getElementById('fullName').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    subject: document.getElementById('subject').value,
+                    message: document.getElementById('message').value
+                };
+                
                 try {
-                    const res = await fetch('/check-session', {
-                        method: 'GET',
-                        headers: { 'Accept': 'application/json' }
+                    // Send data to server
+                    const response = await fetch('/contacts', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
                     });
-                    const data = await res.json();
-                    if (data.loggedIn) {
-                        window.location.href = url;
-                    } else {
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
                         Swal.fire({
-                            icon: 'warning',
-                            title: 'Login Required',
-                            text: `Please login to view your ${action}`,
-                            confirmButtonText: 'OK'
+                            icon: 'success',
+                            title: 'Message Sent Successfully!',
+                            html: `
+                                <p>Thank you <strong>${formData.fullName}</strong> for contacting Lapmart!</p>
+                                <p>We have received your message and will respond within 2-4 hours.</p>
+                                <p>A confirmation email has been sent to <strong>${formData.email}</strong></p>
+                            `,
+                            confirmButtonText: 'Excellent!',
+                            confirmButtonColor: '#d4af37',
+                            timer: 5000,
+                            timerProgressBar: true
                         });
+                        
+                        // Reset form
+                        document.getElementById('contactForm').reset();
+                        clearErrors();
+                        
+                    } else {
+                        throw new Error(result.message || 'Failed to send message');
                     }
+                    
                 } catch (error) {
-                    console.error(`Error checking ${action}:`, error);
                     Swal.fire({
                         icon: 'error',
-                        title: 'Something went wrong',
-                        text: `Unable to access ${action}. Try again later.`
+                        title: 'Failed to Send Message',
+                        html: `
+                            <p>Sorry, there was an error sending your message.</p>
+                            <p><strong>Error:</strong> ${error.message}</p>
+                            <p>Please try again or contact us directly at:</p>
+                            <p><strong>Email:</strong> info@lapmart.com</p>
+                            <p><strong>Phone:</strong> +91 94950 12345</p>
+                        `,
+                        confirmButtonText: 'Try Again',
+                        confirmButtonColor: '#d4af37',
+                        showCancelButton: true,
+                        cancelButtonText: 'Contact Directly'
+                    }).then((result) => {
+                        if (result.dismiss === Swal.DismissReason.cancel) {
+                            window.location.href = 'mailto:info@lapmart.com?subject=' + encodeURIComponent(formData.subject) + '&body=' + encodeURIComponent(formData.message);
+                        }
                     });
+                } finally {
+                    // Reset button state
+                    submitBtn.textContent = originalText;
+                    submitBtn.style.background = 'linear-gradient(135deg, #d4af37 0%, #f4d03f 100%)';
+                    submitBtn.disabled = false;
                 }
-            };
-
-            // Cart and Wishlist Button Handlers
-            ['cart-btn', 'cart-btn-sidebar'].forEach(id => {
-                const btn = document.getElementById(id);
-                if (btn) {
-                    btn.addEventListener('click', e => {
-                        e.preventDefault();
-                        checkSession('/cart', 'cart');
-                    });
-                }
-            });
-
-            ['Wishlist-btn', 'Wishlist-btn-sidebar'].forEach(id => {
-                const btn = document.getElementById(id);
-                if (btn) {
-                    btn.addEventListener('click', e => {
-                        e.preventDefault();
-                        checkSession('/wishlist', 'wishlist');
-                    });
-                }
-            });
-
-            // Sidebar and Navigation Logic
-            (function() {
-                const debounce = (func, wait) => {
-                    let timeout;
-                    return (...args) => {
-                        clearTimeout(timeout);
-                        timeout = setTimeout(() => func.apply(null, args), wait);
-                    };
-                };
-
-                const menuToggle = document.querySelector('.menu-toggle');
-                const sidebar = document.getElementById('sidebar');
-                const sidebarOverlay = document.getElementById('sidebarOverlay');
-                const profileButton = document.getElementById('profileButton');
-                const logo = document.querySelector('.logo');
-                const navLinks = document.querySelectorAll('.nav-link');
-
-                // Set active link based on current URL
-                const currentPath = window.location.pathname;
-                navLinks.forEach(link => {
-                    if (link.getAttribute('href') === currentPath) {
-                        link.classList.add('active');
-                        logo.classList.toggle('home-active', currentPath === '/');
-                    }
-                    link.addEventListener('click', function() {
-                        navLinks.forEach(l => l.classList.remove('active'));
-                        this.classList.add('active');
-                        logo.classList.toggle('home-active', this.getAttribute('href') === '/');
-                    });
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Please Fix Form Errors',
+                    text: 'Please fill in all required fields correctly before submitting.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#d4af37'
                 });
-
-                // Sidebar toggle
-                if (menuToggle && sidebar && sidebarOverlay) {
-                    const toggleSidebar = () => {
-                        menuToggle.classList.toggle('active');
-                        sidebar.classList.toggle('active');
-                        sidebarOverlay.classList.toggle('active');
-                    };
-
-                    menuToggle.addEventListener('click', toggleSidebar);
-                    sidebarOverlay.addEventListener('click', toggleSidebar);
-
-                    // Close sidebar on link click
-                    sidebar.querySelectorAll('.sidebar-menu a').forEach(link => {
-                        link.addEventListener('click', toggleSidebar);
-                    });
-
-                    // Keyboard accessibility for menu toggle
-                    menuToggle.addEventListener('keydown', e => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            toggleSidebar();
-                        }
-                    });
-                }
-
-                // Profile dropdown and sidebar toggle
-                if (profileButton) {
-                    profileButton.addEventListener('click', e => {
-                        e.preventDefault();
-                        if (window.innerWidth > 900) {
-                            const dropdown = document.getElementById('profileDropdown');
-                            dropdown.classList.toggle('active');
-                        } else {
-                            menuToggle.classList.toggle('active');
-                            sidebar.classList.toggle('active');
-                            sidebarOverlay.classList.toggle('active');
-                        }
-                    });
-
-                    // Close dropdown when clicking outside
-                    document.addEventListener('click', e => {
-                        const dropdown = document.getElementById('profileDropdown');
-                        const container = document.querySelector('.profile-container');
-                        if (window.innerWidth > 900 && !container.contains(e.target)) {
-                            dropdown.classList.remove('active');
-                        }
-                    });
-
-                    // Keyboard accessibility for profile button
-                    profileButton.addEventListener('keydown', e => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            if (window.innerWidth > 900) {
-                                const dropdown = document.getElementById('profileDropdown');
-                                dropdown.classList.toggle('active');
-                            } else {
-                                menuToggle.classList.toggle('active');
-                                sidebar.classList.toggle('active');
-                                sidebarOverlay.classList.toggle('active');
-                            }
-                        }
-                    });
-                }
-
-                // Close sidebar on resize
-                window.addEventListener('resize', debounce(() => {
-                    if (window.innerWidth > 900 && sidebar && sidebarOverlay) {
-                        sidebar.classList.remove('active');
-                        sidebarOverlay.classList.remove('active');
-                        menuToggle.classList.remove('active');
-                        const dropdown = document.getElementById('profileDropdown');
-                        if (dropdown) dropdown.classList.remove('active');
-                    }
-                }, 100));
-            })();
+            }
         });
     </script>
 </body>
 </html>
+<%- include("../../views/partials/user/footer") %>

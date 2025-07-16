@@ -104,22 +104,20 @@ async function sendVerificationEmail(email, otp) {
                 pass: process.env.NODEMAILER_PASSWORD,
             },
         });
-        const info = await transporter.sendMail({
-            from: process.env.NODEMAILER_EMAIL,
-            to: email,
-            subject: "Your One-Time Password (OTP) for Account Verification",
-            text: `Your OTP is ${otp}`,
-            html: `
-            <div style="font-family: Arial, sans-serif; color: #333;">
-                <h2>Your OTP Code</h2>
-                <p style="font-size: 18px; color: #555;">
-                    Your OTP is <b style="color: blue; font-size: 22px;">${otp}</b>
-                </p>
-                <p>Please enter this OTP to verify your account.</p>
-            </div>`,
-        });
+  const info = await transporter.sendMail({
+    from: process.env.NODEMAILER_EMAIL,
+    to: email,
+    subject: "Your One-Time Password (OTP) for Account Verification",
+    text: `Your OTP is ${otp}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #333;">
+        <h2>Your OTP Code</h2>
+        <p>Your OTP is <b>${otp}</b></p>
+      </div>`,
+  });
 
-        return info.accepted.length > 0;
+
+  return info.accepted.length > 0;
     } catch (error) {
         console.error("Error sending email:", error.message, error.stack);
         return false;
@@ -197,7 +195,7 @@ if (otp === stored.otp) {
 
     req.session.user = newUser._id;
     req.session.userOtp = null;
-    res.json({success:true,message:"OTP Verified Successfully  Welcome to Lapkart"});
+    res.json({success:true,message:"OTP Verified Successfully  Welcome to LapMart"});
 } else {
             res.status(400).json({ success: false, message: "Invalid OTP, Please try again" });
         }
@@ -206,6 +204,7 @@ if (otp === stored.otp) {
     res.render("verify-Otp", { message: "OTP verification failed. Please try again." });
   }
 };
+
 const resendOtp = async (req, res) => {
   try {
     const userData = req.session.userData;
@@ -333,19 +332,19 @@ const LoadHomepage = async (req, res) => {
 const loadShoppingPage = async (req, res) => {
   try {
     const userSession = req.session.user;
+   
     let userData = null;
     let wishlistProductIds = [];
 
-    // ✅ If user is logged in and valid
-    if (userSession?. _id && mongoose.isValidObjectId(userSession._id)) {
-      userData = await User.findById(userSession._id).lean();
-      const wishlist = await Wishlist.findOne({ userId: userSession._id }).lean();
+ 
+    if (userSession) {
+      userData = await User.findById(userSession).lean();
+      const wishlist = await Wishlist.findOne({ userId: userSession}).lean();
       if (wishlist) {
         wishlistProductIds = wishlist.products.map(item => item.productId.toString());
       }
     }
 
-    // ✅ Query Parameters
     const {
       category = 'all',
       brand = 'all',
@@ -370,7 +369,7 @@ const loadShoppingPage = async (req, res) => {
     const maxPrice = Math.min(parseInt(priceMax) || 150000, 150000);
     query.salePrice = { $gte: minPrice, $lte: maxPrice };
 
-    // ✅ Search logic
+
     let categoryIds = [];
     if (search.trim()) {
       const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -393,7 +392,7 @@ const loadShoppingPage = async (req, res) => {
     const categories = await Category.find({ isListed: true, isDeleted: false }).lean();
     const brands = await Brand.find({ isListed: true, isDeleted: false }).lean();
 
-    // ✅ Sorting
+
     let sortOption = {};
     switch (sort) {
       case 'price-low': sortOption = { salePrice: 1 }; break;
@@ -412,14 +411,13 @@ const loadShoppingPage = async (req, res) => {
     const updatedProducts = await Promise.all(products.map(applyBestOffer));
     const totalPages = Math.ceil(totalProducts / limit);
 
-    // ✅ Category name for heading
     let categoryName = 'Laptops';
     if (category !== 'all' && mongoose.isValidObjectId(category)) {
       const selectedCategory = categories.find(cat => cat._id.toString() === category);
       if (selectedCategory) categoryName = selectedCategory.name;
     }
 
-    // ✅ Related products
+
     const relatedQuery = {
       isListed: true,
       isDeleted: false,
@@ -450,7 +448,7 @@ const loadShoppingPage = async (req, res) => {
       product.isBestseller = (product.ratingCount || 0) > 150;
     });
 
-    // ✅ Filters for frontend reuse
+
     const filters = {
       category, brand, priceMin: minPrice, priceMax: maxPrice, sort, search,
     };
