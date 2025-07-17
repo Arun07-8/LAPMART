@@ -1,5 +1,5 @@
 const passport =require("passport");
-const GoogleStrategy=require("passport-google-oauth20").Strategy;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User=require("../models/userSchema");
 const env=require("dotenv").config();
 
@@ -26,9 +26,9 @@ passport.use(new GoogleStrategy({
 
 async(accessToken,refreshToken,profile,done)=>{
     try {
-     
+     console.log("hello")
         let  user=await  User.findOne({googleid:profile.id});
-      
+      console.log(user)
         if(user){
            if( !user.isBlocked)
                return  done(null,user);
