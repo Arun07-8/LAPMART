@@ -27,25 +27,22 @@ router.post("/signup",userController.signup)
 router.get("/verify-Otp",userController.renderOtpPge)
 router.post("/verify-Otp",userController.verifyOtp);
 router.post("/resendOtp",userController.resendOtp)
-router.get('/auth/google/callback', (req, res, next) => {
-  passport.authenticate('google', (err, user, info) => {
-    if (err) {
-      return res.redirect(`/signup?message=${encodeURIComponent('Google Auth Error')}`);
-    }
-    if (!user) {
-      return res.redirect(`/signup?message=${encodeURIComponent(info?.message || 'No user from Google')}`);
-    }
-    req.logIn(user, (loginErr) => {
-      if (loginErr) {
-        console.error("Login error:", loginErr);
-        return res.redirect(`/signup?message=${encodeURIComponent('Login Failed')}`);
-      }
-      req.session.user = user._id;
-      return res.redirect('/');
-    });
-  })(req, res, next);
+router.get("/auth/google", (req, res, next) => {
+
+  passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
 });
 
+router.get('/auth/google/callback', (req, res, next) => {
+      passport.authenticate('google', (err, user, info) => {
+      if (err || !user) {const message = info?.message || 'Authentication failed';
+           return res.redirect(`/signup?message=${encodeURIComponent(message)}`);}
+      req.logIn(user, (loginErr) => {if (loginErr) {
+           return res.redirect(`/signup?message=${encodeURIComponent('Login failed')}`);}
+      req.session.user = user._id;
+           return res.redirect('/');
+      });
+    })(req, res, next);});
+  
 //   Login management
 router.get("/login",userController.loadlogin)
 router.post("/login",userController.login)
