@@ -1,49 +1,21 @@
-/* Reset and Base Styles */
-* {
+/* Enhanced Scoped Header Styles */
+.header-scope {
+    font-family: 'Poppins', sans-serif;
+    display: block;
+}
+
+.header-scope * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-}
-
-body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #f8f9fa;
-}
-
-/* Top Banner Styles */
-.site-header .top-banner {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 8px 0;
-    text-align: center;
-    position: relative;
-    font-size: 14px;
-}
-
-.site-header .banner-laptops {
-    display: none;
-}
-
-.site-header .banner-content a {
-    color: #fff;
-    text-decoration: underline;
-    font-weight: 500;
-}
-
-.site-header .close-btn {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    font-size: 20px;
-    font-weight: bold;
+    list-style: none;
+    text-decoration: none;
 }
 
 /* Header Styles */
-.site-header {
+.header-scope .site-header {
     background: #ffffff;
-    padding: 0 141px;
+    padding: 0 20px;
     height: 85px;
     display: flex;
     align-items: center;
@@ -52,45 +24,56 @@ body {
     top: 0;
     z-index: 1000;
     flex-wrap: nowrap;
-    gap: 10px;
+    gap: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-width: 100%;
+    /* Removed overflow: hidden to prevent clipping dropdown */
+}
+
+/* Logo and Hamburger Container */
+.header-scope .logo-hamburger-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    min-width: 0;
+    z-index: 1001;
 }
 
 /* Logo Section */
-.site-header .logo {
+.header-scope .logo {
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    margin-right: 10px;
-    transition: margin-right 0.3s ease;
+    transition: margin-left 0.3s ease;
 }
 
-.site-header .logo.home-active {
-    margin-right: 5px;
+.header-scope .logo.home-active {
+    margin-left: 5px;
 }
 
-.site-header .logo a {
+.header-scope .logo a {
     display: flex;
     align-items: center;
     text-decoration: none;
 }
 
-.site-header .logo-container {
+.header-scope .logo-container {
     display: flex;
     align-items: center;
     gap: 8px;
-    position: relative;
 }
 
-.site-header .logo-icon {
+.header-scope .logo-icon {
     width: 36px;
     height: 36px;
     color: #060606;
     filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
-.site-header .logo-text {
+.header-scope .logo-text {
     font-family: 'Cinzel', serif;
     font-size: 41px;
     font-weight: 900;
@@ -102,9 +85,11 @@ body {
     text-transform: uppercase;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     position: relative;
+    white-space: nowrap;
+    padding-right: 10px;
 }
 
-.site-header .logo-text::after {
+.header-scope .logo-text::after {
     content: '';
     position: absolute;
     width: 50%;
@@ -115,13 +100,13 @@ body {
     transition: width 0.3s ease;
 }
 
-.site-header .logo a:hover .logo-icon {
+.header-scope .logo a:hover .logo-icon {
     transform: scale(1.05);
     color: #d4af37;
     filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.6));
 }
 
-.site-header .logo a:hover .logo-text {
+.header-scope .logo a:hover .logo-text {
     transform: scale(1.03);
     background: linear-gradient(to bottom, #191717 50%, #a0a0a0 100%);
     -webkit-background-clip: text;
@@ -129,45 +114,49 @@ body {
     text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
 }
 
-.site-header .logo a:hover .logo-text::after {
+.header-scope .logo a:hover .logo-text::after {
     width: 80%;
 }
 
-.site-header .logo-subtext {
+.header-scope .logo-subtext {
     font-family: 'Poppins', sans-serif;
     font-size: 10px;
     font-weight: 500;
     color: #000000;
     margin-top: 4px;
     letter-spacing: 0.5px;
+    white-space: nowrap;
 }
 
 /* Navigation */
-.site-header .nav-links {
+.header-scope .nav-links {
     display: flex;
     gap: 40px;
     align-items: center;
+    flex-grow: 1;
+    justify-content: center;
 }
 
-.site-header .nav-links a {
+.header-scope .nav-links a {
     text-decoration: none;
     color: #000000;
     font-weight: 500;
     font-size: 16px;
     transition: color 0.3s ease;
     position: relative;
+    padding: 5px 0;
 }
 
-.site-header .nav-links a.active {
+.header-scope .nav-links a.active {
     color: #d4af37;
     font-weight: 600;
 }
 
-.site-header .nav-links a.active::after {
+.header-scope .nav-links a.active::after {
     width: 100%;
 }
 
-.site-header .nav-links a::after {
+.header-scope .nav-links a::after {
     content: '';
     position: absolute;
     width: 0;
@@ -178,86 +167,65 @@ body {
     transition: width 0.3s ease;
 }
 
-.site-header .nav-links a:hover {
+.header-scope .nav-links a:hover {
     color: #d4af37;
 }
 
-.site-header .nav-links a:hover::after {
+.header-scope .nav-links a:hover::after {
     width: 100%;
 }
 
-/* Search Bar */
-.site-header .search-bar {
-    display: flex;
-    align-items: center;
-    background: #ffffff;
-    border: 2px solid #1b4848;
-    border-radius: 12px;
-    padding: 0 15px;
-    width: 400px;
-    height: 48px;
-    transition: all 0.3s ease;
-    position: relative;
-}
-
-.site-header .search-bar:focus-within {
-    border-color: #fffcf3;
-    box-shadow: 0 0 0 3px rgba(22, 22, 20, 0.1);
-}
-
-.site-header .search-bar input {
-    flex: 1;
-    border: none;
-    background: transparent;
-    outline: none;
-    font-size: 14px;
-    color: #ffffff;
-}
-
-.site-header .search-bar input::placeholder {
-    color: #000000;
-}
-
-.site-header .search-bar button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #000000;
-    padding: 5px;
-    border-radius: 6px;
-    transition: background-color 0.3s ease;
-}
-
-.site-header .search-bar button:hover {
-    background-color: rgb(254, 239, 239);
-}
-
 /* Right Section */
-.site-header .cart-profile {
+.header-scope .cart-profile {
     display: flex;
     align-items: center;
-    gap: 20px;
-    margin-right: 20px;
+    justify-content: flex-end;
+    gap: 24px;
     flex-shrink: 0;
+    flex-wrap: nowrap;
+    z-index: 1001;
 }
 
 /* Wishlist and Cart Icons */
-.site-header .cart-profile > a {
+.header-scope .cart-profile > a {
     color: #000000;
     text-decoration: none;
     padding: 10px;
     border-radius: 10px;
     transition: all 0.3s ease;
     position: relative;
+    flex-shrink: 0;
+    min-width: 44px;
 }
 
-.site-header .cart-profile > a:hover {
+.header-scope .cart-profile > a:hover {
     background-color: #2d3b3c;
     color: #d4af37;
 }
 
+.header-scope .header-wishlist-btn,
+.header-scope .cart-btn {
+    z-index: 1002;
+    background: transparent;
+    position: relative;
+    top: auto;
+    left: auto;
+}
+
+.header-scope .header-wishlist-btn svg,
+.header-scope .cart-btn svg {
+    stroke: #000000;
+    width: 24px;
+    height: 24px;
+}
+
+.header-scope .header-wishlist-btn:hover svg,
+.header-scope .cart-btn:hover svg {
+    stroke: #d4af37;
+}
+
 /* Sign In Button */
-.site-header .signin-btn {
+.header-scope .signin-btn {
     background: #d4af37;
     color: #1a2526;
     border: none;
@@ -271,19 +239,32 @@ body {
     align-items: center;
     gap: 8px;
     transition: all 0.3s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
-.site-header .signin-btn:hover {
+.header-scope .signin-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
 }
 
-/* Profile Container */
-.site-header .profile-container {
-    position: relative;
+.header-scope .signin-btn svg {
+    stroke: #1a2526;
 }
 
-.site-header .profile-button {
+/* Profile Container */
+.header-scope .profile-container {
+    position: relative;
+    display: inline-flex;
+    z-index: 1002;
+}
+
+.header-scope .profile-container::before,
+.header-scope .profile-container::after {
+    content: none;
+}
+
+.header-scope .profile-button {
     background: none;
     border: none;
     cursor: pointer;
@@ -294,14 +275,21 @@ body {
     border-radius: 10px;
     transition: all 0.3s ease;
     color: #000000;
+    flex-shrink: 0;
+    min-width: 60px;
 }
 
-.site-header .profile-button:hover {
+.header-scope .profile-button:hover {
     background-color: #2d3b3c;
     color: #d4af37;
 }
 
-.site-header .profile-avatar {
+.header-scope .profile-button::before,
+.header-scope .profile-button::after {
+    content: none;
+}
+
+.header-scope .profile-avatar {
     width: 36px;
     height: 36px;
     background: #d4af37;
@@ -312,73 +300,139 @@ body {
     color: #1a2526;
     font-weight: 600;
     font-size: 14px;
+    flex-shrink: 0;
 }
 
-.site-header .username {
+.header-scope .profile-button:hover .profile-avatar {
+    background: #2d3b3c;
+    color: #d4af37;
+}
+
+.header-scope .profile-avatar::before,
+.header-scope .profile-avatar::after {
+    content: none;
+}
+
+.header-scope .username {
     font-weight: 500;
     font-size: 14px;
+    white-space: nowrap;
+    color: #000000;
 }
 
-.site-header .dropdown-arrow {
-    transition: transform 0.3s ease;
+.header-scope .profile-button:hover .username {
+    color: #d4af37;
 }
 
-.site-header .profile-container.active .dropdown-arrow {
-    transform: rotate(180deg);
+.header-scope .username::before,
+.header-scope .username::after {
+    content: none;
 }
 
 /* Profile Dropdown */
-.site-header .profile-dropdown {
+.header-scope .profile-container .profile-dropdown {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 5px); /* Added slight offset to avoid overlap */
     right: 0;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    width: 280px;
+    background: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: none;
+    flex-direction: column;
+    border-radius: 8px;
+    z-index: 1005; /* Increased to ensure visibility */
+    min-width: 180px;
+    padding: 8px 0;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
-    z-index: 1000;
-    margin-top: 8px;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-.site-header .profile-dropdown.active {
+.header-scope .profile-container .profile-dropdown.active {
+    display: flex;
     opacity: 1;
     visibility: visible;
-    transform: translateY(0);
 }
 
-.site-header .profile-header {
+.header-scope .profile-container .profile-dropdown a {
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #000;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+.header-scope .profile-container .profile-dropdown a:hover {
+    background: #f0f0f0;
+}
+
+/* Remove redundant profile-dropdown rules */
+.header-scope .profile-dropdown {
+    /* Consolidate all styles under .header-scope .profile-container .profile-dropdown */
+}
+
+/* Sidebar Styles */
+.header-scope .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100%;
+    background: #ffffff;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 1003;
+    display: flex;
+    flex-direction: column;
     padding: 20px;
-    border-bottom: 1px solid #e0e0e0;
+    overflow-y: auto;
+}
+
+.header-scope .sidebar.active {
+    transform: translateX(0);
+}
+
+.header-scope .sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 1002;
+}
+
+.header-scope .sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.header-scope .sidebar-header {
     display: flex;
     align-items: center;
     gap: 12px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
 }
 
-.site-header .profile-info h4 {
-    font-size: 16px;
-    color: #000000;
-    margin-bottom: 4px;
-}
-
-.site-header .profile-info p {
-    font-size: 14px;
-    color: #666666;
-}
-
-.site-header .profile-menu {
+.header-scope .sidebar-menu {
     list-style: none;
-    padding: 8px;
+    padding: 10px 0;
+    flex-grow: 1;
 }
 
-.site-header .profile-menu li {
-    margin: 2px 0;
+.header-scope .sidebar-menu li {
+    margin: 5px 0;
 }
 
-.site-header .profile-menu a {
+.header-scope .sidebar-menu li::marker {
+    content: none;
+}
+
+.header-scope .sidebar-menu a {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -387,590 +441,359 @@ body {
     text-decoration: none;
     border-radius: 8px;
     transition: all 0.3s ease;
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 16px;
+    font-weight: 600;
 }
 
-.site-header .profile-menu a:hover {
+.header-scope .sidebar-menu a:hover {
     background-color: #f0f0f0;
     color: #d4af37;
 }
 
-.site-header .profile-badge {
-    background: #e53e3e;
-    color: white;
-    font-size: 12px;
-    padding: 2px 6px;
-    border-radius: 10px;
-    margin-left: auto;
+.header-scope .sidebar-menu a svg {
+    stroke: #000000;
 }
 
-.site-header .logout-link {
-    color: #e53e3e !important;
+.header-scope .sidebar-menu a:hover svg {
+    stroke: #d4af37;
 }
 
-.site-header .logout-link:hover {
-    background-color: #ffe5e5 !important;
-    color: #c53030 !important;
+.header-scope .sidebar-menu .logout-link {
+    color: #e53e3e;
+}
+
+.header-scope .sidebar-menu .logout-link:hover {
+    background-color: #ffe5e5;
+    color: #c53030;
+}
+
+.header-scope .sidebar-menu .logout-link svg {
+    stroke: #e53e3e;
+}
+
+.header-scope .sidebar-menu .logout-link:hover svg {
+    stroke: #c53030;
+}
+
+/* Sidebar Section Styling */
+.header-scope .sidebar-section {
+    padding: 10px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.header-scope .sidebar-section:last-child {
+    border-bottom: none;
+}
+
+.header-scope .sidebar-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    padding: 10px 16px;
+    text-transform: uppercase;
+    margin-bottom: 5px;
 }
 
 /* Mobile Menu Toggle */
-.site-header .menu-toggle {
+.header-scope .menu-toggle {
     display: none;
     flex-direction: column;
     cursor: pointer;
-    gap: 4px;
+    gap: 6px;
+    width: 30px;
+    height: 24px;
     position: relative;
-    width: 24px;
-    height: 20px;
+    margin-right: 10px;
+    order: -1;
+    z-index: 1001;
 }
 
-.site-header .hamburger,
-.site-header .hamburger::before,
-.site-header .hamburger::after {
-    width: 24px;
-    height: 3px;
-    background: #d1d5db;
-    border-radius: 2px;
+.header-scope .hamburger,
+.header-scope .hamburger::before,
+.header-scope .hamburger::after {
+    width: 30px;
+    height: 5px;
+    background: linear-gradient(90deg, #d4af37, #2d3b3c);
+    border-radius: 5px;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.site-header .hamburger {
+.header-scope .hamburger {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
 }
 
-.site-header .hamburger::before,
-.site-header .hamburger::after {
+.header-scope .hamburger::before,
+.header-scope .hamburger::after {
     content: '';
     position: absolute;
 }
 
-.site-header .hamburger::before {
-    transform: translateY(-8px);
+.header-scope .hamburger::before {
+    transform: translateY(-12px);
 }
 
-.site-header .hamburger::after {
-    transform: translateY(8px);
+.header-scope .hamburger::after {
+    transform: translateY(12px);
 }
 
-/* Hamburger Animation to "X" */
-.site-header .menu-toggle.active .hamburger {
+.header-scope .menu-toggle.active .hamburger {
     background: transparent;
+    box-shadow: none;
 }
 
-.site-header .menu-toggle.active .hamburger::before {
+.header-scope .menu-toggle.active .hamburger::before {
     transform: rotate(45deg);
     background: #d4af37;
+    box-shadow: none;
 }
 
-.site-header .menu-toggle.active .hamburger::after {
+.header-scope .menu-toggle.active .hamburger::after {
     transform: rotate(-45deg);
     background: #d4af37;
+    box-shadow: none;
 }
 
 /* Responsive Design */
 @media (max-width: 1200px) {
-    .site-header .search-bar {
-        width: 280px;
-    }
-    
-    .site-header .nav-links {
+    .header-scope .nav-links {
         gap: 25px;
     }
 
-    .site-header .logo {
-        margin-right: 8px;
-    }
-
-    .site-header .logo.home-active {
-        margin-right: 4px;
-    }
-
-    .site-header .logo-text {
+    .header-scope .logo-text {
         font-size: 32px;
     }
 
-    .site-header .logo-icon {
+    .header-scope .logo-icon {
         width: 30px;
         height: 30px;
     }
 
-    .site-header .logo-subtext {
+    .header-scope .logo-subtext {
         font-size: 9px;
     }
 
-    .site-header .cart-profile {
-        margin-right: 20px;
-        gap: 15px;
+    .header-scope .cart-profile {
+        gap: 18px;
+    }
+
+    .header-scope .profile-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 13px;
     }
 }
 
 @media (max-width: 1024px) {
-    .site-header {
+    .header-scope .site-header {
         padding: 0 15px;
     }
 
-    .site-header .search-bar {
-        width: 240px;
-    }
-    
-    .site-header .nav-links {
+    .header-scope .nav-links {
         gap: 20px;
     }
 
-    .site-header .logo {
-        margin-right: 6px;
-    }
-
-    .site-header .logo.home-active {
-        margin-right: 3px;
-    }
-
-    .site-header .logo-text {
+    .header-scope .logo-text {
         font-size: 30px;
     }
 
-    .site-header .logo-icon {
+    .header-scope .logo-icon {
         width: 28px;
         height: 28px;
     }
 
-    .site-header .logo-subtext {
+    .header-scope .logo-subtext {
         font-size: 8px;
     }
 
-    .site-header .cart-profile {
-        margin-right: 20px;
-        gap: 12px;
+    .header-scope .cart-profile {
+        gap: 15px;
     }
 }
 
 @media (max-width: 900px) {
-    .site-header .nav-links {
+    .header-scope .nav-links {
         display: none;
     }
 
-    .site-header .menu-toggle {
+    .header-scope .menu-toggle {
         display: flex;
     }
 
-    .site-header .search-bar {
-        width: 200px;
+    .header-scope .cart-profile .header-wishlist-btn,
+    .header-scope .cart-profile .cart-btn {
+        display: none;
     }
 
-    .site-header .logo {
-        margin-right: 5px;
-    }
-
-    .site-header .logo.home-active {
-        margin-right: 2px;
-    }
-
-    .site-header .logo-text {
+    .header-scope .logo-text {
         font-size: 28px;
+        padding-right: 8px;
     }
 
-    .site-header .logo-icon {
+    .header-scope .logo-icon {
         width: 26px;
         height: 26px;
     }
 
-    .site-header .logo-subtext {
+    .header-scope .logo-subtext {
         font-size: 7px;
     }
 
-    .site-header .cart-profile {
-        margin-right: 20px;
-        gap: 10px;
-    }
-
-    .site-header .nav-links {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: #2a3b3c; /* Slightly lighter for contrast */
-        flex-direction: column;
-        padding: 20px 0;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-        transform: translateY(-100%);
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-        gap: 10px;
-        display: flex;
-        z-index: 999; /* Below header but above content */
-    }
-
-    .site-header .nav-links.active {
-        transform: translateY(0);
-        opacity: 1;
-        visibility: visible;
-    }
-
-    .site-header .nav-links a {
-        color: #ffffff; /* White for contrast */
-        font-size: 16px;
-        padding: 15px 20px; /* Larger tap area */
-        text-align: center;
-        width: 100%;
-    }
-
-    .site-header .nav-links a:hover {
-        background-color: #3a4b4c; /* Hover feedback */
-        color: #d4af37;
-    }
-
-    .site-header .nav-links a::after {
-        display: none; /* Remove underline animation on mobile */
+    .header-scope .profile-container .profile-dropdown {
+        display: none; /* Simplified, removed !important */
     }
 }
 
 @media (max-width: 768px) {
-    .site-header {
-        padding: 0 10px;
-        height: 60px;
-        gap: 8px;
-        flex-wrap: nowrap;
-    }
-
-    .site-header .logo {
-        margin-right: 4px;
-    }
-
-    .site-header .logo.home-active {
-        margin-right: 2px;
-    }
-
-    .site-header .logo-text {
-        font-size: 24px;
-    }
-
-    .site-header .logo-icon {
-        width: 22px;
-        height: 22px;
-    }
-
-    .site-header .logo-subtext {
-        font-size: 6px;
-    }
-
-    .site-header .search-bar {
-        width: 150px;
-        height: 36px;
+    .header-scope .site-header {
         padding: 0 8px;
+        height: 56px;
+        gap: 6px;
     }
 
-    .site-header .search-bar input {
-        font-size: 12px;
-    }
-
-    .site-header .nav-links a {
-        font-size: 16px;
-        padding: 15px 20px;
-    }
-
-    .site-header .profile-dropdown {
-        width: 220px;
-        right: 0;
-    }
-
-    .site-header .username {
-        display: none;
-    }
-
-    .site-header .cart-profile {
-        margin-right: 20px;
+    .header-scope .logo-hamburger-container {
         gap: 8px;
     }
 
-    .site-header .cart-profile > a {
-        padding: 6px;
+    .header-scope .logo-text {
+        font-size: 22px;
+        padding-right: 6px;
     }
 
-    .site-header .cart-profile > a svg {
+    .header-scope .logo-icon {
         width: 20px;
         height: 20px;
     }
 
-    .site-header .menu-toggle {
-        width: 22px;
+    .header-scope .logo-subtext {
+        font-size: 6px;
+        display: block;
+    }
+
+    .header-scope .cart-profile {
+        gap: 6px;
+    }
+
+    .header-scope .menu-toggle {
+        width: 24px;
         height: 18px;
+        margin-right: 8px;
     }
 
-    .site-header .hamburger,
-    .site-header .hamburger::before,
-    .site-header .hamburger::after {
-        width: 22px;
-        height: 2.5px;
+    .header-scope .hamburger,
+    .header-scope .hamburger::before,
+    .header-scope .hamburger::after {
+        width: 24px;
+        height: 3px;
     }
 
-    .site-header .hamburger::before {
+    .header-scope .hamburger::before {
         transform: translateY(-7px);
     }
 
-    .site-header .hamburger::after {
+    .header-scope .hamburger::after {
         transform: translateY(7px);
     }
-}
 
-@media (max-width: 640px) {
-    .site-header {
-        padding: 0 8px;
-        height: 55px;
-        gap: 6px;
-        flex-wrap: nowrap;
-    }
-
-    .site-header .logo {
-        margin-right: 3px;
-    }
-
-    .site-header .logo.home-active {
-        margin-right: 1px;
-    }
-
-    .site-header .logo-text {
-        font-size: 22px;
-    }
-
-    .site-header .logo-icon {
-        width: 20px;
-        height: 20px;
-    }
-
-    .site-header .logo-subtext {
-        font-size: 5px;
-    }
-
-    .site-header .search-bar {
-        width: 120px;
-        height: 32px;
-        padding: 0 6px;
-    }
-
-    .site-header .search-bar input {
-        font-size: 11px;
-    }
-
-    .site-header .search-bar button {
-        padding: 3px;
-    }
-
-    .site-header .search-bar svg {
-        width: 16px;
-        height: 16px;
-    }
-
-    .site-header .cart-profile {
-        margin-right: 20px;
-        gap: 6px;
-    }
-
-    .site-header .cart-profile > a svg {
-        width: 18px;
-        height: 18px;
-    }
-
-    .site-header .signin-btn {
+    .header-scope .signin-btn {
         padding: 6px 10px;
-        font-size: 11px;
-        gap: 3px;
+        font-size: 12px;
     }
 
-    .site-header .signin-btn svg {
-        width: 12px;
-        height: 12px;
-    }
-
-    .site-header .profile-button {
-        padding: 4px 6px;
-    }
-
-    .site-header .profile-avatar {
+    .header-scope .profile-avatar {
         width: 30px;
         height: 30px;
-        font-size: 11px;
-    }
-
-    .site-header .profile-dropdown {
-        width: 200px;
-        right: 0;
-    }
-
-    .site-header .top-banner {
         font-size: 12px;
-        padding: 5px 0;
-    }
-
-    .site-header .close-btn {
-        right: 15px;
-        font-size: 18px;
-    }
-
-    .site-header .menu-toggle {
-        width: 20px;
-        height: 16px;
-    }
-
-    .site-header .hamburger,
-    .site-header .hamburger::before,
-    .site-header .hamburger::after {
-        width: 20px;
-        height: 2px;
-    }
-
-    .site-header .hamburger::before {
-        transform: translateY(-6px);
-    }
-
-    .site-header .hamburger::after {
-        transform: translateY(6px);
     }
 }
 
 @media (max-width: 480px) {
-    .site-header {
+    .header-scope .site-header {
         padding: 0 5px;
         height: 50px;
         gap: 4px;
-        flex-wrap: nowrap;
         justify-content: space-between;
     }
 
-    .site-header .logo {
-        margin-right: 2px;
+    .header-scope .logo {
         flex: 0 0 auto;
     }
 
-    .site-header .logo.home-active {
-        margin-right: 1px;
-    }
-
-    .site-header .logo-text {
+    .header-scope .logo-text {
         font-size: 20px;
+        padding-right: 4px;
     }
 
-    .site-header .logo-icon {
+    .header-scope .logo-icon {
         width: 18px;
         height: 18px;
     }
 
-    .site-header .logo-subtext {
-        font-size: 4px;
+    .header-scope .logo-subtext {
         display: none;
     }
 
-    .site-header .search-bar {
-        width: 40px;
-        height: 32px;
-        padding: 0;
-        background: transparent;
-        border: none;
-        position: relative;
-        transition: width 0.3s ease;
-    }
-
-    .site-header .search-bar input {
-        display: none;
-    }
-
-    .site-header .search-bar button {
-        width: 100%;
-        height: 100%;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .site-header .search-bar svg {
-        width: 18px;
-        height: 18px;
-    }
-
-    .site-header .search-bar.active {
-        width: 120px;
-        background: #2d3b3c;
-        border: 2px solid #4b5e60;
-        padding: 0 6px;
-    }
-
-    .site-header .search-bar.active input {
-        display: block;
-        font-size: 11px;
-    }
-
-    .site-header .cart-profile {
-        margin-right: 20px;
+    .header-scope .cart-profile {
         gap: 4px;
         flex: 0 0 auto;
     }
 
-    .site-header .cart-profile > a {
-        padding: 4px;
-    }
-
-    .site-header .cart-profile > a svg {
-        width: 16px;
-        height: 16px;
-    }
-
-    .site-header .signin-btn {
+    .header-scope .signin-btn {
         padding: 5px 8px;
         font-size: 10px;
         gap: 2px;
     }
 
-    .site-header .signin-btn svg {
+    .header-scope .signin-btn svg {
         width: 10px;
         height: 10px;
     }
 
-    .site-header .profile-button {
+    .header-scope .profile-button {
         padding: 3px 5px;
     }
 
-    .site-header .profile-avatar {
+    .header-scope .profile-avatar {
         width: 28px;
         height: 28px;
         font-size: 10px;
     }
 
-    .site-header .profile-dropdown {
-        width: 180px;
-        right: 0;
+    .header-scope .sidebar {
+        width: 260px;
+        padding: 15px;
     }
 
-    .site-header .profile-header {
-        padding: 12px;
-    }
-
-    .site-header .profile-menu a {
-        padding: 8px 10px;
+    .header-scope .sidebar-section-title {
         font-size: 12px;
+        padding: 8px 12px;
     }
+}
 
-    .site-header .menu-toggle {
-        flex: 0 0 auto;
-        width: 18px;
-        height: 14px;
-    }
+.header-scope .profile-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #d4af37;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
 
-    .site-header .hamburger,
-    .site-header .hamburger::before,
-    .site-header .hamburger::after {
-        width: 18px;
-        height: 2px;
-    }
+.header-scope .avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
 
-    .site-header .hamburger::before {
-        transform: translateY(-5px);
-    }
-
-    .site-header .hamburger::after {
-        transform: translateY(5px);
-    }
+.header-scope .avatar-letter {
+    font-size: 18px;
+    font-weight: bold;
+    color: #1a2526;
 }
