@@ -134,7 +134,7 @@ const createOrder = async (req, res) => {
     });
 
     await newOrder.save();
-
+    await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0 });
     res.status(200).json({
       success: true,
       order: {

@@ -25,7 +25,7 @@ const searchUsers = async (req, res) => {
         };
 
         const users = await User.find(query)
-            .select('name email phoneNumber profileImage createdAt isBlocked _id ')
+            .select('name email phoneNumber profileImage createdAt isBlocked ')
             .skip((page - 1) * limit)
             .limit(limit)
             .lean();

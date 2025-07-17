@@ -9,6 +9,7 @@ const { distance } = require('fastest-levenshtein');
 const productInfo = async (req, res) => {
     try {
         const search = decodeURIComponent(req.query.search || "").trim();
+        console.log(search)
         const page = Math.max(1, parseInt(req.query.page) || 1);
         const limit = 3;
         let query = { isDeleted: false };
@@ -130,18 +131,18 @@ const addProducts = async (req, res) => {
       const dist = distance(normalizedInput, existingName);
       const maxLen = Math.max(normalizedInput.length, existingName.length);
       const similarity = 1 - dist / maxLen;
-      return similarity >= 0.8; // 80% or more same = duplicate
+      return similarity >= 0.8;
     });
 
     if (duplicate) {
-      return res.status(400).json({
-        error: `Product with a similar name already exists: "${duplicate.productName}"`
+      return res.json({success:false,
+        message: `Product with a similar name already exists: "${duplicate.productName}"`
       });
     }
 
     if (!req.files || req.files.length < 1 || req.files.length > 4) {
-      return res.status(400).json({
-        error: `Please upload between 1 and 4 images. Received: ${req.files ? req.files.length : 0}.`
+      return res.json({ success:false,
+        message: `Please upload between 1 and 4 images. Received: ${req.files ? req.files.length : 0}.`
       });
     }
 

@@ -45,11 +45,18 @@ const applyCoupon = async (req, res) => {
       validUpto: { $gte: new Date() },
       usedBy: { $nin: [userId] },
     });
-
+    
+    if(coupon.validUpto){
+      return res.status(404).json({
+        success: false,
+        message: 'Coupon code is  expired',
+      });
+     }
+ 
     if (!coupon) {
       return res.status(404).json({
         success: false,
-        message: 'Coupon code is invalid, expired, or already used by you',
+        message: 'this coupon already used by you',
       });
     }
 
@@ -60,17 +67,12 @@ const applyCoupon = async (req, res) => {
       });
     }
 
-    let discount = coupon.type === 'percentage'
-      ? Math.floor((totalAmount * coupon.offerPrice) / 100)
-      : coupon.offerPrice;
+let discount = coupon.offerPrice;
 
-    if (coupon.type === 'percentage' && coupon.maxAmount && discount > coupon.maxAmount) {
-      discount = coupon.maxAmount;
-    }
+if (discount > totalAmount) {
+  discount = totalAmount; 
+}
 
-    if (discount > totalAmount) {
-      discount = totalAmount;
-    }
 
     req.session.appliedCoupon = {
       couponId: coupon._id.toString(),

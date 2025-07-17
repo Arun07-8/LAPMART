@@ -295,6 +295,7 @@ document.getElementById('editProductForm').addEventListener('submit', async func
                 body: formData,
             });
             const result = await response.json();
+            
             if (response.ok) {
                 Swal.fire({
                     icon: 'success',
