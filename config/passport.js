@@ -21,7 +21,7 @@ async function generateUniqueReferralCode(name) {
 passport.use(new GoogleStrategy({
     clientID:process.env.GOOGLE_CLIENT_ID,
     clientSecret:process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL:"http://lapmart.shop/auth/google/callback",
+    callbackURL:"https://lapmart.shop/auth/google/callback",
       passReqToCallback: true,
 },
 
