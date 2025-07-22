@@ -3,16 +3,23 @@ const Coupon = require("../../models/couponSchema");
 
 const availableCoupon = async (req, res) => {
   try {
-const today = new Date();
-const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+    // Convert server time to IST
+    const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
 
-const coupons = await Coupon.find({
-  isDeleted: false,
-  isActive: true,
-  validFrom: { $lte: endOfDay },
-  validUpto: { $gte: startOfDay },
-}).lean();
+    // Calculate start and end of day in IST
+    const startOfDay = new Date(new Date(now).setHours(0, 0, 0, 0));
+    const endOfDay = new Date(new Date(now).setHours(23, 59, 59, 999));
+
+    // Fetch coupons that are active and valid today
+    const coupons = await Coupon.find({
+      isDeleted: false,
+      isActive: true,
+      validFrom: { $lte: endOfDay },
+      validUpto: { $gte: startOfDay },
+    }).lean();
+
+    console.log("IST Now:", now);
+    console.log("Coupons available:", coupons);
 
     res.json({ success: true, coupons });
   } catch (error) {
@@ -20,6 +27,7 @@ const coupons = await Coupon.find({
     res.status(500).json({ success: false, message: 'Failed to load coupons' });
   }
 };
+
 
 const applyCoupon = async (req, res) => {
   try {
