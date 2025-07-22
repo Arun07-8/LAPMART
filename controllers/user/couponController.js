@@ -87,6 +87,10 @@ const applyCoupon = async (req, res) => {
       req.session.save(err => (err ? reject(err) : resolve()));
     });
 
+    console.log("Session userId:", req.session.user);
+console.log("UsedBy:", coupon.usedBy);
+
+
     if (req.session.appliedCoupon) {
       await Coupon.updateOne(
         { _id: req.session.appliedCoupon.couponId },
