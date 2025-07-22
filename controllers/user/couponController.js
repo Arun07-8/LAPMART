@@ -1,47 +1,108 @@
 const Coupon = require("../../models/couponSchema");
 
+
+const availableCoupon = async (req, res) => {
+  try {
+
+    const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+
+    
+    const startOfDay = new Date(new Date(now).setHours(0, 0, 0, 0));
+    const endOfDay = new Date(new Date(now).setHours(23, 59, 59, 999));
+
+
+    const coupons = await Coupon.find({
+      isDeleted: false,
+      isActive: true,
+      validFrom: { $lte: endOfDay },
+      validUpto: { $gte: startOfDay },
+    }).lean();
+
+    res.json({ success: true, coupons });
+  } catch (error) {
+    console.error('Load coupons error:', error);
+    res.status(500).json({ success: false, message: 'Failed to load coupons' });
+  }
+};
+
+
 const applyCoupon = async (req, res) => {
   try {
     const { code, totalAmount } = req.body;
     const userId = req.session.user;
 
-    if (!code) {
-      return res.status(400).json({ success: false, message: "No coupon code provided" });
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'User not logged in' });
     }
 
-    const now = new Date(); // Use server time in UTC
+    if (req.session.appliedCoupon) {
+      return res.status(400).json({
+        success: false,
+        message: 'A coupon is already applied. Remove it to apply a new one.',
+      });
+    }
+
+    const today = new Date();
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
     const coupon = await Coupon.findOne({
       couponCode: code,
       isDeleted: false,
       isActive: true,
-      validFrom: { $lte: now },
-      validUpto: { $gte: now },
-    });
-
+      validFrom: { $lte: endOfDay },
+      validUpto: { $gte: startOfDay },
+      usedBy: { $nin: [userId] },
+    }).lean()
+console.log(coupon,"s")
     if (!coupon) {
-      return res.status(400).json({ success: false, message: "Invalid or expired coupon" });
+      return res.status(404).json({
+        success: false,
+        message: 'Coupon not found or already used by you',
+      });
     }
 
     if (totalAmount < coupon.minPurchase) {
-      return res.status(400).json({ success: false, message: `Minimum purchase should be ₹${coupon.minPurchase}` });
+      return res.status(400).json({
+        success: false,
+        message: `Minimum purchase of ₹${coupon.minPurchase} required to use this coupon`,
+      });
     }
 
-    const userUsed = coupon.usedBy.includes(userId);
-    if (userUsed) {
-      return res.status(400).json({ success: false, message: "You already used this coupon" });
+    let discount = Number(coupon.offerPrice) || 0;
+    if (discount > totalAmount) {
+      discount = totalAmount;
     }
 
-    // Success: return discount
-    res.status(200).json({
+    req.session.appliedCoupon = {
+      couponId: coupon._id.toString(),
+      couponCode: coupon.couponCode,
+      discount: discount.toFixed(2),
+    };
+
+    await new Promise((resolve, reject) => {
+      req.session.save(err => (err ? reject(err) : resolve()));
+    });
+    
+
+    if (req.session.appliedCoupon) {
+      await Coupon.updateOne(
+        { _id: req.session.appliedCoupon.couponId },
+        { $addToSet: { usedBy: userId } }
+      );
+    }
+
+    res.json({
       success: true,
-      discount: coupon.offerPrice,
-      message: "Coupon applied successfully",
+      couponId: coupon._id,
+      couponCode: coupon.couponCode,
+      discount: Number(discount.toFixed(2)),
+      newTotal: Number((totalAmount - discount).toFixed(2)),
     });
 
-  } catch (err) {
-    console.error("Apply coupon error:", err);
-    res.status(500).json({ success: false, message: "Server error while applying coupon" });
+  } catch (error) {
+    console.error('Apply coupon error:', error);
+    res.status(500).json({ success: false, message: 'Server error: Failed to apply coupon' });
   }
 };
 
