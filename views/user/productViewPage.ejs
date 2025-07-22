@@ -320,7 +320,8 @@
       const imageLink = document.querySelector('.image-popup');
       const quantityInput = document.getElementById('quantity');
       const addToCartBtn = document.getElementById('addToCartBtn');
-      const cartQuantity = parseInt('<%= cartQuantity %>') || 0;
+     const cartQuantity = parseInt('<%= typeof cartQuantity !== "undefined" ? cartQuantity : 0 %>');
+
       const MAX_QUANTITY = 5;
 
       // Error handling for critical elements
