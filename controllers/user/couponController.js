@@ -3,7 +3,7 @@ const Coupon = require("../../models/couponSchema");
 
 const availableCoupon = async (req, res) => {
   try {
-    // Convert server time to IST
+
     const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
 
     // Calculate start and end of day in IST
