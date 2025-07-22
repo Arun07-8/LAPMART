@@ -52,8 +52,9 @@ const applyCoupon = async (req, res) => {
       isActive: true,
       isDeleted: false,
       isExpired: false,
-     
-      usedBy: { $nin: [userId] }, // Ensure userId is ObjectId
+      validFrom: { $lte: new Date() },
+      validUpto: { $gte: new Date() },
+      usedBy: { $nin: userId }, // Ensure userId is ObjectId
     });
 
     // Validate coupon
