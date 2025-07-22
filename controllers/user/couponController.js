@@ -1,90 +1,71 @@
-const mongoose = require("mongoose");
-const Coupon = require("../../models/couponSchema");
+const Coupon = require('../models/couponSchema');
 
-// ✅ GET Available Coupons
 const availableCoupon = async (req, res) => {
   try {
-    // Ensure IST timezone
-    const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-    const startOfDay = new Date(new Date(now).setHours(0, 0, 0, 0));
-    const endOfDay = new Date(new Date(now).setHours(23, 59, 59, 999));
+    const today = new Date();
+    console.log('Server Date Now:', today);
 
-    // Fetch active, non-deleted coupons valid today
     const coupons = await Coupon.find({
       isDeleted: false,
       isActive: true,
-      validFrom: { $lte: endOfDay },
-      validUpto: { $gte: startOfDay },
+      validFrom: { $lte: today },
+      validUpto: { $gte: today },
     }).lean();
 
-    console.log("IST Now:", now);
-    console.log("Coupons available:", coupons);
-
+    console.log('Coupons:', coupons);
     res.json({ success: true, coupons });
   } catch (error) {
-    console.error("Load coupons error:", error);
-    res.status(500).json({ success: false, message: "Failed to load coupons" });
+    console.error('Load coupons error:', error.stack);
+    res.status(500).json({ success: false, message: 'Failed to load coupons' });
   }
 };
 
-// ✅ APPLY Coupon
 const applyCoupon = async (req, res) => {
   try {
     const { code, totalAmount } = req.body;
     const userId = req.session.user;
 
-    // Check if user logged in
+    console.log('Apply Coupon Input:', { code, totalAmount, userId });
+
     if (!userId) {
-      return res.status(401).json({ success: false, message: "User not logged in" });
+      return res.status(401).json({ success: false, message: 'User not logged in' });
     }
 
-    // Prevent double apply
     if (req.session.appliedCoupon) {
       return res.status(400).json({
         success: false,
-        message: "A coupon is already applied. Remove it to apply a new one.",
+        message: 'A coupon is already applied. Remove it to apply a new one.',
       });
     }
 
-    // Convert string userId to ObjectId for MongoDB
-    const userObjectId = mongoose.Types.ObjectId(userId);
-
-    // IST time handling
-    const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-    const startOfDay = new Date(new Date(today).setHours(0, 0, 0, 0));
-    const endOfDay = new Date(new Date(today).setHours(23, 59, 59, 999));
-
-    // Find coupon
     const coupon = await Coupon.findOne({
-      couponCode: code,
-      isDeleted: false,
+      couponCode: code.toUpperCase(),
       isActive: true,
-      validFrom: { $lte: endOfDay },
-      validUpto: { $gte: startOfDay },
-      usedBy: { $nin: [userObjectId] }, // ✅ FIXED: compare as ObjectId
+      isDeleted: false,
+      validFrom: { $lte: new Date() },
+      validUpto: { $gte: new Date() },
+      usedBy: { $nin: [userId] },
     });
-
-    console.log("Coupon match result:", coupon);
 
     if (!coupon) {
       return res.status(404).json({
         success: false,
-        message: "Coupon not found or already used by you",
+        message: 'Coupon not found, invalid, or already used by you',
       });
     }
 
     if (totalAmount < coupon.minPurchase) {
       return res.status(400).json({
         success: false,
-        message: `Minimum purchase of ₹${coupon.minPurchase} required to use this coupon`,
+        message: `Minimum purchase of ₹${coupon.minPurchase} required`,
       });
     }
 
-    // Calculate discount
     let discount = Number(coupon.offerPrice) || 0;
-    if (discount > totalAmount) discount = totalAmount;
+    if (discount > totalAmount) {
+      discount = totalAmount;
+    }
 
-    // Save to session
     req.session.appliedCoupon = {
       couponId: coupon._id.toString(),
       couponCode: coupon.couponCode,
@@ -92,15 +73,15 @@ const applyCoupon = async (req, res) => {
     };
 
     await new Promise((resolve, reject) => {
-      req.session.save(err => (err ? reject(err) : resolve()));
+      req.session.save((err) => (err ? reject(err) : resolve()));
     });
 
-    // Mark coupon as used
     if (req.session.appliedCoupon) {
       await Coupon.updateOne(
         { _id: req.session.appliedCoupon.couponId },
-        { $addToSet: { usedBy: userObjectId } }
+        { $addToSet: { usedBy: userId } }
       );
+      console.log('Coupon applied and updated:', req.session.appliedCoupon);
     }
 
     res.json({
@@ -110,32 +91,30 @@ const applyCoupon = async (req, res) => {
       discount: Number(discount.toFixed(2)),
       newTotal: Number((totalAmount - discount).toFixed(2)),
     });
-
   } catch (error) {
-    console.error("Apply coupon error:", error);
-    res.status(500).json({ success: false, message: "Server error: Failed to apply coupon" });
+    console.error('Apply coupon error:', error.stack);
+    res.status(500).json({ success: false, message: 'Server error: Failed to apply coupon' });
   }
 };
 
-// ✅ REMOVE Coupon
 const removeCoupon = async (req, res) => {
   try {
     const { couponId } = req.body;
 
     if (!couponId || !req.session.appliedCoupon || req.session.appliedCoupon.couponId !== couponId) {
-      return res.status(400).json({ success: false, message: "No coupon applied or invalid coupon ID" });
+      return res.status(400).json({ success: false, message: 'No coupon applied or invalid coupon ID' });
     }
 
     req.session.appliedCoupon = null;
 
     await new Promise((resolve, reject) => {
-      req.session.save(err => (err ? reject(err) : resolve()));
+      req.session.save((err) => (err ? reject(err) : resolve()));
     });
 
-    res.json({ success: true, message: "Coupon removed successfully" });
+    res.json({ success: true, message: 'Coupon removed successfully' });
   } catch (error) {
-    console.error("Remove coupon error:", error);
-    res.status(500).json({ success: false, message: "Failed to remove coupon" });
+    console.error('Remove coupon error:', error.stack);
+    res.status(500).json({ success: false, message: 'Failed to remove coupon' });
   }
 };
 
