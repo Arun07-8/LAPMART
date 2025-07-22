@@ -17,7 +17,7 @@ const availableCoupon = async (req, res) => {
       validFrom: { $lte: endOfDay },
       validUpto: { $gte: startOfDay },
     }).lean();
-
+console.log(coupons,"avble ")
     res.json({ success: true, coupons });
   } catch (error) {
     console.error('Load coupons error:', error);
@@ -54,7 +54,7 @@ const applyCoupon = async (req, res) => {
       validUpto: { $gte: startOfDay },
       usedBy: { $nin: [userId] },
     }).lean()
-console.log(coupon,"s")
+console.log(coupon,"shhhh")
     if (!coupon) {
       return res.status(404).json({
         success: false,
