@@ -1,129 +1,166 @@
-const Coupon = require('../../models/couponSchema');
+const Coupon = require("../../models/couponSchema");
+const { ObjectId } = require("mongoose").Types;
 
+// 1. Get available coupons
 const availableCoupon = async (req, res) => {
   try {
     const today = new Date();
-    console.log('Server Date Now:', today);
 
     const coupons = await Coupon.find({
-     
+      isDeleted: false,
+      isActive: true,
+      isExpired: false,
+    
     }).lean();
 
-    console.log('Coupons:', coupons);
+    console.log("Available coupons:", coupons);
+
     res.json({ success: true, coupons });
   } catch (error) {
-    console.error('Load coupons error:', error.stack);
-    res.status(500).json({ success: false, message: 'Failed to load coupons' });
+    console.error("Load coupons error:", error);
+    res.status(500).json({ success: false, message: "Failed to load coupons" });
   }
 };
+
+// 2. Apply a coupon
 const applyCoupon = async (req, res) => {
   try {
-    console.log('[applyCoupon] Endpoint hit at:', new Date().toISOString());
-    console.log('[applyCoupon] Request Method:', req.method, 'URL:', req.originalUrl);
-    console.log('[applyCoupon] Request Body:', req.body);
-    console.log('[applyCoupon] Session:', req.session);
-
     const { code, totalAmount } = req.body;
     const userId = req.session.user;
 
+    // Validate inputs
+    if (!code || !totalAmount) {
+      return res.status(400).json({ success: false, message: "Coupon code and total amount are required" });
+    }
+
+    // Validate user login
     if (!userId) {
-      console.log('[applyCoupon] No user in session');
-      return res.status(401).json({ success: false, message: 'User not logged in' });
+      return res.status(401).json({ success: false, message: "User not logged in" });
     }
 
-    // Rest of the applyCoupon code from previous response
-    const coupon = await Coupon.findOne({
-      couponCode: code.toUpperCase(),
-      isActive: true,
-      isDeleted: false,
-      validFrom: { $lte: new Date() },
-      validUpto: { $gte: new Date() },
-      usedBy: { $nin: [userId] },
-    });
-
-    console.log('[applyCoupon] Coupon Query Result:', coupon);
-
-    if (!coupon) {
-      console.log('[applyCoupon] Coupon not found or invalid');
-      return res.status(404).json({
-        success: false,
-        message: 'Coupon not found, invalid, or already used by you',
-      });
-    }
-
-    if (totalAmount < coupon.minPurchase) {
-      console.log('[applyCoupon] Minimum purchase not met:', { totalAmount, minPurchase: coupon.minPurchase });
+    // Check if a coupon is already applied
+    if (req.session.appliedCoupon) {
       return res.status(400).json({
         success: false,
-        message: `Minimum purchase of ₹${coupon.minPurchase} required`,
+        message: "A coupon is already applied. Remove it to apply a new one.",
       });
     }
 
-    let discount = Number(coupon.offerPrice) || 0;
-    if (discount > totalAmount) {
-      discount = totalAmount;
+    // Find coupon
+    const coupon = await Coupon.findOne({
+      couponCode: code.toUpperCase(), // Schema enforces uppercase
+      isActive: true,
+      isDeleted: false,
+      isExpired: false,
+      validFrom: { $lte: new Date() },
+      validUpto: { $gte: new Date() },
+      usedBy: { $nin: [new ObjectId(userId)] }, // Ensure userId is ObjectId
+    });
+
+    // Validate coupon
+    if (!coupon) {
+      return res.status(404).json({
+        success: false,
+        message: "Coupon not found, expired, or already used by you",
+      });
     }
 
+    // Validate minimum purchase
+    if (totalAmount < coupon.minPurchase) {
+      return res.status(400).json({
+        success: false,
+        message: `Minimum purchase of ₹${coupon.minPurchase} required to use this coupon`,
+      });
+    }
+
+    // Calculate discount
+    let discount = Number(coupon.offerPrice) || 0;
+    if (discount > totalAmount) {
+      discount = totalAmount; // Cap discount to total amount
+    }
+
+    // Store coupon in session
     req.session.appliedCoupon = {
       couponId: coupon._id.toString(),
       couponCode: coupon.couponCode,
       discount: discount.toFixed(2),
     };
 
-    console.log('[applyCoupon] Saving session:', req.session.appliedCoupon);
-
+    // Save session
     await new Promise((resolve, reject) => {
       req.session.save((err) => {
         if (err) {
-          console.error('[applyCoupon] Session save error:', err.stack);
+          console.error("Session save error:", err);
           reject(err);
         } else {
-          console.log('[applyCoupon] Session saved');
+          console.log("Session saved:", req.session.appliedCoupon);
           resolve();
         }
       });
     });
 
+    // Mark coupon as used
     await Coupon.updateOne(
-      { _id: req.session.appliedCoupon.couponId },
-      { $addToSet: { usedBy: userId } }
+      { _id: new ObjectId(coupon._id) },
+      { $addToSet: { usedBy: new ObjectId(userId) } }
     );
-    console.log('[applyCoupon] Coupon updated with userId:', userId);
 
+    // Return response
     res.json({
       success: true,
-      couponId: coupon._id,
+      couponId: coupon._id.toString(),
       couponCode: coupon.couponCode,
       discount: Number(discount.toFixed(2)),
       newTotal: Number((totalAmount - discount).toFixed(2)),
+      couponName: coupon.couponName,
+      description: coupon.description,
     });
   } catch (error) {
-    console.error('[applyCoupon] Error:', error.stack);
-    res.status(500).json({ success: false, message: 'Server error: Failed to apply coupon' });
+    console.error("Apply coupon error:", error);
+    res.status(500).json({ success: false, message: "Server error: Failed to apply coupon" });
   }
 };
 
+// 3. Remove applied coupon
 const removeCoupon = async (req, res) => {
   try {
     const { couponId } = req.body;
 
-    if (!couponId || !req.session.appliedCoupon || req.session.appliedCoupon.couponId !== couponId) {
-      return res.status(400).json({ success: false, message: 'No coupon applied or invalid coupon ID' });
+    // Validate coupon ID and session
+    if (
+      !couponId ||
+      !req.session.appliedCoupon ||
+      req.session.appliedCoupon.couponId !== couponId
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "No coupon applied or invalid coupon ID",
+      });
     }
 
+    // Clear applied coupon
     req.session.appliedCoupon = null;
 
+    // Save session
     await new Promise((resolve, reject) => {
-      req.session.save((err) => (err ? reject(err) : resolve()));
+      req.session.save((err) => {
+        if (err) {
+          console.error("Session save error:", err);
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
     });
 
-    res.json({ success: true, message: 'Coupon removed successfully' });
+    res.json({ success: true, message: "Coupon removed successfully" });
   } catch (error) {
-    console.error('Remove coupon error:', error.stack);
-    res.status(500).json({ success: false, message: 'Failed to remove coupon' });
+    console.error("Remove coupon error:", error);
+    res.status(500).json({ success: false, message: "Failed to remove coupon" });
   }
 };
 
+// Export all functions
 module.exports = {
   availableCoupon,
   applyCoupon,
