@@ -3,13 +3,9 @@ const Coupon = require("../../models/couponSchema");
 
 const availableCoupon = async (req, res) => {
   try {
-
-    const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-
-    
-    const startOfDay = new Date(new Date(now).setHours(0, 0, 0, 0));
-    const endOfDay = new Date(new Date(now).setHours(23, 59, 59, 999));
-
+    const now = new Date(); // Use server time (UTC-safe)
+    const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(now.setHours(23, 59, 59, 999));
 
     const coupons = await Coupon.find({
       isDeleted: false,
@@ -24,7 +20,6 @@ const availableCoupon = async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to load coupons' });
   }
 };
-
 
 const applyCoupon = async (req, res) => {
   try {
@@ -54,7 +49,7 @@ const applyCoupon = async (req, res) => {
       validUpto: { $gte: startOfDay },
       usedBy: { $nin: [userId] },
     });
-console.log(coupon,"s")
+
     if (!coupon) {
       return res.status(404).json({
         success: false,
