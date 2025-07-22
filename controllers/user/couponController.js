@@ -6,20 +6,17 @@ const availableCoupon = async (req, res) => {
 
     const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
 
-    // Calculate start and end of day in IST
+    
     const startOfDay = new Date(new Date(now).setHours(0, 0, 0, 0));
     const endOfDay = new Date(new Date(now).setHours(23, 59, 59, 999));
 
-    // Fetch coupons that are active and valid today
+
     const coupons = await Coupon.find({
       isDeleted: false,
       isActive: true,
       validFrom: { $lte: endOfDay },
       validUpto: { $gte: startOfDay },
     }).lean();
-
-    console.log("IST Now:", now);
-    console.log("Coupons available:", coupons);
 
     res.json({ success: true, coupons });
   } catch (error) {
@@ -57,7 +54,7 @@ const applyCoupon = async (req, res) => {
       validUpto: { $gte: startOfDay },
       usedBy: { $nin: [userId] },
     });
-
+console.log(coupon,"s")
     if (!coupon) {
       return res.status(404).json({
         success: false,
@@ -86,10 +83,7 @@ const applyCoupon = async (req, res) => {
     await new Promise((resolve, reject) => {
       req.session.save(err => (err ? reject(err) : resolve()));
     });
-
-    console.log("Session userId:", req.session.user);
-console.log("UsedBy:", coupon.usedBy);
-
+    
 
     if (req.session.appliedCoupon) {
       await Coupon.updateOne(
