@@ -11,17 +11,9 @@ const availableCoupon = async (req, res) => {
     const endOfDay = new Date(new Date(now).setHours(23, 59, 59, 999));
 
     // Fetch coupons that are active and valid today
-    const toIST = (dateString) => {
-  return new Date(new Date(dateString).toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-};
-
-// Example during coupon creation
-const coupon = new Coupon({
-  validFrom: toIST(req.body.validFrom),
-  validUpto: toIST(req.body.validUpto),
-  // other fields...
-});
-
+    const coupons = await Coupon.find({
+  
+    }).lean();
 
     console.log("IST Now:", now);
     console.log("Coupons available:", coupons);
