@@ -21,7 +21,8 @@ const availableCoupon = async (req, res) => {
 };
 const applyCoupon = async (req, res) => {
   try {
-    console.log('[applyCoupon] Endpoint called at:', new Date().toISOString());
+    console.log('[applyCoupon] Endpoint hit at:', new Date().toISOString());
+    console.log('[applyCoupon] Request Method:', req.method, 'URL:', req.originalUrl);
     console.log('[applyCoupon] Request Body:', req.body);
     console.log('[applyCoupon] Session:', req.session);
 
@@ -33,6 +34,7 @@ const applyCoupon = async (req, res) => {
       return res.status(401).json({ success: false, message: 'User not logged in' });
     }
 
+    // Rest of the applyCoupon code from previous response
     const coupon = await Coupon.findOne({
       couponCode: code.toUpperCase(),
       isActive: true,
@@ -100,7 +102,7 @@ const applyCoupon = async (req, res) => {
     });
   } catch (error) {
     console.error('[applyCoupon] Error:', error.stack);
-    res.status(500).json({ success: false``, message: 'Server error: Failed to apply coupon' });
+    res.status(500).json({ success: false, message: 'Server error: Failed to apply coupon' });
   }
 };
 
