@@ -6,10 +6,7 @@ const availableCoupon = async (req, res) => {
     console.log('Server Date Now:', today);
 
     const coupons = await Coupon.find({
-      isDeleted: false,
-      isActive: true,
-      validFrom: { $lte: today },
-      validUpto: { $gte: today },
+     
     }).lean();
 
     console.log('Coupons:', coupons);
