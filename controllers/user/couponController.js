@@ -6,18 +6,21 @@ const availableCoupon = async (req, res) => {
 
     const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
 
-    
+    // Calculate start and end of day in IST
     const startOfDay = new Date(new Date(now).setHours(0, 0, 0, 0));
     const endOfDay = new Date(new Date(now).setHours(23, 59, 59, 999));
 
-
+    // Fetch coupons that are active and valid today
     const coupons = await Coupon.find({
       isDeleted: false,
       isActive: true,
       validFrom: { $lte: endOfDay },
       validUpto: { $gte: startOfDay },
     }).lean();
-console.log(coupons,"avble ")
+
+    console.log("IST Now:", now);
+    console.log("Coupons available:", coupons);
+
     res.json({ success: true, coupons });
   } catch (error) {
     console.error('Load coupons error:', error);
@@ -47,15 +50,20 @@ const applyCoupon = async (req, res) => {
     const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
     const coupon = await Coupon.findOne({
-    
-    }).lean()
-console.log(coupon,"shhhh")
-    if (!coupon) {
-      return res.status(404).json({
-        success: false,
-        message: 'Coupon not found or already used by you',
-      });
-    }
+      couponCode: code,
+      isDeleted: false,
+      isActive: true,
+      validFrom: { $lte: endOfDay },
+      validUpto: { $gte: startOfDay },
+      usedBy: { $nin: [userId] },
+    });
+
+    // if (!coupon) {
+    //   return res.status(404).json({
+    //     success: false,
+    //     message: 'Coupon not found or already used by you',
+    //   });
+    // }
 
     if (totalAmount < coupon.minPurchase) {
       return res.status(400).json({

@@ -49,7 +49,7 @@ const productViewPage = async (req, res) => {
 
         
         if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
-            console.error('Invalid or missing productId:', productId);
+            error('Invalid or missing productId:', productId);
             return res.redirect('/pageNotFound');
         }
 
