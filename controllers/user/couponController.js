@@ -47,12 +47,7 @@ const applyCoupon = async (req, res) => {
     const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
     const coupon = await Coupon.findOne({
-      couponCode: code,
-      isDeleted: false,
-      isActive: true,
-      validFrom: { $lte: endOfDay },
-      validUpto: { $gte: startOfDay },
-      usedBy: { $nin: [userId] },
+    
     }).lean()
 console.log(coupon,"shhhh")
     if (!coupon) {
