@@ -1,17 +1,18 @@
 const Coupon = require("../../models/couponSchema");
 
 
-
 const availableCoupon = async (req, res) => {
   try {
-    const today = new Date();
-    const coupons = await Coupon.find({
-      isDeleted: false,
-      isActive: true,
-      validFrom: { $lte: today },
-      validUpto: { $gte: today },
-    }).lean();
+const today = new Date();
+const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
+const coupons = await Coupon.find({
+  isDeleted: false,
+  isActive: true,
+  validFrom: { $lte: endOfDay },
+  validUpto: { $gte: startOfDay },
+}).lean();
 
     res.json({ success: true, coupons });
   } catch (error) {
@@ -19,6 +20,7 @@ const availableCoupon = async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to load coupons' });
   }
 };
+
 const applyCoupon = async (req, res) => {
   try {
     const { code, totalAmount } = req.body;
@@ -35,12 +37,16 @@ const applyCoupon = async (req, res) => {
       });
     }
 
+    const today = new Date();
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
     const coupon = await Coupon.findOne({
-      couponCode: code.toUpperCase(),
-      isActive: true,
+      couponCode: code,
       isDeleted: false,
-      validFrom: { $lte: new Date() },
-      validUpto: { $gte: new Date() },
+      isActive: true,
+      validFrom: { $lte: endOfDay },
+      validUpto: { $gte: startOfDay },
       usedBy: { $nin: [userId] },
     });
 
@@ -59,7 +65,6 @@ const applyCoupon = async (req, res) => {
     }
 
     let discount = Number(coupon.offerPrice) || 0;
-
     if (discount > totalAmount) {
       discount = totalAmount;
     }
@@ -69,18 +74,18 @@ const applyCoupon = async (req, res) => {
       couponCode: coupon.couponCode,
       discount: discount.toFixed(2),
     };
-    
 
     await new Promise((resolve, reject) => {
       req.session.save(err => (err ? reject(err) : resolve()));
     });
 
-     if (req.session.appliedCoupon) {
-       await Coupon.updateOne(
-    { _id: req.session.appliedCoupon.couponId },
-    { $addToSet: { usedBy: req.session.user } }
-  );
-}
+    if (req.session.appliedCoupon) {
+      await Coupon.updateOne(
+        { _id: req.session.appliedCoupon.couponId },
+        { $addToSet: { usedBy: userId } }
+      );
+    }
+
     res.json({
       success: true,
       couponId: coupon._id,
