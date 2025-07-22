@@ -65,9 +65,7 @@
             const logo = document.querySelector('.logo');
             const navLinks = document.querySelectorAll('.nav-link');
 
-            // Debug: Log DOM elements
-            console.log('Profile Button:', profileButton);
-            console.log('Dropdown:', document.getElementById('profileDropdown'));
+          
 
             // Set active link based on current URL
             const currentPath = window.location.pathname;
@@ -92,7 +90,7 @@
                     const dropdown = document.getElementById('profileDropdown');
                     if (dropdown) {
                         dropdown.classList.remove('active');
-                        console.log('Dropdown closed due to sidebar toggle');
+                     
                     }
                 };
 
@@ -118,14 +116,14 @@
                     if (window.innerWidth > 900) {
                         const dropdown = document.getElementById('profileDropdown');
                         if (dropdown) {
-                            console.log('Toggling dropdown, current state:', dropdown.classList.contains('active'));
+                     
                             dropdown.classList.toggle('active');
-                            console.log('Dropdown classes after toggle:', dropdown.classList.toString());
+                          
                         } else {
                             console.error('Dropdown element not found');
                         }
                     } else {
-                        console.log('Opening sidebar on mobile');
+                       
                         if (menuToggle && sidebar && sidebarOverlay) {
                             menuToggle.classList.toggle('active');
                             sidebar.classList.toggle('active');
@@ -141,14 +139,14 @@
                         if (window.innerWidth > 900) {
                             const dropdown = document.getElementById('profileDropdown');
                             if (dropdown) {
-                                console.log('Toggling dropdown via keyboard, current state:', dropdown.classList.contains('active'));
+                               
                                 dropdown.classList.toggle('active');
-                                console.log('Dropdown classes after keyboard toggle:', dropdown.classList.toString());
+                               
                             } else {
                                 console.error('Dropdown element not found');
                             }
                         } else {
-                            console.log('Opening sidebar via keyboard on mobile');
+                          
                             if (menuToggle && sidebar && sidebarOverlay) {
                                 menuToggle.classList.toggle('active');
                                 sidebar.classList.toggle('active');
@@ -164,9 +162,9 @@
                 const dropdown = document.getElementById('profileDropdown');
                 const container = document.querySelector('.profile-container');
                 if (dropdown && container && !container.contains(e.target) && dropdown.classList.contains('active')) {
-                    console.log('Closing dropdown due to outside click');
+                   
                     dropdown.classList.remove('active');
-                    console.log('Dropdown classes after close:', dropdown.classList.toString());
+                
                 }
             });
 
@@ -179,7 +177,7 @@
                     const dropdown = document.getElementById('profileDropdown');
                     if (dropdown) {
                         dropdown.classList.remove('active');
-                        console.log('Dropdown and sidebar closed on resize');
+                      
                     }
                 }
             }, 100));

@@ -52,6 +52,7 @@ const createOrder = async (req, res) => {
 
     for (const item of cart.items) {
       const product = item.productId;
+
       const offer = await applyBestOffer(product) || {};
 
       const originalPrice = product.salePrice;
@@ -134,7 +135,6 @@ const createOrder = async (req, res) => {
     });
 
     await newOrder.save();
-    await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0 });
     res.status(200).json({
       success: true,
       order: {
@@ -155,39 +155,58 @@ const verifyPayment = async (req, res) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId, couponId } = req.body;
     const userId = req.session.user;
     const cart= await Cart.findOne({userId})
-
+    
     if (!userId) {
       req.session.appliedCoupon = null;
       return res.status(401).json({ success: false, message: 'User not logged in.' });
     }
-
-    const existingOrder = await Order.findOne({ _id: orderId, userId }).populate("userId");
-
+    
+    const existingOrder = await Order.findOne({ _id: orderId, userId }).populate("userId").populate("orderedItems.product");
+    
     if (!existingOrder) {
       req.session.appliedCoupon = null;
       return res.status(404).json({ success: false, message: 'Order not found or unauthorized.' });
     } 
-
-     if (!cart || cart.items.length === 0) {
+    
+    if (!cart || cart.items.length === 0) {
       return res.status(400).json({ success: false, message: 'Cart is empty.' });
     }
-
+    
     const razorpayOrder = await razorpay.orders.fetch(razorpay_order_id);
-
-
+    
+    
     const isValidSignature = verifySignature(
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
       process.env.RAZORPAY_KEY_SECRET
     );
-
+    
     if (!isValidSignature) {
       req.session.appliedCoupon = null;
-      return res.status(400).json({ success: false, message: 'Payment verification failed.' });
+      // return res.status(400).json({ success: false, message: 'Payment verification failed.' });
     }
-  
+    for (const item of existingOrder.orderedItems) {
+      
+      if (!item.product || !item.product._id) {
+       return res.status(400).json({ success: false, message: `Product not found for item ${item._id}` });
+      }
 
+      const product = item.product;
+      if (!product) {
+        req.session.appliedCoupon = null;
+        return res.status(400).json({ success: false, message: `Product not found for item ${item._id}` });
+      }
+
+      if (product.quantity < item.quantity) {
+        req.session.appliedCoupon = null;
+        return res.status(400).json({ success: false, message: `Insufficient stock for product ${product.name}` });
+      }
+
+      product.quantity -= item.quantity;
+      await product.save();
+    }
+    
     await Order.updateOne(
       { _id: orderId, paymentStatus: { $ne: 'success' } },
       {
@@ -199,7 +218,7 @@ const verifyPayment = async (req, res) => {
         },
       }
     );
-
+    
     if (couponId && existingOrder.couponApplied && existingOrder.couponCode) {
       await Coupon.updateOne(
         { _id: couponId, couponCode: existingOrder.couponCode, isActive: true, isDeleted: false },
@@ -207,7 +226,7 @@ const verifyPayment = async (req, res) => {
       );
       await markCouponAsUsed( couponId);
     }
-
+    
     const user = existingOrder.userId;
     if (user.firstOrder && user.referredBy) {
       let userWallet = await Wallet.findOne({ user: user._id });
@@ -218,7 +237,7 @@ const verifyPayment = async (req, res) => {
           transactions: [],
         });
       }
-
+      
       const userBonusDesc = "Referral bonus for first Razorpay order";
       const transactionId = `TXN_${Date.now()}_${Math.floor(100000 + Math.random() * 900000)}`;
       if (!userWallet.transactions.some(t => t.description === userBonusDesc)) {
@@ -235,7 +254,7 @@ const verifyPayment = async (req, res) => {
         user.wallet = userWallet._id;
         await user.save();
       }
-
+      
       const referrer = await User.findById(user.referredBy).populate("wallet");
       if (referrer) {
         let referrerWallet = await Wallet.findOne({ user: referrer._id });
@@ -268,13 +287,13 @@ const verifyPayment = async (req, res) => {
         }
       }
       
-
+      
       user.firstOrder = false;
       await user.save();
     }
-
+    
     req.session.appliedCoupon = null;
-
+    await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0 });
     return res.status(200).json({
       success: true,
       message: 'Payment verified. Order updated.',
@@ -291,6 +310,7 @@ const verifyPayment = async (req, res) => {
 const getPaymentFailed = async (req, res) => {
   try {
     const { orderId, errorCode, paymentId, reason ,amount} = req.query;
+
     const userId = req.session.user;
     if (!userId) {
       return res.redirect('/login');
@@ -299,6 +319,8 @@ const getPaymentFailed = async (req, res) => {
 
     if (!orderId || !mongoose.Types.ObjectId.isValid(orderId)) {
       return res.status(200).render('paymentFailed', {
+        amount,
+        user:userData,
         orderId,
         errorCode: errorCode || 'INVALID_ORDER_ID',
         paymentId: paymentId || 'N/A',
@@ -307,8 +329,11 @@ const getPaymentFailed = async (req, res) => {
     }
 
     const existingOrder = await Order.findOne({ _id: orderId, userId });
+
     if (!existingOrder) {
       return res.status(200).render('paymentFailed', {
+        amount,
+        user:userData,
         orderId,
         errorCode: errorCode || 'ORDER_NOT_FOUND',
         paymentId: paymentId || 'N/A',
@@ -321,30 +346,26 @@ const getPaymentFailed = async (req, res) => {
       item.status = 'Payment Failed';
     });
 
-    if(existingOrder.paymentStatus==="failed"){
-      await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0 });
-    }
+    // if(existingOrder.paymentStatus==="failed"){
+    //   await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0 });
+    // }
     
     await existingOrder.save();
-    if(paymentStatus==="failed"){
-      res.status(200).render('paymentFailed', {
-      orderId,
-      errorCode: errorCode || 'N/A',
-      paymentId: paymentId || 'N/A',
-      reason: reason || 'Unknown failure',
-      amount,
-      user:userData
-    });
-    }
+    if (existingOrder.paymentStatus === "failed") {
+  res.status(200).render('paymentFailed', {
+    orderId,
+    errorCode: errorCode || 'N/A',
+    paymentId: paymentId || 'N/A',
+    reason: reason || 'Unknown failure',
+    amount,
+    user: userData
+  });
+}
+
     
   } catch (error) {
     console.error('Payment failed page error:', error);
-    res.status(500).render('paymentFailed', {
-      orderId: 'N/A',
-      errorCode: 'SERVER_ERROR',
-      paymentId: 'N/A',
-      reason: 'Something went wrong. Please try again later.',
-    });
+    
   }
 };
 

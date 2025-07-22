@@ -256,9 +256,16 @@ const updateStatus = async (req, res) => {
     if(order.paymentStatus !== 'success' && order.paymentMethod !== 'Cash on Delivery'){
       return res.status(404).json({ success: false, message: 'Payment is not completed!' });
     }
+  
 
     order.orderedItems.forEach(item => {
+
+      if(item.status=="Cancelled"){
+         return res.status(404).json({ success: false, message: 'this order already cancelled' }); 
+      }
+
       item.status = newStatus;
+
     });
 if (newStatus === 'Delivered' && order.paymentMethod === 'Cash on Delivery') {
       order.paymentStatus = 'success';

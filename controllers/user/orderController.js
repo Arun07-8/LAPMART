@@ -4,7 +4,7 @@ const Wallet = require("../../models/walletSchema")
 const fs = require('fs');
 const path = require('path');
 const Cart= require("../../models/cartSchema")
-
+const Product=require("../../models/productSchema")
 const { applyBestOffer } = require("../../helpers/offerHelper")
 const generateInvoice=require("../../helpers/generateInvoice")
 
@@ -375,12 +375,12 @@ if(!isFullCancellation){
       await wallet.save();
     }
 
- const allCancelled = order.orderedItems.every(item => item.status === "Cancelled");
-if (allCancelled) {
+  const allCancelled = order.orderedItems.every(item => item.status === "Cancelled");
+  if (allCancelled) {
   order.isCancelled = true;
   order.cancelReason = reason || "All items cancelled";
   order.additionalNote = details || "";
-}
+  }
 
 
     await order.save()
@@ -395,9 +395,6 @@ if (allCancelled) {
     res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
-
-
-
 
 const orderReturn = async (req, res) => {
   try {

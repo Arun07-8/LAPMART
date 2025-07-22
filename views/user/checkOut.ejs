@@ -198,7 +198,7 @@
               <span class="checkout-price-label">Subtotal</span>
               <span class="checkout-price-value">₹<%= Cart.totalPrice.toFixed(2) %></span>
             </div>
-            <% if (Cart.discountAmount > 0) { %>
+            <% if (Cart.couponoffer > 0) { %>
               <div class="checkout-price-row" id="coupon-discount-row">
                 <span class="checkout-price-label">Coupon Discount</span>
                 <span class="checkout-price-value checkout-savings">- ₹<%= Cart.discountAmount.toFixed(2) %></span>

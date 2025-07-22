@@ -9,7 +9,7 @@ const { distance } = require('fastest-levenshtein');
 const productInfo = async (req, res) => {
     try {
         const search = decodeURIComponent(req.query.search || "").trim();
-        console.log(search)
+    
         const page = Math.max(1, parseInt(req.query.page) || 1);
         const limit = 3;
         let query = { isDeleted: false };

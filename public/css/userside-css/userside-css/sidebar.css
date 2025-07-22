@@ -34,7 +34,7 @@
     background: #f8f9fa;
     border-right: 1px solid #e9ecef;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    margin: 35px 20px;
+    margin: 35px 1px;
     border-radius: 10px;
     z-index: 1000;
 }

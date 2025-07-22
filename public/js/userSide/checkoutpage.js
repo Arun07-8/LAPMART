@@ -276,7 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
           icon: 'success',
           title: 'Payment Successful',
           text: 'Your order has been placed successfully using your wallet!',
-          confirmButtonText: 'Go to Orders',
         }).then(() => {
           window.location.href = `/order/${data.orderId}`;
         });
@@ -404,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
 
       appliedCoupon = data.couponId;
-      discountAmount = data.discount;
+   
       totalAmount = data.newTotal;
       updatePriceDisplay(data.discount, data.newTotal);
       updateCouponButton(data.couponCode, true);

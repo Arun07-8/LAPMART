@@ -19,7 +19,6 @@ const availableCoupon = async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to load coupons' });
   }
 };
-
 const applyCoupon = async (req, res) => {
   try {
     const { code, totalAmount } = req.body;
@@ -29,7 +28,6 @@ const applyCoupon = async (req, res) => {
       return res.status(401).json({ success: false, message: 'User not logged in' });
     }
 
- 
     if (req.session.appliedCoupon) {
       return res.status(400).json({
         success: false,
@@ -45,18 +43,11 @@ const applyCoupon = async (req, res) => {
       validUpto: { $gte: new Date() },
       usedBy: { $nin: [userId] },
     });
-    
-    if(coupon.validUpto){
-      return res.status(404).json({
-        success: false,
-        message: 'Coupon code is  expired',
-      });
-     }
- 
+
     if (!coupon) {
       return res.status(404).json({
         success: false,
-        message: 'this coupon already used by you',
+        message: 'Coupon not found or already used by you',
       });
     }
 
@@ -67,30 +58,37 @@ const applyCoupon = async (req, res) => {
       });
     }
 
-let discount = coupon.offerPrice;
+    let discount = Number(coupon.offerPrice) || 0;
 
-if (discount > totalAmount) {
-  discount = totalAmount; 
-}
-
+    if (discount > totalAmount) {
+      discount = totalAmount;
+    }
 
     req.session.appliedCoupon = {
       couponId: coupon._id.toString(),
       couponCode: coupon.couponCode,
-      discount,
+      discount: discount.toFixed(2),
     };
+    
 
     await new Promise((resolve, reject) => {
       req.session.save(err => (err ? reject(err) : resolve()));
     });
 
+     if (req.session.appliedCoupon) {
+       await Coupon.updateOne(
+    { _id: req.session.appliedCoupon.couponId },
+    { $addToSet: { usedBy: req.session.user } }
+  );
+}
     res.json({
       success: true,
       couponId: coupon._id,
       couponCode: coupon.couponCode,
-      discount,
-      newTotal: totalAmount - discount,
+      discount: Number(discount.toFixed(2)),
+      newTotal: Number((totalAmount - discount).toFixed(2)),
     });
+
   } catch (error) {
     console.error('Apply coupon error:', error);
     res.status(500).json({ success: false, message: 'Server error: Failed to apply coupon' });
@@ -118,21 +116,9 @@ const removeCoupon = async (req, res) => {
   }
 };
 
-const markCouponAsUsed = async (userId, couponId) => {
-  try {
-    if (!couponId) return;
-    await Coupon.findByIdAndUpdate(couponId, {
-      $addToSet: { usedBy: userId },
-    });
-  } catch (err) {
-    console.error('Error marking coupon as used:', err);
-  }
-};
-
 
 module.exports = {
   availableCoupon,
   applyCoupon,
   removeCoupon,
-  markCouponAsUsed,
 };

@@ -61,6 +61,7 @@ const signup = async (req, res) => {
     }
 
     const otp = generateOtp();
+    console.log("Otp :",  otp)
     const otpExpiration = new Date(Date.now() + 1* 60 * 1000); 
 
     const emailSent = await sendVerificationEmail(email, otp);
@@ -214,6 +215,7 @@ const resendOtp = async (req, res) => {
     }
 
     const otp = generateOtp();
+    console.log("Resend Otp",otp)
     const otpExpiration = new Date(Date.now() + 1* 60 * 1000); 
 
     const emailSent = await sendVerificationEmail(userData.email, otp);

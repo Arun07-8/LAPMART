@@ -1,119 +1,127 @@
+
 <%- include("../../views/partials/user/header") %>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
-  <link rel="stylesheet" href=css/userside-css/userside-css/productView.css>
-  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<head>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css" integrity="sha512-+EoPw+Fiwh6eSeRK7zwIkZqZ6UD1rCRr5822aL35m5C3GwVuO9vSFH0vQFbybBtzTrH2b94+ApFlk4W6yXX1t3g==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/userside-css/userside-css/productView.css">
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" integrity="sha256-+N+KLf9k/yE0oL+UCLAk2qAdnW7fOkV84W0n1Q5yM+0=" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script>window.jQuery || document.write('<script src="/js/jquery-3.6.0.min.js"><\/script>')</script>
 </head>
 <body>
   <!-- Breadcrumb with Box Shadow -->
   <div class="container mt-3">
     <nav aria-label="breadcrumb">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">Home</a></li>
-        <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">Shop</a></li>
+      <ol class="breadcrumb shadow-sm">
+        <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted">Home</a></li>
+        <li class="breadcrumb-item"><a href="/shop" class="text-decoration-none text-muted">Shop</a></li>
         <li class="breadcrumb-item active" aria-current="page">Laptops</li>
       </ol>
     </nav>
   </div>
 
-  
   <div class="container mb-5">
     <div class="product-section">
-
-<div class="product-images">
-  <div class="product-thumbs-container">
-    <% if (product.productImage && product.productImage.length > 0) { %>
-      <% product.productImage.forEach((image, index) => { %>
-        <div class="product-thumb <%= index === 0 ? 'active' : '' %>" data-index="<%= index %>">
-          <img src="<%= image || '/images/placeholder.jpg' %>" alt="Product thumbnail <%= index + 1 %>">
+      <div class="product-images">
+        <div class="product-thumbs-container">
+          <% if (product.productImage && product.productImage.length > 0) { %>
+            <% product.productImage.forEach((image, index) => { %>
+              <div class="product-thumb <%= index === 0 ? 'active' : '' %>" data-index="<%= index %>">
+                <img src="<%= image || '/images/placeholder.jpg' %>" alt="Thumbnail of <%= product.productName %> <%= index + 1 %>" width="80" height="80" loading="lazy">
+              </div>
+            <% }) %>
+          <% } else { %>
+            <div class="product-thumb active">
+              <img src="/images/placeholder.jpg" alt="No image available for <%= product.productName %>" width="80" height="80" loading="lazy">
+            </div>
+          <% } %>
         </div>
-      <% }) %>
-    <% } else { %>
-      <div class="product-thumb active">
-        <img src="/images/placeholder.jpg" alt="No image available">
-      </div>
-    <% } %>
-  </div>
-  
-  <!-- Main Image Section - Right Side -->
-  <div class="main-image-section">
-    <!-- Main Product Image with Full Cover -->
-    <div class="zoom-container" id="prod-image">
-      <% if (product.productImage && product.productImage.length > 0) { %>
-        <a href="<%= product.productImage[0] %>" class="image-popup">
-          <img 
-            src="<%= product.productImage[0] %>" 
-            class="zoom-image" 
-            alt="<%= product.productName %>" 
-            id="image-sec"
-          >
-        </a>
-        <div class="zoom-lens"></div>
-      <% } else { %>
-        <img 
-          src="/images/placeholder.jpg" 
-          class="zoom-image" 
-          alt="No Image Available"
-        >
-      <% } %>
-    </div>
-    
-    <!-- NEW: Offer Section Below Main Image -->
-    <% if (product.offerPercentage > 0 || product.offerName) { %>
-      <div class="offer-section">
-        <div class="offer-badge">SPECIAL</div>
-        <% if (product.offerName) { %>
-          <h4><%= product.offerName %></h4>
-        <% } else { %>
-          <h4>Limited Time Offer</h4>
-        <% } %>
-        <% if (product.offerPercentage > 0) { %>
-          <p>Save <%= product.offerPercentage %>% on this amazing product!</p>
-        <% } else { %>
-          <p>Don't miss out on this exclusive deal!</p>
-        <% } %>
-      </div>
-    <% } %>
-    
-    <!-- Product Status Below Offer Section -->
- <% if (!product.isLocked && product.quantity === 0) { %>
-  <div class="product-status text-danger">
-    ✖ Out of Stock
-  </div>
-<% } %>
 
-  </div>
-</div>
-<div class="product-info">
+        <!-- Main Image Section -->
+        <div class="main-image-section">
+          <div class="zoom-container" id="prod-image" role="region" aria-label="Product image zoom">
+            <% if (product.productImage && product.productImage.length > 0) { %>
+              <a href="<%= product.productImage[0] %>" class="image-popup">
+                <img 
+                  src="<%= product.productImage[0] %>" 
+                  class="zoom-image" 
+                  alt="Main image of <%= product.productName %>" 
+                  id="image-sec"
+                  width="400"
+                  height="400"
+                  loading="lazy"
+                >
+              </a>
+              <div class="zoom-lens" role="presentation" aria-hidden="true"></div>
+            <% } else { %>
+              <img 
+                src="/images/placeholder.jpg" 
+                class="zoom-image" 
+                alt="No image available for <%= product.productName %>"
+                width="400"
+                height="400"
+                loading="lazy"
+              >
+            <% } %>
+          </div>
+
+          <!-- Offer Section -->
+          <% if (product.offerPercentage > 0 || product.offerName) { %>
+            <div class="offer-section">
+              <div class="offer-badge">SPECIAL</div>
+              <% if (product.offerName) { %>
+                <h4><%= product.offerName %></h4>
+              <% } else { %>
+                <h4>Limited Time Offer</h4>
+              <% } %>
+              <% if (product.offerPercentage > 0) { %>
+                <p>Save <%= product.offerPercentage %>% on this product!</p>
+              <% } else { %>
+                <p>Don't miss out on this exclusive deal!</p>
+              <% } %>
+            </div>
+          <% } %>
+
+          <!-- Product Status -->
+          <% if (!product.isLocked && product.quantity === 0) { %>
+            <div class="product-status text-danger">
+              ✖ Out of Stock
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="product-info">
         <!-- Product Title with Wishlist Button -->
         <div class="product-title-section">
           <h1><%= product.productName %></h1>
-          <button class="wishlist-btn <%= wishlistProductIds.includes(product._id.toString()) ? 'active' : ''%>" id="wishlist-btn"   onclick="initAddToWishlistButton('<%= product._id %>')"
-        data-product-name="<%= product.productName %>">
+          <button 
+            class="wishlist-btn <%= wishlistProductIds.includes(product._id.toString()) ? 'active' : ''%>" 
+            data-product-id="<%= product._id %>"
+            data-product-name="<%= product.productName %>"
+            aria-label="<%= wishlistProductIds.includes(product._id.toString()) ? 'Remove from Wishlist' : 'Add to Wishlist' %>"
+          >
             <i class="far fa-heart"></i>
           </button>
         </div>
-        
+
         <!-- Rating Section -->
         <div class="rating-section">
           <div class="rating">
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star-half-alt"></i>
-            <span>4.5/5</span>
+            <% for (let i = 1; i <= 5; i++) { %>
+              <i class="<%= i <= Math.floor(product.averageRating || 0) ? 'fas fa-star' : i < (product.averageRating || 0) + 1 ? 'fas fa-star-half-alt' : 'far fa-star' %>"></i>
+            <% } %>
+            <span><%= (product.averageRating || 0).toFixed(1) %>/5 (<%= product.reviewCount || 0 %> reviews)</span>
           </div>
-          <a href="/reviews" class="text-decoration-none">View all reviews</a>
+          <a href="/reviews?productId=<%= product._id %>" class="text-decoration-none">View all reviews</a>
         </div>
-        
+
         <!-- Price Section -->
         <div class="price-section">
           <h2>
             ₹<%= product.discountedPrice ? product.discountedPrice.toLocaleString('en-IN') : product.salePrice.toLocaleString('en-IN') %>
           </h2>
-
           <% if (product.offerPercentage > 0) { %>
             <div class="d-flex align-items-center">
               <span class="old-price">₹<%= product.salePrice.toLocaleString('en-IN') %></span>
@@ -128,9 +136,9 @@
 
         <!-- Product Description -->
         <div class="product-description">
-          <p>This high-performance laptop is perfect for any task. Crafted with premium materials and cutting-edge technology, it offers superior performance and reliability.</p>
+          <p><%= product.description || 'This high-performance laptop is perfect for any task. Crafted with premium materials and cutting-edge technology, it offers superior performance and reliability.' %></p>
         </div>
-        
+
         <!-- Specifications -->
         <div class="specs-section">
           <h6>Processor: <%= product.processor %></h6>
@@ -141,9 +149,15 @@
         <input type="hidden" id="product-id" value="<%= product._id %>">
         <input type="hidden" id="price" value="<%= product.salePrice %>">
         
+
         <div class="quantity-section">
           <div class="quantity-controls">
-            <button onclick="decreaseQty()" class="btn-quantity" <%= product.isLocked || product.quantity === 0 ? 'disabled' : '' %>>
+            <button 
+              id="decreaseQtyBtn" 
+              class="btn-quantity" 
+              <%= product.isLocked || product.quantity === 0 ? 'disabled' : '' %>
+              aria-label="Decrease quantity"
+            >
               <i class="fas fa-minus"></i>
             </button>
             <input 
@@ -154,16 +168,30 @@
               value="1" 
               class="quantity-input" 
               <%= product.isLocked || product.quantity === 0 ? 'disabled' : '' %>
+              aria-label="Product quantity"
             >
-            <button onclick="increaseQty()" class="btn-quantity" <%= product.isLocked || product.quantity === 0 ? 'disabled' : '' %>>
+            <button 
+              id="increaseQtyBtn" 
+              class="btn-quantity" 
+              <%= product.isLocked || product.quantity === 0 ? 'disabled' : '' %>
+              aria-label="Increase quantity"
+            >
               <i class="fas fa-plus"></i>
             </button>
           </div>
         </div>
-        
+
         <!-- Action Buttons -->
         <div class="action-buttons">
-          <button id="addToCartBtn" data-product-id="<%= product._id %>" class="btn-cart" <%= product.isLocked || product.quantity === 0 ? 'disabled' : '' %>>Add to Cart</button>
+          <button 
+            id="addToCartBtn" 
+            data-product-id="<%= product._id %>" 
+            class="btn-cart" 
+            <%= product.isLocked || product.quantity === 0 ? 'disabled' : '' %>
+            aria-label="Add to cart"
+          >
+            Add to Cart
+          </button>
         </div>
       </div>
     </div>
@@ -173,18 +201,11 @@
   <div class="container mb-5">
     <ul class="nav nav-tabs justify-content-center" id="productTabs" role="tablist">
       <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button">Product Details</button>
+        <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab" aria-selected="true">Product Details</button>
       </li>
-      <!-- <li class="nav-item" role="presentation">
-        <button class="nav-link" id="ratings-tab" data-bs-toggle="tab" data-bs-target="#ratings" type="button">Rating & Reviews</button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="faqs-tab" data-bs-toggle="tab" data-bs-target="#faqs" type="button">FAQs</button>
-      </li> -->
     </ul>
     <div class="tab-content py-3" id="productTabsContent">
-      <!-- Product Details Tab -->
-      <div class="tab-pane fade show active" id="details" role="tabpanel">
+      <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
         <div class="row">
           <div class="col-md-12">
             <h4 class="mb-2">Specifications</h4>
@@ -192,619 +213,464 @@
               <tbody>
                 <tr>
                   <td width="30%"><strong>Processor</strong></td>
-                  <td><%= product.processor %></td>
+                  <td><%= product.processor || 'N/A' %></td>
                 </tr>
                 <tr>
                   <td><strong>Memory</strong></td>
-                  <td><%= product.ram %></td>
+                  <td><%= product.ram || 'N/A' %></td>
                 </tr>
                 <tr>
                   <td><strong>Storage</strong></td>
-                  <td><%= product.Storage %></td>
+                  <td><%= product.Storage || 'N/A' %></td>
                 </tr>
                 <tr>
                   <td><strong>Display</strong></td>
-                  <td><%= product.display %></td>
+                  <td><%= product.display || 'N/A' %></td>
                 </tr>
                 <tr>
                   <td><strong>Graphics</strong></td>
-                  <td><%= product.graphicsCard %></td>
+                  <td><%= product.graphicsCard || 'N/A' %></td>
                 </tr>
                 <tr>
                   <td><strong>Connectivity</strong></td>
                   <td>
                     <% if (product.additionalFeatures && typeof product.additionalFeatures === 'string' && product.additionalFeatures.trim() !== '') { %>
-                        <%= product.additionalFeatures.split(', ').slice(0, 2).join(', ') || 'N/A' %>
+                      <%= product.additionalFeatures.split(', ').slice(0, 2).join(', ') || 'N/A' %>
                     <% } else { %>
-                        N/A
+                      N/A
                     <% } %>
-                </td>
+                  </td>
                 </tr>
                 <tr>
                   <td><strong>Battery</strong></td>
-                  <td><%= product.Battery %></td>
+                  <td><%= product.Battery || 'N/A' %></td>
                 </tr>
                 <tr>
                   <td><strong>Weight</strong></td>
-                  <td><%= product.Weight %></td>
+                  <td><%= product.Weight || 'N/A' %></td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
-      
-      <!-- Ratings Tab -->
-      <!-- <div class="tab-pane fade" id="ratings" role="tabpanel">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h4 class="mb-0">All Reviews <span class="text-muted">(465)</span></h4>
-          <div class="d-flex align-items-center">
-            <div class="dropdown me-3">
-              <button class="btn btn-sm border dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                Latest
-              </button>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">Latest</a></li>
-                <li><a class="dropdown-item" href="#">Highest Rated</a></li>
-                <li><a class="dropdown-item" href="#">Lowest Rated</a></li>
-              </ul>
-            </div>
-            <button class="btn btn-outline-dark btn-sm px-3 ms-2">Write a Review</button>
-          </div>
-        </div>
-        
-        <div class="row">
-          <div class="col-md-6">
-            <div class="review-card">
-              <div class="rating mb-2">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-              </div>
-              <div class="d-flex align-items-center mb-2">
-                <h6 class="mb-0">Michael T.</h6>
-                <span class="verified-user ms-2">
-                  <i class="fas fa-check-circle"></i>
-                </span>
-              </div>
-              <p>"This laptop exceeded my expectations! The performance is top-notch. Being a software developer, I'm quite picky about hardware specs, and this definitely gets a thumbs up."</p>
-              <small class="text-muted">Posted on August 14, 2024</small>
-            </div>
-          </div>
-          
-          <div class="col-md-6">
-            <div class="review-card">
-              <div class="rating mb-2">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="far fa-star"></i>
-              </div>
-              <div class="d-flex align-items-center mb-2">
-                <h6 class="mb-0">Sarah L.</h6>
-                <span class="verified-user ms-2">
-                  <i class="fas fa-check-circle"></i>
-                </span>
-              </div>
-              <p>"The processing power is amazing and the display quality is incredible. Battery life could be better, but it's expected with such high performance."</p>
-              <small class="text-muted">Posted on August 15, 2024</small>
-            </div>
-          </div>
-        </div>
-        
-        <div class="text-center mt-3">
-          <a href="/reviews" class="btn btn-outline-dark px-4">Load More Reviews</a>
-        </div>
-      </div>
-      
-       FAQs Tab -->
-      <!-- <div class="tab-pane fade" id="faqs" role="tabpanel">
-        <div class="row justify-content-center">
-          <div class="col-lg-8">
-            <div class="accordion" id="faqAccordion">
-              <div class="accordion-item">
-                <h2 class="accordion-header">
-                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
-                    What's the warranty period for this laptop?
-                  </button>
-                </h2>
-                <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
-                  <div class="accordion-body">
-                    This laptop comes with a standard 1-year manufacturer warranty. You can extend it to 3 years with our Premium Care package available at checkout.
-                  </div>
-                </div>
-              </div>
-              <div class="accordion-item">
-                <h2 class="accordion-header">
-                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
-                    Is the RAM and storage upgradeable?
-                  </button>
-                </h2>
-                <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                  <div class="accordion-body">
-                    Yes, both the RAM and storage are user-upgradeable. The laptop has two SODIMM slots supporting up to 64GB of RAM, and two M.2 SSD slots for storage expansion.
-                  </div>
-                </div>
-              </div>
-              <div class="accordion-item">
-                <h2 class="accordion-header">
-                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
-                    Does it come with pre-installed software?
-                  </button>
-                </h2>
-                <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                  <div class="accordion-body">
-                    The laptop comes with Windows 11 Home pre-installed. It also includes a 30-day trial of Microsoft Office and our own system optimization software.
-                  </div>
-                </div>
-              </div>
-              <div class="accordion-item">
-                <h2 class="accordion-header">
-                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
-                    What's included in the box?
-                  </button>
-                </h2>
-                <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                  <div class="accordion-body">
-                    The package includes the laptop, a 180W power adapter, quick start guide, and warranty information.
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div> -->
-    </div> 
+    </div>
   </div>
 
   <!-- You Might Also Like Section -->
   <div class="container mb-5">
-    <h2 class="text-center fw-bold mb-3">YOU MIGHT ALSO LIKE</h2>
+    <h2 class="text-center fw-bold mb-3">You Might Also Like</h2>
     <div class="row">
-        <% applyoffsimilerProducts.forEach(item => { %>
-            <div class="col-lg-3 col-md-6 mb-4">
-                <a href="/productView?id=<%= item._id %>" class="text-decoration-none text-dark">
-                    <div class="product-card">
-                        <img src="<%= item.productImage[0] %>" class="img-fluid mb-2" alt="<%= item.productName %>">
-                        <h5><%= item.productName %></h5>
-                        <div class="rating mb-2">
-                          
-                                <i class="fas fa-star"></i>
-                    
-                            <i class="far fa-star"></i>
-                            <span class="ms-1">4.0/5</span>
-                        </div>
-                        <div class="d-flex justify-content-center">
-                            <h5 class="fw-bold me-2">₹<%= item.salePrice %></h5>
-                            <% if (item.regularPrice && item.regularPrice > item.salePrice) { %>
-                                <span class="old-price">₹<%= item.regularPrice %></span>
-                                <% const discount = Math.round(((item.regularPrice - item.salePrice) / item.regularPrice) * 100); %>
-                                <span class="discount ms-2">-%<%= discount %></span>
-                            <% } %>
-                        </div>
-                    </div>
-                </a>
+      <% applyoffsimilerProducts.forEach(item => { %>
+        <div class="col-lg-3 col-md-6 mb-4">
+          <a href="/productView?id=<%= item._id %>" class="text-decoration-none text-dark">
+            <div class="product-card">
+              <img src="<%= item.productImage[0] || '/images/placeholder.jpg' %>" class="img-fluid mb-2" alt="<%= item.productName %>" width="200" height="200" loading="lazy">
+              <h5><%= item.productName %></h5>
+              <div class="rating mb-2">
+                <% for (let i = 1; i <= 5; i++) { %>
+                  <i class="<%= i <= Math.floor(item.averageRating || 0) ? 'fas fa-star' : i < (item.averageRating || 0) + 1 ? 'fas fa-star-half-alt' : 'far fa-star' %>"></i>
+                <% } %>
+                <span class="ms-1"><%= (item.averageRating || 0).toFixed(1) %>/5</span>
+              </div>
+              <div class="d-flex justify-content-center">
+                <h5 class="fw-bold me-2">₹<%= item.salePrice.toLocaleString('en-IN') %></h5>
+                <% if (item.regularPrice && item.regularPrice > item.salePrice) { %>
+                  <span class="old-price">₹<%= item.regularPrice.toLocaleString('en-IN') %></span>
+                  <% const discount = Math.round(((item.regularPrice - item.salePrice) / item.regularPrice) * 100); %>
+                  <span class="discount ms-2">-%<%= discount %></span>
+                <% } %>
+              </div>
             </div>
-        <% }) %>
+          </a>
+        </div>
+      <% }) %>
     </div>
-</div>
+  </div>
 
   <!-- Newsletter Section -->
   <div class="container">
     <div class="newsletter-box">
       <div class="row justify-content-center">
         <div class="col-lg-8 text-center">
-          <h3 class="fw-bold mb-2">STAY UP TO DATE ABOUT OUR LATEST OFFERS</h3>
-          <div class="row g-2">
-         
-          </div>
+          <h3 class="fw-bold mb-2">Stay Up to Date About Our Latest Offers</h3>
+          <form action="/newsletter/subscribe" method="POST" class="row g-2">
+            
+            <div class="col-md-8">
+              <input type="email" class="form-control" placeholder="Enter your email" name="email" required aria-label="Email for newsletter subscription">
+            </div>
+            <div class="col-md-4">
+              <button type="submit" class="btn btn-primary w-100" aria-label="Subscribe to newsletter">Subscribe</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js" integrity="sha512-IsNh5E3eYy3tr/JiX2Yx4vsCujtkhwl7SLqgnwLNgZV5T5G5f0r42h2vzm9O7z1wEhZ0W8+2/6N6G5lD7LsQzQ==" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" integrity="sha256-2Vq0NVOaJ8jbt3eDSDDxt1sd3z3kAtG3y3Umn2Q9zQ0=" crossorigin="anonymous"></script>
 
   <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // DOM Elements
+      const thumbnails = document.querySelectorAll('.product-thumb');
+      const mainImage = document.querySelector('.zoom-image');
+      const imageLink = document.querySelector('.image-popup');
+      const quantityInput = document.getElementById('quantity');
+      const addToCartBtn = document.getElementById('addToCartBtn');
+      const cartQuantity = parseInt('<%= cartQuantity %>') || 0;
+      const MAX_QUANTITY = 5;
 
-    
-document.addEventListener('DOMContentLoaded', () => {
-  const thumbnails = document.querySelectorAll('.product-thumb');
-  const mainImage = document.querySelector('.zoom-image');
-  const imageLink = document.querySelector('.image-popup');
-
-  if (!mainImage || !imageLink) {
-    console.error('Main image or image link element not found');
-    return;
-  }
-
-  // Thumbnail switching
-  thumbnails.forEach(thumb => {
-    thumb.addEventListener('click', () => {
-      thumbnails.forEach(t => t.classList.remove('active'));
-      thumb.classList.add('active');
-      const newSrc = thumb.querySelector('img')?.src || '/images/placeholder.jpg';
-      const newAlt = thumb.querySelector('img')?.alt || 'Product main image';
-      mainImage.style.opacity = '0';
-      setTimeout(() => {
-        mainImage.src = newSrc;
-        mainImage.alt = newAlt;
-        imageLink.href = newSrc;
-        mainImage.style.opacity = '1';
-      }, 300);
-    });
-  });
-
-  // Zoom functionality
-  document.querySelectorAll('.zoom-container').forEach(container => {
-    const img = container.querySelector('.zoom-image');
-    const lens = container.querySelector('.zoom-lens');
-
-    if (!img || !lens) {
-      console.error('Zoom image or lens not found');
-      return;
-    }
-
-    container.addEventListener('mousemove', (e) => {
-      if (window.innerWidth <= 767) return; // Disable zoom on mobile
-
-      const rect = container.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      let lensX = x - (lens.offsetWidth / 2);
-      let lensY = y - (lens.offsetHeight / 2);
-
-      const maxX = rect.width - lens.offsetWidth;
-      const maxY = rect.height - lens.offsetHeight;
-      lensX = Math.min(Math.max(0, lensX), maxX);
-      lensY = Math.min(Math.max(0, lensY), maxY);
-
-      lens.style.left = `${lensX}px`;
-      lens.style.top = `${lensY}px`;
-
-      const zoomRatio = 2;
-      const backgroundX = (x * zoomRatio) - (lens.offsetWidth / 2);
-      const backgroundY = (y * zoomRatio) - (lens.offsetHeight / 2);
-
-      lens.style.backgroundImage = `url(${img.src})`;
-      lens.style.backgroundSize = `${rect.width * zoomRatio}px ${rect.height * zoomRatio}px`;
-      lens.style.backgroundPosition = `-${backgroundX}px -${backgroundY}px`;
-    });
-
-    container.addEventListener('mouseenter', () => {
-      lens.style.opacity = '1';
-    });
-
-    container.addEventListener('mouseleave', () => {
-      lens.style.opacity = '0';
-    });
-  });
-
-  // Initialize Magnific Popup
-  if (typeof $ !== 'undefined' && $.magnificPopup) {
-    $('.image-popup').magnificPopup({
-      type: 'image',
-      closeOnContentClick: true,
-      mainClass: 'mfp-img-mobile',
-      image: {
-        verticalFit: true
+      // Error handling for critical elements
+      if (!mainImage || !imageLink) {
+        console.error('Main image or image link element not found');
+        return;
       }
-    });
-  }
 
-  // Get product data from hidden inputs
-  const getProductData = () => {
-    const productId = document.getElementById("product-id")?.value;
-    const maxQty = parseInt(document.getElementById("quantity")?.getAttribute('max')) || 0;
-    const price = parseFloat(document.getElementById("price")?.value) || 0;
-    
-    return { productId, maxQty, price };
-  };
-
-  // Quantity control functions
-  const increaseQty = () => {
-    const qtyInput = document.getElementById("quantity");
-    const { maxQty } = getProductData();
-    let currentQty = parseInt(qtyInput.value) || 1;
-    
-    if (currentQty < maxQty) {
-      qtyInput.value = currentQty + 1;
-    } else {
-      showErrorMessage("Cannot add more than available stock.");
-    }
-  };
-
-  const decreaseQty = () => {
-    const qtyInput = document.getElementById("quantity");
-    let currentQty = parseInt(qtyInput.value) || 1;
-    
-    if (currentQty > 1) {
-      qtyInput.value = currentQty - 1;
-     
-    }
-  };
-
-  // Make functions globally available
-  window.increaseQty = increaseQty;
-  window.decreaseQty = decreaseQty;
-
-  // Validate manual quantity input
-  const quantityInput = document.getElementById("quantity");
-  if (quantityInput) {
-    quantityInput.addEventListener("input", function () {
-      const { maxQty } = getProductData();
-      let value = parseInt(this.value);
-      
-      if (isNaN(value) || value < 1) {
-        this.value = 1;
-      } else if (value > maxQty) {
-        this.value = maxQty;
-        showErrorMessage("Cannot add more than available stock.");
-      }
-    });
-
-    quantityInput.addEventListener("keypress", function(e) {
-      if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
-        e.preventDefault();
-      }
-    });
-  }
-
-  const showErrorMessage = (message) => {
-    if (typeof Swal !== 'undefined') {
-      Swal.fire({
-        title: "Error!",
-        text: message,
-        icon: "error",
-        confirmButtonText: "OK"
+      // Thumbnail switching
+      thumbnails.forEach(thumb => {
+        thumb.addEventListener('click', () => {
+          thumbnails.forEach(t => t.classList.remove('active'));
+          thumb.classList.add('active');
+          const newSrc = thumb.querySelector('img')?.src || '/images/placeholder.jpg';
+          const newAlt = thumb.querySelector('img')?.alt || 'Product main image';
+          mainImage.style.opacity = '0';
+          setTimeout(() => {
+            mainImage.src = newSrc;
+            mainImage.alt = newAlt;
+            imageLink.href = newSrc;
+            mainImage.style.opacity = '1';
+          }, 300);
+        });
       });
-    } else {
-      console.error('SweetAlert not available. Error message:', message);
-    }
-  };
 
-  const showSuccessMessage = (title, callback) => {
-    if (typeof Swal !== 'undefined') {
-      Swal.fire({
-        title: title,
-        icon: "success",
-        timer: 1500,
-        showConfirmButton: false
-      }).then(callback);
-    } else {
-     
-      if (callback) callback();
-    }
-  };
+      // Zoom functionality with accessibility
+      document.querySelectorAll('.zoom-container').forEach(container => {
+        const img = container.querySelector('.zoom-image');
+        const lens = container.querySelector('.zoom-lens');
 
-  // Login prompt helper - Updated to use SweetAlert
-  const showLoginPrompt = () => {
-    if (typeof Swal !== 'undefined') {
-      Swal.fire({
-        title: "Please log in",
-        text: "You need to be logged in to add items to the cart.",
-        icon: "warning",
-        confirmButtonText: "Go to Login",
-        showCancelButton: true,
-        cancelButtonText: "Cancel"
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = "/login";
-        }
-      });
-    } else {
-     
-    }
-  };
-
-  // Add to cart functionality
-  const addToCartBtn = document.getElementById("addToCartBtn");
-  if (addToCartBtn) {
-    addToCartBtn.addEventListener("click", async () => {
-      try {
-        // Get current product data
-        const { productId, maxQty, price } = getProductData();
-        const quantity = parseInt(document.getElementById("quantity").value) || 1;
-
-        // Validation
-        if (!productId) {
-          showErrorMessage("Product ID not found.");
+        if (!img || !lens) {
+          console.error('Zoom image or lens not found');
           return;
         }
 
-        if (quantity < 1 || isNaN(quantity)) {
-          showErrorMessage("Please enter a valid quantity.");
-          return;
-        }
+        container.addEventListener('mousemove', (e) => {
+          if (window.innerWidth <= 767) return; // Disable zoom on mobile
 
-        if (quantity > maxQty) {
-          showErrorMessage("Cannot add more than available stock.");
-          document.getElementById("quantity").value = maxQty;
-          return;
-        }
+          const rect = container.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
 
-        // Disable button during request
-        addToCartBtn.disabled = true;
-        const originalText = addToCartBtn.textContent;
-        addToCartBtn.textContent = "Adding...";
+          let lensX = x - (lens.offsetWidth / 2);
+          let lensY = y - (lens.offsetHeight / 2);
 
-      
+          const maxX = rect.width - lens.offsetWidth;
+          const maxY = rect.height - lens.offsetHeight;
+          lensX = Math.min(Math.max(0, lensX), maxX);
+          lensY = Math.min(Math.max(0, lensY), maxY);
 
-        // Send request to backend
-        const response = await fetch("/cart/add", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          body: JSON.stringify({ 
-            productId: productId,
-            quantity: quantity,
-            price: price
-          })
+          lens.style.left = `${lensX}px`;
+          lens.style.top = `${lensY}px`;
+
+          const zoomRatio = 2;
+          const backgroundX = (x * zoomRatio) - (lens.offsetWidth / 2);
+          const backgroundY = (y * zoomRatio) - (lens.offsetHeight / 2);
+
+          lens.style.backgroundImage = `url(${img.src})`;
+          lens.style.backgroundSize = `${rect.width * zoomRatio}px ${rect.height * zoomRatio}px`;
+          lens.style.backgroundPosition = `-${backgroundX}px -${backgroundY}px`;
         });
 
-        const data = await response.json();
-      
+        container.addEventListener('mouseenter', () => {
+          lens.style.opacity = '1';
+        });
 
-        // Handle response
-        if (data.success) {
-          showSuccessMessage("Added to cart successfully!", () => {
-            window.location.href = "/cart";
+        container.addEventListener('mouseleave', () => {
+          lens.style.opacity = '0';
+        });
+
+        // Keyboard support for zoom
+        container.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            lens.style.opacity = '1';
+            imageLink.click(); // Trigger Magnific Popup
+          }
+        });
+      });
+
+      // Initialize Magnific Popup
+      if (typeof $ !== 'undefined' && $.magnificPopup) {
+        $('.image-popup').magnificPopup({
+          type: 'image',
+          closeOnContentClick: true,
+          mainClass: 'mfp-img-mobile',
+          image: {
+            verticalFit: true
+          }
+        });
+      } else {
+        console.warn('jQuery or Magnific Popup not loaded');
+      }
+
+      // Get product data
+      const getProductData = () => {
+        const productId = document.getElementById('product-id')?.value;
+        const maxQty = parseInt(document.getElementById('quantity')?.getAttribute('max')) || 0;
+        const price = parseFloat(document.getElementById('price')?.value) || 0;
+        const csrfToken = document.getElementById('csrf-token')?.value;
+        return { productId, maxQty, price, csrfToken };
+      };
+
+      // Quantity control functions
+      const increaseQty = () => {
+        if (!quantityInput) return;
+        const { maxQty } = getProductData();
+        let currentQty = parseInt(quantityInput.value) || 1;
+        const availableQty = Math.min(maxQty, MAX_QUANTITY - cartQuantity);
+        if (currentQty < availableQty) {
+          quantityInput.value = currentQty + 1;
+        } else {
+          showErrorMessage(`Only ${maxQty} items available in stock`);
+        }
+      };
+
+      const decreaseQty = () => {
+        if (!quantityInput) return;
+        let currentQty = parseInt(quantityInput.value) || 1;
+        if (currentQty > 1) {
+          quantityInput.value = currentQty - 1;
+        }
+      };
+
+      // Quantity button events
+      const increaseQtyBtn = document.getElementById('increaseQtyBtn');
+      const decreaseQtyBtn = document.getElementById('decreaseQtyBtn');
+      if (increaseQtyBtn) increaseQtyBtn.addEventListener('click', increaseQty);
+      if (decreaseQtyBtn) decreaseQtyBtn.addEventListener('click', decreaseQty);
+
+      // Validate quantity input
+      if (quantityInput) {
+        quantityInput.addEventListener('input', function () {
+          const { maxQty } = getProductData();
+          let value = parseInt(this.value);
+          const availableQty = Math.min(maxQty, MAX_QUANTITY - cartQuantity);
+          if (isNaN(value) || value < 1) {
+            this.value = 1;
+          } else if (value > availableQty) {
+            this.value = availableQty;
+            showErrorMessage(`Only ${maxQty} items available in stock`);
+          }
+        });
+
+        quantityInput.addEventListener('keypress', (e) => {
+          if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
+            e.preventDefault();
+          }
+        });
+      }
+
+      // Error and success messages
+      const showErrorMessage = (message) => {
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Quantity Limit Reached',
+            text: message,
+            icon: 'warning',
+            confirmButtonText: 'OK'
           });
+        } else {
+          console.error('SweetAlert not available. Error message:', message);
+          alert(message);
         }
-        else if(data.redirectUrl) {
-if (data.redirectUrl) {
-  await Swal.fire({
-    icon: 'warning',
-    title: 'Please log in',
-    text: data.message || 'You need to be logged in to use this feature.',
-    confirmButtonText: 'Go to Login',
-    showCancelButton: true
-  }).then(result => {
-    if (result.isConfirmed) {
-      window.location.href = data.redirectUrl;
-    }else{
-       window.location.reload()
-    }
-  })
-  return;
-}else {
-                        await Swal.fire({
-                        icon: 'error',
-                        title: 'Failed to Add',
-                        text: data.message || 'Something went wrong while adding to cart.',
-                        position: 'center', 
-                        showConfirmButton: true,
-                        confirmButtonText: 'OK',
-                        timer: 4000,
-                        timerProgressBar: true
-                    })
-}
+      };
 
-
+      const showSuccessMessage = (title, callback) => {
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title,
+            icon: 'success',
+            timer: 1500,
+            showConfirmButton: false
+          }).then(callback);
+        } else {
+          if (callback) callback();
         }
+      };
 
-      } catch (error) {
-        console.error("Add to cart error:", error);
-        showErrorMessage("Something went wrong. Please try again.");
-      } finally {
-        // Re-enable button
-        addToCartBtn.disabled = false;
-        addToCartBtn.textContent = originalText || "Add to Cart";
-      }
-    });
-  }
+      // Add to cart
+      if (addToCartBtn) {
+        addToCartBtn.addEventListener('click', async () => {
+          try {
+            const { productId, maxQty, price, csrfToken } = getProductData();
+            const quantity = parseInt(quantityInput?.value) || 1;
 
-  // Debug function to check current state
-  window.debugProductState = () => {
-    const { productId, maxQty, price } = getProductData();
-    const quantity = parseInt(document.getElementById("quantity").value) || 1;
-    
-   
-  };
+            if (!productId) {
+              showErrorMessage('Product ID not found.');
+              return;
+            }
 
+            if (quantity < 1 || isNaN(quantity)) {
+              showErrorMessage('Please enter a valid quantity.');
+              return;
+            }
 
-});
-         // Updated Wishlist Function
-    function initAddToWishlistButton(productId) {
-        const buttons = document.querySelectorAll('.wishlist-btn'); 
-        buttons.forEach(button => {
-            button.addEventListener('click', async function (e) {
-                e.preventDefault();
-                e.stopPropagation();
+            if (quantity > maxQty) {
+              showErrorMessage(`Only ${maxQty} items available in stock`);
+              quantityInput.value = maxQty;
+              return;
+            }
 
-                const Id =productId;
-          
-                const productName = this.dataset.productName; 
+            if (cartQuantity + quantity > MAX_QUANTITY) {
+              showErrorMessage(`Cannot add more. Maximum ${MAX_QUANTITY} items allowed (including ${cartQuantity} already in cart).`);
+              return;
+            }
 
-           
-                const originalContent = this.innerHTML;
-                this.disabled = true;
-                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+            addToCartBtn.disabled = true;
+            const originalText = addToCartBtn.textContent;
+            addToCartBtn.textContent = 'Adding...';
 
-                try {
-                    const res = await fetch(`/wishlist/add/${Id}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                    });
-
-                    const data = await res.json();
-
-                    if (data.success) {
-                     
-                        this.classList.add('active');
-
-                        
-                        await Swal.fire({
-                            icon: 'success',
-                            title: 'Added to Wishlist!',
-                            position: 'center',
-                            showConfirmButton: true,
-                            confirmButtonText: 'OK',
-                            timer: 3000,
-                            timerProgressBar: true
-                        });
-                    } else if(data.redirectUrl){
-
-                                              if (data.redirectUrl) {
-  await Swal.fire({
-    icon: 'warning',
-    title: 'Please log in',
-    text: data.message || 'You need to be logged in to use this feature.',
-    confirmButtonText: 'Go to Login',
-    showCancelButton: true
-  }).then(result => {
-    if (result.isConfirmed) {
-      window.location.href = data.redirectUrl;
-    }
-  });
-  return;
-}
-                    }else
-                        // Error message with centered SweetAlert
-                        await Swal.fire({
-                            icon: 'error',
-                            title: 'Failed to Add',
-                            text: data.message || 'Something went wrong while adding to wishlist.',
-                            position: 'center',
-                            showConfirmButton: true,
-                            confirmButtonText: 'OK',
-                            timer: 4000,
-                            timerProgressBar: true
-                        })
-
-   
-         
-                } catch (err) {
-                    console.error('Add to wishlist error:', err);
-                    // Network error message with centered SweetAlert
-                    await Swal.fire({
-                        icon: 'error',
-                        title: 'Network Error',
-                        text: 'Server error. Please try again later.',
-                        position: 'center',
-                        showConfirmButton: true,
-                        confirmButtonText: 'OK',
-                        timer: 4000,
-                        timerProgressBar: true
-                    });
-                } finally {
-                    // Re-enable button and restore original content
-                    this.disabled = false;
-                    this.innerHTML = originalContent;
-                }
+            const response = await fetch('/cart/add', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'CSRF-Token': csrfToken
+              },
+              body: JSON.stringify({ productId, quantity, price })
             });
+
+            const data = await response.json();
+
+            if (data.success) {
+              showSuccessMessage('Added to cart successfully!', () => {
+                window.location.href = '/cart';
+              });
+            } else if (data.redirectUrl) {
+              await Swal.fire({
+                icon: 'warning',
+                title: 'Please log in',
+                text: data.message || 'You need to be logged in to use this feature.',
+                confirmButtonText: 'Go to Login',
+                showCancelButton: true
+              }).then(result => {
+                if (result.isConfirmed) {
+                  window.location.href = data.redirectUrl;
+                } else {
+                  window.location.reload();
+                }
+              });
+            } else {
+              await Swal.fire({
+                icon: 'error',
+                title: 'Failed to Add',
+                text: data.message || 'Something went wrong while adding to cart.',
+                position: 'center',
+                showConfirmButton: true,
+                confirmButtonText: 'OK',
+                timer: 4000,
+                timerProgressBar: true
+              });
+            }
+          } catch (error) {
+            console.error('Add to cart error:', error);
+            showErrorMessage('Something went wrong. Please try again.');
+          } finally {
+            addToCartBtn.disabled = false;
+            addToCartBtn.textContent = originalText;
+          }
         });
       }
+
+      // Wishlist functionality
+      document.querySelectorAll('.wishlist-btn').forEach(button => {
+        button.addEventListener('click', async function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const productId = this.dataset.productId;
+          const productName = this.dataset.productName;
+          const originalContent = this.innerHTML;
+          this.disabled = true;
+          this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+          try {
+            const { csrfToken } = getProductData();
+            const res = await fetch(`/wishlist/add/${productId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'CSRF-Token': csrfToken
+              }
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+              this.classList.toggle('active');
+              this.setAttribute('aria-label', this.classList.contains('active') ? 'Remove from Wishlist' : 'Add to Wishlist');
+              await Swal.fire({
+                icon: 'success',
+                title: this.classList.contains('active') ? 'Added to Wishlist!' : 'Removed from Wishlist!',
+                position: 'center',
+                showConfirmButton: true,
+                confirmButtonText: 'OK',
+                timer: 3000,
+                timerProgressBar: true
+              });
+            } else if (data.redirectUrl) {
+              await Swal.fire({
+                icon: 'warning',
+                title: 'Please log in',
+                text: data.message || 'You need to be logged in to use this feature.',
+                confirmButtonText: 'Go to Login',
+                showCancelButton: true
+              }).then(result => {
+                if (result.isConfirmed) {
+                  window.location.href = data.redirectUrl;
+                }
+              });
+            } else {
+              await Swal.fire({
+                icon: 'error',
+                title: 'Failed to Add',
+                text: data.message || 'Something went wrong while adding to wishlist.',
+                position: 'center',
+                showConfirmButton: true,
+                confirmButtonText: 'OK',
+                timer: 4000,
+                timerProgressBar: true
+              });
+            }
+          } catch (err) {
+            console.error('Wishlist error:', err);
+            await Swal.fire({
+              icon: 'error',
+              title: 'Network Error',
+              text: 'Server error. Please try again later.',
+              position: 'center',
+              showConfirmButton: true,
+              confirmButtonText: 'OK',
+              timer: 4000,
+              timerProgressBar: true
+            });
+          } finally {
+            this.disabled = false;
+            this.innerHTML = originalContent;
+          }
+        });
+      });
+
+      // Debug function
+      window.debugProductState = () => {
+        const { productId, maxQty, price } = getProductData();
+        const quantity = parseInt(quantityInput?.value) || 1;
+     
+      };
+    });
   </script>
   <%- include("../../views/partials/user/footer") %>
 </body>

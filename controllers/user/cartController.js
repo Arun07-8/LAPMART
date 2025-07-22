@@ -67,7 +67,6 @@ const Wishlist=require("../../models/wishlistSchema")
       console.error("Cart page can't be loaded:", error);
     }
   };
-
 const addTocart = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -75,97 +74,118 @@ const addTocart = async (req, res) => {
       return res.status(401).json({ success: false, message: "Please login to add items to cart" });
     }
 
-    const { productId, quantity = 1 } = req.body;
+    const { productId, quantity } = req.body;
+
+    if (!productId || !quantity || !Number.isInteger(quantity) || quantity <= 0) {
+      return res.status(400).json({ success: false, message: "Out of Stock" });
+    }
+
     const product = await Product.findOne({
       _id: productId,
       isDeleted: false,
-      isListed: true
+      isListed: true,
     }).populate('category').populate('brand');
 
-    if (!product) return res.status(404).json({ success: false, message: "Product not found or unavailable" });
-    if (!product.isListed || !product.category?.isListed || !product.brand?.isListed) {
-      return res.status(403).json({ success: false, message: "This product is blocked." });
-    }
-    if (!product.category?.isListed) {
-      return res.status(403).json({ success: false, message: "This product's category is blocked." });
-    }
-    if (!product.brand?.isListed) {
-      return res.status(403).json({ success: false, message: "This product's brand is blocked." });
-    }
-
-    const maximumQuantity = 5;
-    let cart = await Cart.findOne({ userId });
-
-    if (cart) {
-      const existingItemIndex = cart.items.findIndex(item => item.productId.toString() === productId);
-
-      if (existingItemIndex > -1) {
-        const existingQty = cart.items[existingItemIndex].quantity;
-        const newQty = existingQty + quantity;
-
-        if (newQty > product.quantity) {
-          return res.status(400).json({ success: false, message: `Only ${product.quantity - existingQty} more in stock.` });
-        }
-
-        if (newQty > maximumQuantity) {
-          return res.status(400).json({ success: false, message: `Maximum ${maximumQuantity} units per product allowed.` });
-        }
-
-        cart.items[existingItemIndex].quantity = newQty;
-        cart.items[existingItemIndex].totalPrice = product.salePrice * newQty;
-      } else {
-        if (quantity > product.quantity) {
-          return res.status(400).json({ success: false, message: `Only ${product.quantity} items available.` });
-        }
-
-        if (quantity > maximumQuantity) {
-          return res.status(400).json({ success: false, message: `Maximum ${maximumQuantity} units per product allowed.` });
-        }
-
-        cart.items.push({
-          productId: product._id,
-          salePrice: product.salePrice,
-          quantity,
-          totalPrice: product.salePrice * quantity
-        });
-      }
-    } else {
-      if (quantity > product.quantity) {
-        return res.status(400).json({ success: false, message: `Only ${product.quantity} items available.` });
-      }
-
-      if (quantity > maximumQuantity) {
-        return res.status(400).json({ success: false, message: `Maximum ${maximumQuantity} units per product allowed.` });
-      }
-
-      cart = new Cart({
-        userId,
-        items: [{
-          productId: product._id,
-          price: product.regularPrice,
-          salePrice: product.salePrice,
-          quantity,
-          totalPrice: product.salePrice * quantity
-        }]
+    if (!product || !product.category?.isListed || !product.brand?.isListed) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found or unavailable (blocked product, category, or brand)",
       });
     }
 
-    await cart.save();
+    const maximumQuantity = 5;
 
-    await Wishlist.updateOne(
-      { userId },
-      { $pull: { products: { productId: product._id } } }
-    );
+    const validateQuantity = (qty, availableStock) => {
+      if (qty > availableStock) {
+        return `Only ${availableStock} items available in stock`;
+      }
+      if (qty > maximumQuantity) {
+        return `Maximum ${maximumQuantity} units per product allowed`;
+      }
+      return null;
+    };
 
-    res.status(200).json({ success: true, message: "Product added to cart successfully!" });
+    let cart = await Cart.findOne({ userId }); 
 
+ 
+    const session = await Cart.startSession();
+    session.startTransaction();
+
+    try {
+      if (cart) {
+        const existingItemIndex = cart.items.findIndex(
+          (item) => item.productId.toString() === productId
+        );
+
+        if (existingItemIndex > -1) {
+          const existingQty = cart.items[existingItemIndex].quantity;
+          const newQty = existingQty + quantity;
+          const stockError = validateQuantity(newQty, product.quantity);
+          if (stockError) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({ success: false, message: stockError });
+          }
+
+          cart.items[existingItemIndex].quantity = newQty;
+          cart.items[existingItemIndex].totalPrice = product.salePrice * newQty;
+        } else {
+          const stockError = validateQuantity(quantity, product.quantity);
+          if (stockError) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({ success: false, message: stockError });
+          }
+
+          cart.items.push({
+            productId: product._id,
+            salePrice: product.salePrice,
+            quantity,
+            totalPrice: product.salePrice * quantity,
+          });
+        }
+      } else {
+        const stockError = validateQuantity(quantity, product.quantity);
+        if (stockError) {
+          await session.abortTransaction();
+          session.endSession();
+          return res.status(400).json({ success: false, message: stockError });
+        }
+
+        cart = new Cart({
+          userId,
+          items: [{
+            productId: product._id,
+            salePrice: product.salePrice,
+            quantity,
+            totalPrice: product.salePrice * quantity,
+          }],
+        });
+      }
+
+  
+      await cart.save({ session });
+
+      await Wishlist.updateOne(
+        { userId },
+        { $pull: { products: { productId: product._id } } },
+        { session }
+      );
+
+      await session.commitTransaction();
+      session.endSession();
+
+      res.status(200).json({ success: true, message: "Product added to cart successfully!" });
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error; 
+    }
   } catch (error) {
     console.error("Add to cart error:", error);
     res.status(500).json({ success: false, message: "Server error. Please try again." });
   }
 };
-
-
 const updateCartQuantity = async (req, res) => {
   try {
     const { productId, quantity } = req.body;
@@ -190,8 +210,7 @@ const updateCartQuantity = async (req, res) => {
       }
 
     if (quantity > product.quantity) {
-
-      if (quantity > item.quantity) {
+       if (quantity > item.quantity) {
         return res.status(400).json({ message: `Only ${product.quantity} units available.` });
       }
     }

@@ -51,17 +51,14 @@ const checkOutpage = async (req, res) => {
       let couponCode = '';
 
 
-
-      if (appliedCoupon?.couponId) {
-        coupon = await Coupon.findOne({
-          _id: appliedCoupon.couponId,
-          couponCode: appliedCoupon.couponCode,
-          isActive: true,
-          isDeleted: false,
-          validFrom: { $lte: new Date() },
-          validUpto: { $gte: new Date() },
-          usedBy: { $nin: [userId] },
-        });
+if (appliedCoupon) {
+  // Fetch the full coupon object from DB
+  coupon = await Coupon.findById(appliedCoupon.couponId);
+  couponCode = coupon?.couponCode || "";
+  discountAmount = Number(appliedCoupon.discount) || 0;
+}
+     
+      
 
         if (coupon && totalPrice >= coupon.minPurchase) {
   
@@ -86,34 +83,35 @@ const checkOutpage = async (req, res) => {
             req.session.save(err => (err ? reject(err) : resolve()));
           });
         }
-      }
+      
 
       const grandTotal = Math.max(totalPrice - discountAmount, 0);
 
    
 
 
-      res.render("checkOut", {
-        key_id: process.env.RAZORPAY_KEY_ID,
-        user: userData,
-        Address: addresses,
-        wallet: wallet,
-        Cart: {
-          ...existingCart?.toObject(),
-          items: existingCart?.items.map(item => ({
-            ...item.toObject(),
-            finalPrice: item.finalPrice,
-            subtotal: item.subtotal,
-            savings: item.savings,
-          })) || [],
-          totalPrice,
-          totalSavings,
-          discountAmount,
-          grandTotal,
-        },
-        coupon,
-        appliedCoupon: appliedCoupon ? { couponId: appliedCoupon.couponId, code: couponCode, discount: discountAmount } : null,
-      });
+   res.render("checkOut", {
+  key_id: process.env.RAZORPAY_KEY_ID,
+  user: userData,
+  Address: addresses,
+  wallet: wallet,
+  Cart: {
+    ...existingCart?.toObject(),
+    items: existingCart?.items.map(item => ({
+      ...item.toObject(),
+      finalPrice: item.finalPrice,
+      subtotal: item.subtotal,
+      savings: item.savings,
+    })) || [],
+    totalPrice,
+    totalSavings,
+    discountAmount,
+    grandTotal,
+  },
+  coupon,
+  appliedCoupon: appliedCoupon ? { couponId: appliedCoupon.couponId, code: couponCode, discount: discountAmount } : null,
+});
+
     } catch (error) {
       console.error("Checkout page error:", error);
       res.redirect("/pageNotFound");

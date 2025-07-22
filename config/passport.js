@@ -29,9 +29,9 @@ passport.use(new GoogleStrategy({
 
 async(req,accessToken,refreshToken,profile,done)=>{
     try {
-     console.log("hello")
+    
         let  user=await  User.findOne({googleid:profile.id});
-      console.log(user)
+    
         if(user){
            if( !user.isBlocked)
                return  done(null,user);
