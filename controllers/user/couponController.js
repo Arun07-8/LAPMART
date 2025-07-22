@@ -1,14 +1,16 @@
 const Coupon = require("../../models/couponSchema");
 
-const moment = require('moment-timezone');
 
 const availableCoupon = async (req, res) => {
   try {
-    const nowIST = moment().tz('Asia/Kolkata');
+    // Convert server time to IST
+    const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
 
-    const startOfDay = nowIST.clone().startOf('day').toDate();
-    const endOfDay = nowIST.clone().endOf('day').toDate();
+    // Calculate start and end of day in IST
+    const startOfDay = new Date(new Date(now).setHours(0, 0, 0, 0));
+    const endOfDay = new Date(new Date(now).setHours(23, 59, 59, 999));
 
+    // Fetch coupons that are active and valid today
     const coupons = await Coupon.find({
       isDeleted: false,
       isActive: true,
@@ -16,8 +18,8 @@ const availableCoupon = async (req, res) => {
       validUpto: { $gte: startOfDay },
     }).lean();
 
-    console.log("IST Now:", nowIST.toDate());
-    console.log("Coupons:", coupons);
+    console.log("IST Now:", now);
+    console.log("Coupons available:", coupons);
 
     res.json({ success: true, coupons });
   } catch (error) {
