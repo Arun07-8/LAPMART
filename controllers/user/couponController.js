@@ -17,7 +17,7 @@ const availableCoupon = async (req, res) => {
       validFrom: { $lte: endOfDay },
       validUpto: { $gte: startOfDay },
     }).lean();
-
+console.log("avablecoupon:",availableCoupon)
     console.log("IST Now:", now);
     console.log("Coupons available:", coupons);
 
@@ -57,13 +57,13 @@ const applyCoupon = async (req, res) => {
       validUpto: { $gte: startOfDay },
       usedBy: { $nin: [userId] },
     });
-
-    // if (!coupon) {
-    //   return res.status(404).json({
-    //     success: false,
-    //     message: 'Coupon not found or already used by you',
-    //   });
-    // }
+console.log("this in applycoupon:", coupon)
+    if (!coupon) {
+      return res.status(404).json({
+        success: false,
+        message: 'Coupon not found or already used by you',
+      });
+    }
 
     if (totalAmount < coupon.minPurchase) {
       return res.status(400).json({
