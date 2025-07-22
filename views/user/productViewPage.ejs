@@ -320,7 +320,7 @@
       const imageLink = document.querySelector('.image-popup');
       const quantityInput = document.getElementById('quantity');
       const addToCartBtn = document.getElementById('addToCartBtn');
-     const cartQuantity = parseInt('<%= typeof cartQuantity !== "undefined" ? cartQuantity : 0 %>');
+      const cartQuantity = parseInt('<%= typeof cartQuantity !== "undefined" ? cartQuantity : 0 %>');
 
       const MAX_QUANTITY = 5;
 
@@ -434,7 +434,7 @@
         if (currentQty < availableQty) {
           quantityInput.value = currentQty + 1;
         } else {
-          showErrorMessage(`Only ${maxQty} items available in stock`);
+          showErrorMessage(`Cannot add more. Maximum ${MAX_QUANTITY} items allowed (including ${cartQuantity} already in cart).`);
         }
       };
 
