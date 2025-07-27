@@ -3,200 +3,868 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Lapmart</title>
+    <title>Lapmart - Login</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/css/userside-css/userside-css/login.css" type="text/css">
-</head>
-<body>
-    <!-- Store session message from server -->
- <div id="session-data" data-message="<%= typeof message !== 'undefined' ? JSON.stringify(message) : 'null' %>"></div>
-    <div class="login-container">
-        <div class="login-image">
-            <img src="https://images.unsplash.com/photo-1593642632823-8f785ba67e45?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2664&q=80" alt="Laptop">
-            <div class="image-overlay">
-                <div class="brand">
-                    <div class="brand-logo">
-                        <i class="fas fa-laptop"></i>
-                    </div>
-                    <h1>LAPMART</h1>
-                    <p>Premium laptops and computing solutions for professionals and gamers.</p>
-                    <div class="featured-products">
-                        <span class="product-badge">Gaming</span>
-                        <span class="product-badge">Ultrabooks</span>
-                        <span class="product-badge">Workstations</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="login-form">
-            <div class="login-header">
-                <h2>Welcome back! Glad to see you, Again!</h2>
-                <p>Please enter your credentials to access your account.</p>
-            </div>
-            <form action="/login" method="POST">
-                <div class="form-group">
-                    <input type="email" id="email" name="email" placeholder="Enter your email">
-                    <div class="error1 error-message" style="color: red;"></div>
-                </div>
-                <div class="form-group">
-                    <input type="password" id="password" name="password" placeholder="Enter your password">
-                    <div class="error2 error-message" style="color: red;"></div>
-                    <span class="password-toggle" onclick="togglePassword()">
-                        <i class="fas fa-eye" id="toggleIcon"></i>
-                    </span>
-                </div>
-                <div class="form-footer">
-                    <a href="/forgot-password" class="forgot-password">Forgot Password?</a>
-                </div>
-                <button type="submit" class="login-button">Login</button>
-                <div class="signup-link">
-                    Don't have an account? <a href='/signup'>Register Now</a>
-                </div>
-                <div class="social-login">
-                    <p>Or Login with</p>
-                    <div class="social-icons">
-                        <a href="/auth/google" class="social-icon google-icon">
-                            <i class="fab fa-google"></i>
-                            <span>Sign in with Google</span>
-                        </a>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <script>
-        // Get session message from the div
-        const sessionData = document.getElementById('session-data');
-        let sessionMessage = sessionData.dataset.message;
-        // Convert string to object if not null
-        if (sessionMessage !== 'null') {
-            try {
-                sessionMessage = JSON.parse(sessionMessage);
-            } catch (error) {
-                console.error("Failed to parse sessionMessage:", error);
-            }
-        } else {
-            sessionMessage = null;
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
 
-                document.addEventListener("DOMContentLoaded", function () {
-                    if (typeof Swal === 'undefined') {
-                        console.error("SweetAlert2 not loaded");
-                        return;
-                    }
+        body {
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            position: relative;
+            overflow-x: hidden;
+        }
 
-                    // Show server session message
-                    if (sessionMessage) {
-                        let text, icon, title;
-                        if (typeof sessionMessage === 'string') {
-                            text = sessionMessage;
-                            icon = 'error';
-                            title = 'Error';
-                        } else if (sessionMessage && sessionMessage.text) {
-                            text = sessionMessage.text;
-                            icon = sessionMessage.type === 'success' ? 'success' : 'error';
-                            title = sessionMessage.type === 'success' ? 'Success' : 'Error';
-                        }
-                        if (text) {
-                            Swal.fire({
-                                icon: icon,
-                                title: title,
-                                text: text,
-                                confirmButtonColor: '#3a7bd5'
-                            });
-                        }
-                    }
-                })
+        @media (max-width: 768px) {
+            body {
+                padding: 0.25rem;
+                align-items: flex-start;
+                padding-top: 0.5rem;
+                padding-bottom: 0.5rem;
+                display: block;
+            }
+        }
 
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="rgba(102,126,234,0.05)"/><circle cx="80" cy="40" r="0.8" fill="rgba(118,75,162,0.04)"/><circle cx="40" cy="80" r="0.6" fill="rgba(102,126,234,0.03)"/><circle cx="90" cy="90" r="1.2" fill="rgba(118,75,162,0.02)"/><circle cx="10" cy="60" r="0.7" fill="rgba(102,126,234,0.04)"/></svg>') repeat;
+            animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            z-index: 1;
+            position: relative;
+        }
+
+        .form-box {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 2rem;
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.15),
+                0 20px 40px -8px rgba(102, 126, 234, 0.1),
+                0 0 0 1px rgba(0, 0, 0, 0.05);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            overflow: hidden;
+            width: 100%;
+            min-height: 600px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @media (max-width: 992px) {
+            .form-box {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+                margin: 0 auto;
+                min-height: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-box {
+                border-radius: 1.5rem;
+                margin: 0;
+                max-height: calc(100vh - 1rem);
+                box-shadow: 
+                    0 20px 40px -8px rgba(0, 0, 0, 0.12),
+                    0 15px 30px -6px rgba(102, 126, 234, 0.08),
+                    0 0 0 1px rgba(0, 0, 0, 0.06);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-box {
+                border-radius: 1.25rem;
+                max-height: calc(100vh - 0.5rem);
+                box-shadow: 
+                    0 15px 30px -6px rgba(0, 0, 0, 0.1),
+                    0 10px 20px -4px rgba(102, 126, 234, 0.06),
+                    0 0 0 1px rgba(0, 0, 0, 0.05);
+            }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-section {
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: rgba(255,255,255,0.95);
+            overflow-y: auto;
+        }
+
+        .image-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%);
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 30s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .brand-logo {
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #D4AF37;
+            z-index: 1;
+            position: relative;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+            animation: glow 2s ease-in-out infinite alternate;
+            margin-bottom: 2rem;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2)); }
+            to { filter: drop-shadow(0 15px 30px rgba(212,175,55,0.4)); }
+        }
+
+        .brand-tagline {
+            color: rgba(255,255,255,0.95);
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 1;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .carousel-container {
+            width: 100%;
+            max-width: 300px;
+            overflow: hidden;
+            margin-top: 1rem;
+            z-index: 1;
+        }
+
+        .carousel {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .carousel img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2rem;
+            line-height: 1.2;
+            text-align: center;
+            position: relative;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 0.75rem;
+            background: rgba(249, 250, 251, 0.95);
+            backdrop-filter: blur(10px);
+            font-size: 0.95rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #374151;
+            font-weight: 500;
+        }
+
+        input::placeholder {
+            color: #9CA3AF;
+            font-weight: 400;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 
+                0 0 0 4px rgba(102, 126, 234, 0.1),
+                0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        input:hover:not(:focus) {
+            border-color: rgba(102, 126, 234, 0.5);
+            background: rgba(255, 255, 255, 0.98);
+        }
+
+        input[aria-invalid="true"] {
+            border-color: #ef4444;
+        }
+
+        .password-group {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #6B7280;
+            transition: color 0.2s ease;
+            z-index: 2;
+        }
+
+        .toggle-password:hover {
+            color: #667eea;
+        }
+
+        .error-message {
+            position: absolute;
+            bottom: -1.2rem;
+            left: 0;
+            color: #ef4444;
+            font-size: 0.7rem;
+            visibility: hidden;
+            width: 100%;
+            line-height: 1.2;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .error-message.show {
+            visibility: visible;
+            animation: slideInError 0.3s ease-out;
+        }
+
+        @keyframes slideInError {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .password-strength {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: #6B7280;
+            display: none;
+        }
+
+        .password-strength.show {
+            display: block;
+        }
+
+        .password-strength.weak { color: #ef4444; }
+        .password-strength.medium { color: #f59e0b; }
+        .password-strength.strong { color: #10b981; }
+
+        .submit-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 1rem;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px -5px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 5px 15px -5px rgba(102, 126, 234, 0.4);
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .forgot-password a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .forgot-password a:hover::after {
+            width: 100%;
+        }
+
+        .forgot-password a:hover {
+            color: #764ba2;
+        }
+
+        .divider {
+            position: relative;
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .divider span {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 0 1.5rem;
+            color: #6B7280;
+            font-size: 0.85rem;
+            position: relative;
+            font-weight: 500;
+        }
+
+        .google-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 0.875rem;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            color: #374151;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+
+        .google-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: #4285f4;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(66, 133, 244, 0.2);
+            color: #374151;
+            text-decoration: none;
+        }
+
+        .google-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #6B7280;
+            font-weight: 500;
+        }
+
+        .signup-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .signup-link a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .signup-link a:hover::after {
+            width: 100%;
+        }
+
+        .signup-link a:hover {
+            color: #764ba2;
+        }
+
+        /* Consolidated responsive styles */
+        @media (max-width: 992px) {
+            .form-box { grid-template-columns: 1fr; max-width: 500px; min-height: auto; }
+            .image-section { order: -1; min-height: 120px; padding: 1.5rem; }
+            .brand-logo { width: 80px; height: 80px; font-size: 1.2rem; margin-bottom: 1rem; }
+            .brand-tagline { font-size: 0.9rem; }
+            .form-section { padding: 2rem; }
+            .carousel-container { max-width: 200px; }
+        }
+
+        @media (max-width: 768px) {
+            .form-section { padding: 1.5rem; max-height: calc(100vh - 140px); }
+            h2 { font-size: 1.5rem; margin-bottom: 1.5rem; }
+            .input-group { margin-bottom: 1.25rem; }
+            input { padding: 0.75rem; font-size: 0.9rem; }
+            .image-section { min-height: 100px; padding: 1rem; }
+            .brand-logo { width: 60px; height: 60px; font-size: 1rem; margin-bottom: 0.75rem; }
+            .brand-tagline { font-size: 0.8rem; }
+            .submit-btn { padding: 0.75rem; font-size: 0.95rem; }
+            .divider { margin: 1.25rem 0; }
+            .google-btn { padding: 0.75rem; font-size: 0.9rem; }
+            .signup-link { margin-top: 1.25rem; font-size: 0.85rem; }
+            .carousel-container { max-width: 180px; }
+        }
+
+        @media (max-width: 480px) {
+            .form-section { padding: 1.25rem; max-height: calc(100vh - 120px); }
+            h2 { font-size: 1.375rem; margin-bottom: 1.25rem; }
+            .input-group { margin-bottom: 1rem; }
+            input { padding: 0.7rem; font-size: 0.875rem; }
+            .submit-btn { padding: 0.7rem; font-size: 0.9rem; }
+            .image-section { min-height: 90px; padding: 0.875rem; }
+            .brand-logo { width: 55px; height: 55px; font-size: 0.9rem; margin-bottom: 0.625rem; }
+            .brand-tagline { font-size: 0.75rem; }
+            .divider { margin: 1rem 0; }
+            .google-btn { padding: 0.7rem; font-size: 0.875rem; }
+            .signup-link { margin-top: 1rem; font-size: 0.8rem; }
+            .carousel-container { max-width: 160px; }
+        }
+
+        @media (max-width: 375px) {
+            .form-section { padding: 1rem; max-height: calc(100vh - 110px); }
+            h2 { font-size: 1.25rem; margin-bottom: 1rem; }
+            .input-group { margin-bottom: 0.875rem; }
+            input { padding: 0.625rem; font-size: 0.825rem; }
+            .submit-btn { padding: 0.625rem; font-size: 0.875rem; }
+            .brand-logo { width: 50px; height: 50px; font-size: 0.8rem; margin-bottom: 0.5rem; }
+            .brand-tagline { font-size: 0.7rem; }
+            .divider { margin: 0.875rem 0; }
+            .google-btn { padding: 0.625rem; font-size: 0.825rem; }
+            .signup-link { margin-top: 0.875rem; font-size: 0.75rem; }
+            .carousel-container { max-width: 140px; }
+        }
+
+        @media (max-width: 320px) {
+            .form-section { padding: 0.875rem; max-height: calc(100vh - 100px); }
+            h2 { font-size: 1.125rem; margin-bottom: 0.875rem; }
+            .input-group { margin-bottom: 0.75rem; }
+            input { padding: 0.575rem; font-size: 0.8rem; }
+            .submit-btn { padding: 0.575rem; font-size: 0.85rem; }
+            .brand-logo { width: 45px; height: 45px; font-size: 0.75rem; margin-bottom: 0.375rem; }
+            .brand-tagline { font-size: 0.65rem; }
+            .divider { margin: 0.75rem 0; }
+            .google-btn { padding: 0.575rem; font-size: 0.8rem; }
+            .signup-link { margin-top: 0.75rem; font-size: 0.7rem; }
+            .carousel-container { max-width: 120px; }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(243, 244, 246, 0.5);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        }
+
+        .d-none {
+            display: none !important;
+        }
+
+        .spinner-border {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            vertical-align: text-bottom;
+            border: 0.15em solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spinner-border 0.75s linear infinite;
+        }
+
+        @keyframes spinner-border {
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner-border-sm {
+            width: 0.875rem;
+            height: 0.875rem;
+            border-width: 0.125em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <div class="form-box">
+            <div class="form-section">
+                <h2>Welcome Back</h2>
+                <form id="login-form" action="/login" method="post" novalidate>
+                    <div class="input-group">
+                        <label for="email" class="visually-hidden">Email</label>
+                        <input type="email" placeholder="Enter your email" name="email" id="email" required aria-describedby="email-error">
+                        <div class="error-message error1" id="email-error" aria-live="polite"></div>
+                    </div>
+                    
+                    <div class="input-group password-group">
+                        <label for="password" class="visually-hidden">Password</label>
+                        <input type="password" placeholder="Enter your password" id="password" name="password" required aria-describedby="password-error">
+                        <div class="error-message error2" id="password-error" aria-live="polite"></div>
+                        <div class="password-strength" id="password-strength"></div>
+                        <button type="button" class="toggle-password" aria-label="Toggle password visibility" onclick="togglePassword()">
+                            <i class="fas fa-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="forgot-password">
+                        <a href="/forgot-password">Forgot Password?</a>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="login-btn">
+                        <span id="login-btn-text">Sign In</span>
+                        <span id="login-spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    </button>
+                    
+                    <div class="divider">
+                        <span>OR</span>
+                    </div>
+                    
+                    <a href="/auth/google" class="google-btn">
+                        <img class="google-icon" src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google icon">
+                        Continue with Google
+                    </a>
+                    
+                    <p class="signup-link">
+                        Don't have an account? <a href="/signup">Sign Up</a>
+                    </p>
+                </form>
+            </div>
+            
+            <div class="image-section">
+                <div class="brand-logo">
+                    LAPMART
+                </div>
+                <div class="brand-tagline">
+                    Laptops & More
+                </div>
+                <div class="carousel-container">
+                    <div class="carousel" id="laptop-carousel">
+                        <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853" alt="Laptop 1">
+                        <img src="https://images.unsplash.com/photo-1516321310762-479437144107" alt="Laptop 2">
+                        <img src="https://images.unsplash.com/photo-1504707748692-419802cf939d" alt="Laptop 3">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script>
+        // Session message handling
+        document.addEventListener("DOMContentLoaded", function () {
+            if (typeof Swal === 'undefined') {
+                console.error("SweetAlert2 not loaded");
+                return;
+            }
+
+            const sessionData = document.getElementById('session-data');
+            let sessionMessage = sessionData.dataset.message;
+            if (sessionMessage !== 'null') {
+                try {
+                    sessionMessage = JSON.parse(sessionMessage);
+                } catch (error) {
+                    console.error("Failed to parse sessionMessage:", error);
+                    sessionMessage = null;
+                }
+
+                if (sessionMessage) {
+                    let text = typeof sessionMessage === 'string' ? sessionMessage : sessionMessage.text;
+                    let icon = typeof sessionMessage === 'string' ? 'error' : (sessionMessage.type === 'success' ? 'success' : 'error');
+                    let title = icon === 'success' ? 'Success' : 'Error';
+                    if (text) {
+                        Swal.fire({
+                            icon: icon,
+                            title: title,
+                            text: text,
+                            confirmButtonColor: '#3a7bd5'
+                        });
+                    }
+                }
+            }
+        });
+
+        // Password visibility toggle
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             const toggleIcon = document.getElementById('toggleIcon');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.classList.remove('fa-eye');
-                toggleIcon.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                toggleIcon.classList.remove('fa-eye-slash');
-                toggleIcon.classList.add('fa-eye');
-            }
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            toggleIcon.classList.toggle('fa-eye', isPassword);
+            toggleIcon.classList.toggle('fa-eye-slash', !isPassword);
+            passwordInput.focus();
         }
 
+        // Form validation with debouncing
         document.addEventListener("DOMContentLoaded", function () {
             const email = document.getElementById("email");
             const password = document.getElementById("password");
             const error1 = document.querySelector(".error1");
             const error2 = document.querySelector(".error2");
-            const signupForm = document.querySelector("form");
+            const passwordStrength = document.getElementById("password-strength");
+            const loginForm = document.getElementById("login-form");
+            const loginBtn = document.getElementById("login-btn");
+            const loginBtnText = document.getElementById("login-btn-text");
+            const loginSpinner = document.getElementById("login-spinner");
+
+            function debounce(func, wait) {
+                let timeout;
+                return function (...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), wait);
+                };
+            }
 
             function showError(errorElement, message) {
-                errorElement.style.display = "block";
                 errorElement.innerHTML = message;
+                errorElement.classList.add('show');
             }
 
             function hideError(errorElement) {
-                errorElement.style.display = "none";
+                errorElement.classList.remove('show');
                 errorElement.innerHTML = "";
+            }
+
+            function updatePasswordStrength(passwordVal) {
+                const strongPass = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+                const mediumPass = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+                passwordStrength.classList.add('show');
+                if (!passwordVal) {
+                    passwordStrength.classList.remove('weak', 'medium', 'strong');
+                    passwordStrength.innerHTML = "";
+                    passwordStrength.classList.remove('show');
+                } else if (strongPass.test(passwordVal)) {
+                    passwordStrength.classList.remove('weak', 'medium');
+                    passwordStrength.classList.add('strong');
+                    passwordStrength.innerHTML = "Strong password";
+                } else if (mediumPass.test(passwordVal)) {
+                    passwordStrength.classList.remove('weak', 'strong');
+                    passwordStrength.classList.add('medium');
+                    passwordStrength.innerHTML = "Medium password";
+                } else {
+                    passwordStrength.classList.remove('medium', 'strong');
+                    passwordStrength.classList.add('weak');
+                    passwordStrength.innerHTML = "Weak password";
+                }
             }
 
             function emailValidateChecking() {
                 const emailVal = email.value.trim();
-                const emailpattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
                 if (!emailVal) {
                     showError(error1, "Email cannot be empty");
+                    email.setAttribute('aria-invalid', 'true');
                     return false;
-                } else if (!emailpattern.test(emailVal)) {
+                } else if (!emailPattern.test(emailVal)) {
                     showError(error1, "Invalid email format");
+                    email.setAttribute('aria-invalid', 'true');
                     return false;
                 } else {
                     hideError(error1);
+                    email.setAttribute('aria-invalid', 'false');
                     return true;
                 }
             }
 
             function passwordValidateChecking() {
                 const passwordVal = password.value.trim();
-                const strongpass = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+                const strongPass = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
                 let isValid = true;
 
                 if (!passwordVal) {
                     showError(error2, "Password cannot be empty");
+                    password.setAttribute('aria-invalid', 'true');
                     isValid = false;
                 } else if (passwordVal.length < 8) {
-                    showError(error2, "Should contain at least 8 characters");
+                    showError(error2, "Password must be at least 8 characters");
+                    password.setAttribute('aria-invalid', 'true');
                     isValid = false;
-                } else if (!strongpass.test(passwordVal)) {
-                    showError(error2, "Password must include at least one number and one special character (@$!%*?&).");
+                } else if (!strongPass.test(passwordVal)) {
+                    showError(error2, "Password must include at least one number and one special character (@$!%*?&)");
+                    password.setAttribute('aria-invalid', 'true');
                     isValid = false;
                 } else {
                     hideError(error2);
+                    password.setAttribute('aria-invalid', 'false');
                 }
 
+                updatePasswordStrength(passwordVal);
                 return isValid;
             }
 
-            email.addEventListener("input", emailValidateChecking);
-            password.addEventListener("input", passwordValidateChecking);
+            const debouncedEmailValidate = debounce(emailValidateChecking, 300);
+            const debouncedPasswordValidate = debounce(passwordValidateChecking, 300);
 
-            signupForm.addEventListener("submit", function (e) {
+            email.addEventListener("input", debouncedEmailValidate);
+            password.addEventListener("input", debouncedPasswordValidate);
+
+            loginForm.addEventListener("submit", function (e) {
                 const isEmailValid = emailValidateChecking();
                 const isPasswordValid = passwordValidateChecking();
 
                 if (!isEmailValid || !isPasswordValid) {
                     e.preventDefault();
-                    let errorMessage = "";
-                    if (!isEmailValid) {
-                        errorMessage += error1.innerHTML + "<br>";
-                    }
-                    if (!isPasswordValid) {
-                        errorMessage += error2.innerHTML;
-                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Error',
+                        html: [
+                            !isEmailValid ? error1.innerHTML : '',
+                            !isPasswordValid ? error2.innerHTML : ''
+                        ].filter(Boolean).join('<br>'),
+                        confirmButtonColor: '#3a7bd5'
+                    });
+                } else {
+                    loginBtn.disabled = true;
+                    loginBtnText.textContent = "Signing In...";
+                    loginSpinner.classList.remove('d-none');
                 }
             });
+
+            // Carousel logic
+            const carousel = document.getElementById('laptop-carousel');
+            let currentIndex = 0;
+            const images = carousel.querySelectorAll('img');
+            const totalImages = images.length;
+
+            function updateCarousel() {
+                carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
+            }
+
+            setInterval(() => {
+                currentIndex = (currentIndex + 1) % totalImages;
+                updateCarousel();
+            }, 3000);
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 </body>
 </html>

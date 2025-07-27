@@ -24,7 +24,7 @@ const  addressPageload=async (req,res) => {
 
     } catch (error) {
         console.error("the  add address page not loading",error)
-        re.redirect("/pageNotFound")
+        res.redirect("/pageNotFound")
     }
 }
 
@@ -38,7 +38,7 @@ const getaddressAddpage=async (req,res) => {
         res.render("useraddAddress",{user:userData,from: fromPage})
     } catch (error) {
         console.error("the address page not loading",error)
-        re.redirect("/pageNotFound")
+        res.redirect("/pageNotFound")
         
     }
 }

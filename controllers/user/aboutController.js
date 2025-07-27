@@ -7,7 +7,7 @@ const getAboutPage=async (req,res) => {
         res.render("about",{user:userData})
     } catch (error) {
         console.error("the about page rendering time error :",error)
-        res.redirect("/pageNotFoundgen")
+        res.redirect("/pageNotFound")
     }
 }
 module.exports={

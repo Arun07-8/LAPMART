@@ -33,6 +33,7 @@ const productInfo = async (req, res) => {
             .skip((page - 1) * limit)
             .lean();
 
+
         const count = await Product.countDocuments(query);
         const totalPages = Math.ceil(count / limit);
         if (req.headers.accept.includes('application/json')) {

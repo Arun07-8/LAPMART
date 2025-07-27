@@ -320,6 +320,10 @@
             background: #ffcdd2;
             color: #b71c1c;
         }
+        .status-partiallyreturned {
+            background: #ffebee;
+            color: #c62828;
+        }
         .status-na {
             background: #f0f0f0;
             color: #666;
@@ -570,8 +574,8 @@
                                         <%= order.paymentMethod || 'N/A' %>
                                     </span></td>
                                     <td><%= order.createdAt ? new Date(order.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : 'N/A' %></td>
-                                    <td><span class="status-badge status-<%= (order.orderedItems && order.orderedItems[0]?.status ? order.orderedItems[0].status.toLowerCase().replace(/\s/g, '') : 'na') %>">
-                                        <%= order.orderedItems && order.orderedItems[0]?.status || 'N/A' %>
+                                    <td><span class="status-badge status-<%= (order.orderedItems.some(item => item.status === 'Returned') ? 'partiallyreturned' : (order.orderedItems[0]?.status || 'Delivered').toLowerCase().replace(/\s/g, '')) %>">
+                                        <%= order.orderedItems.some(item => item.status === 'Returned') ? 'Partially Returned' : (order.orderedItems[0]?.status || 'Delivered') %>
                                     </span></td>
                                 </tr>
                             <% }) %>
@@ -653,6 +657,8 @@
                     }
                 }
             });
+            searchCache.clear(); // Clear cache on initial load
+            filterSales(); // Trigger initial fetch
         });
 
         function toggleInputs(disabled) {
@@ -734,6 +740,8 @@
             const filterParams = { search, userSearch, paymentMethod, orderStatus, dateRange, startDate, endDate, page: currentPage, limit: itemsPerPage };
             const cacheKey = JSON.stringify(filterParams);
 
+            console.log("Filter Params:", filterParams);
+
             if (searchCache.has(cacheKey)) {
                 const cached = searchCache.get(cacheKey);
                 currentOrders = cached.orders;
@@ -745,6 +753,7 @@
                 renderPagination();
                 isFetching = false;
                 toggleInputs(false);
+                console.log("Using cached data:", cached);
                 return;
             }
 
@@ -781,12 +790,21 @@
                     netSales: String(data.summary.netSales || '0.00'),
                     totalOrders: parseInt(data.summary.totalOrders, 10) || 0,
                     totalReturns: parseInt(data.summary.totalReturns, 10) || 0
-                } : { grossSales: '0.00', totalDiscount: '0.00', totalCoupons: '0.00', netSales: '0.00', totalOrders: 0, totalReturns: 0 };
+                } : { 
+                    grossSales: '0.00', 
+                    totalDiscount: '0.00', 
+                    totalCoupons: '0.00', 
+                    netSales: '0.00', 
+                    totalOrders: 0, 
+                    totalReturns: 0
+                };
                 totalPages = Math.max(1, Number.isInteger(data.totalPages) ? data.totalPages : 1);
                 currentPage = Math.max(1, Number.isInteger(data.currentPage) ? data.currentPage : 1);
 
                 searchCache.set(cacheKey, { orders: currentOrders, summary: currentSummary, totalPages, currentPage });
                 if (searchCache.size > 10) searchCache.delete(searchCache.keys().next().value);
+
+                console.log("Fetched Data:", { orders: currentOrders, summary: currentSummary, totalPages, currentPage });
 
                 renderTable();
                 renderSummary();
@@ -825,6 +843,9 @@
 
             uniqueOrders.forEach(order => {
                 const row = document.createElement("tr");
+                const status = order.orderedItems.some(item => item.status === "Returned")
+                    ? "Partially Returned"
+                    : order.orderedItems[0]?.status || "Delivered";
                 row.innerHTML = `
                     <td class="order-id">${order.orderId || 'N/A'}</td>
                     <td>${order.shippingAddress?.name || 'N/A'}</td>
@@ -834,7 +855,7 @@
                     <td class="final-amount">₹${(order.finalAmount || 0).toFixed(2)}</td>
                     <td><span class="payment-method method-${(order.paymentMethod || '').toLowerCase().replace(/\s/g, '') || 'na'}">${order.paymentMethod || 'N/A'}</span></td>
                     <td>${order.createdAt ? new Date(order.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : 'N/A'}</td>
-                    <td><span class="status-badge status-${(order.orderedItems && order.orderedItems[0]?.status ? order.orderedItems[0].status.toLowerCase().replace(/\s/g, '') : 'na')}">${order.orderedItems && order.orderedItems[0]?.status || 'N/A'}</span></td>
+                    <td><span class="status-badge status-${status.toLowerCase().replace(/\s/g, '')}">${status}</span></td>
                 `;
                 tbody.appendChild(row);
             });
@@ -906,37 +927,26 @@
             }
         }
 
-        function showError(message) {
-            const tbody = document.getElementById("orderTableBody");
-            tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #e74c3c;">${message}</td></tr>`;
-        }
-
         async function exportPDF() {
             if (isFetching) return;
             isFetching = true;
             toggleInputs(true);
 
-            const search = document.getElementById("searchInput").value.trim().replace(/[<>]/g, '');
-            const userSearch = document.getElementById("userSearchInput").value.trim().replace(/[<>]/g, '');
-            const paymentMethod = document.getElementById("paymentMethodSelect").value;
-            const orderStatus = document.getElementById("orderStatusSelect").value;
-            const dateRange = document.getElementById("dateRangeSelect").value;
-            let startDate = document.getElementById("startDate").value.trim();
-            let endDate = document.getElementById("endDate").value.trim();
-
-            if (dateRange === "custom") {
-                if (startDate && !endDate) {
-                    endDate = startDate;
-                } else if (endDate && !startDate) {
-                    startDate = endDate;
-                }
-            }
+            const filterParams = {
+                search: document.getElementById("searchInput").value.trim().replace(/[<>]/g, ''),
+                userSearch: document.getElementById("userSearchInput").value.trim().replace(/[<>]/g, ''),
+                paymentMethod: document.getElementById("paymentMethodSelect").value,
+                orderStatus: document.getElementById("orderStatusSelect").value,
+                dateRange: document.getElementById("dateRangeSelect").value,
+                startDate: document.getElementById("startDate").value.trim(),
+                endDate: document.getElementById("endDate").value.trim()
+            };
 
             try {
                 const response = await fetch("/admin/export-sales-report-pdf", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ search, userSearch, paymentMethod, orderStatus, dateRange, startDate, endDate })
+                    body: JSON.stringify(filterParams)
                 });
 
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
@@ -945,12 +955,14 @@
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = "sales_report.pdf";
+                a.download = "sales_report_delivered.pdf";
+                document.body.appendChild(a);
                 a.click();
+                document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
             } catch (error) {
                 console.error("Error exporting PDF:", error);
-                showError(`Failed to export PDF: ${error.message}. <button onclick="exportPDF()">Retry</button>`);
+                showError(`Failed to export PDF: ${error.message}`);
             } finally {
                 isFetching = false;
                 toggleInputs(false);
@@ -962,27 +974,21 @@
             isFetching = true;
             toggleInputs(true);
 
-            const search = document.getElementById("searchInput").value.trim().replace(/[<>]/g, '');
-            const userSearch = document.getElementById("userSearchInput").value.trim().replace(/[<>]/g, '');
-            const paymentMethod = document.getElementById("paymentMethodSelect").value;
-            const orderStatus = document.getElementById("orderStatusSelect").value;
-            const dateRange = document.getElementById("dateRangeSelect").value;
-            let startDate = document.getElementById("startDate").value.trim();
-            let endDate = document.getElementById("endDate").value.trim();
-
-            if (dateRange === "custom") {
-                if (startDate && !endDate) {
-                    endDate = startDate;
-                } else if (endDate && !startDate) {
-                    startDate = endDate;
-                }
-            }
+            const filterParams = {
+                search: document.getElementById("searchInput").value.trim().replace(/[<>]/g, ''),
+                userSearch: document.getElementById("userSearchInput").value.trim().replace(/[<>]/g, ''),
+                paymentMethod: document.getElementById("paymentMethodSelect").value,
+                orderStatus: document.getElementById("orderStatusSelect").value,
+                dateRange: document.getElementById("dateRangeSelect").value,
+                startDate: document.getElementById("startDate").value.trim(),
+                endDate: document.getElementById("endDate").value.trim()
+            };
 
             try {
                 const response = await fetch("/admin/export-sales-report-excel", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ search, userSearch, paymentMethod, orderStatus, dateRange, startDate, endDate })
+                    body: JSON.stringify(filterParams)
                 });
 
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
@@ -991,12 +997,14 @@
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = "sales_report.xlsx";
+                a.download = "sales_report_delivered.xlsx";
+                document.body.appendChild(a);
                 a.click();
+                document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
             } catch (error) {
                 console.error("Error exporting Excel:", error);
-                showError(`Failed to export Excel: ${error.message}. <button onclick="exportExcel()">Retry</button>`);
+                showError(`Failed to export Excel: ${error.message}`);
             } finally {
                 isFetching = false;
                 toggleInputs(false);
@@ -1013,12 +1021,18 @@
             document.getElementById("endDate").value = "";
             document.getElementById("customDateRange").style.display = "none";
             currentPage = 1;
+            searchCache.clear();
             filterSales();
+        }
+
+        function showError(message) {
+            const tbody = document.getElementById("orderTableBody");
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #e74c3c;">${message}</td></tr>`;
         }
 
         function toggleSidebar() {
             const sidebar = document.getElementById("sidebar-container");
-            sidebar.style.display = sidebar.style.display === "block" ? "none" : "block";
+            sidebar.style.display = sidebar.style.display === "none" || !sidebar.style.display ? "block" : "none";
         }
     </script>
 </body>
