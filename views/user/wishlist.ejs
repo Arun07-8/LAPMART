@@ -54,92 +54,94 @@
                                 </th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <% if (wishlist && wishlist.products && wishlist.products.length > 0) { %>
-                                <% wishlist.products.forEach((item, index) => { %>
-                                    <tr class="wishlist-item" data-item-id="<%= item.productId._id %>">
-                                        <!-- Desktop Layout -->
-                                        <td class="text-center d-none d-lg-table-cell">
-                                            <button class="btn-remove" onclick="removeItem('<%= item.productId._id %>')" title="Remove from wishlist">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                        </td>
-                                        <td class="text-center d-none d-lg-table-cell">
-                                            <img src="<%= item.productId.productImage[0] %>" alt="<%= item.productId.productName %>" class="product-image">
-                                        </td>
-                                        <td class="d-none d-lg-table-cell">
-                                            <div class="product-details">
-                                                <h6><%= item.productId.productName %></h6>
-                                                <div class="product-brand">
-                                                    <i class="fas fa-certificate me-1"></i>Brand: <%= item.productId.brand.name %>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="text-center d-none d-lg-table-cell">
-                                            <div class="price">₹<%= item.productId.salePrice.toFixed(2) %></div>
-                                        </td>
-                                        <% if (item.productId.quantity == 0 || item.productId.isListed == false) { %>
-                                            <td class="text-center d-none d-lg-table-cell">
-                                                <button class="btn btn-add-cart" disabled>
-                                                    <span style="color: #ffffff;">Out of stock</span>
-                                                </button>
-                                            </td>
-                                        <% } else { %>
-                                            <td class="text-center d-none d-lg-table-cell">
-                                                <button class="btn btn-add-cart" onclick="addToCart('<%= item.productId._id %>')">
-                                                    <i class="fas fa-cart-plus me-2"></i>Add to Cart
-                                                </button>
-                                            </td>
-                                        <% } %>
+                       <tbody>
+    <% if (wishlist && wishlist.products && wishlist.products.length > 0) { %>
+        <% wishlist.products.forEach((item, index) => { %>
+            <% if (item.productId) { %> <!-- NULL check added here -->
+                <tr class="wishlist-item" data-item-id="<%= item.productId._id %>">
+                    <!-- Desktop Layout -->
+                    <td class="text-center d-none d-lg-table-cell">
+                        <button class="btn-remove" onclick="removeItem('<%= item.productId._id %>')" title="Remove from wishlist">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </td>
+                    <td class="text-center d-none d-lg-table-cell">
+                        <img src="<%= item.productId.productImage[0] %>" alt="<%= item.productId.productName %>" class="product-image">
+                    </td>
+                    <td class="d-none d-lg-table-cell">
+                        <div class="product-details">
+                            <h6><%= item.productId.productName %></h6>
+                            <div class="product-brand">
+                                <i class="fas fa-certificate me-1"></i>Brand: <%= item.productId.brand.name %>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="text-center d-none d-lg-table-cell">
+                        <div class="price">₹<%= item.productId.salePrice.toFixed(2) %></div>
+                    </td>
+                    <% if (item.productId.quantity == 0 || item.productId.isListed == false) { %>
+                        <td class="text-center d-none d-lg-table-cell">
+                            <button class="btn btn-add-cart" disabled>
+                                <span style="color: #ffffff;">Out of stock</span>
+                            </button>
+                        </td>
+                    <% } else { %>
+                        <td class="text-center d-none d-lg-table-cell">
+                            <button class="btn btn-add-cart" onclick="addToCart('<%= item.productId._id %>')">
+                                <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                            </button>
+                        </td>
+                    <% } %>
 
-                                        <!-- Enhanced Mobile Layout -->
-                                        <td class="d-lg-none" colspan="5">
-                                            <div class="mobile-item-layout">
-                                                <button class="btn-remove mobile-remove-btn" onclick="removeItem('<%= item.productId._id %>')" title="Remove from wishlist">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                                
-                                                <img src="<%= item.productId.productImage[0] %>" alt="<%= item.productId.productName %>" class="product-image">
-                                                
-                                                <div class="mobile-product-info">
-                                                    <div class="product-details">
-                                                        <h6><%= item.productId.productName %></h6>
-                                                        <div class="product-brand">
-                                                            <i class="fas fa-certificate me-1"></i>Brand: <%= item.productId.brand.name %>
-                                                        </div>
+                    <!-- Enhanced Mobile Layout -->
+                    <td class="d-lg-none" colspan="5">
+                        <div class="mobile-item-layout">
+                            <button class="btn-remove mobile-remove-btn" onclick="removeItem('<%= item.productId._id %>')" title="Remove from wishlist">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            
+                            <img src="<%= item.productId.productImage[0] %>" alt="<%= item.productId.productName %>" class="product-image">
+                            
+                            <div class="mobile-product-info">
+                                <div class="product-details">
+                                    <h6><%= item.productId.productName %></h6>
+                                    <div class="product-brand">
+                                        <i class="fas fa-certificate me-1"></i>Brand: <%= item.productId.brand.name %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="mobile-price-action">
-                                                <div class="price">₹<%= item.productId.salePrice.toFixed(2) %></div>
-                                                <% if (item.productId.quantity == 0 || item.productId.isListed == false) { %>
-                                                    <button class="btn btn-add-cart" disabled>
-                                                        <span style="color: #dc3545;">Out of stock</span>
-                                                    </button>
-                                                <% } else { %>
-                                                    <button class="btn btn-add-cart" onclick="addToCart('<%= item.productId._id %>')">
-                                                        <i class="fas fa-cart-plus me-2"></i>Add to Cart
-                                                    </button>
-                                                <% } %>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <% }) %>
+                        <div class="mobile-price-action">
+                            <div class="price">₹<%= item.productId.salePrice.toFixed(2) %></div>
+                            <% if (item.productId.quantity == 0 || item.productId.isListed == false) { %>
+                                <button class="btn btn-add-cart" disabled>
+                                    <span style="color: #dc3545;">Out of stock</span>
+                                </button>
                             <% } else { %>
-                                <tr>
-                                    <td colspan="5" class="empty-wishlist">
-                                        <i class="fas fa-heart-broken"></i>
-                                        <h5>Your wishlist is empty</h5>
-                                        <p>Discover amazing laptops and add them to your wishlist.</p>
-                                        <button class="btn btn-add-cart mt-3" onclick="window.history.back()">
-                                            <i class="fas fa-arrow-left me-2"></i>Continue Shopping
-                                        </button>
-                                    </td>
-                                </tr>
+                                <button class="btn btn-add-cart" onclick="addToCart('<%= item.productId._id %>')">
+                                    <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                                </button>
                             <% } %>
-                        </tbody>
+                        </div>
+                    </td>
+                </tr>
+            <% } /* else you can optionally show a message or skip */ %>
+        <% }) %>
+    <% } else { %>
+        <tr>
+            <td colspan="5" class="empty-wishlist">
+                <i class="fas fa-heart-broken"></i>
+                <h5>Your wishlist is empty</h5>
+                <p>Discover amazing laptops and add them to your wishlist.</p>
+                <button class="btn btn-add-cart mt-3" onclick="window.history.back()">
+                    <i class="fas fa-arrow-left me-2"></i>Continue Shopping
+                </button>
+            </td>
+        </tr>
+    <% } %>
+</tbody>
+
                     </table>
                 </div>
             </div>
