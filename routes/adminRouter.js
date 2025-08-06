@@ -8,7 +8,7 @@ const productController=require("../controllers/admin/productController")
 const orderMangementController=require("../controllers/admin/orderMangementController")
 const couponController=require("../controllers/admin/couponController")
 const offersController=require("../controllers/admin/offersController")
-const salesReportContreller=require("../controllers/admin/salesReporterController")
+const salesReporterController=require("../controllers/admin/salesReporterController")
 const dashboardController=require("../controllers/admin/dasboardController")
 const {adminAuth}=require("../middlewares/adminAuth");
 const {productUpload}=require("../config/multer")
@@ -86,10 +86,10 @@ router.patch("/offerdelete/:id",adminAuth,offersController.deleteOffer)
 
 
 //  SalesReport
-router.get("/sales-report",adminAuth, salesReportContreller.getSalesReport);
-router.post("/filter-sales-report",adminAuth,  salesReportContreller.filterSalesReport);
-router.post("/export-sales-report-pdf",adminAuth,  salesReportContreller.exportSalesReportPDF);
-router.post("/export-sales-report-excel",adminAuth,  salesReportContreller.exportSalesReportExcel);
+router.get("/sales-report",adminAuth, salesReporterController.getSalesReport);
+router.post("/filter-sales-report",adminAuth,  salesReporterController.filterSalesReport);
+router.post("/export-sales-report-pdf",adminAuth,  salesReporterController.exportSalesReportPDF);
+router.post("/export-sales-report-excel",adminAuth,  salesReporterController.exportSalesReportExcel);
 
 //  Dashboard
 router.get("/dashBoard",adminAuth,dashboardController.loadDashbard);
