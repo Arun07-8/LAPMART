@@ -29,7 +29,7 @@ const couponSchema = new Schema({
     required: true,
     min: 0
   },
-   validFrom: {
+  validFrom: {
     type: Date,
     required: true
   },
@@ -41,9 +41,9 @@ const couponSchema = new Schema({
     type: Boolean,
     default: true
   },
-  isExpired:{
-    type:Boolean,
-    default:false
+  isExpired: {
+    type: Boolean,
+    default: false
   },
   isDeleted: {
     type: Boolean,
@@ -53,6 +53,9 @@ const couponSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User"
   }]
+}, {
+  timestamps: true 
 });
+
 const Coupon = mongoose.model("Coupon", couponSchema);
 module.exports = Coupon;

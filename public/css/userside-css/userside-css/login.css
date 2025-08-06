@@ -286,7 +286,7 @@
 
         .error-message {
             position: absolute;
-            bottom: -1.2rem;
+            bottom: -0.9rem;
             left: 0;
             color: #ef4444;
             font-size: 0.7rem;
@@ -494,7 +494,11 @@
 
         /* Consolidated responsive styles */
         @media (max-width: 992px) {
-            .form-box { grid-template-columns: 1fr; max-width: 500px; min-height: auto; }
+            .form-box {         grid-template-columns: 1fr;
+        max-width: 500px;
+        height: 635px;
+        min-height: auto;
+        margin-top: 62px; }
             .image-section { order: -1; min-height: 120px; padding: 1.5rem; }
             .brand-logo { width: 80px; height: 80px; font-size: 1.2rem; margin-bottom: 1rem; }
             .brand-tagline { font-size: 0.9rem; }
@@ -533,7 +537,8 @@
         }
 
         @media (max-width: 375px) {
-            .form-section { padding: 1rem; max-height: calc(100vh - 110px); }
+            .form-section { padding: 1rem; max-height: calc(200vh - 110px); }
+            
             h2 { font-size: 1.25rem; margin-bottom: 1rem; }
             .input-group { margin-bottom: 0.875rem; }
             input { padding: 0.625rem; font-size: 0.825rem; }
@@ -546,8 +551,10 @@
             .carousel-container { max-width: 140px; }
         }
 
+        
         @media (max-width: 320px) {
-            .form-section { padding: 0.875rem; max-height: calc(100vh - 100px); }
+            .form-section { padding: 0.875rem; max-height: calc(900vh - 100px); height: 600px;margin: 6px;}
+            
             h2 { font-size: 1.125rem; margin-bottom: 0.875rem; }
             .input-group { margin-bottom: 0.75rem; }
             input { padding: 0.575rem; font-size: 0.8rem; }

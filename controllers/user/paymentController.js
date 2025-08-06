@@ -89,9 +89,10 @@ const createOrder = async (req, res) => {
         isDeleted: false,
         validFrom: { $lte: new Date() },
         validUpto: { $gte: new Date() },
-        usedBy: { $nin: [userId] },
+        usedBy: { $in: [userId] },
       });
 
+      console.log(coupon,"payment controller")
       if (coupon && totalPrice >= coupon.minPurchase) {
         discount = coupon.type === 'percentage'
           ? Math.floor((totalPrice * coupon.offerPrice) / 100)

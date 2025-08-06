@@ -10,14 +10,12 @@ const couponManagementpage = async (req, res) => {
     const limit = 3;
     const skip = (page - 1) * limit;
 
-    const searchQuery = req.query.search ? req.query.search.trim() : '';
+    const searchQuery = req.query.search?.trim() || '';
     const fromDate = req.query.fromDate ? moment(req.query.fromDate, 'DD/MM/YY', true) : null;
     const toDate = req.query.toDate ? moment(req.query.toDate, 'DD/MM/YY', true) : null;
 
- 
-
-
-    if (fromDate && !fromDate.isValid()) {
+    // Validate dates
+    if (fromDate && !fromDate.isValid() || toDate && !toDate.isValid()) {
       return res.render('couponManagement', {
         coupons: [],
         currentPage: page,
@@ -26,22 +24,17 @@ const couponManagementpage = async (req, res) => {
         fromDate: req.query.fromDate || '',
         toDate: req.query.toDate || '',
         sortType: req.query.sort || 'date-new-to-old',
-        errorMessage: 'Invalid From Date format. Please use DD/MM/YY.',
-      });
-    }
-    if (toDate && !toDate.isValid()) {
-      return res.render('couponManagement', {
-        coupons: [],
-        currentPage: page,
-        totalPages: 0,
-        searchQuery,
-        fromDate: req.query.fromDate || '',
-        toDate: req.query.toDate || '',
-        sortType: req.query.sort || 'date-new-to-old',
-        errorMessage: 'Invalid To Date format. Please use DD/MM/YY.',
+        errorMessage: 'Invalid date format. Please use DD/MM/YY.',
       });
     }
 
+
+    await Coupon.updateMany(
+      { validUpto: { $lt: new Date() }, isExpired: false },
+      { $set: { isExpired: true } }
+    );
+
+    // Build query
     let query = { isDeleted: false };
 
     if (searchQuery) {
@@ -54,45 +47,42 @@ const couponManagementpage = async (req, res) => {
     if (fromDate && toDate) {
       const start = moment.min(fromDate, toDate).startOf('day');
       const end = moment.max(fromDate, toDate).endOf('day');
-
       query.$and = [
-        { validFrom: { $lte: end.toDate() } },    
-        { validUpto: { $gte: start.toDate() } },  
+        { validFrom: { $lte: end.toDate() } },
+        { validUpto: { $gte: start.toDate() } },
       ];
     } else if (fromDate) {
-      const start = fromDate.startOf('day');
-      query.validUpto = { $gte: start.toDate() }; 
+      query.validUpto = { $gte: fromDate.startOf('day').toDate() };
     } else if (toDate) {
-      const end = toDate.endOf('day');
-      query.validFrom = { $lte: end.toDate() };  
+      query.validFrom = { $lte: toDate.endOf('day').toDate() };
     }
 
-    let sortQuery = {};
-    switch (req.query.sort) {
-      case 'date-old-to-new': sortQuery = { validFrom: 1 }; break;
-      case 'date-new-to-old': sortQuery = { validFrom: -1 }; break;
-      case 'name-a-to-z': sortQuery = { couponName: 1 }; break;
-      case 'name-z-to-a': sortQuery = { couponName: -1 }; break;
-      case 'price-high-to-low': sortQuery = { offerPrice: -1 }; break;
-      case 'price-low-to-high': sortQuery = { offerPrice: 1 }; break;
-      default: sortQuery = { validFrom: -1 };
-    }
+    // Sorting logic
+    const sortMap = {
+      'date-old-to-new': { validFrom: 1 },
+      'date-new-to-old': { validFrom: -1 },
+      'name-a-to-z': { couponName: 1 },
+      'name-z-to-a': { couponName: -1 },
+      'price-high-to-low': { offerPrice: -1 },
+      'price-low-to-high': { offerPrice: 1 },
+    };
+    const sortQuery = sortMap[req.query.sort] || { validFrom: -1 };
 
-
+    // Get paginated results
     const coupons = await Coupon.find(query).sort(sortQuery).skip(skip).limit(limit).lean();
-    const todayDate = new Date();
-    todayDate.setHours(0, 0, 0, 0);
+
+    // Calculate expiry flag (for view purpose)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     coupons.forEach(coupon => {
-      const endDate = new Date(coupon.validUpto);
-      endDate.setHours(0, 0, 0, 0);
-      coupon.isExpired = endDate < todayDate;
+      const validUpto = new Date(coupon.validUpto);
+      validUpto.setHours(0, 0, 0, 0);
+      coupon.isExpired = validUpto < today;
     });
 
-    // Pagination
     const totalCoupons = await Coupon.countDocuments(query);
     const totalPages = Math.ceil(totalCoupons / limit);
 
-    // Render response
     res.render('couponManagement', {
       coupons,
       currentPage: page,
@@ -112,6 +102,9 @@ const couponManagementpage = async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to fetch coupons' });
   }
 };
+
+
+
 
 const addCouponpage = async (req, res) => {
   try {
@@ -230,16 +223,30 @@ const inactiveCoupon = async (req, res) => {
   }
 };
 
+const formatDateToInput = (date) => {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = ('0' + (d.getMonth() + 1)).slice(-2);
+  const day = ('0' + d.getDate()).slice(-2);
+  return `${year}-${month}-${day}`;
+};
 
 const editCoupon = async (req, res) => {
   try {
     const coupon = await Coupon.findById(req.params.couponId).lean();
+
+    // Convert UTC dates to local input format
+    coupon.validFrom = formatDateToInput(coupon.validFrom);
+    coupon.validUpto = formatDateToInput(coupon.validUpto);
+
     res.render("editCoupon", { coupon });
   } catch (error) {
     console.error("Edit Load Error:", error);
     res.redirect("/admin/pagenotFounderror");
   }
 };
+
+
 const editpageCoupon = async (req, res) => {
   try {
     const {

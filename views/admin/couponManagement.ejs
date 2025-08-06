@@ -99,13 +99,23 @@
                             </tr>
                         </thead>
                         <tbody>
-                            eradicate  <% coupons.forEach((coupon, index) => { %>
+<%
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // months are 0-indexed
+  const year = String(date.getFullYear()).slice(-2); // get last 2 digits
+  return `${day}/${month}/${year}`;
+}
+%>
+
+                          <% coupons.forEach((coupon, index) => { %>
                             <tr>
                                 <td><%= index + 1 %></td>
                                 <td class="coupon-name"><%= coupon.couponName %></td>
                                 <td><span class="coupon-code"><%= coupon.couponCode %></span></td>
-                                <td><%= coupon.validFrom ? new Date(coupon.validFrom).toLocaleDateString("en-US") : 'N/A' %></td>
-                                <td><%= coupon.validUpto ? new Date(coupon.validUpto).toLocaleDateString("en-US") : 'N/A' %></td>
+                                <td><%= coupon.validFrom ? formatDate(coupon.validFrom) : 'N/A' %></td>
+                                <td><%= coupon.validUpto ? formatDate(coupon.validUpto) : 'N/A' %></td>
                                 <td class="currency">₹<%= coupon.offerPrice ? coupon.offerPrice.toLocaleString() : '0.00' %></td>
                                 <td class="currency">₹<%= coupon.minPurchase ? coupon.minPurchase.toLocaleString() : '0.00' %></td>
                                 <td>

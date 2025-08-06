@@ -452,7 +452,7 @@ document.addEventListener('DOMContentLoaded', () => {
       elements.appliedCouponIdInput.value = '';
       elements.totalAmountInput.value = originalTotal;
 
-      Swal.fire({ icon: 'info', title: 'Coupon Removed', text: 'Coupon removed successfully' });
+      Swal.fire({  icon: 'success', title: 'Coupon Removed', text: 'Coupon removed successfully' });
     } catch (err) {
       console.error('Remove coupon error:', err);
       Swal.fire({ icon: 'error', title: 'Error', text: err.message || 'Failed to remove coupon' });
@@ -520,7 +520,9 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: { 'Content-Type': 'application/json' },
       });
       const data = await res.json();
-      if (data.success && data.coupons) {
+  console.log(data.coupons,"data")
+      if (data.coupons) {
+        console.log(data.coupons,"hlkooooooooo")
         displayCoupons(data.coupons);
       } else {
         throw new Error(data.message || 'No coupons found');
@@ -532,7 +534,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function displayCoupons(coupons) {
+    console.log(coupons)
     const list = document.getElementById('available-coupon-list');
+
     if (!list) {
       console.error('Coupon list element not found');
       return;
@@ -543,29 +547,36 @@ document.addEventListener('DOMContentLoaded', () => {
       list.innerHTML = '<li class="no-coupons">No coupons available.</li>';
       return;
     }
+console.log(coupons,"heloooooo")
+coupons.forEach(coupon => {
+  const li = document.createElement('li');
+  li.className = 'coupon-item';
 
-    coupons.forEach(coupon => {
-      const li = document.createElement('li');
-      li.className = 'coupon-item';
-      li.innerHTML = `
-        <div class="coupon-card">
-          <div class="coupon-header">
-            <div class="coupon-code">${coupon.couponCode}</div>
-            <div class="coupon-discount">₹${coupon.offerPrice.toFixed(2)} OFF</div>
-          </div>
-          <div class="coupon-details">
-            <p class="coupon-description">${coupon.description || 'Use this coupon to save more'}</p>
-            <div class="coupon-terms">
-              <span class="coupon-min-order">Min order: ₹${coupon.minPurchase.toFixed(2)}</span>
-              <span class="coupon-max-discount">Max discount: ₹${coupon.maxDiscount?.toFixed(2) || coupon.offerPrice.toFixed(2)}</span>
-            </div>
-            <div class="coupon-validity">Valid till: ${new Date(coupon.validUpto).toLocaleDateString()}</div>
-          </div>
-          <button class="apply-coupon-btn" onclick="applyCouponFromModal('${coupon.couponCode}')">Apply Coupon</button>
+  // ✅ Format date in dd/mm/yyyy
+  const validUptoDate = new Date(coupon.validUpto);
+  const formattedDate = `${validUptoDate.getDate().toString().padStart(2, '0')}/${(validUptoDate.getMonth() + 1).toString().padStart(2, '0')}/${validUptoDate.getFullYear()}`;
+
+  li.innerHTML = `
+    <div class="coupon-card">
+      <div class="coupon-header">
+        <div class="coupon-code">${coupon.couponCode}</div>
+        <div class="coupon-discount">₹${coupon.offerPrice.toFixed(2)} OFF</div>
+      </div>
+      <div class="coupon-details">
+        <p class="coupon-description">${coupon.description || 'Use this coupon to save more'}</p>
+        <div class="coupon-terms">
+          <span class="coupon-min-order">Min order: ₹${coupon.minPurchase.toFixed(2)}</span>
+          <span class="coupon-max-discount">Max discount: ₹${coupon.maxDiscount?.toFixed(2) || coupon.offerPrice.toFixed(2)}</span>
         </div>
-      `;
-      list.appendChild(li);
-    });
+        <div class="coupon-validity">Valid till: ${formattedDate}</div>
+      </div>
+      <button class="apply-coupon-btn" onclick="applyCouponFromModal('${coupon.couponCode}')">Apply Coupon</button>
+    </div>
+  `;
+
+  list.appendChild(li);
+});
+
 
     const modalBody = document.querySelector('.modal-body');
     if (modalBody) {
