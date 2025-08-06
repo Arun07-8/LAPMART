@@ -1,4 +1,4 @@
-   <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,56 +7,75 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    <link href="/css/userside-css/userside-css/addAddresspage.css"  rel="stylesheet">
+    <!-- Removed external stylesheet to avoid conflicts; all styles are now inline -->
     <style>
-        /* Ensure the main container for the layout is flex */
-        .page-container > .container-fluid > .row {
-            display: flex;
-            flex-wrap: nowrap; /* Prevent wrapping to keep sidebar and main content side-by-side */
-            align-items: stretch; /* Stretch children to fill height */
-            gap: 20px; /* Space between sidebar and main content */
-            flex: 1; /* Allow the row to grow */
-            min-height: 600px; /* Ensure a minimum height */
+        /* Reset default margins and ensure full height */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
         }
 
+        /* Main container for the page */
+        .address-page-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .address-page-container .page-container {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .address-page-container .container-fluid {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .address-page-container .row {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: stretch;
+            gap: 20px;
+            flex: 1;
+            min-height: 600px;
+        }
+
+        /* Sidebar column */
         .address-sidebar-col {
-            /* This element is the flex item within the .row */
-            flex: 0 0 250px; /* Fixed width of 250px, no grow/shrink */
-            max-width: 250px; /* Ensure it doesn't expand beyond 250px */
-            /* Apply visual styles here, as this is the visible "column" */
+            flex: 0 0 250px;
+            max-width: 250px;
             background: #f8f9fa;
             border-right: 1px solid #e9ecef;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             border-radius: 10px;
-            margin: 0; /* Ensure no external margins interfere with flex gap */
-            padding: 0; /* Control padding at this level if needed */
-            display: flex; /* Make it a flex container for the actual .sidebar inside */
+            margin: 0;
+            padding: 0;
+            display: flex;
             flex-direction: column;
         }
 
         .address-sidebar-col .sidebar {
-            /* This targets the actual sidebar div from the partial.
-               It should yield all layout control to its parent (.address-sidebar-col)
-               and only define its internal content layout and basic box model. */
-            width: 100% !important; /* Crucial: Let parent control width */
-            height: auto !important; /* Crucial: Let content dictate height */
-            min-height: 0 !important; /* Crucial: Ensure it can shrink if needed */
-            margin: 0 !important; /* Crucial: Remove any margins */
-            padding: 0 !important; /* Crucial: Remove any padding from external CSS */
-            position: static !important; /* Crucial: Remove any absolute/fixed positioning */
-            border: none !important; /* Remove any border that conflicts with wrapper */
-            box-shadow: none !important; /* Remove any shadow that conflicts with wrapper */
-            background: transparent !important; /* Remove any background that conflicts with wrapper */
-            border-radius: 0 !important; /* Remove any border-radius that conflicts with wrapper */
-            z-index: auto !important; /* Reset z-index */
-
-            /* Re-establish internal display for its children, as all:unset might have removed it */
+            width: 100% !important;
+            height: auto !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            position: static !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+            border-radius: 0 !important;
+            z-index: auto !important;
             display: flex;
             flex-direction: column;
-            flex: 1; /* Allow inner sidebar content to fill its wrapper */
+            flex: 1;
         }
 
-        /* Re-apply styles for inner sidebar elements, targeting them via .address-sidebar-col .sidebar to maintain specificity */
         .address-sidebar-col .sidebar .sidebar-header {
             padding: 25px 20px;
             border-bottom: 1px solid #e9ecef;
@@ -64,21 +83,25 @@
             color: white;
             border-radius: 10px 10px 0 0;
         }
+
         .address-sidebar-col .sidebar .sidebar-header h5 {
             margin: 0 0 12px 0;
             font-weight: 700;
             font-size: 22px;
             letter-spacing: 0.5px;
         }
+
         .address-sidebar-col .sidebar .sidebar-header p {
             margin: 0;
             opacity: 0.9;
             font-size: 16px;
             font-weight: 300;
         }
+
         .address-sidebar-col .sidebar .sidebar-menu {
             padding: 25px 0;
         }
+
         .address-sidebar-col .sidebar .sidebar-menu .nav-link {
             display: flex;
             align-items: center;
@@ -91,12 +114,14 @@
             font-weight: 500;
             margin-bottom: 8px;
         }
+
         .address-sidebar-col .sidebar .sidebar-menu .nav-link:hover {
             background: linear-gradient(90deg, #f8f9fa, #fff);
             color: #C4A676;
             border-left-color: #C4A676;
             transform: translateX(3px);
         }
+
         .address-sidebar-col .sidebar .sidebar-menu .nav-link.active {
             background: linear-gradient(90deg, #f8f9fa, #fff);
             color: #C4A676;
@@ -104,6 +129,7 @@
             font-weight: 600;
             box-shadow: inset 0 2px 4px rgba(196, 166, 118, 0.1);
         }
+
         .address-sidebar-col .sidebar .sidebar-menu .nav-link i {
             margin-right: 12px;
             width: 20px;
@@ -111,41 +137,440 @@
             font-size: 16px;
         }
 
+        /* Main content column */
         .address-main-content-col {
-            flex: 1; /* Allow main content to grow and take remaining space */
-            min-width: 0; /* Important for flex items to shrink properly */
+            flex: 1;
+            min-width: 0;
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 992px) {
-            .page-container > .container-fluid > .row {
-                flex-direction: column; /* Stack columns on mobile */
-                gap: 15px;
-            }
+        /* Main content styling */
+        .main-content {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 30px;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 40px);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .content-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: absolute;
+            left: 0;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        .content-header h2 {
+            color: #495057;
+            font-weight: 700;
+            margin: 0 auto;
+            font-size: 28px;
+            text-align: center;
+            flex: 1;
+        }
+
+        .address-form-container {
+            background: #fff;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            margin-bottom: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 35px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+
+        .section-header i {
+            color: #C4A676;
+            font-size: 22px;
+        }
+
+        .section-header h4 {
+            color: #495057;
+            font-weight: 600;
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .address-type-section {
+            margin-bottom: 40px;
+        }
+
+        .address-type-options {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .address-type-option {
+            position: relative;
+        }
+
+        .address-type-option input[type="radio"] {
+            display: none;
+        }
+
+        .address-type-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            font-weight: 500;
+            color: #495057;
+            min-width: 130px;
+            justify-content: center;
+        }
+
+        .address-type-option input[type="radio"]:checked + .address-type-label {
+            border-color: #C4A676;
+            background: linear-gradient(135deg, #C4A676, #8B7355);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(196, 166, 118, 0.3);
+        }
+
+        .address-type-label i {
+            font-size: 16px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            display: block;
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .form-label.required::after {
+            content: " *";
+            color: #dc3545;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 18px 22px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fff;
+            color: #495057;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #C4A676;
+            box-shadow: 0 0 0 3px rgba(196, 166, 118, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-input::placeholder {
+            color: #adb5bd;
+        }
+
+        .form-input.invalid {
+            border-color: #dc3545;
+            background: #fff5f5;
+            animation: shake 0.3s ease;
+        }
+
+        .error-text {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+            position: absolute;
+            left: 0;
+            bottom: -20px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 30px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #C4A676;
+            cursor: pointer;
+        }
+
+        .checkbox-container label {
+            color: #495057;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #C4A676, #8B7355);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 30px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(196, 166, 118, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .submit-btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .submit-btn.loading::after {
+            content: '';
+            width: 18px;
+            height: 18px;
+            border: 2px solid transparent;
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            display: inline-block;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .success-message {
+            background: #d1edff;
+            color: #0c5460;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+            border-left: 4px solid #0dcaf0;
+        }
+
+        /* Responsive design */
+        @media (max-width: 1200px) {
             .address-sidebar-col {
-                flex: 0 0 auto; /* Allow sidebar to take auto height in column layout */
-                max-width: 100%; /* Allow sidebar to take full width */
-                border-right: none; /* Remove right border in column layout */
-                border-bottom: 1px solid #e9ecef; /* Add bottom border */
-                border-radius: 10px; /* Re-apply border-radius for mobile */
-                margin-bottom: 15px; /* Add some space below sidebar */
+                flex: 0 0 220px;
+                max-width: 220px;
             }
-            .address-sidebar-col .sidebar-header {
-                border-radius: 10px 10px 0 0; /* Ensure header corners are rounded */
+
+            .main-content {
+                margin-left: 20px;
+                margin-right: 10px;
             }
-            .address-main-content-col {
-                width: 100%; /* Main content takes full width */
+
+            .address-sidebar-col .sidebar-header h5 {
+                font-size: 20px;
+            }
+
+            .address-sidebar-col .sidebar-header p {
+                font-size: 15px;
+            }
+
+            .address-sidebar-col .sidebar-menu .nav-link {
+                font-size: 16px;
+                padding: 14px 18px;
             }
         }
+
+        @media (max-width: 992px) {
+            .address-page-container .row {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .address-sidebar-col {
+                flex: 0 0 auto;
+                max-width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+                border-radius: 10px;
+                margin-bottom: 15px;
+            }
+
+            .main-content {
+                margin-left: 15px;
+                margin-right: 15px;
+                min-height: auto;
+                max-width: 100%;
+            }
+
+            .address-form-container {
+                max-width: 100%;
+            }
+        }
+
         @media (max-width: 768px) {
             .address-sidebar-col {
-                margin: 0; /* Remove potential leftover margins */
+                margin: 0;
             }
+
+            .main-content {
+                padding: 15px;
+            }
+
+            .address-form-container {
+                padding: 25px 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .content-header {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .content-header h2 {
+                font-size: 24px;
+            }
+
+            .back-btn {
+                position: static;
+                margin-bottom: 15px;
+            }
+
+            .address-type-options {
+                justify-content: center;
+            }
+
+            .address-type-label {
+                min-width: 110px;
+                padding: 12px 16px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 10px;
+            }
+
+            .address-form-container {
+                padding: 20px 15px;
+            }
+
+            .address-type-options {
+                flex-direction: column;
+            }
+
+            .address-type-label {
+                min-width: auto;
+                width: 100%;
+            }
+
+            .form-input {
+                padding: 14px 18px;
+                font-size: 15px;
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
         }
     </style>
 </head>
-<%- include("../../views/partials/user/header") %>
 <body class="address-page-container">
+    <%- include("../../views/partials/user/header") %>
     <div class="page-container">
         <div class="container-fluid">
             <div class="row">
@@ -487,9 +912,7 @@
                 addressData[key] = value;
             }
 
-            // Handle checkbox
-addressData.isDefault = document.getElementById('defaultAddress').checked.toString(); // converts to "true"/"false"
-
+            addressData.isDefault = document.getElementById('defaultAddress').checked.toString();
 
             try {
                 const response = await fetch('/address/add', {
