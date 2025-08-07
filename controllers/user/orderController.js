@@ -1,6 +1,7 @@
 const Order = require("../../models/orderSchema")
 const User = require("../../models/userSchema")
 const Wallet = require("../../models/walletSchema")
+const offer=require("../../models/offersSchema")
 const fs = require('fs');
 const path = require('path');
 const Cart= require("../../models/cartSchema")
@@ -298,16 +299,19 @@ if (isFullCancellation) {
   productIdsArray = order.orderedItems.map(item => item.product._id.toString());
 }
 
+  
 
     if (productIdsArray.length === 0) {
       return res.status(400).json({ success: false, message: "No products selected for cancellation" });
     }
 
+
+   
+     
    let totalRefundAmount = 0;
     const failedItems = [];
     let cancelledCount = 0;
-
-
+ 
 
     for (const productId of productIdsArray) {
       const item = order.orderedItems.find( item => item.product && item.product._id.toString() === productId);  
@@ -325,16 +329,35 @@ if (isFullCancellation) {
         failedItems.push({ productId, reason: "Already cancelled" });
         continue;
       }
+    const product=await Product.findOne({productIds})
+    console.log(product,"product")
+   const existingoffer=await  offer.findOne({
+       isDeleted:false,
+       isActive:true,
+       status:"active",
+       offerType:"Product",
+       validFrom:{$lte:new Date()},
+       validUpto:{$gte:new Date()},
+       applicableId:productIds,
+  })
+console.log(existingoffer,"offer")
 
 let itemRefund=0
 const itemSubtotal = item.originalPrice || 0;
 const itemOfferDiscount = item.offerDiscount || 0;
 const itemCouponDiscount = item.couponDiscount || 0;
+
+if(product.quantity<5&&existingoffer){
+  itemRefund=itemRefund*0.25
+}
+console.log(itemRefund,"amount")
+
 if(!isFullCancellation){
    itemRefund = Math.max(0, itemSubtotal - itemOfferDiscount - itemCouponDiscount);
 }else{
    itemRefund=order.finalAmount
 }
+
 
       
       item.status = "Cancelled";

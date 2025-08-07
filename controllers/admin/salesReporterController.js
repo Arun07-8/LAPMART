@@ -43,7 +43,6 @@ const getSalesReport = async (req, res) => {
             { $limit: limit }
         ]);
 
-        // Count total delivered orders
         const countAgg = await Order.aggregate([
             { $match: matchQuery },
             { $group: { _id: "$_id" } },

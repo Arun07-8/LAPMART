@@ -1,6 +1,6 @@
 const Category=require("../../models/categorySchema");
 const { distance } = require('fastest-levenshtein');
-
+const offer=require("../../models/offersSchema")
 
 //  category page rendering
 const categoryInfo=async (req,res) => {
@@ -128,25 +128,29 @@ const editCategory = async (req, res) => {
         return res.status(500).json({ error: "Server error. Please try again later." });
     }
 };
-
 const softDeleteCategory = async (req, res) => {
     try {
         const id = req.params.id;
+  
         const category = await Category.findByIdAndUpdate(
             id,
             { isDeleted: true },
-            { new:true}
+            { new: true }
         );
-        if (!category) {
-            return res.status(404).json({error:"category Not found"})
-        }
 
-        return res.status(200).json({message:"  Category  deleted"})
+        return res.status(200).json({
+            success: true,
+            message: "Category deleted successfully ",
+        });
     } catch (error) {
-        console.error('Error soft deleting category:', error);
-        return res.status(500).json({ error: 'Internal server error' });
+        console.error("Error soft deleting category:", error);
+        return res.status(500).json({
+            success: false,
+            error: "Internal server error",
+        });
     }
 };
+
 module.exports={
     categoryInfo,
     addCategory,

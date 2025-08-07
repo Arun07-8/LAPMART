@@ -313,15 +313,25 @@
                     });
 
                     const data = await response.json();
-                    if (!response.ok) throw new Error(data.error || 'Failed to soft delete category');
+                    console.log(data,"helooo    ")
+                  if (!response.ok || data.success === false) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Warning',
+                text: data.message || 'Category has not been deleted',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        } else {
+            Swal.fire({
+                icon: 'success',
+                title: 'Deleted',
+                text: data.message || 'Category has been deleted',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => location.reload());
+        }
 
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Deleted',
-                        text: data.message || 'Category has been soft deleted',
-                        timer: 1500,
-                        showConfirmButton: false
-                    }).then(() => location.reload());
                 } catch (error) {
                     Swal.fire({
                         icon: 'error',

@@ -31,10 +31,9 @@ const checkOutpage = async (req, res) => {
         for (const item of existingCart.items) {
           const product = item.productId;
           const quantity = item.quantity;
-          const salePrice = item.salePrice;
-
+          let salePrice = item.salePrice;
           const updatedProduct = await applyBestOffer(product);
-          const finalPrice = updatedProduct.finalPrice || updatedProduct.salePrice;
+          const finalPrice =updatedProduct.salePrice;
 
           item.finalPrice = finalPrice;
           item.subtotal = finalPrice * quantity;
