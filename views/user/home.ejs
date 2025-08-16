@@ -1,5 +1,4 @@
 
-
 <%- include("../../views/partials/user/header") %>
 <!DOCTYPE html>
 <html lang="en">
@@ -19,10 +18,9 @@
         font-family: 'Inter', sans-serif;
         line-height: 1.6;
         color: #172b4d;
-        background: #f1f3f5; /* Flipkart's light background */
+        background: #f1f3f5;
     }
 
-    /* Animated Banner Hero Section */
     .hero {
         position: relative;
         height: 100vh;
@@ -30,7 +28,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, #2873f0 0%, #174ea6 100%); /* Flipkart blue gradient */
+        background: linear-gradient(135deg, #2873f0 0%, #174ea6 100%);
     }
 
     .banner-slider {
@@ -54,7 +52,6 @@
         justify-content: center;
     }
 
-    /* Video Background Styling */
     .banner-video {
         position: absolute;
         top: 0;
@@ -72,7 +69,6 @@
         left: 0;
         width: 100%;
         height: 100%;
-      
         z-index: 2;
     }
 
@@ -165,7 +161,6 @@
         left: 100%;
     }
 
-    /* Banner Indicators */
     .banner-indicators {
         position: absolute;
         bottom: 20px;
@@ -195,7 +190,6 @@
         33.33%, 100% { background: rgba(255,255,255,0.5); transform: scale(1); }
     }
 
-    /* Stats Section */
     .stats {
         display: flex;
         justify-content: space-around;
@@ -235,7 +229,6 @@
         font-weight: 500;
     }
 
-    /* Section Header */
     .section-header {
         text-align: center;
         font-size: 3rem;
@@ -260,7 +253,6 @@
         border-radius: 2px;
     }
 
-    /* Product Grid */
     .product-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -280,6 +272,7 @@
         position: relative;
         display: flex;
         flex-direction: column;
+        min-height: 440px;
         height: 100%;
     }
 
@@ -298,35 +291,56 @@
         z-index: 2;
     }
 
-    .product-image {
+    .product-image-container {
+        position: relative;
         width: 100%;
         height: 260px;
-        background: #f1f3f5;
+        background: #f1f3f5 url('/img/placeholder.jpg') center/contain no-repeat;
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 1.5rem;
-        position: relative;
         overflow: hidden;
     }
 
-    .product-image img {
+    .product-image {
         width: 100%;
         height: 100%;
         object-fit: contain;
+        object-position: center;
         transition: transform 0.4s ease;
     }
 
-    .product-card:hover .product-image img {
+    .product-card:hover .product-image {
         transform: scale(1.03);
     }
 
+    .offer-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: #388e3c;
+        color: #fff;
+        padding: 0.3rem 0.6rem;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        z-index: 3;
+    }
+
     .product-details {
-        padding: 2rem;
+        padding: 1.5rem;
         flex: 1;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+    }
+
+    .product-brand {
+        font-size: 0.9rem;
+        color: #64748b;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
     }
 
     .product-title {
@@ -350,37 +364,56 @@
 
     .stars {
         color: #388e3c;
-                                        font-size: 1.1rem;
+        font-size: 1.1rem;
+        display: flex;
+        gap: 2px;
     }
 
-    .review-count {
+    .star {
+        width: 16px;
+        height: 16px;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23388e3c" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>') center/contain no-repeat;
+    }
+
+    .star.empty {
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23d3d3d3" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>') center/contain no-repeat;
+    }
+
+    .rating-text {
         color: #64748b;
         font-size: 0.85rem;
         font-weight: 500;
     }
 
-    .product-price-container {
+    .price-section {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-top: auto;
+        padding-top: 0.5rem;
+    }
+
+    .price-container {
         display: flex;
         align-items: baseline;
         gap: 0.5rem;
         flex-wrap: wrap;
-        margin-top: auto;
     }
 
-    .product-price {
+    .current-price {
         font-size: 1.8rem;
         font-weight: 700;
         color: #172b4d;
     }
 
-    .product-regular-price {
+    .original-price {
         font-size: 1.1rem;
         color: #878787;
         text-decoration: line-through;
         font-weight: 400;
     }
 
-    .product-discount {
+    .discount-percent {
         font-size: 0.85rem;
         color: #388e3c;
         font-weight: 600;
@@ -389,7 +422,6 @@
         border-radius: 10px;
     }
 
-    /* Category Cards */
     .category-section {
         padding: 4rem 1.5rem;
         background: #ffffff;
@@ -440,7 +472,6 @@
         line-height: 1.4;
     }
 
-    /* Newsletter Section */
     .newsletter {
         background: linear-gradient(135deg, #2873f0 0%, #174ea6 100%);
         padding: 4rem 1.5rem;
@@ -526,7 +557,6 @@
         box-shadow: 0 4px 15px rgba(255, 159, 0, 0.4);
     }
 
-    /* Animations */
     @keyframes fadeInUp {
         from {
             opacity: 0;
@@ -549,8 +579,6 @@
         transform: translateY(0);
     }
 
-    /* Responsive Design */
-    /* Mobile (≤768px) */
     @media (max-width: 768px) {
         body {
             background: #ffffff;
@@ -624,24 +652,24 @@
         }
 
         .product-grid {
-            grid-template-columns: 1fr; /* Single column */
-            gap: 1.5rem; /* Increased gap for better spacing */
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
             padding: 1rem;
         }
 
         .product-card {
             border-radius: 10px;
-            max-width: 360px; /* Larger card width */
-            margin: 0 auto; /* Center cards */
-            min-height: 450px; /* Ensure taller cards */
+            max-width: 360px;
+            margin: 0 auto;
+            min-height: 420px;
         }
 
-        .product-image {
-            height: 280px; /* Larger image height */
+        .product-image-container {
+            height: 280px;
             padding: 1.5rem;
         }
 
-        .product-image img {
+        .product-image {
             max-height: 100%;
             object-fit: contain;
         }
@@ -651,8 +679,8 @@
         }
 
         .product-title {
-            font-size: 1.4rem; /* Larger title */
-            -webkit-line-clamp: 2; /* Allow two lines for better readability */
+            font-size: 1.4rem;
+            -webkit-line-clamp: 2;
             line-height: 1.4;
         }
 
@@ -661,23 +689,23 @@
         }
 
         .stars {
-            font-size: 1.2rem; /* Larger stars */
+            font-size: 1.2rem;
         }
 
-        .review-count {
-            font-size: 1rem; /* Larger review count */
+        .rating-text {
+            font-size: 1rem;
         }
 
-        .product-price {
-            font-size: 1.8rem; /* Larger price */
+        .current-price {
+            font-size: 1.8rem;
         }
 
-        .product-regular-price {
-            font-size: 1.2rem; /* Larger regular price */
+        .original-price {
+            font-size: 1.2rem;
         }
 
-        .product-discount {
-            font-size: 1rem; /* Larger discount text */
+        .discount-percent {
+            font-size: 1rem;
             padding: 0.3rem 0.6rem;
             border-radius: 8px;
         }
@@ -743,7 +771,6 @@
         }
     }
 
-    /* Laptop (769px–1200px) */
     @media (min-width: 769px) and (max-width: 1200px) {
         .hero {
             height: 80vh;
@@ -795,17 +822,17 @@
         }
 
         .product-grid {
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Slightly larger cards */
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1.5rem;
             padding: 1.5rem;
         }
 
         .product-card {
-            min-height: 420px; /* Taller cards for consistency */
+            min-height: 400px;
         }
 
-        .product-image {
-            height: 240px; /* Slightly larger image */
+        .product-image-container {
+            height: 240px;
         }
 
         .product-details {
@@ -816,7 +843,7 @@
             font-size: 1.3rem;
         }
 
-        .product-price {
+        .current-price {
             font-size: 1.6rem;
         }
 
@@ -852,11 +879,9 @@
 </style>
 </head>
 <body>
-    <!-- Hero Section with Animated Banner -->
     <section class="hero">
         <div class="banner-slider">
             <div class="banner-slide">
-                <!-- Video Background -->
                 <video autoplay muted loop playsinline class="banner-video">
                     <source src="/img/video/x4fa4f3ce9_large.mp4" type="video/mp4" />
                     Your browser does not support the video tag.
@@ -864,24 +889,22 @@
                 <div class="hero-content">
                     <h1 class="hero-title">Creative Workstations</h1>
                     <p class="hero-subtitle">Transform your creative vision into reality with our powerful workstations perfect for design, video editing, and content creation.</p>
-                    <a href="/shop" class="hero-btn"> Create Now</a>
+                    <a href="/shop" class="hero-btn">Create Now</a>
                 </div>
             </div>
-              <div class="banner-slide">
-                <!-- Video Background -->
-                <img src="/home/arun/WEEK8_PROJECT/public/img/banner/maxresdefault.jpg" alt="">
+            <div class="banner-slide">
+                <img src="/home/arun/WEEK8_PROJECT/public/img/banner/maxresdefault.jpg" alt="Gaming Laptop Banner">
                 <div class="hero-content">
-                   <a href="/shop" class="hero-btn"> Create Now</a>
                     <h1 class="hero-title">Gaming Laptops</h1>
-                    <p class="hero-subtitle">Experience ultimate gaming performance with our cutting-edge gaming laptops designed for victory. </p>
+                    <p class="hero-subtitle">Experience ultimate gaming performance with our cutting-edge gaming laptops designed for victory.</p>
+                    <a href="/shop" class="hero-btn">Create Now</a>
                 </div>
             </div>
             <div class="banner-slide">
                 <div class="hero-content">
                     <h1 class="hero-title">Creative Workstations</h1>
                     <p class="hero-subtitle">Transform your creative vision into reality with our powerful workstations perfect for design, video editing, and content creation.</p>
-               <a href="/shop" class="hero-btn"> Create Now</a>
-                
+                    <a href="/shop" class="hero-btn">Create Now</a>
                 </div>
             </div>
         </div>
@@ -892,9 +915,6 @@
         </div>
     </section>
 
-  
-
-    <!-- Categories Section -->
     <section class="category-section">
         <h2 class="section-header animate-on-scroll">Shop by Category</h2>
         <div class="category-grid">
@@ -918,54 +938,48 @@
         </div>
     </section>
 
-    <!-- New Arrivals Section -->
     <h2 class="section-header animate-on-scroll">New Arrivals</h2>
     <section class="product-grid" aria-label="New Arrivals">
         <% if (Array.isArray(product) && product.length > 0) { %>
             <% product.forEach((product) => { %>
-                <article class="product-card animate-on-scroll" role="region" aria-labelledby="product-<%= product._id %>-title">
-                    <a href="/productview?id=<%= product._id %>" class="no-underline" aria-label="View <%= product.productName || 'Unnamed Product' %>">
-                        <!-- Product Image -->
-                        <div class="product-image">
-                            <img class="default-img" 
+                <article class="product-card animate-on-scroll">
+                    <a href="/productview?id=<%= product._id %>" aria-label="View details for <%= product.productName || 'Unnamed Product' %>">
+                        <div class="product-image-container">
+                            <% if (product.offerPercentage > 0) { %>
+                                <div class="offer-badge"><%= product.offerPercentage %>% OFF</div>
+                            <% } %>
+                            <img class="product-image" 
                                  src="<%= product.productImage && product.productImage[0] ? product.productImage[0] : '/img/placeholder.jpg' %>" 
                                  alt="<%= product.productName ? product.productName + ' laptop' : 'Laptop product image' %>">
                         </div>
-                        <!-- Product Details -->
                         <div class="product-details">
-                            <h3 class="product-title" id="product-<%= product._id %>-title">
+                            <div class="product-brand">Laptmart</div>
+                            <h3 class="product-title">
                                 <%= product.productName || 'Unnamed Product' %>
                             </h3>
                             <div class="product-rating">
-                                <% const rating = product.rating || 5; %>
-                                <span class="stars" aria-label="Rating <%= rating %> out of 5">
-                                    <% 
-                                        const fullStars = Math.floor(rating);
-                                        const hasHalfStar = rating % 1 >= 0.5;
-                                        const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-                                    %>
-                                    <%= '★'.repeat(fullStars) %>
-                                    <%= hasHalfStar ? '🟊' : '' %>
-                                    <%= '☆'.repeat(emptyStars) %>
-                                </span>
-                                <span class="review-count">(<%= product.reviewCount || 45 %>)</span>
+                                <div class="stars">
+                                    <% const rating = product.rating || 5; %>
+                                    <% const fullStars = Math.floor(rating); %>
+                                    <% for(let i = 0; i < fullStars; i++) { %>
+                                        <div class="star"></div>
+                                    <% } %>
+                                    <% for(let i = fullStars; i < 5; i++) { %>
+                                        <div class="star empty"></div>
+                                    <% } %>
+                                </div>
+                                <span class="rating-text"><%= rating %> (<%= product.reviewCount || 45 %> reviews)</span>
                             </div>
-                            <div class="product-price-container">
-                                <% if (product.offerPercentage > 0) { %>
-                                    <span class="product-price text-danger fw-bold">
-                                        ₹<%= product.discountedPrice.toLocaleString('en-IN') %>
-                                    </span>
-                                    <span class="product-regular-price text-muted text-decoration-line-through ms-2">
-                                        ₹<%= product.salePrice.toLocaleString('en-IN') %>
-                                    </span>
-                                    <span class="product-discount text-success ms-2">
-                                        <%= product.offerPercentage %>% OFF
-                                    </span>
-                                <% } else { %>
-                                    <span class="product-price fw-bold">
-                                        ₹<%= product.salePrice.toLocaleString('en-IN') %>
-                                    </span>
-                                <% } %>
+                            <div class="price-section">
+                                <div class="price-container">
+                                    <% if (product.offerPercentage > 0) { %>
+                                        <span class="current-price">₹<%= product.discountedPrice.toLocaleString('en-IN') %></span>
+                                        <span class="original-price">₹<%= product.salePrice.toLocaleString('en-IN') %></span>
+                                        <span class="discount-percent"><%= product.offerPercentage %>% OFF</span>
+                                    <% } else { %>
+                                        <span class="current-price">₹<%= product.salePrice.toLocaleString('en-IN') %></span>
+                                    <% } %>
+                                </div>
                             </div>
                         </div>
                     </a>
@@ -976,70 +990,12 @@
         <% } %>
     </section>
 
-    <script>
-        // Scroll Animation
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.animate-on-scroll').forEach(el => {
-            observer.observe(el);
-        });
-
-        // Banner Indicator Click
-        document.querySelectorAll('.indicator').forEach((indicator, index) => {
-            indicator.addEventListener('click', () => {
-                const slider = document.querySelector('.banner-slider');
-                slider.style.transform = `translateX(-${index * 100}%)`;
-                slider.style.animationPlayState = 'paused';
-                
-                setTimeout(() => {
-                    slider.style.animationPlayState = 'running';
-                }, 3000);
-            });
-        });
-
-        // Category Card Hover Effects
-        document.querySelectorAll('.category-card').forEach(card => {
-            card.addEventListener('mouseenter', () => {
-                card.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-                card.style.color = 'white';
-                card.querySelector('.category-icon').style.transform = 'scale(1.2) rotate(5deg)';
-            });
-            
-            card.addEventListener('mouseleave', () => {
-                card.style.background = 'white';
-                card.style.color = '';
-                card.querySelector('.category-icon').style.transform = 'scale(1) rotate(0deg)';
-            });
-        });
-
-        // Newsletter Form
-        document.querySelector('.newsletter-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = e.target.querySelector('input').value;
-            alert(`Thank you for subscribing with ${email}!`);
-            e.target.reset();
-        });
-    </script>
-    </script>
-</body>
-</html>
     <%- include("../../views/partials/user/footer") %>
 
-    <!-- JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Navigation active state (retained from original)
+            // Navigation active state
             const logo = document.querySelector('.header-scope .logo');
             const navLinks = document.querySelectorAll('.header-scope .nav-link');
             
@@ -1056,7 +1012,6 @@
                 });
             });
 
-            // Set initial active state for Home if on homepage
             if (window.location.pathname === '/home') {
                 const homeLink = document.querySelector('.header-scope a[href="/"]');
                 if (homeLink) {
@@ -1066,7 +1021,6 @@
             }
 
             // Scroll-triggered animations
-            const animateElements = document.querySelectorAll('.animate-on-scroll');
             const observerOptions = {
                 root: null,
                 rootMargin: '0px',
@@ -1082,8 +1036,44 @@
                 });
             }, observerOptions);
 
-            animateElements.forEach(element => {
-                observer.observe(element);
+            document.querySelectorAll('.animate-on-scroll').forEach(el => {
+                observer.observe(el);
+            });
+
+            // Banner Indicator Click
+            document.querySelectorAll('.indicator').forEach((indicator, index) => {
+                indicator.addEventListener('click', () => {
+                    const slider = document.querySelector('.banner-slider');
+                    slider.style.transform = `translateX(-${index * 100}%)`;
+                    slider.style.animationPlayState = 'paused';
+                    
+                    setTimeout(() => {
+                        slider.style.animationPlayState = 'running';
+                    }, 3000);
+                });
+            });
+
+            // Category Card Hover Effects
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                    card.style.color = 'white';
+                    card.querySelector('.category-icon').style.transform = 'scale(1.2) rotate(5deg)';
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.background = '#f1f3f5';
+                    card.style.color = '';
+                    card.querySelector('.category-icon').style.transform = 'scale(1) rotate(0deg)';
+                });
+            });
+
+            // Newsletter Form
+            document.querySelector('.newsletter-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = e.target.querySelector('input').value;
+                alert(`Thank you for subscribing with ${email}!`);
+                e.target.reset();
             });
         });
     </script>

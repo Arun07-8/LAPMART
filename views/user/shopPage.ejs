@@ -8,6 +8,166 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/css/userside-css/userside-css/shop-modern.css" rel="stylesheet" type="text/css">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<style>
+        /* Filter sidebar - no scroll, full height optimization */
+        .filters-sidebar {
+            height: 100vh;
+            overflow: visible !important;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filters-content {
+            flex: 1;
+            overflow: visible !important;
+            padding: 0 1rem 1rem 1rem;
+        }
+        
+        .filters-header {
+            flex-shrink: 0;
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        /* Compact spacing to fit everything */
+        .search-sort-section {
+            padding: 1rem 0 0.5rem 0;
+            border-bottom: 1px solid #e9ecef;
+            margin-bottom: 1rem;
+        }
+        
+        .filter-group {
+            margin-bottom: 0.75rem !important;
+        }
+        
+        .filter-group label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.4rem;
+            display: block;
+        }
+        
+        .search-sort-section .search-box {
+            position: relative;
+            margin-bottom: 0.75rem;
+        }
+        
+        .search-sort-section .search-box input,
+        .form-select {
+            width: 100%;
+            padding: 0.6rem 2.5rem 0.6rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            height: auto;
+        }
+        
+        .search-sort-section .search-box input {
+            padding-right: 2.5rem;
+        }
+        
+        .search-sort-section .search-box button {
+            position: absolute;
+            right: 0.6rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+        
+        .search-sort-section .search-box button:hover {
+            color: #333;
+        }
+        
+        /* Price range compact styling */
+        .price-range {
+            margin-top: 0.5rem;
+        }
+        
+        .price-slider-container {
+            margin-bottom: 0.5rem;
+        }
+        
+        .price-inputs {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        /* Compact filter actions */
+        .filter-actions {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .btn-apply, .btn-clear {
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .products-header-simplified {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .products-header-simplified h1 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
+        
+        .products-count {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        /* Hide original search and sort from products-header on desktop */
+        @media (min-width: 769px) {
+            .products-header .products-tools {
+                display: none;
+            }
+        }
+        
+        /* Mobile optimization */
+        @media (max-width: 768px) {
+            .products-header .products-tools {
+                display: none;
+            }
+            
+            .filters-sidebar {
+                height: 100vh;
+                overflow-y: auto;
+            }
+            
+            .filters-content {
+                overflow-y: auto;
+                max-height: calc(100vh - 80px);
+            }
+        }
+        
+        /* Ensure sidebar content fits without scroll on desktop */
+        @media (min-width: 769px) {
+            .filters-sidebar {
+                position: sticky;
+                top: 0;
+                height: fit-content;
+                max-height: 100vh;
+                overflow: visible;
+            }
+            
+            .filters-content {
+                max-height: calc(100vh - 80px);
+                overflow: visible;
+            }
+        }
+    </style>
 </head>
 <body>
     <%- include("../../views/partials/user/header") %>
@@ -34,13 +194,37 @@
                 <!-- Filters Sidebar -->
                 <aside class="filters-sidebar" id="filters-sidebar">
                     <div class="filters-header">
-                        <h2>Filters</h2>
+                        <h2>Filters & Search</h2>
                         <button class="filter-close" id="filter-close">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
 
                     <div class="filters-content">
+                        <!-- Search and Sort Section - Moved here -->
+                        <div class="search-sort-section">
+                            <div class="filter-group">
+                                <label>Search Products</label>
+                                <div class="search-box">
+                                    <input type="text" id="search-input" placeholder="Search products..." value="<%= filters.search || '' %>">
+                                    <button type="button" id="search-btn" aria-label="Search">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="sort-select">Sort by</label>
+                                <select id="sort-select" class="form-select">
+                                    <option value="popular" <%= filters.sort === 'popular' ? 'selected' : '' %>>Most Popular</option>
+                                    <option value="price-low" <%= filters.sort === 'price-low' ? 'selected' : '' %>>Price: Low to High</option>
+                                    <option value="price-high" <%= filters.sort === 'price-high' ? 'selected' : '' %>>Price: High to Low</option>
+                                    <option value="name-asc" <%= filters.sort === 'name-asc' ? 'selected' : '' %>>Name: A to Z</option>
+                                    <option value="name-desc" <%= filters.sort === 'name-desc' ? 'selected' : '' %>>Name: Z to A</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <form id="filter-form" action="/shop" method="GET">
                             <!-- Category Filter -->
                             <div class="filter-group">
@@ -94,21 +278,28 @@
 
                 <!-- Products Section -->
                 <section class="products-section">
-                    <!-- Products Header -->
+                    <!-- Products Header - Simplified -->
                     <div class="products-header">
-                        <h1 id="category-heading">
-                            <%= categoryName || 'All Products' %>
-                        </h1>
+                        <div class="products-header-simplified">
+                            <h1 id="category-heading">
+                                <%= categoryName || 'All Products' %>
+                            </h1>
+                            <div class="products-count">
+                                Showing <%= (currentPage - 1) * limit + 1 %>-<%= Math.min(currentPage * limit, totalProducts) %> of <%= totalProducts %> products
+                            </div>
+                        </div>
+                        
+                        <!-- Original tools section - kept for mobile fallback but hidden on desktop -->
                         <div class="products-tools">
                             <div class="search-box">
-                                <input type="text" id="search-input" placeholder="Search products..." value="<%= filters.search || '' %>">
-                                <button type="button" id="search-btn" aria-label="Search">
+                                <input type="text" id="search-input-fallback" placeholder="Search products..." value="<%= filters.search || '' %>">
+                                <button type="button" id="search-btn-fallback" aria-label="Search">
                                     <i class="fas fa-search"></i>
                                 </button>
                             </div>
                             <div class="sort-box">
-                                <label for="sort-select">Sort by:</label>
-                                <select id="sort-select" class="form-select">
+                                <label for="sort-select-fallback">Sort by:</label>
+                                <select id="sort-select-fallback" class="form-select">
                                     <option value="popular" <%= filters.sort === 'popular' ? 'selected' : '' %>>Most Popular</option>
                                     <option value="price-low" <%= filters.sort === 'price-low' ? 'selected' : '' %>>Price: Low to High</option>
                                     <option value="price-high" <%= filters.sort === 'price-high' ? 'selected' : '' %>>Price: High to Low</option>
@@ -116,9 +307,6 @@
                                     <option value="name-desc" <%= filters.sort === 'name-desc' ? 'selected' : '' %>>Name: Z to A</option>
                                 </select>
                             </div>
-                        </div>
-                        <div class="products-count">
-                            Showing <%= (currentPage - 1) * limit + 1 %>-<%= Math.min(currentPage * limit, totalProducts) %> of <%= totalProducts %> products
                         </div>
                     </div>
 

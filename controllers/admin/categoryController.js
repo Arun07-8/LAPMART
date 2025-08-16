@@ -1,7 +1,7 @@
 const Category=require("../../models/categorySchema");
 const { distance } = require('fastest-levenshtein');
 const offer=require("../../models/offersSchema")
-
+const Product=require("../../models/productSchema")
 //  category page rendering
 const categoryInfo=async (req,res) => {
     try{

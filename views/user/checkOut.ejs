@@ -179,9 +179,7 @@
                   <% if (item.salePrice > item.finalPrice) { %>
                     <span class="checkout-original-price">₹<%= item.salePrice.toFixed(2) %></span>
                   <% } %>
-                  <div class="checkout-current-price">
-                    ₹<%= item.finalPrice ? item.finalPrice.toFixed(2) : '0.00' %> x <%= item.quantity %> = ₹<%= item.subtotal ? item.subtotal.toFixed(2) : '0.00' %>
-                  </div>
+              
                 </div>
               </div>
             </div>
